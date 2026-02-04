@@ -498,31 +498,37 @@ const registerRoutes = (prefix: string) => {
     let reply = "Tushunarli. Buni o'rganib chiqaman.";
     let toolUsed: any = null;
 
+    let openaiError: string | null = null;
+
     if (OPENAI_API_KEY) {
-      const aiResponse = await callOpenAI({
-        model: OPENAI_MODEL,
-        input: [
-          {
-            role: "system",
-            content: "Sen AI Business Concierge. Javoblar qisqa, amaliy va foydali bo'lsin.",
-          },
-          {
-            role: "user",
-            content: message,
-          },
-        ],
-      });
+      try {
+        const aiResponse = await callOpenAI({
+          model: OPENAI_MODEL,
+          input: [
+            {
+              role: "system",
+              content: "Sen AI Business Concierge. Javoblar qisqa, amaliy va foydali bo'lsin.",
+            },
+            {
+              role: "user",
+              content: message,
+            },
+          ],
+        });
 
-      const outputText = Array.isArray(aiResponse.output)
-        ? aiResponse.output
-            .flatMap((item: any) => item.content || [])
-            .map((part: any) => part.text)
-            .filter(Boolean)
-            .join("\n")
-        : "";
+        const outputText = Array.isArray(aiResponse.output)
+          ? aiResponse.output
+              .flatMap((item: any) => item.content || [])
+              .map((part: any) => part.text)
+              .filter(Boolean)
+              .join("\n")
+          : "";
 
-      reply = outputText || reply;
-      toolUsed = aiResponse?.tool_calls?.[0] ?? null;
+        reply = outputText || reply;
+        toolUsed = aiResponse?.tool_calls?.[0] ?? null;
+      } catch (err) {
+        openaiError = err instanceof Error ? err.message : "OPENAI_ERROR";
+      }
     } else {
       const lowerMsg = message.toLowerCase();
 
@@ -536,6 +542,32 @@ const registerRoutes = (prefix: string) => {
         reply = "Men oylik hisobotni shakllantirishni boshladim. Tayyor bo'lgach xabar beraman.";
         toolUsed = { name: "ReportGenerator.generate", status: "loading" };
       }
+    }
+
+    if (openaiError) {
+      await writeAiInteraction(ctx as TenantContext, {
+        role: "ShadowCFO",
+        prompt_name: "shadow_cfo",
+        prompt_version: "v1",
+        locale: "uz",
+        input_excerpt: message.slice(0, 160),
+        output_excerpt: openaiError.slice(0, 160),
+        tools_used: toolUsed ? [toolUsed] : [],
+        success_flag: false,
+        error_code: "OPENAI_ERROR",
+        latency_ms: 800,
+        trace_id: getTraceId(c),
+        created_at: new Date().toISOString(),
+        context: context ?? {},
+      });
+
+      return failure(
+        c,
+        502,
+        "OPENAI_ERROR",
+        "OpenAI so'rovida xatolik.",
+        { detail: openaiError.slice(0, 500) },
+      );
     }
 
     await writeAiInteraction(ctx as TenantContext, {
