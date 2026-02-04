@@ -1,6 +1,6 @@
 import { projectId, publicAnonKey } from '/utils/supabase/info';
 
-const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-6c2837d6/v1`;
+const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1`;
 
 type ApiOptions = RequestInit & { tenantId?: string };
 

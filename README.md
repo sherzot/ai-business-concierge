@@ -25,7 +25,7 @@
 
 3) Edge Function base URL:
 
-`https://<project-id>.supabase.co/functions/v1/make-server-6c2837d6/v1`
+`https://<project-id>.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1`
 
 ## API Notes
 
