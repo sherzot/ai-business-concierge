@@ -632,6 +632,8 @@ const registerRoutes = (prefix: string) => {
   });
 };
 
+app.get("/", (c) => c.json({ status: "ok" }));
+app.get("/health", (c) => c.json({ status: "ok" }));
 registerRoutes(BASE_PATH);
 registerRoutes(V1_PATH);
 
