@@ -30,8 +30,11 @@ type TenantContext = {
 const TRACE_ID_KEY = "trace_id";
 const TENANT_CTX_KEY = "tenant_context";
 const JWT_SECRET = Deno.env.get("JWT_SECRET") ?? "";
-const SB_URL = Deno.env.get("SB_URL") ?? "";
-const SB_SERVICE_ROLE_KEY = Deno.env.get("SB_SERVICE_ROLE_KEY") ?? "";
+const SB_URL = Deno.env.get("SB_URL") ?? Deno.env.get("SUPABASE_URL") ?? "";
+const SB_SERVICE_ROLE_KEY =
+  Deno.env.get("SB_SERVICE_ROLE_KEY") ??
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ??
+  "";
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY") ?? "";
 const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") ?? "gpt-4o-mini";
 
