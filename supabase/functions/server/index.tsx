@@ -6,6 +6,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2.49.8";
 const app = new Hono();
 const BASE_PATH = "/make-server-6c2837d6";
 const V1_PATH = `${BASE_PATH}/v1`;
+const GATEWAY_PREFIX = "/bright-api";
 
 app.use('*', logger(console.log));
 
@@ -634,7 +635,11 @@ const registerRoutes = (prefix: string) => {
 
 app.get("/", (c) => c.json({ status: "ok" }));
 app.get("/health", (c) => c.json({ status: "ok" }));
+app.get(`${GATEWAY_PREFIX}`, (c) => c.json({ status: "ok" }));
+app.get(`${GATEWAY_PREFIX}/health`, (c) => c.json({ status: "ok" }));
 registerRoutes(BASE_PATH);
 registerRoutes(V1_PATH);
+registerRoutes(`${GATEWAY_PREFIX}${BASE_PATH}`);
+registerRoutes(`${GATEWAY_PREFIX}${V1_PATH}`);
 
 Deno.serve(app.fetch);
