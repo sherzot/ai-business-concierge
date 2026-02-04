@@ -17,8 +17,8 @@
 
 2) Configure Edge Function env vars:
 
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
+- `SB_URL`
+- `SB_SERVICE_ROLE_KEY`
 - `JWT_SECRET`
 - `OPENAI_API_KEY`
 - `OPENAI_MODEL` (optional, default: `gpt-4o-mini`)
