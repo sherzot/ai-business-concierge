@@ -26,6 +26,7 @@ import { DocsPage } from "./features/docs/pages/DocsPage";
 import { IntegrationsPage } from "./features/integrations/pages/IntegrationsPage";
 import { SettingsPage } from "./features/settings/pages/SettingsPage";
 import { AIChat } from "./shared/components/AIChat";
+import { useI18n } from "./app/providers/I18nProvider";
 
 // Utility for classes
 export function cn(...inputs: ClassValue[]) {
@@ -60,6 +61,7 @@ const CURRENT_USER: User = {
 };
 
 export default function App() {
+  const { translate } = useI18n();
   const [currentTenant, setCurrentTenant] = useState<Tenant>(TENANTS[0]);
   const [activeModule, setActiveModule] = useState<string>("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -129,7 +131,7 @@ export default function App() {
                   <p className="text-sm font-medium truncate group-hover:text-white text-slate-200">
                     {currentTenant.name}
                   </p>
-                  <p className="text-xs text-slate-400 truncate">Tenant ID: {currentTenant.id}</p>
+                  <p className="text-xs text-slate-400 truncate">{translate("common.tenantId")}: {currentTenant.id}</p>
                 </div>
               </div>
               <ChevronDown size={14} className="text-slate-400" />
@@ -140,38 +142,38 @@ export default function App() {
           <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
             <NavItem 
               icon={<LayoutDashboard size={20} />} 
-              label="Manager Reports" 
+              label={translate("nav.reports")} 
               active={activeModule === "dashboard"}
               onClick={() => setActiveModule("dashboard")}
             />
             <NavItem 
               icon={<Inbox size={20} />} 
-              label="Unified Inbox" 
+              label={translate("nav.inbox")} 
               active={activeModule === "inbox"}
               badge={5}
               onClick={() => setActiveModule("inbox")}
             />
             <NavItem 
               icon={<CheckSquare size={20} />} 
-              label="Tasks & Compliance" 
+              label={translate("nav.tasks")} 
               active={activeModule === "tasks"}
               onClick={() => setActiveModule("tasks")}
             />
             <NavItem 
               icon={<HeartPulse size={20} />} 
-              label="HR Pulse" 
+              label={translate("nav.hr")} 
               active={activeModule === "hr"}
               onClick={() => setActiveModule("hr")}
             />
             <NavItem 
               icon={<FileText size={20} />} 
-              label="Docs Hub" 
+              label={translate("nav.docs")} 
               active={activeModule === "docs"}
               onClick={() => setActiveModule("docs")}
             />
             <NavItem 
               icon={<Plug size={20} />} 
-              label="Integrations" 
+              label={translate("nav.integrations")} 
               active={activeModule === "integrations"}
               onClick={() => setActiveModule("integrations")}
             />
@@ -181,7 +183,7 @@ export default function App() {
           <div className="p-4 border-t border-slate-800">
              <NavItem 
               icon={<Settings size={20} />} 
-              label="Sozlamalar" 
+              label={translate("nav.settings")} 
               active={activeModule === "settings"}
               onClick={() => setActiveModule("settings")}
             />
@@ -208,11 +210,11 @@ export default function App() {
               <Menu size={20} />
             </button>
             <h2 className="text-lg font-semibold text-slate-800 hidden sm:block">
-              {activeModule === "dashboard" && "Dashboard"}
-              {activeModule === "inbox" && "Unified Inbox"}
-              {activeModule === "tasks" && "Vazifalar"}
-              {activeModule === "hr" && "HR Pulse"}
-              {activeModule === "docs" && "Hujjatlar"}
+              {activeModule === "dashboard" && translate("nav.dashboard")}
+              {activeModule === "inbox" && translate("nav.inbox")}
+              {activeModule === "tasks" && translate("nav.tasksTitle")}
+              {activeModule === "hr" && translate("nav.hr")}
+              {activeModule === "docs" && translate("nav.docsTitle")}
             </h2>
           </div>
 
@@ -221,7 +223,7 @@ export default function App() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <input 
                 type="text" 
-                placeholder="Qidiruv (Ctrl+K)..." 
+                placeholder={translate("nav.search")} 
                 className="pl-9 pr-4 py-2 w-64 bg-slate-100 border-none rounded-full text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
               />
             </div>

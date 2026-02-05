@@ -19,6 +19,7 @@ import {
   Area 
 } from 'recharts';
 import { getDashboardStats } from "../api/reportsApi";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 type Tenant = {
   id: string;
@@ -38,6 +39,7 @@ type DashboardStats = {
 };
 
 export function ReportsPage({ tenant }: ReportsPageProps) {
+  const { translate } = useI18n();
   const [stats, setStats] = React.useState<DashboardStats | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -54,7 +56,7 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
       setStats(data);
     } catch (err) {
       console.error("Failed to load dashboard stats", err);
-      setError("Dashboard statistikalarini yuklab bo'lmadi.");
+      setError(translate("reports.loadError"));
       setStats(null);
     } finally {
       setLoading(false);
@@ -66,15 +68,17 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
       {/* Welcome Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Assalomu alaykum, Jasurbek 👋</h1>
-          <p className="text-slate-500">Bugungi biznes holatingiz qisqacha.</p>
+          <h1 className="text-2xl font-bold text-slate-900">
+            {translate("reports.greeting", { name: "Jasurbek" })}
+          </h1>
+          <p className="text-slate-500">{translate("reports.subtitle")}</p>
         </div>
         <div className="flex gap-3">
           <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm">
-            Hisobotni yuklash
+            {translate("reports.download")}
           </button>
           <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-200">
-            AI Audit (Run)
+            {translate("reports.audit")}
           </button>
         </div>
       </div>
@@ -82,7 +86,7 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
       {/* KPI Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard 
-          title="Business Health" 
+          title={translate("reports.health")} 
           value={loading ? "..." : `${stats?.healthScore ?? 0}/100`} 
           trend="+4.2%" 
           trendUp={true}
@@ -90,7 +94,7 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
           color="indigo"
         />
         <StatCard 
-          title="Oylik Tushum (Forecast)" 
+          title={translate("reports.revenue")} 
           value={loading ? "..." : `$${stats?.monthlyRevenue?.toLocaleString() ?? 0}`} 
           trend="+12%" 
           trendUp={true}
@@ -98,7 +102,7 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
           color="emerald"
         />
         <StatCard 
-          title="Tasks Overdue" 
+          title={translate("reports.tasksOverdue")} 
           value={loading ? "..." : `${stats?.tasksOverdue ?? 0}`} 
           trend="-2" 
           trendUp={false} // Good that it's down, but logic handled below
@@ -107,7 +111,7 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
           color="amber"
         />
         <StatCard 
-          title="Pending Approvals" 
+          title={translate("reports.pendingApprovals")} 
           value={loading ? "..." : `${stats?.pendingApprovals ?? 0}`} 
           trend="0" 
           trendUp={true}
@@ -120,15 +124,13 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
         {/* Main Chart */}
         <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="font-semibold text-slate-800">Business Health Trend</h3>
+            <h3 className="font-semibold text-slate-800">{translate("reports.trend")}</h3>
             <select className="text-sm border-slate-200 rounded-md text-slate-500">
-              <option>Oxirgi 7 kun</option>
-              <option>Oxirgi 30 kun</option>
+              <option>{translate("reports.last7")}</option>
+              <option>{translate("reports.last30")}</option>
             </select>
           </div>
-          {error && (
-            <div className="mb-4 text-sm text-rose-600">{error}</div>
-          )}
+          {error && <div className="mb-4 text-sm text-rose-600">{translate("reports.loadError")}</div>}
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={stats?.chartData ?? []}>
@@ -172,27 +174,27 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
           <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-            Diqqat Talab (AI Insights)
+            {translate("reports.insights")}
           </h3>
           <div className="flex-1 space-y-4 overflow-y-auto pr-2">
             <InsightItem 
               type="danger" 
-              title="Kassadagi yetishmovchilik xavfi" 
-              desc="Joriy xarajatlar sur'ati bilan 15-sana uchun kutilayotgan balans manfiy bo'lishi mumkin."
+              title={translate("reports.insight.cashRisk")} 
+              desc={translate("reports.insight.cashRiskDesc")}
             />
             <InsightItem 
               type="warning" 
-              title="HR: 3 ta xodimda 'Burnout'" 
-              desc="Oxirgi so'rovnomalarda Marketing bo'limida stress darajasi oshgan."
+              title={translate("reports.insight.hrBurnout")} 
+              desc={translate("reports.insight.hrBurnoutDesc")}
             />
             <InsightItem 
               type="info" 
-              title="Shartnoma muddati tugamoqda" 
-              desc="'Global Tech' bilan shartnoma 5 kundan keyin tugaydi. Avto-yangilash o'chiq."
+              title={translate("reports.insight.contract")} 
+              desc={translate("reports.insight.contractDesc")}
             />
           </div>
           <button className="mt-4 w-full py-2 text-sm text-indigo-600 font-medium hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-center gap-2">
-            Barcha hisobotlarni ko'rish <ArrowRight size={16} />
+            {translate("reports.viewAll")} <ArrowRight size={16} />
           </button>
         </div>
       </div>
@@ -227,7 +229,7 @@ function StatCard({ title, value, trend, trendUp, inverseTrend, icon, color }: a
           {isPositive ? <TrendingUp size={14} className="mr-1" /> : <TrendingDown size={14} className="mr-1" />}
           {trend}
         </span>
-        <span className="text-slate-400 ml-2">o'tgan oyga nisbatan</span>
+        <span className="text-slate-400 ml-2">{translate("reports.compare")}</span>
       </div>
     </div>
   );

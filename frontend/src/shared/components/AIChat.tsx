@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { sendAIChatMessage } from "../lib/aiApi";
+import { useI18n } from "../../app/providers/I18nProvider";
 
 type Message = {
   id: string;
@@ -24,16 +25,15 @@ type Message = {
   };
 };
 
-const MOCK_MESSAGES: Message[] = [
-  {
-    id: 'm1',
-    role: 'ai',
-    content: 'Assalomu alaykum. Men sizning AI biznes assistentiman. Bugun nimada yordam bera olaman?',
-  }
-];
-
 export function AIChat({ tenantId, onClose }: { tenantId: string; onClose: () => void }) {
-  const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES);
+  const { translate } = useI18n();
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 'm1',
+      role: 'ai',
+      content: translate("ai.greeting"),
+    },
+  ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -43,6 +43,15 @@ export function AIChat({ tenantId, onClose }: { tenantId: string; onClose: () =>
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isTyping]);
+
+  useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0].id === "m1" && prev[0].role === "ai") {
+        return [{ ...prev[0], content: translate("ai.greeting") }];
+      }
+      return prev;
+    });
+  }, [translate]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -72,7 +81,7 @@ export function AIChat({ tenantId, onClose }: { tenantId: string; onClose: () =>
        setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'ai',
-        content: 'Uzr, server bilan bog\'lanishda xatolik yuz berdi.',
+        content: translate("ai.error"),
       }]);
     } finally {
       setIsTyping(false);
@@ -162,9 +171,9 @@ export function AIChat({ tenantId, onClose }: { tenantId: string; onClose: () =>
       <div className="p-4 border-t border-slate-200 bg-white">
         {messages.length < 3 && (
           <div className="flex gap-2 overflow-x-auto mb-3 pb-1 scrollbar-hide">
-            <SuggestionButton label="📊 Monthly Report" onClick={() => setInput('Generate monthly report')} />
-            <SuggestionButton label="💰 Cashflow Check" onClick={() => setInput('Check cashflow status')} />
-            <SuggestionButton label="📝 HR Policy" onClick={() => setInput('Draft new HR policy')} />
+            <SuggestionButton label={translate("ai.suggestionMonthly")} onClick={() => setInput('Generate monthly report')} />
+            <SuggestionButton label={translate("ai.suggestionCashflow")} onClick={() => setInput('Check cashflow status')} />
+            <SuggestionButton label={translate("ai.suggestionHrPolicy")} onClick={() => setInput('Draft new HR policy')} />
           </div>
         )}
         
@@ -181,7 +190,7 @@ export function AIChat({ tenantId, onClose }: { tenantId: string; onClose: () =>
                 handleSend();
               }
             }}
-            placeholder="Ask Concierge AI..."
+            placeholder={translate("ai.placeholder")}
             className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2.5 max-h-32 resize-none text-slate-800 placeholder:text-slate-400"
             rows={1}
           />

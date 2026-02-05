@@ -3,8 +3,10 @@ import { DocDetail } from "../components/DocDetail";
 import { DocList, DocItem } from "../components/DocList";
 import { DocSearchBar } from "../components/DocSearchBar";
 import { getDocs } from "../api/docsApi";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
+  const { translate } = useI18n();
   const [query, setQuery] = React.useState("");
   const [docs, setDocs] = React.useState<DocItem[]>([]);
   const [selected, setSelected] = React.useState<DocItem | undefined>(undefined);
@@ -32,7 +34,7 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
       setSelected(mapped[0]);
     } catch (err) {
       console.error("Failed to load docs", err);
-      setError("Hujjatlarni yuklab bo'lmadi.");
+      setError(translate("docs.loadError"));
       setDocs([]);
       setSelected(undefined);
     } finally {
@@ -47,10 +49,12 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
           <div className="flex items-center gap-3">
             <DocSearchBar value={query} onChange={setQuery} onClear={() => setQuery("")} />
           </div>
-          <p className="text-xs text-slate-400 mt-2">Tenant: {tenant.name}</p>
+          <p className="text-xs text-slate-400 mt-2">
+            {translate("common.tenant")}: {tenant.name}
+          </p>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {loading && <div className="p-6 text-sm text-slate-400">Yuklanmoqda...</div>}
+          {loading && <div className="p-6 text-sm text-slate-400">{translate("common.loading")}</div>}
           {!loading && error && <div className="p-6 text-sm text-rose-600">{error}</div>}
           {!loading && !error && (
             <DocList docs={docs} selectedId={selected?.id} onSelect={setSelected} />

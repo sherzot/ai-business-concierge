@@ -1,6 +1,7 @@
 import React from "react";
 import { FileText } from "lucide-react";
 import { DocStatus, DocStatusBadge } from "./DocStatusBadge";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 export type DocItem = {
   id: string;
@@ -20,11 +21,12 @@ export function DocList({
   selectedId?: string;
   onSelect: (doc: DocItem) => void;
 }) {
+  const { translate } = useI18n();
   if (!docs.length) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-slate-400 py-10">
         <FileText size={32} className="mb-2 opacity-40" />
-        <p className="text-sm">Hujjatlar topilmadi</p>
+        <p className="text-sm">{translate("docs.empty")}</p>
       </div>
     );
   }
@@ -42,11 +44,13 @@ export function DocList({
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-sm font-semibold text-slate-800">{doc.title}</h4>
-              <p className="text-xs text-slate-500 mt-1">Owner: {doc.owner}</p>
+              <p className="text-xs text-slate-500 mt-1">{translate("docs.owner")}: {doc.owner}</p>
             </div>
             <DocStatusBadge status={doc.status} />
           </div>
-          <p className="text-[10px] text-slate-400 mt-2">Yangilangan: {doc.updatedAt}</p>
+          <p className="text-[10px] text-slate-400 mt-2">
+            {translate("docs.updatedAt")}: {doc.updatedAt}
+          </p>
         </button>
       ))}
     </div>

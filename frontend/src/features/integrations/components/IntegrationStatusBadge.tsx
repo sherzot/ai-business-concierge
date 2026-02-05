@@ -1,4 +1,5 @@
 import React from "react";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 export type IntegrationStatus = "connected" | "disconnected" | "pending";
 
@@ -8,16 +9,11 @@ const styles: Record<IntegrationStatus, string> = {
   pending: "bg-amber-50 text-amber-700 border-amber-200",
 };
 
-const labels: Record<IntegrationStatus, string> = {
-  connected: "Connected",
-  disconnected: "Disconnected",
-  pending: "Pending",
-};
-
 export function IntegrationStatusBadge({ status }: { status: IntegrationStatus }) {
+  const { translate } = useI18n();
   return (
     <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${styles[status]}`}>
-      {labels[status]}
+      {translate(`integrations.status.${status}`)}
     </span>
   );
 }

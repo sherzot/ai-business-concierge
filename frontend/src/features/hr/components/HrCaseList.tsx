@@ -1,5 +1,6 @@
 import React from "react";
 import { AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 export type HrCase = {
   id: string;
@@ -11,12 +12,6 @@ export type HrCase = {
   summary: string;
 };
 
-const statusMap: Record<HrCase["status"], { label: string; icon: JSX.Element; color: string }> = {
-  open: { label: "Open", icon: <AlertTriangle size={12} />, color: "text-rose-600" },
-  in_review: { label: "Review", icon: <Clock size={12} />, color: "text-amber-600" },
-  resolved: { label: "Resolved", icon: <CheckCircle2 size={12} />, color: "text-emerald-600" },
-};
-
 export function HrCaseList({
   cases,
   selectedId,
@@ -26,6 +21,12 @@ export function HrCaseList({
   selectedId?: string;
   onSelect: (item: HrCase) => void;
 }) {
+  const { translate } = useI18n();
+  const statusMap: Record<HrCase["status"], { label: string; icon: JSX.Element; color: string }> = {
+    open: { label: translate("hr.status.open"), icon: <AlertTriangle size={12} />, color: "text-rose-600" },
+    in_review: { label: translate("hr.status.in_review"), icon: <Clock size={12} />, color: "text-amber-600" },
+    resolved: { label: translate("hr.status.resolved"), icon: <CheckCircle2 size={12} />, color: "text-emerald-600" },
+  };
   return (
     <div className="divide-y divide-slate-100">
       {cases.map((item) => {

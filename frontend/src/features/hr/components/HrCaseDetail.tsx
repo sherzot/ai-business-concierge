@@ -1,13 +1,15 @@
 import React from "react";
 import { User, Tag } from "lucide-react";
 import { HrCase } from "./HrCaseList";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 export function HrCaseDetail({ item }: { item?: HrCase }) {
+  const { translate } = useI18n();
   if (!item) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-slate-400">
         <User size={32} className="mb-2 opacity-40" />
-        <p className="text-sm">HR case tanlang</p>
+        <p className="text-sm">{translate("hr.selectCase")}</p>
       </div>
     );
   }
@@ -20,14 +22,14 @@ export function HrCaseDetail({ item }: { item?: HrCase }) {
           <p className="text-xs text-slate-500 mt-1">{item.employee}</p>
         </div>
         <span className="text-[10px] px-2 py-0.5 rounded-full border bg-slate-100 text-slate-600">
-          {item.status.replace("_", " ")}
+          {translate(`hr.status.${item.status}`)}
         </span>
       </div>
 
       <div className="text-sm text-slate-600 leading-relaxed">
         <p className="mb-3">{item.summary}</p>
         <div className="flex items-center gap-2 text-xs text-slate-400">
-          <Tag size={12} /> Priority: {item.priority}
+          <Tag size={12} /> {translate("hr.priorityLabel")}: {translate(`hr.priority.${item.priority}`)}
         </div>
       </div>
     </div>

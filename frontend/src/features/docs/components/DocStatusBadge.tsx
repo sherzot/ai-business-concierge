@@ -1,4 +1,5 @@
 import React from "react";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 export type DocStatus = "draft" | "review" | "approved" | "expired";
 
@@ -9,17 +10,11 @@ const statusStyles: Record<DocStatus, string> = {
   expired: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
-const statusLabels: Record<DocStatus, string> = {
-  draft: "Draft",
-  review: "Review",
-  approved: "Approved",
-  expired: "Expired",
-};
-
 export function DocStatusBadge({ status }: { status: DocStatus }) {
+  const { translate } = useI18n();
   return (
     <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${statusStyles[status]}`}>
-      {statusLabels[status]}
+      {translate(`docs.status.${status}`)}
     </span>
   );
 }

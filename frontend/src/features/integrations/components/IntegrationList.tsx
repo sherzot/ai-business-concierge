@@ -1,5 +1,6 @@
 import React from "react";
 import { IntegrationStatusBadge, IntegrationStatus } from "./IntegrationStatusBadge";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 export type IntegrationItem = {
   id: string;
@@ -18,6 +19,7 @@ export function IntegrationList({
   selectedId?: string;
   onSelect: (item: IntegrationItem) => void;
 }) {
+  const { translate } = useI18n();
   return (
     <div className="divide-y divide-slate-100">
       {integrations.map((item) => (
@@ -35,7 +37,9 @@ export function IntegrationList({
             </div>
             <IntegrationStatusBadge status={item.status} />
           </div>
-          <p className="text-[10px] text-slate-400 mt-2">Last sync: {item.lastSync}</p>
+          <p className="text-[10px] text-slate-400 mt-2">
+            {translate("integrations.lastSync")}: {item.lastSync}
+          </p>
         </button>
       ))}
     </div>

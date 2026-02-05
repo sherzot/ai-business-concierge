@@ -19,6 +19,7 @@ import {
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
 import { getInboxItems } from "../api/inboxApi";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 type Tenant = {
   id: string;
@@ -44,9 +45,10 @@ type InboxItem = {
 };
 
 export function InboxPage({ tenant }: { tenant: Tenant }) {
+  const { translate } = useI18n();
   const [items, setItems] = useState<InboxItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<InboxItem | null>(null);
-  const [filter, setFilter] = useState('All');
+  const [filter, setFilter] = useState<'all' | 'HR' | 'Sales' | 'Support'>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,14 +65,13 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
       setSelectedItem(data[0] ?? null);
     } catch (err) {
       console.error("Failed to load inbox", err);
-      setError("Inbox ma'lumotlarini yuklab bo'lmadi.");
+      setError(translate("inbox.loadError"));
     } finally {
       setLoading(false);
     }
   }
 
-  const filteredItems =
-    filter === "All" ? items : items.filter((item) => item.category.toLowerCase() === filter.toLowerCase());
+  const filteredItems = filter === "all" ? items : items.filter((item) => item.category === filter);
 
   return (
     <div className="flex h-[calc(100vh-8rem)] bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
@@ -80,7 +81,7 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
         {/* Toolbar */}
         <div className="p-3 border-b border-slate-200 flex items-center justify-between bg-white">
           <div className="flex items-center gap-2">
-            <h2 className="font-semibold text-slate-700 px-2">Inbox</h2>
+            <h2 className="font-semibold text-slate-700 px-2">{translate("inbox.title")}</h2>
             <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full">
               {filteredItems.length}
             </span>
@@ -92,18 +93,23 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
 
         {/* Filter Tabs */}
         <div className="flex gap-2 p-2 overflow-x-auto border-b border-slate-200 bg-white">
-          {['All', 'HR', 'Sales', 'Support'].map((f) => (
+          {[
+            { id: "all", label: translate("inbox.filterAll") },
+            { id: "HR", label: translate("inbox.filterHR") },
+            { id: "Sales", label: translate("inbox.filterSales") },
+            { id: "Support", label: translate("inbox.filterSupport") },
+          ].map((f) => (
             <button
-              key={f}
-              onClick={() => setFilter(f)}
+              key={f.id}
+              onClick={() => setFilter(f.id as typeof filter)}
               className={clsx(
                 "px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-colors",
-                filter === f 
+                filter === f.id 
                   ? "bg-indigo-600 text-white" 
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               )}
             >
-              {f}
+              {f.label}
             </button>
           ))}
         </div>
@@ -111,13 +117,13 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
         {/* List */}
         <div className="flex-1 overflow-y-auto">
           {loading && (
-            <div className="p-6 text-sm text-slate-400">Yuklanmoqda...</div>
+            <div className="p-6 text-sm text-slate-400">{translate("common.loading")}</div>
           )}
           {!loading && error && (
             <div className="p-6 text-sm text-rose-600">{error}</div>
           )}
           {!loading && !error && filteredItems.length === 0 && (
-            <div className="p-6 text-sm text-slate-400">Xabarlar topilmadi.</div>
+            <div className="p-6 text-sm text-slate-400">{translate("inbox.empty")}</div>
           )}
           {!loading &&
             !error &&
@@ -192,7 +198,7 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
               </div>
               <div className="flex items-center gap-2">
                  <button className="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-lg hover:bg-indigo-100 flex items-center gap-2">
-                   <Tag size={14} /> AI Actions
+                   <Tag size={14} /> {translate("inbox.aiActions")}
                  </button>
                  <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400">
                   <MoreHorizontal size={18} />
@@ -245,7 +251,7 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
                     <div className="w-5 h-5 bg-indigo-600 rounded flex items-center justify-center">
                       <Star size={12} className="text-white" />
                     </div>
-                    <h3 className="text-sm font-semibold text-slate-800">Concierge AI Suggestions</h3>
+                    <h3 className="text-sm font-semibold text-slate-800">{translate("inbox.aiSuggestions")}</h3>
                   </div>
                   
                   <div className="grid gap-2">
@@ -254,8 +260,8 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
                         <div className="flex items-center gap-3">
                            <FileText size={16} className="text-indigo-500" />
                            <div>
-                             <p className="text-sm font-medium text-slate-700">Approve Job Description</p>
-                             <p className="text-xs text-slate-400">Trigger DocFlow approval workflow</p>
+                             <p className="text-sm font-medium text-slate-700">{translate("inbox.approveJobDesc")}</p>
+                             <p className="text-xs text-slate-400">{translate("inbox.workflow")}</p>
                            </div>
                         </div>
                         <ArrowRightIcon className="text-slate-300 group-hover:text-indigo-500" />
@@ -265,8 +271,8 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
                         <div className="flex items-center gap-3">
                            <CheckSquare size={16} className="text-emerald-500" />
                            <div>
-                             <p className="text-sm font-medium text-slate-700">Create Task for HR Team</p>
-                             <p className="text-xs text-slate-400">Due: Tomorrow 10:00 AM</p>
+                             <p className="text-sm font-medium text-slate-700">{translate("inbox.createTask")}</p>
+                             <p className="text-xs text-slate-400">{translate("inbox.dueTomorrow")}</p>
                            </div>
                         </div>
                         <ArrowRightIcon className="text-slate-300 group-hover:text-emerald-500" />
@@ -281,16 +287,16 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
             <div className="p-4 border-t border-slate-200 bg-slate-50">
                <div className="flex gap-2 mb-2">
                  <button className="text-xs bg-white border border-slate-200 px-3 py-1 rounded-full text-slate-600 hover:border-indigo-300">
-                    ✨ Draft response (Professional)
+                    {translate("inbox.draftProfessional")}
                  </button>
                   <button className="text-xs bg-white border border-slate-200 px-3 py-1 rounded-full text-slate-600 hover:border-indigo-300">
-                    ✨ Draft response (Friendly)
+                    {translate("inbox.draftFriendly")}
                  </button>
                </div>
                <div className="relative">
                  <textarea 
                   className="w-full border border-slate-300 rounded-lg p-3 pr-12 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none h-24"
-                  placeholder="Javob yozing yoki AI'dan so'rang..."
+                  placeholder={translate("inbox.replyPlaceholder")}
                  />
                  <div className="absolute bottom-2 right-2 flex gap-1">
                    <button className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded">
@@ -306,7 +312,7 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-slate-400">
              <Mail size={48} className="mb-4 opacity-20" />
-             <p>Xabarni tanlang</p>
+             <p>{translate("inbox.selectMessage")}</p>
           </div>
         )}
       </div>

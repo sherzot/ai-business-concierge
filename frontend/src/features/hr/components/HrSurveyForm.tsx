@@ -1,15 +1,17 @@
 import React from "react";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 export function HrSurveyForm({ onSubmit }: { onSubmit: (payload: { score: number; comment: string }) => void }) {
+  const { translate } = useI18n();
   const [score, setScore] = React.useState(7);
   const [comment, setComment] = React.useState("");
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-5">
-      <h3 className="text-sm font-semibold text-slate-800 mb-2">HR Pulse Survey</h3>
-      <p className="text-xs text-slate-500 mb-4">Kayfiyat va ish yuklamasi bo'yicha qisqa so'rov.</p>
+      <h3 className="text-sm font-semibold text-slate-800 mb-2">{translate("hr.surveyTitle")}</h3>
+      <p className="text-xs text-slate-500 mb-4">{translate("hr.surveyDesc")}</p>
       <div className="space-y-3">
-        <label className="text-xs text-slate-500">Ishdan qoniqish (1-10)</label>
+        <label className="text-xs text-slate-500">{translate("hr.surveyScore")}</label>
         <input
           type="range"
           min={1}
@@ -30,7 +32,7 @@ export function HrSurveyForm({ onSubmit }: { onSubmit: (payload: { score: number
           onClick={() => onSubmit({ score, comment })}
           className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700"
         >
-          Yuborish
+          {translate("hr.surveySubmit")}
         </button>
       </div>
     </div>

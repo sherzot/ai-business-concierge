@@ -17,6 +17,7 @@ import {
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
 import { createTask, getTasks } from "../api/tasksApi";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 // Actually, I'll stick to a clean UI without complex dnd libraries first to ensure stability, 
 // but I will design it to LOOK like a Kanban board.
@@ -36,6 +37,7 @@ interface Task {
 }
 
 export function TasksPage({ tenant }: { tenant: any }) {
+  const { translate } = useI18n();
   const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +55,7 @@ export function TasksPage({ tenant }: { tenant: any }) {
       setTasks(data);
     } catch (err) {
       console.error("Failed to load tasks", err);
-      setError("Vazifalarni yuklab bo'lmadi.");
+      setError(translate("tasks.loadError"));
     } finally {
       setLoading(false);
     }
@@ -61,7 +63,7 @@ export function TasksPage({ tenant }: { tenant: any }) {
 
   async function handleCreateMockTask() {
     const newTask = {
-      title: 'Yangi tezkor vazifa (Demo)',
+      title: translate("tasks.demoTitle"),
       status: 'todo',
       priority: 'medium',
       tags: ['Demo'],
@@ -72,15 +74,15 @@ export function TasksPage({ tenant }: { tenant: any }) {
       setTasks(prev => [...prev, created]);
     } catch (err) {
       console.error("Error creating task", err);
-      setError("Vazifa yaratishda xatolik.");
+      setError(translate("tasks.createError"));
     }
   }
 
   const columns: { id: TaskStatus; label: string; color: string }[] = [
-    { id: 'todo', label: 'Bajarish kerak', color: 'bg-slate-500' },
-    { id: 'in_progress', label: 'Jarayonda', color: 'bg-indigo-500' },
-    { id: 'review', label: 'Tekshiruvda', color: 'bg-amber-500' },
-    { id: 'done', label: 'Bajarildi', color: 'bg-emerald-500' }
+    { id: 'todo', label: translate("tasks.column.todo"), color: 'bg-slate-500' },
+    { id: 'in_progress', label: translate("tasks.column.inProgress"), color: 'bg-indigo-500' },
+    { id: 'review', label: translate("tasks.column.review"), color: 'bg-amber-500' },
+    { id: 'done', label: translate("tasks.column.done"), color: 'bg-emerald-500' }
   ];
 
   if (loading) {
@@ -108,7 +110,7 @@ export function TasksPage({ tenant }: { tenant: any }) {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input 
               type="text" 
-              placeholder="Vazifalarni qidirish..." 
+              placeholder={translate("tasks.search")} 
               className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 w-64"
             />
           </div>
@@ -130,13 +132,13 @@ export function TasksPage({ tenant }: { tenant: any }) {
         
         <div className="flex items-center gap-3">
            <button className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50">
-             <Filter size={16} /> Filter
+             <Filter size={16} /> {translate("tasks.filter")}
            </button>
            <button 
              onClick={handleCreateMockTask}
              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 shadow-sm shadow-indigo-200 transition-all"
            >
-             <Plus size={18} /> Yangi Vazifa
+             <Plus size={18} /> {translate("tasks.newTask")}
            </button>
         </div>
       </div>
@@ -145,7 +147,7 @@ export function TasksPage({ tenant }: { tenant: any }) {
       <div className="flex-1 overflow-x-auto">
         {tasks.length === 0 ? (
           <div className="h-full flex items-center justify-center text-slate-400">
-            Hozircha vazifalar yo'q.
+            {translate("tasks.empty")}
           </div>
         ) : viewMode === 'board' ? (
           <div className="flex gap-6 h-full min-w-[1000px] pb-4">
@@ -171,7 +173,7 @@ export function TasksPage({ tenant }: { tenant: any }) {
                     <TaskCard key={task.id} task={task} />
                   ))}
                   <button className="w-full py-2 flex items-center justify-center gap-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50/50 rounded-lg border border-dashed border-slate-300 hover:border-indigo-300 text-sm transition-all">
-                    <Plus size={16} /> Add Task
+                    <Plus size={16} /> {translate("tasks.addTask")}
                   </button>
                 </div>
               </div>
@@ -182,11 +184,11 @@ export function TasksPage({ tenant }: { tenant: any }) {
              <table className="w-full text-left border-collapse">
                <thead className="bg-slate-50 border-b border-slate-200">
                  <tr>
-                   <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Vazifa</th>
-                   <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Status</th>
-                   <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Mas'ul</th>
-                   <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Muddat</th>
-                   <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Prioritet</th>
+                   <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">{translate("tasks.table.task")}</th>
+                   <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">{translate("tasks.table.status")}</th>
+                   <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">{translate("tasks.table.assignee")}</th>
+                   <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">{translate("tasks.table.dueDate")}</th>
+                   <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">{translate("tasks.table.priority")}</th>
                  </tr>
                </thead>
                <tbody className="divide-y divide-slate-100">
@@ -213,7 +215,7 @@ export function TasksPage({ tenant }: { tenant: any }) {
                              <span className="text-sm text-slate-600">{task.assignee.name}</span>
                            </>
                          ) : (
-                           <span className="text-sm text-slate-400 italic">Biriktirilmagan</span>
+                           <span className="text-sm text-slate-400 italic">{translate("tasks.assign")}</span>
                          )}
                        </div>
                      </td>
@@ -270,7 +272,7 @@ function TaskCard({ task }: { task: Task }) {
                 <span className="text-xs text-slate-500 truncate max-w-[60px]">{task.assignee.name}</span>
              </div>
            ) : (
-             <span className="text-xs text-slate-400 flex items-center gap-1"><User size={12} /> Assign</span>
+             <span className="text-xs text-slate-400 flex items-center gap-1"><User size={12} /> {translate("tasks.assign")}</span>
            )}
         </div>
         
@@ -291,6 +293,7 @@ function TaskCard({ task }: { task: Task }) {
 }
 
 function StatusBadge({ status }: { status: TaskStatus }) {
+  const { translate } = useI18n();
   const styles = {
     todo: 'bg-slate-100 text-slate-600 border-slate-200',
     in_progress: 'bg-indigo-50 text-indigo-700 border-indigo-200',
@@ -299,10 +302,10 @@ function StatusBadge({ status }: { status: TaskStatus }) {
   };
   
   const labels = {
-    todo: 'Bajarish kerak',
-    in_progress: 'Jarayonda',
-    review: 'Tekshiruvda',
-    done: 'Bajarildi'
+    todo: translate("tasks.status.todo"),
+    in_progress: translate("tasks.status.in_progress"),
+    review: translate("tasks.status.review"),
+    done: translate("tasks.status.done"),
   };
 
   return (
@@ -313,6 +316,7 @@ function StatusBadge({ status }: { status: TaskStatus }) {
 }
 
 function PriorityBadge({ priority }: { priority: TaskPriority }) {
+  const { translate } = useI18n();
   const styles = {
     high: 'text-rose-600 bg-rose-50 border-rose-100',
     medium: 'text-amber-600 bg-amber-50 border-amber-100',
@@ -321,7 +325,7 @@ function PriorityBadge({ priority }: { priority: TaskPriority }) {
 
   return (
     <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${styles[priority]}`}>
-      {priority.charAt(0).toUpperCase() + priority.slice(1)}
+      {translate(`tasks.priority.${priority}`)}
     </span>
   );
 }

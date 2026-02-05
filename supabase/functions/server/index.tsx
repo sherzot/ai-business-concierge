@@ -679,7 +679,10 @@ const registerRoutes = (prefix: string) => {
 
     const { data, error } = await query;
     if (error) {
-      return failure(c, 500, "DB_ERROR", "Docs list xatoligi.");
+      console.error("Docs list error", error);
+      return failure(c, 500, "DB_ERROR", "Docs list xatoligi.", {
+        details: error.message,
+      });
     }
 
     const docs = (data ?? []).map((doc: any) => ({
@@ -707,6 +710,9 @@ const registerRoutes = (prefix: string) => {
       .single();
 
     if (error || !data) {
+      if (error) {
+        console.error("Docs detail error", error);
+      }
       return failure(c, 404, "NOT_FOUND", "Document topilmadi.");
     }
 
@@ -776,7 +782,10 @@ const registerRoutes = (prefix: string) => {
       .select("*")
       .single();
     if (error) {
-      return failure(c, 500, "DB_ERROR", "Document saqlashda xatolik.");
+      console.error("Docs index error", error);
+      return failure(c, 500, "DB_ERROR", "Document saqlashda xatolik.", {
+        details: error.message,
+      });
     }
 
     const chunks = String(content)
@@ -821,7 +830,10 @@ const registerRoutes = (prefix: string) => {
       .limit(limit);
 
     if (error) {
-      return failure(c, 500, "DB_ERROR", "Search xatoligi.");
+      console.error("Docs search error", error);
+      return failure(c, 500, "DB_ERROR", "Search xatoligi.", {
+        details: error.message,
+      });
     }
 
     return success(c, {
