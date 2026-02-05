@@ -595,3 +595,14 @@ export function t(locale: Locale, key: string, vars?: Record<string, string>) {
   }
   return value;
 }
+
+// Defensive fallback for any stray global usage.
+export const fallbackTranslate = (key: string, vars?: Record<string, string>) =>
+  t(defaultLocale, key, vars);
+
+if (typeof globalThis !== "undefined") {
+  const g = globalThis as typeof globalThis & { translate?: typeof fallbackTranslate };
+  if (!g.translate) {
+    g.translate = fallbackTranslate;
+  }
+}
