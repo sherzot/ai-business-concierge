@@ -495,8 +495,35 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 422, "VALIDATION_ERROR", "message majburiy.");
     }
 
-    let reply = "Tushunarli. Buni o'rganib chiqaman.";
-    let toolUsed: any = null;
+    const buildFallbackReply = (input: string) => {
+      const lowerMsg = input.toLowerCase();
+      if (lowerMsg.includes("xarajat") || lowerMsg.includes("expense") || lowerMsg.includes("budget")) {
+        return {
+          reply: "Yanvar oyi xarajatlari $12,400 ni tashkil etdi. Bu o'tgan oyga nisbatan 15% kamroq.",
+          toolUsed: { name: "ShadowCFO.check_budget", status: "success" },
+        };
+      }
+      if (lowerMsg.includes("task") || lowerMsg.includes("vazifa")) {
+        return {
+          reply: "Sizda bugun 3 ta muhim vazifa bor. Eng asosiysi: 'Q4 Moliyaviy hisobot'.",
+          toolUsed: { name: "TaskPlanner.list_priorities", status: "success" },
+        };
+      }
+      if (lowerMsg.includes("report") || lowerMsg.includes("hisobot")) {
+        return {
+          reply: "Men oylik hisobotni shakllantirishni boshladim. Tayyor bo'lgach xabar beraman.",
+          toolUsed: { name: "ReportGenerator.generate", status: "loading" },
+        };
+      }
+      return {
+        reply: "Tushunarli. Buni o'rganib chiqaman.",
+        toolUsed: null,
+      };
+    };
+
+    const fallback = buildFallbackReply(message);
+    let reply = fallback.reply;
+    let toolUsed: any = fallback.toolUsed;
 
     let openaiError: string | null = null;
 
@@ -525,22 +552,14 @@ const registerRoutes = (prefix: string) => {
           : "";
 
         reply = outputText || reply;
-        toolUsed = aiResponse?.tool_calls?.[0] ?? null;
+        toolUsed = aiResponse?.tool_calls?.[0] ?? toolUsed;
       } catch (err) {
         openaiError = err instanceof Error ? err.message : "OPENAI_ERROR";
-      }
-    } else {
-      const lowerMsg = message.toLowerCase();
-
-      if (lowerMsg.includes("xarajat") || lowerMsg.includes("expense") || lowerMsg.includes("budget")) {
-        reply = "Yanvar oyi xarajatlari $12,400 ni tashkil etdi. Bu o'tgan oyga nisbatan 15% kamroq.";
-        toolUsed = { name: "ShadowCFO.check_budget", status: "success" };
-      } else if (lowerMsg.includes("task") || lowerMsg.includes("vazifa")) {
-        reply = "Sizda bugun 3 ta muhim vazifa bor. Eng asosiysi: 'Q4 Moliyaviy hisobot'.";
-        toolUsed = { name: "TaskPlanner.list_priorities", status: "success" };
-      } else if (lowerMsg.includes("report") || lowerMsg.includes("hisobot")) {
-        reply = "Men oylik hisobotni shakllantirishni boshladim. Tayyor bo'lgach xabar beraman.";
-        toolUsed = { name: "ReportGenerator.generate", status: "loading" };
+        if (toolUsed) {
+          toolUsed = { ...toolUsed, status: "error", error: openaiError };
+        } else {
+          toolUsed = { name: "OpenAI", status: "error", error: openaiError };
+        }
       }
     }
 
@@ -551,23 +570,15 @@ const registerRoutes = (prefix: string) => {
         prompt_version: "v1",
         locale: "uz",
         input_excerpt: message.slice(0, 160),
-        output_excerpt: openaiError.slice(0, 160),
+        output_excerpt: reply.slice(0, 160),
         tools_used: toolUsed ? [toolUsed] : [],
         success_flag: false,
         error_code: "OPENAI_ERROR",
         latency_ms: 800,
         trace_id: getTraceId(c),
         created_at: new Date().toISOString(),
-        context: context ?? {},
+        context: { ...(context ?? {}), openai_error: openaiError },
       });
-
-      return failure(
-        c,
-        502,
-        "OPENAI_ERROR",
-        "OpenAI so'rovida xatolik.",
-        { detail: openaiError.slice(0, 500) },
-      );
     }
 
     await writeAiInteraction(ctx as TenantContext, {
@@ -586,7 +597,8 @@ const registerRoutes = (prefix: string) => {
       context: context ?? {},
     });
 
-    return success(c, { reply, toolUsed });
+    const payload = openaiError ? { reply, toolUsed, warning: "OPENAI_ERROR" } : { reply, toolUsed };
+    return success(c, payload);
   });
 
   app.get(`${prefix}/ai/tools`, async (c) => {
