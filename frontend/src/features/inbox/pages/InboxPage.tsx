@@ -48,6 +48,7 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
   const [selectedItem, setSelectedItem] = useState<InboxItem | null>(null);
   const [filter, setFilter] = useState('All');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   React.useEffect(() => {
     loadInbox();
@@ -55,16 +56,21 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
 
   async function loadInbox() {
     setLoading(true);
+    setError(null);
     try {
       const data = await getInboxItems(tenant.id);
       setItems(data);
       setSelectedItem(data[0] ?? null);
     } catch (err) {
       console.error("Failed to load inbox", err);
+      setError("Inbox ma'lumotlarini yuklab bo'lmadi.");
     } finally {
       setLoading(false);
     }
   }
+
+  const filteredItems =
+    filter === "All" ? items : items.filter((item) => item.category.toLowerCase() === filter.toLowerCase());
 
   return (
     <div className="flex h-[calc(100vh-8rem)] bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
@@ -75,7 +81,9 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
         <div className="p-3 border-b border-slate-200 flex items-center justify-between bg-white">
           <div className="flex items-center gap-2">
             <h2 className="font-semibold text-slate-700 px-2">Inbox</h2>
-            <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full">5</span>
+            <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full">
+              {filteredItems.length}
+            </span>
           </div>
           <button className="p-2 hover:bg-slate-100 rounded-full text-slate-500">
             <Filter size={18} />
@@ -102,55 +110,66 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
 
         {/* List */}
         <div className="flex-1 overflow-y-auto">
-          {items.map((item) => (
-            <div 
-              key={item.id}
-              onClick={() => setSelectedItem(item)}
-              className={clsx(
-                "p-4 border-b border-slate-100 cursor-pointer hover:bg-white transition-colors group relative",
-                selectedItem?.id === item.id ? "bg-white shadow-sm border-l-4 border-l-indigo-600" : "bg-transparent border-l-4 border-l-transparent",
-                !item.isRead && "bg-indigo-50/40"
-              )}
-            >
-              <div className="flex justify-between items-start mb-1">
-                <div className="flex items-center gap-2">
-                  {item.source === 'telegram' && <MessageCircle size={14} className="text-blue-500" />}
-                  {item.source === 'email' && <Mail size={14} className="text-amber-500" />}
-                  {item.source === 'amocrm' && <User size={14} className="text-indigo-500" />}
-                  <span className={clsx("text-xs font-medium", !item.isRead ? "text-slate-900 font-bold" : "text-slate-600")}>
-                    {item.sender.name}
+          {loading && (
+            <div className="p-6 text-sm text-slate-400">Yuklanmoqda...</div>
+          )}
+          {!loading && error && (
+            <div className="p-6 text-sm text-rose-600">{error}</div>
+          )}
+          {!loading && !error && filteredItems.length === 0 && (
+            <div className="p-6 text-sm text-slate-400">Xabarlar topilmadi.</div>
+          )}
+          {!loading &&
+            !error &&
+            filteredItems.map((item) => (
+              <div 
+                key={item.id}
+                onClick={() => setSelectedItem(item)}
+                className={clsx(
+                  "p-4 border-b border-slate-100 cursor-pointer hover:bg-white transition-colors group relative",
+                  selectedItem?.id === item.id ? "bg-white shadow-sm border-l-4 border-l-indigo-600" : "bg-transparent border-l-4 border-l-transparent",
+                  !item.isRead && "bg-indigo-50/40"
+                )}
+              >
+                <div className="flex justify-between items-start mb-1">
+                  <div className="flex items-center gap-2">
+                    {item.source === 'telegram' && <MessageCircle size={14} className="text-blue-500" />}
+                    {item.source === 'email' && <Mail size={14} className="text-amber-500" />}
+                    {item.source === 'amocrm' && <User size={14} className="text-indigo-500" />}
+                    <span className={clsx("text-xs font-medium", !item.isRead ? "text-slate-900 font-bold" : "text-slate-600")}>
+                      {item.sender.name}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 whitespace-nowrap">
+                    {format(new Date(item.timestamp), 'HH:mm')}
                   </span>
                 </div>
-                <span className="text-[10px] text-slate-400 whitespace-nowrap">
-                  {format(new Date(item.timestamp), 'HH:mm')}
-                </span>
-              </div>
-              
-              <h4 className={clsx("text-sm mb-1 truncate", !item.isRead ? "font-bold text-slate-900" : "font-medium text-slate-700")}>
-                {item.subject}
-              </h4>
-              <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                {item.preview}
-              </p>
+                
+                <h4 className={clsx("text-sm mb-1 truncate", !item.isRead ? "font-bold text-slate-900" : "font-medium text-slate-700")}>
+                  {item.subject}
+                </h4>
+                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                  {item.preview}
+                </p>
 
-              <div className="flex gap-2 mt-2">
-                <span className={clsx(
-                  "text-[10px] px-1.5 py-0.5 rounded font-medium border",
-                  item.category === 'HR' && "bg-pink-50 text-pink-700 border-pink-200",
-                  item.category === 'Sales' && "bg-emerald-50 text-emerald-700 border-emerald-200",
-                  item.category === 'Billing' && "bg-amber-50 text-amber-700 border-amber-200",
-                  item.category === 'Support' && "bg-blue-50 text-blue-700 border-blue-200"
-                )}>
-                  {item.category}
-                </span>
-                {item.tags.map(tag => (
-                   <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
-                     #{tag}
-                   </span>
-                ))}
+                <div className="flex gap-2 mt-2">
+                  <span className={clsx(
+                    "text-[10px] px-1.5 py-0.5 rounded font-medium border",
+                    item.category === 'HR' && "bg-pink-50 text-pink-700 border-pink-200",
+                    item.category === 'Sales' && "bg-emerald-50 text-emerald-700 border-emerald-200",
+                    item.category === 'Billing' && "bg-amber-50 text-amber-700 border-amber-200",
+                    item.category === 'Support' && "bg-blue-50 text-blue-700 border-blue-200"
+                  )}>
+                    {item.category}
+                  </span>
+                  {item.tags.map(tag => (
+                     <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
+                       #{tag}
+                     </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
 

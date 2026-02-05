@@ -39,6 +39,7 @@ export function TasksPage({ tenant }: { tenant: any }) {
   const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   React.useEffect(() => {
     loadTasks();
@@ -46,11 +47,13 @@ export function TasksPage({ tenant }: { tenant: any }) {
 
   async function loadTasks() {
     setLoading(true);
+    setError(null);
     try {
       const data = await getTasks(tenant.id);
       setTasks(data);
     } catch (err) {
       console.error("Failed to load tasks", err);
+      setError("Vazifalarni yuklab bo'lmadi.");
     } finally {
       setLoading(false);
     }
@@ -61,13 +64,15 @@ export function TasksPage({ tenant }: { tenant: any }) {
       title: 'Yangi tezkor vazifa (Demo)',
       status: 'todo',
       priority: 'medium',
-      tags: ['Demo']
+      tags: ['Demo'],
+      comments: 0
     };
     try {
       const created = await createTask(tenant.id, newTask);
       setTasks(prev => [...prev, created]);
     } catch (err) {
       console.error("Error creating task", err);
+      setError("Vazifa yaratishda xatolik.");
     }
   }
 
@@ -82,6 +87,14 @@ export function TasksPage({ tenant }: { tenant: any }) {
     return (
       <div className="h-full flex items-center justify-center text-indigo-600">
         <Loader2 size={40} className="animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-full flex items-center justify-center text-rose-600 text-sm">
+        {error}
       </div>
     );
   }
@@ -130,7 +143,11 @@ export function TasksPage({ tenant }: { tenant: any }) {
 
       {/* Content */}
       <div className="flex-1 overflow-x-auto">
-        {viewMode === 'board' ? (
+        {tasks.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-slate-400">
+            Hozircha vazifalar yo'q.
+          </div>
+        ) : viewMode === 'board' ? (
           <div className="flex gap-6 h-full min-w-[1000px] pb-4">
             {columns.map(col => (
               <div key={col.id} className="flex-1 flex flex-col bg-slate-50/50 rounded-xl border border-slate-200/60">

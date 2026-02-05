@@ -1,21 +1,33 @@
+## AI Business Concierge
 
-  # AI Business Concierge Dashboard
+AI Business Concierge is a multi-tenant business operations dashboard with an AI assistant. It unifies inbox, tasks, HR pulse, docs, reports, and integrations into one interface and exposes a Supabase Edge Function API for data + AI actions.
 
-  This is a code bundle for AI Business Concierge Dashboard. The original project is available at https://www.figma.com/design/oyxVQh9H4aRE1FQrz1sH0U/AI-Business-Concierge-Dashboard.
+## What it does
 
-  ## Running the code
+- Manager Reports dashboard with KPIs and trends
+- Unified Inbox (email/telegram/CRM style) with categorization
+- Tasks & Compliance board and list view
+- HR Pulse cases + survey submissions
+- Docs Hub (indexing + search + listing)
+- Integrations configuration (Telegram/Email/AmoCRM style)
+- AI Concierge chat with OpenAI fallback
 
-  Run `npm i` to install the dependencies.
+## Architecture
 
-  Run `npm run dev` to start the development server.
+- Frontend: React + TypeScript + Vite (feature-based structure under `frontend/`)
+- Backend: Supabase Edge Function (`supabase/functions/server/index.tsx`)
+- Database: Supabase Postgres (`supabase/schema.sql`)
 
-## Backend setup (Supabase)
+## Environment variables
 
-1) Apply database schema:
+Frontend (Netlify or local `.env` under `frontend/`):
 
-`supabase/schema.sql`
+- `VITE_SUPABASE_PROJECT_ID`
+- `VITE_SUPABASE_ANON_KEY`
+- `VITE_API_BASE_URL` (optional override)
+- `VITE_SENTRY_DSN` (optional)
 
-2) Configure Edge Function env vars:
+Backend (Supabase Edge Function secrets):
 
 - `SB_URL`
 - `SB_SERVICE_ROLE_KEY`
@@ -23,13 +35,67 @@
 - `OPENAI_API_KEY`
 - `OPENAI_MODEL` (optional, default: `gpt-4o-mini`)
 
-3) Edge Function base URL:
+## Local development
 
-`https://<project-id>.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1`
+Frontend:
 
-## API Notes
+```
+cd frontend
+npm i
+npm run dev
+```
 
-- All endpoints are under `/v1/*`
-- Tenant context is required (JWT with `tenant_id` claim; `X-Tenant-Id` fallback)
-- Standard response wrapper with `meta.trace_id`
+Backend:
+
+1) Apply DB schema in Supabase SQL Editor:
+   - `supabase/schema.sql`
+2) Deploy Edge Function from `supabase/functions/server/index.tsx`
+
+## Deployment
+
+Supabase (Edge Function):
+
+- Deploy function code from `supabase/functions/server/index.tsx`
+- Set secrets (see Backend env vars above)
+- Base URL:
+  `https://<project-id>.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1`
+
+Netlify (Frontend):
+
+- Base directory: `frontend`
+- Build command: `npm run build`
+- Publish directory: `dist`
+- Set frontend env vars (see Frontend env vars above)
+
+## API overview
+
+All endpoints are under `/v1/*` and require tenant context:
+
+- `X-Tenant-Id` header (fallback)
+- or `Authorization: Bearer <jwt>` with `tenant_id` claim
+
+Key endpoints:
+
+- `GET /dashboard` - dashboard stats
+- `GET /tasks` / `POST /tasks` - tasks list/create
+- `GET /inbox` - inbox list
+- `POST /ai/chat` - AI assistant chat
+- `GET /ai/tools` - AI tool registry
+- `GET /docs` - docs list (supports `?q=...`)
+- `GET /docs/:id` - doc detail
+- `POST /docs/index` - index a doc
+- `POST /docs/search` - search doc chunks
+- `GET /hr/cases` - HR cases list
+- `POST /hr/surveys` - HR survey submit
+- `GET /integrations` - integrations list
+- `POST /integrations/:id` - update integration settings
+
+Standard response wrapper:
+
+```
+{
+  "data": ...,
+  "meta": { "success": true, "trace_id": "..." }
+}
+```
   

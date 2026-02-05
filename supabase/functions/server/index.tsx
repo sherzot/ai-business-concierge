@@ -1,7 +1,7 @@
 import { Hono } from "npm:hono";
 import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
-import { createClient } from "jsr:@supabase/supabase-js@2.49.8";
+import { createClient } from "npm:@supabase/supabase-js@2.49.8";
 
 const app = new Hono();
 const BASE_PATH = "/make-server-6c2837d6";
@@ -14,7 +14,7 @@ app.use(
   "/*",
   cors({
     origin: "*",
-    allowHeaders: ["Content-Type", "Authorization"],
+    allowHeaders: ["Content-Type", "Authorization", "X-Tenant-Id", "X-User-Id", "X-Trace-Id"],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
     maxAge: 600,
@@ -100,6 +100,60 @@ const TOOL_REGISTRY = [
       required: ["results"],
     },
     handler: "DocSearchService",
+  },
+];
+
+const HR_CASES_SEED = [
+  {
+    id: "hr_001",
+    title: "Burnout risk flagged",
+    employee: "M. Karimova",
+    status: "open",
+    priority: "high",
+    created_at: "2026-02-03T09:10:00Z",
+    summary: "Marketing bo'limida stress yuqori, so'rovnoma natijalari diqqat talab qiladi.",
+  },
+  {
+    id: "hr_002",
+    title: "Onboarding feedback",
+    employee: "A. Rakhimov",
+    status: "in_review",
+    priority: "medium",
+    created_at: "2026-01-31T14:40:00Z",
+    summary: "Yangi xodim uchun onboarding jarayoni kechikmoqda.",
+  },
+  {
+    id: "hr_003",
+    title: "Policy acknowledgement",
+    employee: "N. Usmonova",
+    status: "resolved",
+    priority: "low",
+    created_at: "2026-01-22T11:05:00Z",
+    summary: "HR siyosati bilan tanishganlik bo'yicha tasdiq.",
+  },
+];
+
+const INTEGRATIONS_SEED = [
+  {
+    id: "int_telegram",
+    name: "Telegram",
+    description: "Unified inbox uchun Telegram bot",
+    status: "connected",
+    last_sync: "2026-02-05T09:20:00Z",
+  },
+  {
+    id: "int_email",
+    name: "Email",
+    description: "Support va billing xatlari",
+    status: "pending",
+    last_sync: "2026-02-04T18:10:00Z",
+  },
+  {
+    id: "int_amocrm",
+    name: "AmoCRM",
+    description: "Sales pipeline integratsiyasi",
+    status: "disconnected",
+    last_sync: "2026-01-30T12:00:00Z",
   },
 ];
 
@@ -605,6 +659,106 @@ const registerRoutes = (prefix: string) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
     return success(c, TOOL_REGISTRY);
+  });
+
+  app.get(`${prefix}/docs`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const q = c.req.query("q")?.trim();
+    let query = supabase
+      .from("documents")
+      .select("id, title, metadata, created_at, content")
+      .eq("tenant_id", ctx.tenantId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (q) {
+      query = query.ilike("title", `%${q}%`);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      return failure(c, 500, "DB_ERROR", "Docs list xatoligi.");
+    }
+
+    const docs = (data ?? []).map((doc: any) => ({
+      id: doc.id,
+      title: doc.title,
+      owner: doc.metadata?.owner ?? "Legal",
+      status: doc.metadata?.status ?? "draft",
+      updated_at: doc.created_at,
+      content: doc.content,
+    }));
+
+    return success(c, docs);
+  });
+
+  app.get(`${prefix}/docs/:id`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const id = c.req.param("id");
+    const { data, error } = await supabase
+      .from("documents")
+      .select("*")
+      .eq("tenant_id", ctx.tenantId)
+      .eq("id", id)
+      .single();
+
+    if (error || !data) {
+      return failure(c, 404, "NOT_FOUND", "Document topilmadi.");
+    }
+
+    return success(c, data);
+  });
+
+  app.get(`${prefix}/hr/cases`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+    return success(c, HR_CASES_SEED);
+  });
+
+  app.post(`${prefix}/hr/surveys`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const { score, comment } = await c.req.json();
+    if (typeof score !== "number") {
+      return failure(c, 422, "VALIDATION_ERROR", "score majburiy.");
+    }
+
+    await writeAuditLog(ctx as TenantContext, {
+      action: "hr_survey_submit",
+      trace_id: getTraceId(c),
+      payload: { score, comment: comment ?? "" },
+      created_at: new Date().toISOString(),
+    });
+
+    return success(c, { status: "received" });
+  });
+
+  app.get(`${prefix}/integrations`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+    return success(c, INTEGRATIONS_SEED);
+  });
+
+  app.post(`${prefix}/integrations/:id`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const id = c.req.param("id");
+    const payload = await c.req.json().catch(() => ({}));
+
+    await writeAuditLog(ctx as TenantContext, {
+      action: "integration_update",
+      trace_id: getTraceId(c),
+      payload: { id, ...payload },
+      created_at: new Date().toISOString(),
+    });
+
+    return success(c, { id, status: "saved" });
   });
 
   app.post(`${prefix}/docs/index`, async (c) => {

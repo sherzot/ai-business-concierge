@@ -12,7 +12,8 @@ import {
   MessageSquare,
   Building2,
   Menu,
-  X
+  X,
+  Plug
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx, type ClassValue } from "clsx";
@@ -20,6 +21,10 @@ import { twMerge } from "tailwind-merge";
 import { InboxPage } from "./features/inbox/pages/InboxPage";
 import { ReportsPage } from "./features/reports/pages/ReportsPage";
 import { TasksPage } from "./features/tasks/pages/TasksPage";
+import { HrCasesPage } from "./features/hr/pages/HrCasesPage";
+import { DocsPage } from "./features/docs/pages/DocsPage";
+import { IntegrationsPage } from "./features/integrations/pages/IntegrationsPage";
+import { SettingsPage } from "./features/settings/pages/SettingsPage";
 import { AIChat } from "./shared/components/AIChat";
 
 // Utility for classes
@@ -83,21 +88,13 @@ export default function App() {
       case "tasks":
         return <TasksPage tenant={currentTenant} />;
       case "hr":
-        return (
-           <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400">
-            <HeartPulse size={48} className="mb-4 opacity-50" />
-            <h3 className="text-xl font-medium">HR Pulse</h3>
-            <p className="text-sm mt-2">Xodimlar so'rovnomalari va kayfiyati...</p>
-          </div>
-        );
+        return <HrCasesPage tenant={currentTenant} />;
       case "docs":
-        return (
-           <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400">
-            <FileText size={48} className="mb-4 opacity-50" />
-            <h3 className="text-xl font-medium">Docs Hub</h3>
-            <p className="text-sm mt-2">Hujjatlar aylanmasi va shablonlar...</p>
-          </div>
-        );
+        return <DocsPage tenant={currentTenant} />;
+      case "integrations":
+        return <IntegrationsPage tenant={currentTenant} />;
+      case "settings":
+        return <SettingsPage tenant={currentTenant} />;
       default:
         return <ReportsPage tenant={currentTenant} />;
     }
@@ -171,6 +168,12 @@ export default function App() {
               label="Docs Hub" 
               active={activeModule === "docs"}
               onClick={() => setActiveModule("docs")}
+            />
+            <NavItem 
+              icon={<Plug size={20} />} 
+              label="Integrations" 
+              active={activeModule === "integrations"}
+              onClick={() => setActiveModule("integrations")}
             />
           </nav>
 

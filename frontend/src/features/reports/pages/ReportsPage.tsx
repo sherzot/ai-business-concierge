@@ -39,17 +39,25 @@ type DashboardStats = {
 
 export function ReportsPage({ tenant }: ReportsPageProps) {
   const [stats, setStats] = React.useState<DashboardStats | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     loadStats();
   }, [tenant.id]);
 
   async function loadStats() {
+    setLoading(true);
+    setError(null);
     try {
       const data = await getDashboardStats(tenant.id);
       setStats(data);
     } catch (err) {
       console.error("Failed to load dashboard stats", err);
+      setError("Dashboard statistikalarini yuklab bo'lmadi.");
+      setStats(null);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -75,7 +83,7 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard 
           title="Business Health" 
-          value={`${stats?.healthScore ?? 0}/100`} 
+          value={loading ? "..." : `${stats?.healthScore ?? 0}/100`} 
           trend="+4.2%" 
           trendUp={true}
           icon={<HeartBeatIcon />} 
@@ -83,7 +91,7 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
         />
         <StatCard 
           title="Oylik Tushum (Forecast)" 
-          value={`$${stats?.monthlyRevenue?.toLocaleString() ?? 0}`} 
+          value={loading ? "..." : `$${stats?.monthlyRevenue?.toLocaleString() ?? 0}`} 
           trend="+12%" 
           trendUp={true}
           icon={<TrendingUp size={20} className="text-emerald-600" />} 
@@ -91,7 +99,7 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
         />
         <StatCard 
           title="Tasks Overdue" 
-          value={`${stats?.tasksOverdue ?? 0}`} 
+          value={loading ? "..." : `${stats?.tasksOverdue ?? 0}`} 
           trend="-2" 
           trendUp={false} // Good that it's down, but logic handled below
           inverseTrend // trendUp=false usually means bad, but here less is better
@@ -100,7 +108,7 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
         />
         <StatCard 
           title="Pending Approvals" 
-          value={`${stats?.pendingApprovals ?? 0}`} 
+          value={loading ? "..." : `${stats?.pendingApprovals ?? 0}`} 
           trend="0" 
           trendUp={true}
           icon={<CheckCircle2 size={20} className="text-blue-600" />} 
@@ -118,6 +126,9 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
               <option>Oxirgi 30 kun</option>
             </select>
           </div>
+          {error && (
+            <div className="mb-4 text-sm text-rose-600">{error}</div>
+          )}
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={stats?.chartData ?? []}>
