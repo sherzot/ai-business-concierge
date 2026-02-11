@@ -1,5 +1,43 @@
 create extension if not exists "pgcrypto";
 
+-- =============================================================================
+-- Users, tenants, roles
+-- =============================================================================
+-- Role: leader (Rahbar), hr, accounting (Bug'altiriya), department_head (Bo'lim boshliq), employee (Oddiy xodim)
+create table if not exists tenants (
+  id text primary key,
+  name text not null,
+  plan text not null default 'Pro'
+);
+
+create table if not exists user_tenants (
+  user_id uuid not null,
+  tenant_id text not null references tenants(id) on delete cascade,
+  role text not null check (role in ('leader', 'hr', 'accounting', 'department_head', 'employee')),
+  full_name text not null,
+  created_at timestamptz not null default now(),
+  primary key (user_id, tenant_id)
+);
+
+create index if not exists user_tenants_user_id_idx on user_tenants (user_id);
+create index if not exists user_tenants_tenant_id_idx on user_tenants (tenant_id);
+
+-- Seed tenants
+insert into tenants (id, name, plan) values
+  ('t_001', 'Acme Logistics LLC', 'Pro'),
+  ('t_002', 'Global Trade Inc', 'Enterprise')
+on conflict (id) do nothing;
+
+-- Demo user: Supabase Dashboard → Authentication → Users → Add user (email + password)
+-- Copy user UUID, then run:
+--   insert into user_tenants (user_id, tenant_id, role, full_name) values
+--     ('<paste-user-uuid>', 't_001', 'leader', 'Rahbar'),
+--     ('<paste-user-uuid>', 't_001', 'hr', 'HR xodim');
+
+-- =============================================================================
+-- Business tables
+-- =============================================================================
+
 create table if not exists tasks (
   id uuid primary key default gen_random_uuid(),
   tenant_id text not null,
@@ -104,3 +142,20 @@ create table if not exists doc_chunks (
 
 create index if not exists doc_chunks_tenant_id_idx on doc_chunks (tenant_id);
 create index if not exists doc_chunks_document_id_idx on doc_chunks (document_id);
+
+-- =============================================================================
+-- RLS (Row Level Security) - service_role bypasses; anon/authenticated denied
+-- =============================================================================
+
+alter table tenants enable row level security;
+alter table user_tenants enable row level security;
+alter table tasks enable row level security;
+alter table inbox_items enable row level security;
+alter table audit_logs enable row level security;
+alter table request_logs enable row level security;
+alter table ai_interactions enable row level security;
+alter table documents enable row level security;
+alter table doc_chunks enable row level security;
+
+-- No permissive policies for anon/authenticated = full deny (default deny).
+-- Edge Function uses service_role key and bypasses RLS, so API continues to work.

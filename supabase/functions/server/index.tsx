@@ -237,15 +237,29 @@ const getTenantContext = async (c: any): Promise<TenantContext | null> => {
   const auth = c.req.header("authorization");
   if (auth?.startsWith("Bearer ")) {
     const payload = await verifyJwtHS256(auth.replace("Bearer ", "").trim());
-    if (payload?.tenant_id) {
-      const ctx = {
-        tenantId: payload.tenant_id,
-        userId: payload.user_id,
-        roles: payload.roles ?? [],
-        permissions: payload.permissions ?? [],
-      };
-      c.set(TENANT_CTX_KEY, ctx);
-      return ctx;
+    if (payload) {
+      const tenantId = payload.tenant_id ?? c.req.header("x-tenant-id");
+      const userId = payload.sub ?? payload.user_id;
+      if (tenantId) {
+        const ctx: TenantContext = {
+          tenantId,
+          userId,
+          roles: payload.roles ?? payload.app_metadata?.roles ?? [],
+          permissions: payload.permissions ?? [],
+        };
+        c.set(TENANT_CTX_KEY, ctx);
+        return ctx;
+      }
+      if (userId) {
+        const ctx: TenantContext = {
+          tenantId: c.req.header("x-tenant-id") ?? "",
+          userId,
+          roles: payload.roles ?? payload.app_metadata?.roles ?? [],
+          permissions: payload.permissions ?? [],
+        };
+        c.set(TENANT_CTX_KEY, ctx);
+        return ctx;
+      }
     }
   }
 
@@ -411,8 +425,71 @@ const computeDashboardStats = (tasks: any[], inboxItems: any[]) => {
   };
 };
 
+const ROLE_ACCESS: Record<string, string[]> = {
+  leader: ["reports", "inbox", "tasks", "hr", "docs", "integrations", "settings"],
+  hr: ["reports", "inbox", "tasks", "hr", "docs", "settings"],
+  accounting: ["reports", "docs", "integrations", "settings"],
+  department_head: ["reports", "inbox", "tasks", "docs", "settings"],
+  employee: ["inbox", "tasks", "settings"],
+};
+
 const registerRoutes = (prefix: string) => {
   app.get(`${prefix}/health`, (c) => c.json({ status: "ok" }));
+
+  app.get(`${prefix}/auth/me`, async (c) => {
+    const auth = c.req.header("authorization");
+    if (!auth?.startsWith("Bearer ")) {
+      return failure(c, 401, "UNAUTHORIZED", "Token talab qilinadi.");
+    }
+    const payload = await verifyJwtHS256(auth.replace("Bearer ", "").trim());
+    if (!payload) {
+      return failure(c, 401, "INVALID_TOKEN", "Token noto'g'ri yoki muddati tugagan.");
+    }
+    const userId = payload.sub ?? payload.user_id;
+    if (!userId) {
+      return failure(c, 401, "INVALID_TOKEN", "Token ichida user_id topilmadi.");
+    }
+
+    const { data: assignments, error } = await supabase
+      .from("user_tenants")
+      .select("tenant_id, role, full_name")
+      .eq("user_id", userId);
+
+    if (error) {
+      return failure(c, 500, "DB_ERROR", "Profil yuklashda xatolik.");
+    }
+
+    const tenants = (assignments ?? []).map((a) => ({
+      id: a.tenant_id,
+      role: a.role,
+      fullName: a.full_name,
+      permissions: ROLE_ACCESS[a.role] ?? [],
+    }));
+
+    const { data: tenantRows } = await supabase
+      .from("tenants")
+      .select("id, name, plan")
+      .in("id", tenants.map((t) => t.id));
+
+    const tenantMap = Object.fromEntries(
+      (tenantRows ?? []).map((t) => [t.id, t])
+    );
+
+    const enrichedTenants = tenants.map((t) => ({
+      ...t,
+      name: tenantMap[t.id]?.name ?? t.id,
+      plan: tenantMap[t.id]?.plan ?? "Pro",
+    }));
+
+    return success(c, {
+      user: {
+        id: userId,
+        email: payload.email ?? null,
+      },
+      tenants: enrichedTenants,
+      defaultTenant: enrichedTenants[0] ?? null,
+    });
+  });
 
   app.get(`${prefix}/dashboard`, async (c) => {
     const ctx = await requireTenant(c);

@@ -13,11 +13,14 @@ import {
   Building2,
   Menu,
   X,
-  Plug
+  Plug,
+  LogOut
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { useAuthContext } from "./features/auth/context/AuthContext";
+import { useI18n } from "./app/providers/I18nProvider";
 import { InboxPage } from "./features/inbox/pages/InboxPage";
 import { ReportsPage } from "./features/reports/pages/ReportsPage";
 import { TasksPage } from "./features/tasks/pages/TasksPage";
@@ -26,46 +29,50 @@ import { DocsPage } from "./features/docs/pages/DocsPage";
 import { IntegrationsPage } from "./features/integrations/pages/IntegrationsPage";
 import { SettingsPage } from "./features/settings/pages/SettingsPage";
 import { AIChat } from "./shared/components/AIChat";
-import { useI18n } from "./app/providers/I18nProvider";
 
-// Utility for classes
+const ROLE_KEYS: Record<string, string> = {
+  leader: "auth.role.leader",
+  hr: "auth.role.hr",
+  accounting: "auth.role.accounting",
+  department_head: "auth.role.department_head",
+  employee: "auth.role.employee",
+};
+
+const NAV_MODULES: { key: string; module: string; icon: React.ReactNode; permission: string }[] = [
+  { key: "dashboard", module: "dashboard", icon: <LayoutDashboard size={20} />, permission: "reports" },
+  { key: "inbox", module: "inbox", icon: <Inbox size={20} />, permission: "inbox" },
+  { key: "tasks", module: "tasks", icon: <CheckSquare size={20} />, permission: "tasks" },
+  { key: "hr", module: "hr", icon: <HeartPulse size={20} />, permission: "hr" },
+  { key: "docs", module: "docs", icon: <FileText size={20} />, permission: "docs" },
+  { key: "integrations", module: "integrations", icon: <Plug size={20} />, permission: "integrations" },
+];
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Types
-type Tenant = {
-  id: string;
-  name: string;
-  plan: "Pro" | "Enterprise";
-};
-
-type User = {
-  id: string;
-  name: string;
-  role: "Admin" | "Manager" | "Employee";
-  avatar: string;
-};
-
-// Mock Data
-const TENANTS: Tenant[] = [
-  { id: "t_001", name: "Acme Logistics LLC", plan: "Pro" },
-  { id: "t_002", name: "Global Trade Inc", plan: "Enterprise" },
-];
-
-const CURRENT_USER: User = {
-  id: "u_123",
-  name: "Jasurbek Abdullayev",
-  role: "Admin",
-  avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-};
-
 export default function App() {
   const { translate } = useI18n();
-  const [currentTenant, setCurrentTenant] = useState<Tenant>(TENANTS[0]);
+  const {
+    currentTenant,
+    setCurrentTenant,
+    profile,
+    canAccess,
+    logout,
+  } = useAuthContext();
   const [activeModule, setActiveModule] = useState<string>("dashboard");
+  const [tenantDropdownOpen, setTenantDropdownOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
+
+  const allowedModules = NAV_MODULES.filter((m) => canAccess(m.permission));
+
+  useEffect(() => {
+    const hasAccess = allowedModules.some((m) => m.module === activeModule);
+    if (!hasAccess && allowedModules.length > 0) {
+      setActiveModule(allowedModules[0].module);
+    }
+  }, [currentTenant?.id]);
 
   // Responsive sidebar check
   useEffect(() => {
@@ -82,23 +89,24 @@ export default function App() {
   }, []);
 
   const renderContent = () => {
+    const tenant = { id: currentTenant.id, name: currentTenant.name, plan: currentTenant.plan };
     switch (activeModule) {
       case "dashboard":
-        return <ReportsPage tenant={currentTenant} />;
+        return <ReportsPage tenant={tenant} />;
       case "inbox":
-        return <InboxPage tenant={currentTenant} />;
+        return <InboxPage tenant={tenant} />;
       case "tasks":
-        return <TasksPage tenant={currentTenant} />;
+        return <TasksPage tenant={tenant} />;
       case "hr":
-        return <HrCasesPage tenant={currentTenant} />;
+        return <HrCasesPage tenant={tenant} />;
       case "docs":
-        return <DocsPage tenant={currentTenant} />;
+        return <DocsPage tenant={tenant} />;
       case "integrations":
-        return <IntegrationsPage tenant={currentTenant} />;
+        return <IntegrationsPage tenant={tenant} />;
       case "settings":
-        return <SettingsPage tenant={currentTenant} />;
+        return <SettingsPage tenant={tenant} />;
       default:
-        return <ReportsPage tenant={currentTenant} />;
+        return <ReportsPage tenant={tenant} />;
     }
   };
 
@@ -120,9 +128,12 @@ export default function App() {
             <span className="font-bold text-lg tracking-tight">Concierge AI</span>
           </div>
 
-          {/* Tenant Switcher (Visual Only) */}
-          <div className="px-4 py-6">
-            <button className="w-full flex items-center justify-between px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700 group">
+          {/* Tenant Switcher */}
+          <div className="px-4 py-6 relative">
+            <button
+              onClick={() => setTenantDropdownOpen(!tenantDropdownOpen)}
+              className="w-full flex items-center justify-between px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700 group"
+            >
               <div className="flex items-center gap-3 overflow-hidden">
                 <div className="w-8 h-8 rounded bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center shrink-0">
                   <Building2 size={16} className="text-white" />
@@ -131,68 +142,74 @@ export default function App() {
                   <p className="text-sm font-medium truncate group-hover:text-white text-slate-200">
                     {currentTenant.name}
                   </p>
-                  <p className="text-xs text-slate-400 truncate">{translate("common.tenantId")}: {currentTenant.id}</p>
+                  <p className="text-xs text-slate-400 truncate">
+                    {translate(ROLE_KEYS[currentTenant.role] ?? "auth.role.employee")}
+                  </p>
                 </div>
               </div>
               <ChevronDown size={14} className="text-slate-400" />
             </button>
+            {tenantDropdownOpen && profile?.tenants && profile.tenants.length > 1 && (
+              <div className="absolute left-4 right-4 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 py-1">
+                {profile.tenants
+                  .filter((t) => t.id !== currentTenant.id)
+                  .map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => {
+                        setCurrentTenant(t);
+                        setTenantDropdownOpen(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-sm text-slate-200 hover:bg-slate-700 hover:text-white"
+                    >
+                      {t.name}
+                    </button>
+                  ))}
+              </div>
+            )}
           </div>
 
-          {/* Navigation */}
+          {/* Navigation (role-based) */}
           <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
-            <NavItem 
-              icon={<LayoutDashboard size={20} />} 
-              label={translate("nav.reports")} 
-              active={activeModule === "dashboard"}
-              onClick={() => setActiveModule("dashboard")}
-            />
-            <NavItem 
-              icon={<Inbox size={20} />} 
-              label={translate("nav.inbox")} 
-              active={activeModule === "inbox"}
-              badge={5}
-              onClick={() => setActiveModule("inbox")}
-            />
-            <NavItem 
-              icon={<CheckSquare size={20} />} 
-              label={translate("nav.tasks")} 
-              active={activeModule === "tasks"}
-              onClick={() => setActiveModule("tasks")}
-            />
-            <NavItem 
-              icon={<HeartPulse size={20} />} 
-              label={translate("nav.hr")} 
-              active={activeModule === "hr"}
-              onClick={() => setActiveModule("hr")}
-            />
-            <NavItem 
-              icon={<FileText size={20} />} 
-              label={translate("nav.docs")} 
-              active={activeModule === "docs"}
-              onClick={() => setActiveModule("docs")}
-            />
-            <NavItem 
-              icon={<Plug size={20} />} 
-              label={translate("nav.integrations")} 
-              active={activeModule === "integrations"}
-              onClick={() => setActiveModule("integrations")}
-            />
+            {allowedModules.map((m) => (
+              <NavItem
+                key={m.key}
+                icon={m.icon}
+                label={translate(
+                m.key === "dashboard" ? "nav.reports" : m.key === "tasks" ? "nav.tasksTitle" : m.key === "docs" ? "nav.docsTitle" : `nav.${m.key}`
+              )}
+                active={activeModule === m.module}
+                badge={m.module === "inbox" ? 5 : undefined}
+                onClick={() => setActiveModule(m.module)}
+              />
+            ))}
           </nav>
 
-          {/* Bottom Actions */}
+          {/* Bottom: Settings + User */}
           <div className="p-4 border-t border-slate-800">
-             <NavItem 
-              icon={<Settings size={20} />} 
-              label={translate("nav.settings")} 
+            <NavItem
+              icon={<Settings size={20} />}
+              label={translate("nav.settings")}
               active={activeModule === "settings"}
               onClick={() => setActiveModule("settings")}
             />
-            <div className="mt-4 flex items-center gap-3 px-3 py-2">
-              <img src={CURRENT_USER.avatar} alt="User" className="w-8 h-8 rounded-full ring-2 ring-slate-700" />
-              <div className="overflow-hidden">
-                <p className="text-sm font-medium text-white truncate">{CURRENT_USER.name}</p>
-                <p className="text-xs text-slate-400">{CURRENT_USER.role}</p>
+            <div className="mt-4 flex items-center justify-between gap-3 px-3 py-2">
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center shrink-0 text-white font-medium">
+                  {currentTenant.fullName?.charAt(0) ?? profile?.user?.email?.charAt(0) ?? "?"}
+                </div>
+                <div className="overflow-hidden">
+                  <p className="text-sm font-medium text-white truncate">{currentTenant.fullName}</p>
+                  <p className="text-xs text-slate-400">{translate(ROLE_KEYS[currentTenant.role] ?? "auth.role.employee")}</p>
+                </div>
               </div>
+              <button
+                onClick={() => logout()}
+                className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+                title="Chiqish"
+              >
+                <LogOut size={18} />
+              </button>
             </div>
           </div>
         </div>
@@ -215,6 +232,8 @@ export default function App() {
               {activeModule === "tasks" && translate("nav.tasksTitle")}
               {activeModule === "hr" && translate("nav.hr")}
               {activeModule === "docs" && translate("nav.docsTitle")}
+              {activeModule === "integrations" && translate("nav.integrations")}
+              {activeModule === "settings" && translate("nav.settings")}
             </h2>
           </div>
 

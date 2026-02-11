@@ -4,6 +4,8 @@ const defaultAnonKey =
 
 export const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID ?? defaultProjectId;
 export const publicAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY ?? defaultAnonKey;
+export const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL ?? `https://${projectId}.supabase.co`;
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ??
   `https://${projectId}.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1`;

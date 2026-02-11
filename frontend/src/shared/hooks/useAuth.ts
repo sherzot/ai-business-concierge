@@ -1,3 +1,9 @@
+import { useAuthContext } from "../../features/auth/context/AuthContext";
+
 export function useAuth() {
-  return { user: null, tenantId: null };
+  const { profile, currentTenant } = useAuthContext();
+  return {
+    user: profile?.user ?? null,
+    tenantId: currentTenant?.id ?? null,
+  };
 }
