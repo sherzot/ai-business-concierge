@@ -230,6 +230,26 @@ const verifyJwtHS256 = async (token: string) => {
   }
 };
 
+/** JWT_SECRET kerak emas – Supabase Auth API orqali token tekshirish */
+const verifyTokenViaSupabaseAuth = async (token: string): Promise<{ sub: string; email?: string } | null> => {
+  if (!SB_URL || !SB_SERVICE_ROLE_KEY) return null;
+  try {
+    const res = await fetch(`${SB_URL}/auth/v1/user`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        apikey: SB_SERVICE_ROLE_KEY,
+      },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const id = data?.id ?? data?.sub;
+    if (!id) return null;
+    return { sub: id, email: data?.email ?? undefined };
+  } catch {
+    return null;
+  }
+};
+
 const getTenantContext = async (c: any): Promise<TenantContext | null> => {
   const existing = c.get(TENANT_CTX_KEY);
   if (existing) return existing;
@@ -441,11 +461,15 @@ const registerRoutes = (prefix: string) => {
     if (!auth?.startsWith("Bearer ")) {
       return failure(c, 401, "UNAUTHORIZED", "Token talab qilinadi.");
     }
-    const payload = await verifyJwtHS256(auth.replace("Bearer ", "").trim());
+    const token = auth.replace("Bearer ", "").trim();
+    let payload = await verifyJwtHS256(token);
+    if (!payload) {
+      payload = await verifyTokenViaSupabaseAuth(token);
+    }
     if (!payload) {
       return failure(c, 401, "INVALID_TOKEN", "Token noto'g'ri yoki muddati tugagan.");
     }
-    const userId = payload.sub ?? payload.user_id;
+    const userId = payload.sub ?? (payload as any).user_id;
     if (!userId) {
       return failure(c, 401, "INVALID_TOKEN", "Token ichida user_id topilmadi.");
     }

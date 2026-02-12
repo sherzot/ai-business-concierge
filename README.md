@@ -29,9 +29,9 @@ Frontend (Netlify or local `.env` under `frontend/`):
 
 Backend (Supabase Edge Function secrets):
 
-- `SB_URL`
-- `SB_SERVICE_ROLE_KEY`
-- `JWT_SECRET`
+- `SB_URL` – Supabase project URL
+- `SB_SERVICE_ROLE_KEY` – Supabase service role key
+- `JWT_SECRET` – **Supabase Project Settings → API → JWT Secret** (talab qilinadi, `/auth/me` uchun)
 - `OPENAI_API_KEY`
 - `OPENAI_MODEL` (optional, default: `gpt-4o-mini`)
 

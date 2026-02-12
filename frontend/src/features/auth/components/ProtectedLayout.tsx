@@ -30,12 +30,15 @@ export function ProtectedLayout() {
   }
 
   if (error) {
+    const isJwtError = /invalid|token|jwt|noto'g'ri/i.test(error);
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center max-w-md p-6">
           <p className="text-red-600 mb-4">{error}</p>
           <p className="text-sm text-slate-500">
-            Sizning hisobingiz user_tenants jadvalida yo'q. Administrator bilan bog'laning.
+            {isJwtError
+              ? "JWT_SECRET Edge Function secrets da sozlanganligini tekshiring (Supabase → Project Settings → API → JWT Secret)."
+              : "Sizning hisobingiz user_tenants jadvalida yo'q. Administrator bilan bog'laning."}
           </p>
         </div>
       </div>
