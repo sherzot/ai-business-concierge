@@ -45,29 +45,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [session, currentTenant?.id]);
 
   useEffect(() => {
+    let mounted = true;
+
+    const applySession = async (session: Session | null) => {
+      if (!mounted) return;
+      setSession(session);
+      setError(null);
+      if (!session) {
+        setProfile(null);
+        setCurrentTenant(null);
+        setLoading(false);
+        return;
+      }
+      try {
+        const p = await fetchAuthProfile();
+        if (!mounted) return;
+        setProfile(p);
+        setCurrentTenant(p.defaultTenant);
+      } catch (e) {
+        if (!mounted) return;
+        setProfile(null);
+        setError(e instanceof Error ? e.message : "Profil yuklanmadi");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    // Tezda boshlang'ich session olish
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (mounted) applySession(session);
+    });
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setError(null);
-        if (!session) {
-          setProfile(null);
-          setCurrentTenant(null);
-          setLoading(false);
-          return;
-        }
-        try {
-          const p = await fetchAuthProfile();
-          setProfile(p);
-          setCurrentTenant(p.defaultTenant);
-        } catch (e) {
-          setProfile(null);
-          setError(e instanceof Error ? e.message : "Profil yuklanmadi");
-        } finally {
-          setLoading(false);
-        }
+      (_event, session) => {
+        if (mounted) applySession(session);
       }
     );
-    return () => subscription.unsubscribe();
+
+    // Timeout: 5 sekunddan keyin o'chiq bo'lsa login formani ko'rsat
+    const timeout = setTimeout(() => {
+      if (mounted) setLoading(false);
+    }, 5000);
+
+    return () => {
+      mounted = false;
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
