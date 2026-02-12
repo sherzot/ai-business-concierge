@@ -36,6 +36,8 @@ const SB_SERVICE_ROLE_KEY =
   Deno.env.get("SB_SERVICE_ROLE_KEY") ??
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ??
   "";
+const SB_ANON_KEY =
+  Deno.env.get("SB_ANON_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY") ?? "";
 const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") ?? "gpt-4o-mini";
 
@@ -232,12 +234,13 @@ const verifyJwtHS256 = async (token: string) => {
 
 /** JWT_SECRET kerak emas – Supabase Auth API orqali token tekshirish */
 const verifyTokenViaSupabaseAuth = async (token: string): Promise<{ sub: string; email?: string } | null> => {
-  if (!SB_URL || !SB_SERVICE_ROLE_KEY) return null;
+  const apikey = SB_ANON_KEY || SB_SERVICE_ROLE_KEY;
+  if (!SB_URL || !apikey) return null;
   try {
     const res = await fetch(`${SB_URL}/auth/v1/user`, {
       headers: {
         Authorization: `Bearer ${token}`,
-        apikey: SB_SERVICE_ROLE_KEY,
+        apikey,
       },
     });
     if (!res.ok) return null;
@@ -462,17 +465,12 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 401, "UNAUTHORIZED", "Token talab qilinadi.");
     }
     const token = auth.replace("Bearer ", "").trim();
-    let payload = await verifyJwtHS256(token);
-    if (!payload) {
-      payload = await verifyTokenViaSupabaseAuth(token);
-    }
-    if (!payload) {
+    // Supabase Auth API orqali tokenni tekshirish (JWT_SECRET talab qilmaydi)
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
       return failure(c, 401, "INVALID_TOKEN", "Token noto'g'ri yoki muddati tugagan.");
     }
-    const userId = payload.sub ?? (payload as any).user_id;
-    if (!userId) {
-      return failure(c, 401, "INVALID_TOKEN", "Token ichida user_id topilmadi.");
-    }
+    const userId = user.id;
 
     const { data: assignments, error } = await supabase
       .from("user_tenants")
@@ -508,7 +506,7 @@ const registerRoutes = (prefix: string) => {
     return success(c, {
       user: {
         id: userId,
-        email: payload.email ?? null,
+        email: user.email ?? null,
       },
       tenants: enrichedTenants,
       defaultTenant: enrichedTenants[0] ?? null,
