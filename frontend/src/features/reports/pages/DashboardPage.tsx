@@ -5,6 +5,7 @@ import { Mail, CheckSquare, FileText, Zap, AlertTriangle, TrendingUp, Lightbulb,
 import { getDashboardStats } from "../api/reportsApi";
 import { getInboxItems } from "../../inbox/api/inboxApi";
 import { getTasks } from "../../tasks/api/tasksApi";
+import { getDocs } from "../../docs/api/docsApi";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { useAuthContext } from "../../auth/context/AuthContext";
 
@@ -12,13 +13,15 @@ type Tenant = { id: string; name: string };
 
 interface DashboardPageProps {
   tenant: Tenant;
+  onNavigate?: (module: string) => void;
 }
 
-export function DashboardPage({ tenant }: DashboardPageProps) {
+export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
   const { translate } = useI18n();
   const [stats, setStats] = React.useState<any>(null);
   const [inbox, setInbox] = React.useState<any[]>([]);
   const [tasks, setTasks] = React.useState<any[]>([]);
+  const [docs, setDocs] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -26,6 +29,7 @@ export function DashboardPage({ tenant }: DashboardPageProps) {
       getDashboardStats(tenant.id).then(setStats).catch(() => setStats(null)),
       getInboxItems(tenant.id).then(setInbox).catch(() => setInbox([])),
       getTasks(tenant.id).then(setTasks).catch(() => setTasks([])),
+      getDocs(tenant.id).then(setDocs).catch(() => setDocs([])),
     ]).finally(() => setLoading(false));
   }, [tenant.id]);
 
@@ -33,6 +37,8 @@ export function DashboardPage({ tenant }: DashboardPageProps) {
   const unreadInbox = inbox.filter((i) => !i.isRead).length;
   const activeTasks = tasks.filter((t) => t.status !== "done").length;
   const overdueTasks = tasks.filter((t) => t.dueDate && new Date(t.dueDate) < new Date()).length;
+  const docsReviewCount = docs.filter((d) => (d as { status?: string }).status === "review").length;
+  const aiHandledCount = tasks.filter((t) => t.status === "done").length;
   const insights = stats?.insights ?? [
     { type: "danger" as const, title: translate("reports.insight.hrBurnout"), desc: translate("reports.insight.hrBurnoutDesc") },
     { type: "info" as const, title: translate("reports.insight.cashRisk"), desc: translate("reports.insight.cashRiskDesc") },
@@ -59,6 +65,7 @@ export function DashboardPage({ tenant }: DashboardPageProps) {
           value={inboxCount}
           trend="↑ 12% kecha nisbatan"
           trendUp
+          onClick={() => onNavigate?.("inbox")}
         />
         <KpiCard
           icon={<CheckSquare size={20} className="text-indigo-600" />}
@@ -66,18 +73,21 @@ export function DashboardPage({ tenant }: DashboardPageProps) {
           value={activeTasks}
           trend="↓ 5% kecha nisbatan"
           trendUp={false}
+          onClick={() => onNavigate?.("tasks")}
         />
         <KpiCard
           icon={<FileText size={20} className="text-amber-600" />}
           title={translate("dashboard.kpi.docsReview")}
-          value={8}
+          value={docsReviewCount}
+          onClick={() => onNavigate?.("docs")}
         />
         <KpiCard
           icon={<Zap size={20} className="text-emerald-600" />}
           title={translate("dashboard.kpi.aiTasks")}
-          value={156}
+          value={aiHandledCount || 0}
           trend="↑ 25% kecha nisbatan"
           trendUp
+          onClick={() => onNavigate?.("reports")}
         />
       </div>
 
@@ -92,9 +102,12 @@ export function DashboardPage({ tenant }: DashboardPageProps) {
                   {translate("dashboard.newCount", { count: String(unreadInbox) })}
                 </span>
               )}
-              <span className="text-sm text-indigo-600 font-medium cursor-pointer hover:underline">
+              <button
+                onClick={() => onNavigate?.("inbox")}
+                className="text-sm text-indigo-600 font-medium hover:underline"
+              >
                 {translate("dashboard.all")} →
-              </span>
+              </button>
             </div>
           </div>
           <div className="max-h-[320px] overflow-y-auto divide-y divide-slate-100">
@@ -111,9 +124,12 @@ export function DashboardPage({ tenant }: DashboardPageProps) {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-4 border-b border-slate-100 flex items-center justify-between">
             <h3 className="font-semibold text-slate-800">{translate("dashboard.aiAnalysis")}</h3>
-            <span className="text-sm text-indigo-600 font-medium cursor-pointer hover:underline">
+            <button
+              onClick={() => onNavigate?.("reports")}
+              className="text-sm text-indigo-600 font-medium hover:underline"
+            >
               {translate("dashboard.all")} →
-            </span>
+            </button>
           </div>
           <div className="p-4 space-y-4 max-h-[320px] overflow-y-auto">
             {insights.slice(0, 3).map((ins: any, i: number) => (
@@ -134,9 +150,12 @@ export function DashboardPage({ tenant }: DashboardPageProps) {
                   {translate("dashboard.overdueCount", { count: String(overdueTasks) })}
                 </span>
               )}
-              <span className="text-sm text-indigo-600 font-medium cursor-pointer hover:underline">
+              <button
+                onClick={() => onNavigate?.("tasks")}
+                className="text-sm text-indigo-600 font-medium hover:underline"
+              >
                 {translate("dashboard.all")} →
-              </span>
+              </button>
             </div>
           </div>
           <div className="max-h-[280px] overflow-y-auto divide-y divide-slate-100">
@@ -203,15 +222,23 @@ function KpiCard({
   value,
   trend,
   trendUp,
+  onClick,
 }: {
   icon: React.ReactNode;
   title: string;
   value: number;
   trend?: string;
   trendUp?: boolean;
+  onClick?: () => void;
 }) {
   return (
-    <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+    <div
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={onClick ? (e) => e.key === "Enter" && onClick() : undefined}
+      className={`bg-white p-5 rounded-xl border border-slate-200 shadow-sm transition-shadow ${onClick ? "cursor-pointer hover:shadow-md hover:border-indigo-200" : ""}`}
+    >
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm text-slate-500">{title}</p>

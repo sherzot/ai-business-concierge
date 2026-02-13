@@ -52,6 +52,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./shared/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "./shared/ui/popover";
+import type { Locale } from "./app/i18n";
 import { getMembers } from "./features/tasks/api/tasksApi";
 import { getTasks } from "./features/tasks/api/tasksApi";
 import { getNotifications } from "./features/notifications/api/notificationsApi";
@@ -82,7 +84,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export default function App() {
-  const { translate } = useI18n();
+  const { translate, locale, setLocale } = useI18n();
   const {
     currentTenant,
     setCurrentTenant,
@@ -99,6 +101,20 @@ export default function App() {
   const [inboxBadge, setInboxBadge] = useState(0);
   const [tasksBadge, setTasksBadge] = useState(0);
   const [aiTasksCount, setAiTasksCount] = useState(5);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+  const tenantRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (tenantRef.current && !tenantRef.current.contains(e.target as Node)) {
+        setTenantDropdownOpen(false);
+      }
+    };
+    if (tenantDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [tenantDropdownOpen]);
 
   const allowedMain = NAV_MAIN.filter((m) => canAccess(m.permission));
   const allowedHr = NAV_HR.filter((m) => canAccess(m.permission));
@@ -130,6 +146,17 @@ export default function App() {
   }, [currentTenant?.id]);
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1024) setIsSidebarOpen(false);
       else setIsSidebarOpen(true);
@@ -144,7 +171,7 @@ export default function App() {
     const tenant = { id: currentTenant.id, name: currentTenant.name, plan: currentTenant.plan };
     switch (activeModule) {
       case "dashboard":
-        return <DashboardPage tenant={tenant} />;
+        return <DashboardPage tenant={tenant} onNavigate={setActiveModule} />;
       case "reports":
         return <ReportsPage tenant={tenant} />;
       case "inbox":
@@ -192,7 +219,7 @@ export default function App() {
         </div>
 
         {/* Tenant selector */}
-        <div className="px-4 py-5 relative">
+        <div ref={tenantRef} className="px-4 py-5 relative">
           <button
             onClick={() => setTenantDropdownOpen(!tenantDropdownOpen)}
             className="w-full flex items-center gap-3 px-3 py-2.5 bg-slate-800/90 hover:bg-slate-700/90 rounded-xl transition-colors border border-slate-700/50"
@@ -208,22 +235,28 @@ export default function App() {
             </div>
             <ChevronDown size={16} className="text-slate-400 shrink-0" />
           </button>
-          {tenantDropdownOpen && profile?.tenants && profile.tenants.length > 1 && (
+          {tenantDropdownOpen && profile?.tenants && (
             <div className="absolute left-4 right-4 mt-1 bg-slate-800 border border-slate-700 rounded-xl shadow-xl z-50 py-1">
-              {profile.tenants
-                .filter((t) => t.id !== currentTenant.id)
-                .map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => {
-                      setCurrentTenant(t);
-                      setTenantDropdownOpen(false);
-                    }}
-                    className="w-full px-3 py-2 text-left text-sm text-slate-200 hover:bg-slate-700 hover:text-white rounded-lg mx-1"
-                  >
-                    {t.name}
-                  </button>
-                ))}
+              {profile.tenants.length > 1 ? (
+                profile.tenants
+                  .filter((t) => t.id !== currentTenant.id)
+                  .map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => {
+                        setCurrentTenant(t);
+                        setTenantDropdownOpen(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-sm text-slate-200 hover:bg-slate-700 hover:text-white rounded-lg mx-1"
+                    >
+                      {t.name}
+                    </button>
+                  ))
+              ) : (
+                <div className="py-3 px-4 text-center text-sm text-slate-400">
+                  Boshqa tashkilot yo&apos;q
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -346,25 +379,69 @@ export default function App() {
             <div className="relative hidden md:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder={translate("nav.searchPlaceholder")}
-                className="pl-10 pr-4 py-2 w-72 bg-slate-100 border-none rounded-full text-sm focus:ring-2 focus:ring-indigo-500/30 focus:bg-white transition-all"
+                className="pl-10 pr-10 py-2 w-72 bg-slate-100 border-none rounded-full text-sm focus:ring-2 focus:ring-indigo-500/30 focus:bg-white transition-all"
               />
               <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-500" size={16} />
             </div>
-            <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors" title="Til">
-              <Globe size={20} />
-            </button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors" title="Til">
+                  <Globe size={20} />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-56">
+                <p className="text-sm font-medium text-slate-800 mb-3">{translate("common.language")}</p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: "uz" as Locale, label: "O'zbek" },
+                    { id: "ru" as Locale, label: "Русский" },
+                    { id: "en" as Locale, label: "English" },
+                    { id: "ja" as Locale, label: "日本語" },
+                  ].map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => setLocale(opt.id)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        locale === opt.id ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
             {currentTenant && <NotificationsDropdown tenantId={currentTenant.id} />}
-            <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors" title="Yordam">
+            <button
+              onClick={() => setIsAIChatOpen(true)}
+              className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors"
+              title="Yordam"
+            >
               <HelpCircle size={20} />
             </button>
-            <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
-              <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium text-sm">
-                {userName.charAt(0).toUpperCase()}
-              </div>
-              <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full border-2 border-white" />
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium text-sm">
+                    {userName.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full border-2 border-white" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setActiveModule("settings")}>
+                  <Settings size={16} className="mr-2" />
+                  {translate("nav.settings")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => logout()}>
+                  <LogOut size={16} className="mr-2" />
+                  Chiqish
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
@@ -372,6 +449,10 @@ export default function App() {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setActiveModule("settings")}>
+                  <Settings size={16} className="mr-2" />
+                  {translate("nav.settings")}
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => logout()}>
                   <LogOut size={16} className="mr-2" />
                   Chiqish
@@ -391,19 +472,31 @@ export default function App() {
               <Plus size={18} />
               {translate("dashboard.actions.newTask")}
             </button>
-            <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors">
+            <button
+              onClick={() => setActiveModule("docs")}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
+            >
               <FilePlus size={18} />
               {translate("dashboard.actions.createDoc")}
             </button>
-            <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors">
+            <button
+              onClick={() => setActiveModule("hr")}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
+            >
               <UserPlus size={18} />
               {translate("dashboard.actions.addEmployee")}
             </button>
-            <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors">
+            <button
+              onClick={() => setActiveModule("inbox")}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
+            >
               <Send size={18} />
               {translate("dashboard.actions.sendMessage")}
             </button>
-            <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors">
+            <button
+              onClick={() => setIsAIChatOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
+            >
               <Calendar size={18} />
               {translate("dashboard.actions.meeting")}
             </button>
@@ -434,7 +527,7 @@ export default function App() {
         </div>
 
         <AnimatePresence>
-          {isAIChatOpen && (
+          {isAIChatOpen && currentTenant && (
             <AIChat tenantId={currentTenant.id} onClose={() => setIsAIChatOpen(false)} />
           )}
         </AnimatePresence>
