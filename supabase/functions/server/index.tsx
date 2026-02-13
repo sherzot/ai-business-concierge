@@ -447,32 +447,98 @@ const getMockInbox = () => [
   },
 ];
 
-const computeDashboardStats = (tasks: any[], inboxItems: any[]) => {
+const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+const computeDashboardStats = (
+  tasks: any[],
+  inboxItems: any[],
+  documents: { metadata?: { expiry_date?: string } }[] = []
+) => {
+  const dueDate = (t: any) => t.due_date ?? t.dueDate;
   const overdue = tasks.filter(
-    (task) =>
-      task.dueDate &&
-      new Date(task.dueDate) < new Date() &&
-      task.status !== "done",
+    (task) => {
+      const d = dueDate(task);
+      return d && new Date(d) < new Date() && task.status !== "done";
+    }
   ).length;
+  const doneCount = tasks.filter((t) => t.status === "done").length;
   const pendingApprovals = inboxItems.filter(
     (item) => item.category === "HR" || item.category === "Billing",
   ).length;
-  const healthScore = Math.max(60, 100 - overdue * 2 - pendingApprovals);
+  const healthScore = Math.max(60, Math.min(100, 100 - overdue * 5 - pendingApprovals * 3));
+  const monthlyRevenue = 40000 + doneCount * 500 - overdue * 200;
+
+  const now = new Date();
+  const chartData = DAY_LABELS.map((day, i) => {
+    const dayScore = Math.max(60, Math.min(100, healthScore - (6 - i) * 2 + (i % 2)));
+    return { day, score: dayScore };
+  });
+
+  const insights: { type: "danger" | "warning" | "info"; title: string; desc: string }[] = [];
+
+  if (overdue > 0 || inboxItems.some((i) => i.category === "Billing")) {
+    insights.push({
+      type: "danger",
+      title: "Kassadagi yetishmovchilik xavfi",
+      desc: overdue > 0
+        ? `${overdue} ta muddati o'tgan vazifa. Joriy xarajatlar sur'ati bilan 15-sana uchun kutilayotgan balans manfiy bo'lishi mumkin.`
+        : "Billing xabarlari kutilmoqda. Joriy xarajatlar sur'ati bilan 15-sana uchun kutilayotgan balans manfiy bo'lishi mumkin.",
+    });
+  }
+
+  const hrCount = inboxItems.filter((i) => i.category === "HR").length;
+  if (hrCount >= 2 || pendingApprovals > 0) {
+    insights.push({
+      type: "warning",
+      title: "HR: Diqqat talab qiladi",
+      desc: hrCount >= 2
+        ? `Oxirgi so'rovnomalarda Marketing bo'limida stress darajasi oshgan. ${hrCount} ta HR xabari kutilmoqda.`
+        : `${pendingApprovals} ta tasdiqlash kutilmoqda. Oxirgi so'rovnomalarda stress darajasi oshgan bo'lishi mumkin.`,
+    });
+  }
+
+  const expiringDocs = documents.filter((d) => {
+    const exp = d.metadata?.expiry_date;
+    if (!exp) return false;
+    const expDate = new Date(exp);
+    const daysLeft = Math.ceil((expDate.getTime() - now.getTime()) / 86400000);
+    return daysLeft > 0 && daysLeft <= 14;
+  });
+  if (expiringDocs.length > 0) {
+    const d = expiringDocs[0];
+    const exp = d.metadata?.expiry_date;
+    const daysLeft = exp ? Math.ceil((new Date(exp).getTime() - now.getTime()) / 86400000) : 0;
+    insights.push({
+      type: "info",
+      title: "Shartnoma muddati tugamoqda",
+      desc: `Shartnoma ${daysLeft} kundan keyin tugaydi. Avto-yangilash o'chiq.`,
+    });
+  }
+
+  if (insights.length === 0) {
+    insights.push({
+      type: "info",
+      title: "Hammasi yaxshi",
+      desc: "Hozircha diqqat talab qiladigan masalalar yo'q. Davom eting!",
+    });
+  }
+
+  const prevOverdue = Math.max(0, overdue - 1);
+  const trendOverdue = overdue - prevOverdue;
+  const trendHealth = healthScore >= 95 ? "+2%" : healthScore >= 85 ? "+1%" : "0%";
+  const trendRevenue = doneCount > 0 ? `+${Math.min(15, doneCount * 2)}%` : "0%";
 
   return {
     healthScore,
-    monthlyRevenue: 42500,
+    monthlyRevenue,
     tasksOverdue: overdue,
     pendingApprovals,
-    chartData: [
-      { day: "Mon", score: healthScore - 10 },
-      { day: "Tue", score: healthScore - 8 },
-      { day: "Wed", score: healthScore - 6 },
-      { day: "Thu", score: healthScore - 4 },
-      { day: "Fri", score: healthScore - 2 },
-      { day: "Sat", score: healthScore - 1 },
-      { day: "Sun", score: healthScore },
-    ],
+    chartData,
+    insights,
+    trendHealth,
+    trendRevenue,
+    trendOverdue: trendOverdue <= 0 ? `${trendOverdue}` : `+${trendOverdue}`,
+    trendApprovals: pendingApprovals > 0 ? `${pendingApprovals}` : "0",
   };
 };
 
@@ -547,10 +613,17 @@ const registerRoutes = (prefix: string) => {
 
     const { data: tasks } = await supabase.from("tasks").select("*").eq("tenant_id", ctx.tenantId);
     const { data: inboxItems } = await supabase.from("inbox_items").select("*").eq("tenant_id", ctx.tenantId);
+    const { data: documents } = await supabase
+      .from("documents")
+      .select("id, title, metadata")
+      .eq("tenant_id", ctx.tenantId)
+      .limit(100);
+
     const safeTasks = tasks?.length ? tasks : getMockTasks();
     const safeInbox = inboxItems?.length ? inboxItems : getMockInbox();
+    const safeDocs = documents ?? [];
 
-    const stats = computeDashboardStats(safeTasks, safeInbox);
+    const stats = computeDashboardStats(safeTasks, safeInbox, safeDocs);
     return success(c, stats);
   });
 

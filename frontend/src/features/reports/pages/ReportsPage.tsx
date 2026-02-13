@@ -20,6 +20,7 @@ import {
 } from 'recharts';
 import { getDashboardStats } from "../api/reportsApi";
 import { useI18n } from "../../../app/providers/I18nProvider";
+import { useAuthContext } from "../../auth/context/AuthContext";
 
 type Tenant = {
   id: string;
@@ -36,10 +37,17 @@ type DashboardStats = {
   tasksOverdue: number;
   pendingApprovals: number;
   chartData: { day: string; score: number }[];
+  insights?: { type: "danger" | "warning" | "info"; title: string; desc: string }[];
+  trendHealth?: string;
+  trendRevenue?: string;
+  trendOverdue?: string;
+  trendApprovals?: string;
 };
 
 export function ReportsPage({ tenant }: ReportsPageProps) {
   const { translate } = useI18n();
+  const { profile, currentTenant } = useAuthContext();
+  const userName = currentTenant?.fullName?.split(" ")[0] ?? profile?.tenants?.[0]?.fullName?.split(" ")[0] ?? profile?.user?.email?.split("@")[0] ?? "User";
   const [stats, setStats] = React.useState<DashboardStats | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -69,7 +77,7 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            {translate("reports.greeting", { name: "Jasurbek" })}
+            {translate("reports.greeting", { name: userName })}
           </h1>
           <p className="text-slate-500">{translate("reports.subtitle")}</p>
         </div>
@@ -88,35 +96,39 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
         <StatCard 
           title={translate("reports.health")} 
           value={loading ? "..." : `${stats?.healthScore ?? 0}/100`} 
-          trend="+4.2%" 
+          trend={stats?.trendHealth ?? "—"} 
           trendUp={true}
           icon={<HeartBeatIcon />} 
           color="indigo"
+          compareLabel={translate("reports.compare")}
         />
         <StatCard 
           title={translate("reports.revenue")} 
           value={loading ? "..." : `$${stats?.monthlyRevenue?.toLocaleString() ?? 0}`} 
-          trend="+12%" 
+          trend={stats?.trendRevenue ?? "—"} 
           trendUp={true}
           icon={<TrendingUp size={20} className="text-emerald-600" />} 
           color="emerald"
+          compareLabel={translate("reports.compare")}
         />
         <StatCard 
           title={translate("reports.tasksOverdue")} 
           value={loading ? "..." : `${stats?.tasksOverdue ?? 0}`} 
-          trend="-2" 
-          trendUp={false} // Good that it's down, but logic handled below
-          inverseTrend // trendUp=false usually means bad, but here less is better
+          trend={stats?.trendOverdue ?? "0"} 
+          trendUp={(stats?.tasksOverdue ?? 0) <= 0}
+          inverseTrend
           icon={<Clock size={20} className="text-amber-600" />} 
           color="amber"
+          compareLabel={translate("reports.compare")}
         />
         <StatCard 
           title={translate("reports.pendingApprovals")} 
           value={loading ? "..." : `${stats?.pendingApprovals ?? 0}`} 
-          trend="0" 
-          trendUp={true}
+          trend={stats?.trendApprovals ?? "0"} 
+          trendUp={(stats?.pendingApprovals ?? 0) === 0}
           icon={<CheckCircle2 size={20} className="text-blue-600" />} 
           color="blue"
+          compareLabel={translate("reports.compare")}
         />
       </div>
 
@@ -177,21 +189,18 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
             {translate("reports.insights")}
           </h3>
           <div className="flex-1 space-y-4 overflow-y-auto pr-2">
-            <InsightItem 
-              type="danger" 
-              title={translate("reports.insight.cashRisk")} 
-              desc={translate("reports.insight.cashRiskDesc")}
-            />
-            <InsightItem 
-              type="warning" 
-              title={translate("reports.insight.hrBurnout")} 
-              desc={translate("reports.insight.hrBurnoutDesc")}
-            />
-            <InsightItem 
-              type="info" 
-              title={translate("reports.insight.contract")} 
-              desc={translate("reports.insight.contractDesc")}
-            />
+            {(stats?.insights ?? [
+              { type: "info" as const, title: translate("reports.insight.cashRisk"), desc: translate("reports.insight.cashRiskDesc") },
+              { type: "warning" as const, title: translate("reports.insight.hrBurnout"), desc: translate("reports.insight.hrBurnoutDesc") },
+              { type: "info" as const, title: translate("reports.insight.contract"), desc: translate("reports.insight.contractDesc") },
+            ]).map((insight, i) => (
+              <InsightItem
+                key={i}
+                type={insight.type}
+                title={insight.title}
+                desc={insight.desc}
+              />
+            ))}
           </div>
           <button className="mt-4 w-full py-2 text-sm text-indigo-600 font-medium hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-center gap-2">
             {translate("reports.viewAll")} <ArrowRight size={16} />
@@ -203,7 +212,7 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
 }
 
 // Components
-function StatCard({ title, value, trend, trendUp, inverseTrend, icon, color }: any) {
+function StatCard({ title, value, trend, trendUp, inverseTrend, icon, color, compareLabel }: any) {
   const isPositive = inverseTrend ? !trendUp : trendUp;
   
   const colorMap: any = {
@@ -229,7 +238,7 @@ function StatCard({ title, value, trend, trendUp, inverseTrend, icon, color }: a
           {isPositive ? <TrendingUp size={14} className="mr-1" /> : <TrendingDown size={14} className="mr-1" />}
           {trend}
         </span>
-        <span className="text-slate-400 ml-2">{translate("reports.compare")}</span>
+        <span className="text-slate-400 ml-2">{compareLabel}</span>
       </div>
     </div>
   );
