@@ -11,6 +11,7 @@ export async function apiRequest<T>(endpoint: string, options: ApiOptions = {}):
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
     ...(tenantId ? { "X-Tenant-Id": tenantId } : {}),
+    ...(session?.user?.id ? { "X-User-Id": session.user.id } : {}),
     ...(fetchOptions.headers as Record<string, string> ?? {}),
   };
 

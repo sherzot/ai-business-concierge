@@ -261,10 +261,15 @@ const getTenantContext = async (c: any): Promise<TenantContext | null> => {
 
   const auth = c.req.header("authorization");
   if (auth?.startsWith("Bearer ")) {
-    const payload = await verifyJwtHS256(auth.replace("Bearer ", "").trim());
+    const token = auth.replace("Bearer ", "").trim();
+    let payload = await verifyJwtHS256(token);
+    if (!payload) {
+      const supabaseUser = await verifyTokenViaSupabaseAuth(token);
+      if (supabaseUser) payload = { sub: supabaseUser.sub };
+    }
     if (payload) {
       const tenantId = payload.tenant_id ?? c.req.header("x-tenant-id");
-      const userId = payload.sub ?? payload.user_id;
+      const userId = payload.sub ?? payload.user_id ?? c.req.header("x-user-id");
       if (tenantId) {
         const ctx: TenantContext = {
           tenantId,
