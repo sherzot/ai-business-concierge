@@ -5,7 +5,9 @@ import {
   AlertTriangle, 
   CheckCircle2, 
   Clock,
-  ArrowRight
+  ArrowRight,
+  Download,
+  Loader2
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -21,6 +23,13 @@ import {
 import { getDashboardStats } from "../api/reportsApi";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { useAuthContext } from "../../auth/context/AuthContext";
+import { sendAIChatMessage } from "../../../shared/lib/aiApi";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../../shared/ui/dialog";
 
 type Tenant = {
   id: string;
@@ -51,6 +60,65 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
   const [stats, setStats] = React.useState<DashboardStats | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [auditOpen, setAuditOpen] = React.useState(false);
+  const [auditLoading, setAuditLoading] = React.useState(false);
+  const [auditResult, setAuditResult] = React.useState<string | null>(null);
+  const [auditError, setAuditError] = React.useState<string | null>(null);
+
+  function downloadReport() {
+    if (!stats) return;
+    const rows: string[][] = [
+      [translate("reports.health"), `${stats.healthScore}/100`],
+      [translate("reports.revenue"), `$${stats.monthlyRevenue?.toLocaleString() ?? 0}`],
+      [translate("reports.tasksOverdue"), String(stats.tasksOverdue ?? 0)],
+      [translate("reports.pendingApprovals"), String(stats.pendingApprovals ?? 0)],
+      [translate("reports.trend") + " (7 days)", stats.chartData?.map((d) => `${d.day}: ${d.score}`).join("; ") ?? ""],
+    ];
+    if (stats.insights?.length) {
+      rows.push("", [translate("reports.insights"), ""]);
+      stats.insights.forEach((i) => rows.push([i.title, i.desc]));
+    }
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `hisobot-${tenant.name}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function runAIAudit() {
+    setAuditOpen(true);
+    setAuditLoading(true);
+    setAuditResult(null);
+    setAuditError(null);
+    const context = stats ? {
+      healthScore: stats.healthScore,
+      monthlyRevenue: stats.monthlyRevenue,
+      tasksOverdue: stats.tasksOverdue,
+      pendingApprovals: stats.pendingApprovals,
+      insights: stats.insights?.map((i) => `${i.title}: ${i.desc}`) ?? [],
+    } : {};
+    const prompt = stats
+      ? translate("reports.auditPrompt", {
+          health: String(stats.healthScore),
+          revenue: stats.monthlyRevenue?.toLocaleString() ?? "0",
+          overdue: String(stats.tasksOverdue ?? 0),
+          approvals: String(stats.pendingApprovals ?? 0),
+          insights: stats.insights?.map((i) => i.title).join(", ") ?? "",
+        })
+      : translate("reports.auditPromptGeneric");
+    try {
+      const res = await sendAIChatMessage(tenant.id, prompt, context);
+      setAuditResult(res.reply ?? "");
+    } catch (err) {
+      console.error("AI Audit failed", err);
+      setAuditError(translate("reports.auditError"));
+    } finally {
+      setAuditLoading(false);
+    }
+  }
 
   React.useEffect(() => {
     loadStats();
@@ -82,10 +150,20 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
           <p className="text-slate-500">{translate("reports.subtitle")}</p>
         </div>
         <div className="flex gap-3">
-          <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm">
+          <button
+            onClick={downloadReport}
+            disabled={!stats || loading}
+            className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <Download size={18} />
             {translate("reports.download")}
           </button>
-          <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-200">
+          <button
+            onClick={runAIAudit}
+            disabled={loading}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {auditLoading ? <Loader2 size={18} className="animate-spin" /> : null}
             {translate("reports.audit")}
           </button>
         </div>
@@ -207,6 +285,29 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
           </button>
         </div>
       </div>
+
+      {/* AI Audit Modal */}
+      <Dialog open={auditOpen} onOpenChange={(o) => { setAuditOpen(o); if (!o) { setAuditResult(null); setAuditError(null); } }}>
+        <DialogContent className="sm:max-w-xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>{translate("reports.audit")}</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto pr-2">
+            {auditLoading && (
+              <div className="flex items-center gap-3 py-6 text-slate-600">
+                <Loader2 size={24} className="animate-spin shrink-0" />
+                <span>{translate("reports.auditRunning")}</span>
+              </div>
+            )}
+            {auditError && (
+              <div className="py-4 text-rose-600 text-sm">{auditError}</div>
+            )}
+            {auditResult && !auditLoading && (
+              <div className="prose prose-slate max-w-none text-sm whitespace-pre-wrap">{auditResult}</div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
