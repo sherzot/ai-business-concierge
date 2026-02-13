@@ -68,14 +68,14 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
   function downloadReport() {
     if (!stats) return;
     const rows: string[][] = [
-      [translate("reports.health"), `${stats.healthScore}/100`],
-      [translate("reports.revenue"), `$${stats.monthlyRevenue?.toLocaleString() ?? 0}`],
+      [translate("reports.health"), `${stats.healthScore ?? 0}/100`],
+      [translate("reports.revenue"), `$${(stats.monthlyRevenue ?? 0).toLocaleString()}`],
       [translate("reports.tasksOverdue"), String(stats.tasksOverdue ?? 0)],
       [translate("reports.pendingApprovals"), String(stats.pendingApprovals ?? 0)],
       [translate("reports.trend") + " (7 days)", stats.chartData?.map((d) => `${d.day}: ${d.score}`).join("; ") ?? ""],
     ];
     if (stats.insights?.length) {
-      rows.push("", [translate("reports.insights"), ""]);
+      rows.push(["", ""], [translate("reports.insights"), ""]);
       stats.insights.forEach((i) => rows.push([i.title, i.desc]));
     }
     const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
@@ -83,8 +83,11 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `hisobot-${tenant.name}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `hisobot-${tenant.name || tenant.id || "report"}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.style.display = "none";
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
 
