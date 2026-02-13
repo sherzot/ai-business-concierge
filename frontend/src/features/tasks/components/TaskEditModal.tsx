@@ -34,6 +34,8 @@ type Task = {
 
 type Member = { id: string; name: string };
 
+const UNSET_ASSIGNEE = "__none__";
+
 type Props = {
   task: Task | null;
   tenantId: string;
@@ -48,7 +50,7 @@ export function TaskEditModal({ task, tenantId, members, open, onClose, onSaved 
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState<TaskStatus>("todo");
   const [priority, setPriority] = useState<TaskPriority>("medium");
-  const [assigneeName, setAssigneeName] = useState("");
+  const [assigneeName, setAssigneeName] = useState(UNSET_ASSIGNEE);
   const [dueDate, setDueDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +60,7 @@ export function TaskEditModal({ task, tenantId, members, open, onClose, onSaved 
       setTitle(task.title);
       setStatus(task.status);
       setPriority(task.priority);
-      setAssigneeName(task.assignee?.name ?? "");
+      setAssigneeName(task.assignee?.name ?? UNSET_ASSIGNEE);
       setDueDate(task.dueDate ? task.dueDate.slice(0, 10) : "");
     }
   }, [task]);
@@ -72,7 +74,7 @@ export function TaskEditModal({ task, tenantId, members, open, onClose, onSaved 
         title,
         status,
         priority,
-        assignee: assigneeName ? { name: assigneeName } : null,
+        assignee: assigneeName && assigneeName !== UNSET_ASSIGNEE ? { name: assigneeName } : null,
         dueDate: dueDate || null,
       });
       onSaved();
@@ -136,7 +138,7 @@ export function TaskEditModal({ task, tenantId, members, open, onClose, onSaved 
                 <SelectValue placeholder={translate("tasks.assign")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">—</SelectItem>
+                <SelectItem value={UNSET_ASSIGNEE}>—</SelectItem>
                 {members.map((m) => (
                   <SelectItem key={m.id} value={m.name}>
                     {m.name}
