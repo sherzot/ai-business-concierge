@@ -689,6 +689,28 @@ const registerRoutes = (prefix: string) => {
     return c.json({ received: true }, 200);
   });
 
+  app.get(`${prefix}/tenants/:id/members`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const tenantId = c.req.param("id");
+    if (tenantId !== ctx.tenantId) {
+      return failure(c, 403, "FORBIDDEN", "Boshqa tenant a'zolariga kirish mumkin emas.");
+    }
+
+    const { data, error } = await supabase
+      .from("user_tenants")
+      .select("user_id, full_name")
+      .eq("tenant_id", tenantId);
+
+    if (error) {
+      return failure(c, 500, "DB_ERROR", "A'zolar yuklashda xatolik.");
+    }
+
+    const members = (data ?? []).map((r) => ({ id: r.user_id, name: r.full_name }));
+    return success(c, members);
+  });
+
   app.get(`${prefix}/tasks`, async (c) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
@@ -740,6 +762,71 @@ const registerRoutes = (prefix: string) => {
     });
 
     return success(c, data);
+  });
+
+  app.patch(`${prefix}/tasks/:id`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const taskId = c.req.param("id");
+    const body = await c.req.json().catch(() => ({}));
+
+    const updates: Record<string, unknown> = {};
+    if (body.title !== undefined) updates.title = body.title;
+    if (body.status !== undefined) {
+      if (!ALLOWED_TASK_STATUSES.includes(body.status)) {
+        return failure(c, 422, "VALIDATION_ERROR", "status noto'g'ri.");
+      }
+      updates.status = body.status;
+    }
+    if (body.priority !== undefined) {
+      if (!ALLOWED_TASK_PRIORITIES.includes(body.priority)) {
+        return failure(c, 422, "VALIDATION_ERROR", "priority noto'g'ri.");
+      }
+      updates.priority = body.priority;
+    }
+    if (body.assignee !== undefined) updates.assignee = body.assignee;
+    if (body.dueDate !== undefined) updates.due_date = body.dueDate;
+    if (body.tags !== undefined) updates.tags = body.tags;
+
+    if (Object.keys(updates).length === 0) {
+      return failure(c, 400, "INVALID_PAYLOAD", "Yangilash maydonlari yo'q.");
+    }
+
+    const { data, error } = await supabase
+      .from("tasks")
+      .update(updates)
+      .eq("id", taskId)
+      .eq("tenant_id", ctx.tenantId)
+      .select("*")
+      .single();
+
+    if (error) {
+      return failure(c, 500, "DB_ERROR", "Task yangilashda xatolik.");
+    }
+    if (!data) {
+      return failure(c, 404, "NOT_FOUND", "Task topilmadi.");
+    }
+
+    return success(c, data);
+  });
+
+  app.delete(`${prefix}/tasks/:id`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const taskId = c.req.param("id");
+    const { error } = await supabase
+      .from("tasks")
+      .delete()
+      .eq("id", taskId)
+      .eq("tenant_id", ctx.tenantId);
+
+    if (error) {
+      return failure(c, 500, "DB_ERROR", "Task o'chirishda xatolik.");
+    }
+
+    return success(c, { deleted: true });
   });
 
   app.post(`${prefix}/ai/chat`, async (c) => {

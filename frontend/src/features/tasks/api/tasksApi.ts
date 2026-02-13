@@ -20,3 +20,30 @@ export async function createTask(tenantId: string, task: any) {
     tenantId,
   });
 }
+
+export async function updateTask(tenantId: string, taskId: string, updates: Partial<{
+  title: string;
+  status: string;
+  priority: string;
+  assignee: { name: string } | null;
+  dueDate: string | null;
+  tags: string[];
+}>) {
+  const payload = {
+    ...updates,
+    dueDate: updates.dueDate ?? undefined,
+    due_date: updates.dueDate ?? updates.due_date ?? null,
+  };
+  return apiRequest(`/tasks/${taskId}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+    tenantId,
+  });
+}
+
+export async function deleteTask(tenantId: string, taskId: string) {
+  return apiRequest(`/tasks/${taskId}`, {
+    method: "DELETE",
+    tenantId,
+  });
+}
