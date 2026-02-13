@@ -8,6 +8,7 @@ AI Business Concierge is a multi-tenant business operations dashboard with an AI
 - [ROADMAP.md](docs/ROADMAP.md) – bosqichlar va reja
 - [DEMO_USERS.md](docs/DEMO_USERS.md) – demo hisoblar
 - [R001_EMAIL_SETUP.md](docs/R001_EMAIL_SETUP.md) – Resend email inbox sozlash
+- [R002_REALTIME_SETUP.md](docs/R002_REALTIME_SETUP.md) – Supabase Realtime sozlash
 
 ## What it does
 

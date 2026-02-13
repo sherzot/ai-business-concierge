@@ -37,7 +37,7 @@ Bu hujjat loyiha talablarini va kelajakdagi yo‘nalishlarni belgilaydi. Yangi f
 | ID | Talab | Tavsif | Modul |
 |----|-------|--------|-------|
 | R-001 | Real inbox integratsiyasi | Email (Resend) webhook – qisman ✅ | Inbox |
-| R-002 | Real-time yangilanishlar | WebSocket yoki Supabase Realtime | Hammasi |
+| R-002 | Real-time yangilanishlar | Supabase Realtime – inbox, tasks ✅ | Inbox, Tasks |
 | R-003 | Billing/To‘lovlar | Subscription, planlar, to‘lov tarixi | Yangi |
 | R-004 | Audit log ko‘rinishi | Admin uchun audit loglar sahifasi | Settings |
 | R-005 | Export/Import | Excel, CSV export; bulk import | Reports, Tasks |

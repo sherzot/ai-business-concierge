@@ -19,6 +19,7 @@ import {
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
 import { getInboxItems } from "../api/inboxApi";
+import { useRealtimeInbox } from "../hooks/useRealtimeInbox";
 import { useI18n } from "../../../app/providers/I18nProvider";
 
 type Tenant = {
@@ -55,6 +56,8 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
   React.useEffect(() => {
     loadInbox();
   }, [tenant.id]);
+
+  useRealtimeInbox(tenant.id, loadInbox);
 
   async function loadInbox() {
     setLoading(true);

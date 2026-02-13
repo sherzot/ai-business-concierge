@@ -172,3 +172,16 @@ alter table doc_chunks enable row level security;
 
 -- No permissive policies for anon/authenticated = full deny (default deny).
 -- Edge Function uses service_role key and bypasses RLS, so API continues to work.
+
+-- R-002: Realtime uchun – authenticated user o'z tenant'idagi inbox/tasks ni o'qishi
+create policy "inbox_items_select_own_tenant"
+  on inbox_items for select to authenticated
+  using (tenant_id in (select tenant_id from user_tenants where user_id = auth.uid()));
+
+create policy "tasks_select_own_tenant"
+  on tasks for select to authenticated
+  using (tenant_id in (select tenant_id from user_tenants where user_id = auth.uid()));
+
+-- Realtime publication (Supabase Dashboard → Database → Replication da ham qilish mumkin)
+-- alter publication supabase_realtime add table inbox_items;
+-- alter publication supabase_realtime add table tasks;

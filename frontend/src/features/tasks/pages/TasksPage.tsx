@@ -17,6 +17,7 @@ import {
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
 import { createTask, getTasks } from "../api/tasksApi";
+import { useRealtimeTasks } from "../hooks/useRealtimeTasks";
 import { useI18n } from "../../../app/providers/I18nProvider";
 
 // Actually, I'll stick to a clean UI without complex dnd libraries first to ensure stability, 
@@ -46,6 +47,8 @@ export function TasksPage({ tenant }: { tenant: any }) {
   React.useEffect(() => {
     loadTasks();
   }, [tenant.id]);
+
+  useRealtimeTasks(tenant.id, loadTasks);
 
   async function loadTasks() {
     setLoading(true);
