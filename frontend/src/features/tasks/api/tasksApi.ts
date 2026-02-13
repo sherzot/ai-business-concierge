@@ -47,3 +47,9 @@ export async function deleteTask(tenantId: string, taskId: string) {
     tenantId,
   });
 }
+
+export type Member = { id: string; name: string };
+
+export async function getMembers(tenantId: string): Promise<Member[]> {
+  return apiRequest<Member[]>(`/tenants/${tenantId}/members`, { tenantId });
+}

@@ -5,20 +5,37 @@ import {
   Filter, 
   MoreHorizontal, 
   Calendar, 
-  CheckCircle2, 
-  AlertCircle,
   Clock,
   Layout,
   List as ListIcon,
   User,
   Paperclip,
-  Loader2
+  Loader2,
+  Pencil,
+  Trash2
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
-import { createTask, getTasks } from "../api/tasksApi";
+import { createTask, getTasks, deleteTask, getMembers } from "../api/tasksApi";
 import { useRealtimeTasks } from "../hooks/useRealtimeTasks";
 import { useI18n } from "../../../app/providers/I18nProvider";
+import { TaskEditModal } from "../components/TaskEditModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../shared/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../shared/ui/alert-dialog";
+import { Button } from "../../../shared/ui/button";
 
 // Actually, I'll stick to a clean UI without complex dnd libraries first to ensure stability, 
 // but I will design it to LOOK like a Kanban board.
@@ -41,11 +58,19 @@ export function TasksPage({ tenant }: { tenant: any }) {
   const { translate } = useI18n();
   const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [members, setMembers] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [deletingTask, setDeletingTask] = useState<Task | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   React.useEffect(() => {
     loadTasks();
+  }, [tenant.id]);
+
+  React.useEffect(() => {
+    getMembers(tenant.id).then(setMembers).catch(() => setMembers([]));
   }, [tenant.id]);
 
   useRealtimeTasks(tenant.id, loadTasks);
@@ -78,6 +103,21 @@ export function TasksPage({ tenant }: { tenant: any }) {
     } catch (err) {
       console.error("Error creating task", err);
       setError(translate("tasks.createError"));
+    }
+  }
+
+  async function handleConfirmDelete() {
+    if (!deletingTask) return;
+    setDeleteLoading(true);
+    try {
+      await deleteTask(tenant.id, deletingTask.id);
+      setTasks(prev => prev.filter(t => t.id !== deletingTask.id));
+      setDeletingTask(null);
+    } catch (err) {
+      console.error("Error deleting task", err);
+      setError(translate("tasks.loadError"));
+    } finally {
+      setDeleteLoading(false);
     }
   }
 
@@ -173,7 +213,12 @@ export function TasksPage({ tenant }: { tenant: any }) {
                 {/* Tasks List */}
                 <div className="p-3 flex-1 overflow-y-auto space-y-3">
                   {tasks.filter(t => t.status === col.id).map(task => (
-                    <TaskCard key={task.id} task={task} />
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      onEdit={() => setEditingTask(task)}
+                      onDelete={() => setDeletingTask(task)}
+                    />
                   ))}
                   <button className="w-full py-2 flex items-center justify-center gap-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50/50 rounded-lg border border-dashed border-slate-300 hover:border-indigo-300 text-sm transition-all">
                     <Plus size={16} /> {translate("tasks.addTask")}
@@ -192,11 +237,12 @@ export function TasksPage({ tenant }: { tenant: any }) {
                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">{translate("tasks.table.assignee")}</th>
                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">{translate("tasks.table.dueDate")}</th>
                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">{translate("tasks.table.priority")}</th>
+                   <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase w-20"></th>
                  </tr>
                </thead>
                <tbody className="divide-y divide-slate-100">
                  {tasks.map(task => (
-                   <tr key={task.id} className="hover:bg-slate-50 transition-colors cursor-pointer group">
+                   <tr key={task.id} className="hover:bg-slate-50 transition-colors group">
                      <td className="px-6 py-4">
                        <span className="font-medium text-slate-800 group-hover:text-indigo-600 transition-colors">{task.title}</span>
                        <div className="flex gap-2 mt-1">
@@ -235,6 +281,24 @@ export function TasksPage({ tenant }: { tenant: any }) {
                      <td className="px-6 py-4">
                         <PriorityBadge priority={task.priority} />
                      </td>
+                     <td className="px-6 py-4">
+                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <button
+                           onClick={() => setEditingTask(task)}
+                           className="p-1.5 rounded-md text-slate-500 hover:bg-indigo-50 hover:text-indigo-600"
+                           title={translate("tasks.editTask")}
+                         >
+                           <Pencil size={14} />
+                         </button>
+                         <button
+                           onClick={() => setDeletingTask(task)}
+                           className="p-1.5 rounded-md text-slate-500 hover:bg-rose-50 hover:text-rose-600"
+                           title={translate("tasks.delete")}
+                         >
+                           <Trash2 size={14} />
+                         </button>
+                       </div>
+                     </td>
                    </tr>
                  ))}
                </tbody>
@@ -242,23 +306,79 @@ export function TasksPage({ tenant }: { tenant: any }) {
           </div>
         )}
       </div>
+
+      <TaskEditModal
+        task={editingTask}
+        tenantId={tenant.id}
+        members={members}
+        open={!!editingTask}
+        onClose={() => setEditingTask(null)}
+        onSaved={() => { loadTasks(); setEditingTask(null); }}
+      />
+
+      <AlertDialog open={!!deletingTask} onOpenChange={(o) => !o && setDeletingTask(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{translate("tasks.deleteConfirm")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deletingTask?.title}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteLoading}>{translate("common.cancel")}</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={deleteLoading}
+            >
+              {deleteLoading ? "..." : translate("tasks.delete")}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
 
-function TaskCard({ task }: { task: Task }) {
+function TaskCard({ task, onEdit, onDelete }: { task: Task; onEdit: () => void; onDelete: () => void }) {
+  const { translate } = useI18n();
   return (
-    <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer group">
+    <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all group">
       <div className="flex justify-between items-start mb-2">
         <PriorityBadge priority={task.priority} />
-        {task.dueDate && (
-          <div className={clsx("flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded", 
-             new Date(task.dueDate) < new Date() ? "bg-rose-50 text-rose-600" : "bg-slate-100 text-slate-500"
-          )}>
-            <Clock size={10} />
-            {format(new Date(task.dueDate), 'MMM d')}
-          </div>
-        )}
+        <div className="flex items-center gap-1">
+          {task.dueDate && (
+            <div className={clsx("flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded", 
+               new Date(task.dueDate) < new Date() ? "bg-rose-50 text-rose-600" : "bg-slate-100 text-slate-500"
+            )}>
+              <Clock size={10} />
+              {format(new Date(task.dueDate), 'MMM d')}
+            </div>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                onClick={(e) => e.stopPropagation()}
+                className="p-1 rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <MoreHorizontal size={14} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(); }}>
+                <Pencil size={14} className="mr-2" />
+                {translate("tasks.editTask")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              >
+                <Trash2 size={14} className="mr-2" />
+                {translate("tasks.delete")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       
       <h4 className="text-sm font-medium text-slate-800 mb-3 group-hover:text-indigo-600 transition-colors">

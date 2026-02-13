@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "../../../shared/ui/select";
 import { useI18n } from "../../../app/providers/I18nProvider";
-import { apiRequest } from "../../../shared/lib/apiClient";
+import { updateTask } from "../api/tasksApi";
 
 type TaskStatus = "todo" | "in_progress" | "review" | "done";
 type TaskPriority = "high" | "medium" | "low";
@@ -68,16 +68,12 @@ export function TaskEditModal({ task, tenantId, members, open, onClose, onSaved 
     setSaving(true);
     setError(null);
     try {
-      await apiRequest(`/tasks/${task.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({
-          title,
-          status,
-          priority,
-          assignee: assigneeName ? { name: assigneeName } : null,
-          dueDate: dueDate || null,
-        }),
-        tenantId,
+      await updateTask(tenantId, task.id, {
+        title,
+        status,
+        priority,
+        assignee: assigneeName ? { name: assigneeName } : null,
+        dueDate: dueDate || null,
       });
       onSaved();
       onClose();
