@@ -1,0 +1,5 @@
+# Supabase Edge Functions sozlamalari
+# bright-api: JWT tekshiruv kodimizda (supabase.auth.getUser) amalga oshiriladi
+
+[functions.bright-api]
+verify_jwt = false

@@ -2,6 +2,7 @@ import { Hono } from "npm:hono";
 import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
 import { createClient } from "npm:@supabase/supabase-js@2.49.8";
+import { Webhook } from "npm:svix@1.17.0";
 
 const app = new Hono();
 const BASE_PATH = "/make-server-6c2837d6";
@@ -40,6 +41,7 @@ const SB_ANON_KEY =
   Deno.env.get("SB_ANON_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY") ?? "";
 const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") ?? "gpt-4o-mini";
+const RESEND_WEBHOOK_SECRET = Deno.env.get("RESEND_WEBHOOK_SECRET") ?? "";
 
 const supabase = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
@@ -584,6 +586,107 @@ const registerRoutes = (prefix: string) => {
     });
 
     return success(c, data, { idempotent: false });
+  });
+
+  // R-001: Resend email.received webhook (auth talab qilmaydi)
+  app.post(`${prefix}/inbox/webhook/resend`, async (c) => {
+    const rawBody = await c.req.text();
+    if (!rawBody) {
+      return failure(c, 400, "INVALID_PAYLOAD", "Body bo'sh.");
+    }
+
+    if (RESEND_WEBHOOK_SECRET) {
+      try {
+        const wh = new Webhook(RESEND_WEBHOOK_SECRET);
+        const headers = {
+          "svix-id": c.req.header("svix-id") ?? "",
+          "svix-timestamp": c.req.header("svix-timestamp") ?? "",
+          "svix-signature": c.req.header("svix-signature") ?? "",
+        };
+        wh.verify(rawBody, headers);
+      } catch {
+        return failure(c, 401, "INVALID_SIGNATURE", "Webhook imzosi noto'g'ri.");
+      }
+    }
+
+    let payload: { type?: string; data?: { email_id?: string; from?: string; to?: string[]; subject?: string; created_at?: string } };
+    try {
+      payload = JSON.parse(rawBody);
+    } catch {
+      return failure(c, 400, "INVALID_JSON", "JSON parse xatosi.");
+    }
+
+    if (payload?.type !== "email.received" || !payload?.data) {
+      return c.json({ received: true }, 200);
+    }
+
+    const { email_id, from, to, subject, created_at } = payload.data;
+    const toRaw = Array.isArray(to) ? to : [to].filter(Boolean);
+    const toAddrs = toRaw.map((e) => {
+      const s = String(e).trim();
+      const match = s.match(/<([^>]+)>/);
+      return (match ? match[1] : s).toLowerCase();
+    }).filter(Boolean);
+    if (!toAddrs.length) {
+      return c.json({ received: true }, 200);
+    }
+
+    const { data: mappings, error: mapErr } = await supabase
+      .from("tenant_inbox_emails")
+      .select("tenant_id")
+      .in("email_address", toAddrs)
+      .limit(1);
+    let mapping = mappings?.[0];
+
+    if (!mapping?.tenant_id) {
+      const { data: defaultTenant } = await supabase.from("tenants").select("id").limit(1).single();
+      if (defaultTenant?.id) {
+        mapping = { tenant_id: defaultTenant.id };
+        console.warn("Resend webhook: mapping yo'q, default tenant ishlatildi, to=", toAddrs);
+      } else {
+        console.warn("Resend webhook: tenant topilmadi, to=", toAddrs, "mapErr=", mapErr);
+        return c.json({ received: true }, 200);
+      }
+    }
+
+    const senderMatch = String(from || "").match(/^([^<]*)<?([^>]*)>?$/);
+    const senderName = (senderMatch?.[1]?.trim() || "Unknown").replace(/^["']|["']$/g, "");
+    const senderEmail = senderMatch?.[2]?.trim() || "";
+    const sender = { name: senderName || "Unknown", email: senderEmail };
+
+    const sourceMessageId = email_id || `resend-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
+    const newItem = {
+      tenant_id: mapping.tenant_id,
+      source: "email",
+      sender,
+      subject: subject || "(no subject)",
+      preview: subject || "",
+      timestamp: created_at || new Date().toISOString(),
+      is_read: false,
+      category: "General",
+      priority: "Medium",
+      tags: [] as string[],
+      source_message_id: sourceMessageId,
+    };
+
+    const { data: existing } = await supabase
+      .from("inbox_items")
+      .select("id")
+      .eq("tenant_id", mapping.tenant_id)
+      .eq("source_message_id", sourceMessageId)
+      .maybeSingle();
+
+    if (existing) {
+      return c.json({ received: true, idempotent: true }, 200);
+    }
+
+    const { error } = await supabase.from("inbox_items").insert(newItem);
+    if (error) {
+      console.error("Resend webhook insert error:", error);
+      return failure(c, 500, "DB_ERROR", "Inbox saqlashda xatolik.");
+    }
+
+    return c.json({ received: true }, 200);
   });
 
   app.get(`${prefix}/tasks`, async (c) => {

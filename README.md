@@ -2,6 +2,13 @@
 
 AI Business Concierge is a multi-tenant business operations dashboard with an AI assistant. It unifies inbox, tasks, HR pulse, docs, reports, and integrations into one interface and exposes a Supabase Edge Function API for data + AI actions.
 
+## Docs
+
+- [REQUIREMENTS.md](docs/REQUIREMENTS.md) – talablar va kelajakdagi funksiyalar
+- [ROADMAP.md](docs/ROADMAP.md) – bosqichlar va reja
+- [DEMO_USERS.md](docs/DEMO_USERS.md) – demo hisoblar
+- [R001_EMAIL_SETUP.md](docs/R001_EMAIL_SETUP.md) – Resend email inbox sozlash
+
 ## What it does
 
 - Manager Reports dashboard with KPIs and trends
@@ -31,7 +38,8 @@ Backend (Supabase Edge Function secrets):
 
 - `SB_URL` – Supabase project URL
 - `SB_SERVICE_ROLE_KEY` – Supabase service role key
-- `JWT_SECRET` – **Supabase Project Settings → API → JWT Secret** (talab qilinadi, `/auth/me` uchun)
+- `JWT_SECRET` – (ixtiyoriy, `/auth/me` endi `supabase.auth.getUser` ishlatadi)
+- `RESEND_WEBHOOK_SECRET` – Resend inbound webhook signing secret (R-001 email uchun)
 - `OPENAI_API_KEY`
 - `OPENAI_MODEL` (optional, default: `gpt-4o-mini`)
 

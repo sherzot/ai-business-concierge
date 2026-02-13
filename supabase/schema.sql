@@ -73,6 +73,18 @@ create unique index if not exists inbox_items_tenant_source_idx
   on inbox_items (tenant_id, source_message_id);
 create index if not exists inbox_items_tenant_id_idx on inbox_items (tenant_id);
 
+-- R-001: Email (Resend) webhook uchun tenant-email mapping
+create table if not exists tenant_inbox_emails (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id text not null references tenants(id) on delete cascade,
+  email_address text not null,
+  source text not null default 'resend',
+  created_at timestamptz not null default now(),
+  unique (email_address)
+);
+create index if not exists tenant_inbox_emails_email_idx on tenant_inbox_emails (email_address);
+create index if not exists tenant_inbox_emails_tenant_idx on tenant_inbox_emails (tenant_id);
+
 create table if not exists audit_logs (
   id uuid primary key default gen_random_uuid(),
   tenant_id text not null,
@@ -149,6 +161,7 @@ create index if not exists doc_chunks_document_id_idx on doc_chunks (document_id
 
 alter table tenants enable row level security;
 alter table user_tenants enable row level security;
+alter table tenant_inbox_emails enable row level security;
 alter table tasks enable row level security;
 alter table inbox_items enable row level security;
 alter table audit_logs enable row level security;
