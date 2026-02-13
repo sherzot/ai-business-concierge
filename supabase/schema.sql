@@ -45,11 +45,26 @@ create table if not exists tasks (
   status text not null default 'todo',
   priority text not null default 'medium',
   assignee jsonb,
+  acknowledged_at timestamptz,
   due_date timestamptz,
   tags text[] default '{}',
   comments integer not null default 0,
   created_at timestamptz not null default now()
 );
+
+create table if not exists notifications (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id text not null references tenants(id) on delete cascade,
+  user_id uuid not null,
+  type text not null default 'task_assigned',
+  title text not null,
+  message text,
+  task_id uuid references tasks(id) on delete cascade,
+  read_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index if not exists notifications_tenant_user_idx on notifications (tenant_id, user_id);
+create index if not exists notifications_user_unread_idx on notifications (user_id, read_at) where read_at is null;
 
 create index if not exists tasks_tenant_id_idx on tasks (tenant_id);
 
@@ -169,6 +184,7 @@ alter table request_logs enable row level security;
 alter table ai_interactions enable row level security;
 alter table documents enable row level security;
 alter table doc_chunks enable row level security;
+alter table notifications enable row level security;
 
 -- No permissive policies for anon/authenticated = full deny (default deny).
 -- Edge Function uses service_role key and bypasses RLS, so API continues to work.
@@ -181,6 +197,10 @@ create policy "inbox_items_select_own_tenant"
 create policy "tasks_select_own_tenant"
   on tasks for select to authenticated
   using (tenant_id in (select tenant_id from user_tenants where user_id = auth.uid()));
+
+create policy "notifications_select_own"
+  on notifications for select to authenticated
+  using (user_id = auth.uid());
 
 -- Realtime publication (Supabase Dashboard → Database → Replication da ham qilish mumkin)
 -- alter publication supabase_realtime add table inbox_items;

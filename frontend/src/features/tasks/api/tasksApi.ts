@@ -5,6 +5,7 @@ export async function getTasks(tenantId: string) {
   return data.map((task) => ({
     ...task,
     dueDate: task.due_date ?? task.dueDate ?? null,
+    acknowledgedAt: task.acknowledged_at ?? null,
   }));
 }
 
@@ -25,7 +26,7 @@ export async function updateTask(tenantId: string, taskId: string, updates: Part
   title: string;
   status: string;
   priority: string;
-  assignee: { name: string } | null;
+  assignee: { id?: string; name: string } | null;
   dueDate: string | null;
   tags: string[];
 }>) {
@@ -37,6 +38,13 @@ export async function updateTask(tenantId: string, taskId: string, updates: Part
   return apiRequest(`/tasks/${taskId}`, {
     method: "PATCH",
     body: JSON.stringify(payload),
+    tenantId,
+  });
+}
+
+export async function acknowledgeTask(tenantId: string, taskId: string) {
+  return apiRequest(`/tasks/${taskId}/acknowledge`, {
+    method: "POST",
     tenantId,
   });
 }

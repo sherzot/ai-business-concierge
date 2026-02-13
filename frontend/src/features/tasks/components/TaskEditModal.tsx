@@ -27,7 +27,7 @@ type Task = {
   title: string;
   status: TaskStatus;
   priority: TaskPriority;
-  assignee?: { name: string };
+  assignee?: { id?: string; name: string };
   dueDate?: string;
   tags: string[];
 };
@@ -50,7 +50,7 @@ export function TaskEditModal({ task, tenantId, members, open, onClose, onSaved 
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState<TaskStatus>("todo");
   const [priority, setPriority] = useState<TaskPriority>("medium");
-  const [assigneeName, setAssigneeName] = useState(UNSET_ASSIGNEE);
+  const [assigneeId, setAssigneeId] = useState(UNSET_ASSIGNEE);
   const [dueDate, setDueDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,10 +60,11 @@ export function TaskEditModal({ task, tenantId, members, open, onClose, onSaved 
       setTitle(task.title);
       setStatus(task.status);
       setPriority(task.priority);
-      setAssigneeName(task.assignee?.name ?? UNSET_ASSIGNEE);
+      const aid = task.assignee?.id ?? (task.assignee?.name ? members.find((m) => m.name === task.assignee?.name)?.id : null) ?? UNSET_ASSIGNEE;
+      setAssigneeId(aid);
       setDueDate(task.dueDate ? task.dueDate.slice(0, 10) : "");
     }
-  }, [task]);
+  }, [task, members]);
 
   async function handleSave() {
     if (!task) return;
@@ -74,7 +75,7 @@ export function TaskEditModal({ task, tenantId, members, open, onClose, onSaved 
         title,
         status,
         priority,
-        assignee: assigneeName && assigneeName !== UNSET_ASSIGNEE ? { name: assigneeName } : null,
+        assignee: assigneeId && assigneeId !== UNSET_ASSIGNEE ? { id: assigneeId, name: members.find((m) => m.id === assigneeId)?.name ?? "" } : null,
         dueDate: dueDate || null,
       });
       onSaved();
@@ -133,14 +134,14 @@ export function TaskEditModal({ task, tenantId, members, open, onClose, onSaved 
 
           <div className="grid gap-2">
             <Label>{translate("tasks.assignee")}</Label>
-            <Select value={assigneeName} onValueChange={setAssigneeName}>
+            <Select value={assigneeId} onValueChange={setAssigneeId}>
               <SelectTrigger>
                 <SelectValue placeholder={translate("tasks.assign")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={UNSET_ASSIGNEE}>—</SelectItem>
                 {members.map((m) => (
-                  <SelectItem key={m.id} value={m.name}>
+                  <SelectItem key={m.id} value={m.id}>
                     {m.name}
                   </SelectItem>
                 ))}

@@ -16,7 +16,7 @@ app.use(
   cors({
     origin: "*",
     allowHeaders: ["Content-Type", "Authorization", "X-Tenant-Id", "X-User-Id", "X-Trace-Id"],
-    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
     maxAge: 600,
   }),
@@ -328,6 +328,27 @@ const requireTenant = async (c: any) => {
 const writeAuditLog = async (ctx: TenantContext, entry: any) => {
   const payload = { ...entry, tenant_id: ctx.tenantId, user_id: ctx.userId ?? null };
   await supabase.from("audit_logs").insert(payload);
+};
+
+/** Vazifa biriktirilganda mas'ulga bildirishnoma yaratish */
+const createTaskAssignmentNotification = async (
+  tenantId: string,
+  assigneeId: string,
+  taskId: string,
+  taskTitle: string
+) => {
+  try {
+    await supabase.from("notifications").insert({
+      tenant_id: tenantId,
+      user_id: assigneeId,
+      type: "task_assigned",
+      title: "Yangi vazifa biriktirildi",
+      message: `"${taskTitle}" vazifasi sizga biriktirildi. Statusni tasdiqlang.`,
+      task_id: taskId,
+    });
+  } catch (e) {
+    console.error("createTaskAssignmentNotification error:", e);
+  }
 };
 
 const writeAiInteraction = async (ctx: TenantContext, entry: any) => {
@@ -761,6 +782,11 @@ const registerRoutes = (prefix: string) => {
       created_at: new Date().toISOString(),
     });
 
+    const assignee = body.assignee;
+    if (assignee?.id && typeof assignee.id === "string") {
+      await createTaskAssignmentNotification(ctx.tenantId, assignee.id, data.id, newTask.title);
+    }
+
     return success(c, data);
   });
 
@@ -808,6 +834,94 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 404, "NOT_FOUND", "Task topilmadi.");
     }
 
+    const assignee = body.assignee;
+    if (assignee?.id && typeof assignee.id === "string") {
+      await createTaskAssignmentNotification(ctx.tenantId, assignee.id, data.id, data.title);
+    }
+
+    return success(c, data);
+  });
+
+  app.post(`${prefix}/tasks/:id/acknowledge`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const taskId = c.req.param("id");
+    const userId = (ctx as any).userId;
+    if (!userId) {
+      return failure(c, 401, "AUTH_REQUIRED", "Tasdiqlash uchun tizimga kirish kerak.");
+    }
+
+    const { data: task, error: fetchError } = await supabase
+      .from("tasks")
+      .select("id, assignee")
+      .eq("id", taskId)
+      .eq("tenant_id", ctx.tenantId)
+      .single();
+
+    if (fetchError || !task) {
+      return failure(c, 404, "NOT_FOUND", "Task topilmadi.");
+    }
+
+    const assigneeId = (task.assignee as { id?: string })?.id ?? (task.assignee as { user_id?: string })?.user_id;
+    if (assigneeId !== userId) {
+      return failure(c, 403, "FORBIDDEN", "Faqat mas'ul tasdiqlashi mumkin.");
+    }
+
+    const { data, error } = await supabase
+      .from("tasks")
+      .update({ acknowledged_at: new Date().toISOString() })
+      .eq("id", taskId)
+      .eq("tenant_id", ctx.tenantId)
+      .select("*")
+      .single();
+
+    if (error) {
+      return failure(c, 500, "DB_ERROR", "Tasdiqlashda xatolik.");
+    }
+    return success(c, data);
+  });
+
+  app.get(`${prefix}/notifications`, async (c) => {
+    const ctx = await requireTenant(c);
+    const userId = (ctx as any).userId;
+    if (!userId) {
+      return success(c, []);
+    }
+
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("tenant_id", ctx.tenantId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (error) {
+      return failure(c, 500, "DB_ERROR", "Bildirishnomalar yuklashda xatolik.");
+    }
+    return success(c, data ?? []);
+  });
+
+  app.patch(`${prefix}/notifications/:id/read`, async (c) => {
+    const ctx = await requireTenant(c);
+    const userId = (ctx as any).userId;
+    if (!userId) {
+      return failure(c, 401, "AUTH_REQUIRED", "Tizimga kirish kerak.");
+    }
+
+    const notifId = c.req.param("id");
+    const { data, error } = await supabase
+      .from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .eq("id", notifId)
+      .eq("user_id", userId)
+      .select("*")
+      .single();
+
+    if (error || !data) {
+      return failure(c, 404, "NOT_FOUND", "Bildirishnoma topilmadi.");
+    }
     return success(c, data);
   });
 

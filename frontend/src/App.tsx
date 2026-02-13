@@ -6,7 +6,6 @@ import {
   HeartPulse, 
   FileText, 
   Settings, 
-  Bell, 
   Search, 
   ChevronDown,
   MessageSquare,
@@ -29,6 +28,7 @@ import { DocsPage } from "./features/docs/pages/DocsPage";
 import { IntegrationsPage } from "./features/integrations/pages/IntegrationsPage";
 import { SettingsPage } from "./features/settings/pages/SettingsPage";
 import { AIChat } from "./shared/components/AIChat";
+import { NotificationsDropdown } from "./features/notifications/components/NotificationsDropdown";
 
 const ROLE_KEYS: Record<string, string> = {
   leader: "auth.role.leader",
@@ -247,10 +247,9 @@ export default function App() {
               />
             </div>
             
-            <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
-              <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border border-white"></span>
-            </button>
+            {currentTenant && (
+              <NotificationsDropdown tenantId={currentTenant.id} />
+            )}
           </div>
         </header>
 

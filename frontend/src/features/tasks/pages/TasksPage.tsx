@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
-import { createTask, getTasks, deleteTask, getMembers } from "../api/tasksApi";
+import { createTask, getTasks, deleteTask, getMembers, acknowledgeTask } from "../api/tasksApi";
 import { useRealtimeTasks } from "../hooks/useRealtimeTasks";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { TaskEditModal } from "../components/TaskEditModal";
@@ -36,6 +36,7 @@ import {
   AlertDialogTitle,
 } from "../../../shared/ui/alert-dialog";
 import { Button } from "../../../shared/ui/button";
+import { useAuthContext } from "../../auth/context/AuthContext";
 
 // Actually, I'll stick to a clean UI without complex dnd libraries first to ensure stability, 
 // but I will design it to LOOK like a Kanban board.
@@ -48,14 +49,17 @@ interface Task {
   title: string;
   status: TaskStatus;
   priority: TaskPriority;
-  assignee?: { name: string; avatar?: string };
-  dueDate?: string | Date; // API returns string
+  assignee?: { id?: string; name: string; avatar?: string };
+  acknowledgedAt?: string | null;
+  dueDate?: string | Date;
   tags: string[];
   comments: number;
 }
 
 export function TasksPage({ tenant }: { tenant: any }) {
   const { translate } = useI18n();
+  const { session } = useAuthContext();
+  const currentUserId = session?.user?.id;
   const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [members, setMembers] = useState<{ id: string; name: string }[]>([]);
@@ -103,6 +107,15 @@ export function TasksPage({ tenant }: { tenant: any }) {
     } catch (err) {
       console.error("Error creating task", err);
       setError(translate("tasks.createError"));
+    }
+  }
+
+  async function handleAcknowledge(task: Task) {
+    try {
+      await acknowledgeTask(tenant.id, task.id);
+      loadTasks();
+    } catch (err) {
+      console.error("Acknowledge failed", err);
     }
   }
 
@@ -216,8 +229,10 @@ export function TasksPage({ tenant }: { tenant: any }) {
                     <TaskCard
                       key={task.id}
                       task={task}
+                      currentUserId={currentUserId}
                       onEdit={() => setEditingTask(task)}
                       onDelete={() => setDeletingTask(task)}
+                      onAcknowledge={() => handleAcknowledge(task)}
                     />
                   ))}
                   <button className="w-full py-2 flex items-center justify-center gap-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50/50 rounded-lg border border-dashed border-slate-300 hover:border-indigo-300 text-sm transition-all">
@@ -262,6 +277,15 @@ export function TasksPage({ tenant }: { tenant: any }) {
                                {task.assignee.name.charAt(0)}
                              </div>
                              <span className="text-sm text-slate-600">{task.assignee.name}</span>
+                             {task.assignee.id === currentUserId && !task.acknowledgedAt && (
+                               <button
+                                 onClick={() => handleAcknowledge(task)}
+                                 className="text-xs px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-medium"
+                               >
+                                 {translate("tasks.acknowledge")}
+                               </button>
+                             )}
+                             {task.acknowledgedAt && <span className="text-emerald-600 text-sm">✓</span>}
                            </>
                          ) : (
                            <span className="text-sm text-slate-400 italic">{translate("tasks.assign")}</span>
@@ -340,7 +364,7 @@ export function TasksPage({ tenant }: { tenant: any }) {
   );
 }
 
-function TaskCard({ task, onEdit, onDelete }: { task: Task; onEdit: () => void; onDelete: () => void }) {
+function TaskCard({ task, currentUserId, onEdit, onDelete, onAcknowledge }: { task: Task; currentUserId?: string; onEdit: () => void; onDelete: () => void; onAcknowledge: () => void }) {
   const { translate } = useI18n();
   return (
     <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all group">
@@ -396,6 +420,17 @@ function TaskCard({ task, onEdit, onDelete }: { task: Task; onEdit: () => void; 
              </div>
            ) : (
              <span className="text-xs text-slate-400 flex items-center gap-1"><User size={12} /> {translate("tasks.assign")}</span>
+           )}
+           {task.assignee && currentUserId && task.assignee.id === currentUserId && !task.acknowledgedAt && (
+             <button
+               onClick={(e) => { e.stopPropagation(); onAcknowledge(); }}
+               className="text-[10px] px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-medium"
+             >
+               {translate("tasks.acknowledge")}
+             </button>
+           )}
+           {task.acknowledgedAt && (
+             <span className="text-[10px] text-emerald-600 font-medium">✓</span>
            )}
         </div>
         
