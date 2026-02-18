@@ -9,6 +9,11 @@ export type DocApiItem = {
   content?: string;
 };
 
+export type DocMetadata = {
+  owner?: string;
+  status?: "draft" | "review" | "approved" | "expired";
+};
+
 export async function getDocs(tenantId: string, query?: string) {
   const q = query ? `?q=${encodeURIComponent(query)}` : "";
   return apiRequest<DocApiItem[]>(`/docs${q}`, { tenantId });
@@ -16,4 +21,15 @@ export async function getDocs(tenantId: string, query?: string) {
 
 export async function getDocById(tenantId: string, id: string) {
   return apiRequest<DocApiItem>(`/docs/${id}`, { tenantId });
+}
+
+export async function createDoc(
+  tenantId: string,
+  payload: { title: string; content: string; metadata?: DocMetadata }
+) {
+  return apiRequest<{ document_id: string }>(`/docs/index`, {
+    tenantId,
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }

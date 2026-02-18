@@ -1,9 +1,11 @@
 import React from "react";
 import { DocDetail } from "../components/DocDetail";
+import { DocCreateModal } from "../components/DocCreateModal";
 import { DocList, DocItem } from "../components/DocList";
 import { DocSearchBar } from "../components/DocSearchBar";
 import { getDocs } from "../api/docsApi";
 import { useI18n } from "../../../app/providers/I18nProvider";
+import { Button } from "../../../shared/ui/button";
 
 export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
   const { translate } = useI18n();
@@ -12,6 +14,7 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
   const [selected, setSelected] = React.useState<DocItem | undefined>(undefined);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [createOpen, setCreateOpen] = React.useState(false);
 
   React.useEffect(() => {
     loadDocs();
@@ -48,6 +51,9 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
         <div className="p-4 border-b border-slate-200 bg-white">
           <div className="flex items-center gap-3">
             <DocSearchBar value={query} onChange={setQuery} onClear={() => setQuery("")} />
+            <Button onClick={() => setCreateOpen(true)} className="shrink-0">
+              {translate("docs.createAction")}
+            </Button>
           </div>
           <p className="text-xs text-slate-400 mt-2">
             {translate("common.tenant")}: {tenant.name}
@@ -64,6 +70,12 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
       <div className="hidden md:flex flex-1 flex-col bg-white">
         <DocDetail doc={selected} />
       </div>
+      <DocCreateModal
+        tenantId={tenant.id}
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={loadDocs}
+      />
     </div>
   );
 }
