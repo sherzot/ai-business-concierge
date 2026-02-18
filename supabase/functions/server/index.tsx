@@ -1200,6 +1200,113 @@ const registerRoutes = (prefix: string) => {
     return success(c, data);
   });
 
+  app.patch(`${prefix}/docs/:id`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const id = c.req.param("id");
+    const payload = await c.req.json().catch(() => ({}));
+    const { title, content, metadata } = payload ?? {};
+
+    if (!title && !content && !metadata) {
+      return failure(c, 422, "VALIDATION_ERROR", "title/content/metadata dan biri majburiy.");
+    }
+
+    const { data: existing, error: fetchError } = await supabase
+      .from("documents")
+      .select("*")
+      .eq("tenant_id", ctx.tenantId)
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !existing) {
+      if (fetchError) {
+        console.error("Docs update fetch error", fetchError);
+      }
+      return failure(c, 404, "NOT_FOUND", "Document topilmadi.");
+    }
+
+    const nextTitle = title ?? existing.title;
+    const nextContent = content ?? existing.content;
+    const nextMetadata = metadata ?? existing.metadata ?? {};
+
+    const { data: updated, error: updateError } = await supabase
+      .from("documents")
+      .update({ title: nextTitle, content: nextContent, metadata: nextMetadata })
+      .eq("tenant_id", ctx.tenantId)
+      .eq("id", id)
+      .select("*")
+      .single();
+
+    if (updateError || !updated) {
+      if (updateError) {
+        console.error("Docs update error", updateError);
+      }
+      return failure(c, 500, "DB_ERROR", "Document yangilashda xatolik.", {
+        details: updateError?.message,
+      });
+    }
+
+    let chunkCount = 0;
+    if (content) {
+      await supabase.from("doc_chunks").delete().eq("tenant_id", ctx.tenantId).eq("document_id", id);
+
+      const chunks = String(nextContent)
+        .split("\n\n")
+        .map((chunk: string, idx: number) => ({
+          tenant_id: ctx.tenantId,
+          document_id: id,
+          section: `p${idx + 1}`,
+          content: chunk.trim(),
+        }))
+        .filter((chunk: any) => chunk.content.length > 0);
+
+      if (chunks.length) {
+        await supabase.from("doc_chunks").insert(chunks);
+      }
+      chunkCount = chunks.length;
+    }
+
+    await writeAuditLog(ctx as TenantContext, {
+      action: "doc_update",
+      trace_id: getTraceId(c),
+      payload: { document_id: id, title: nextTitle },
+      created_at: new Date().toISOString(),
+    });
+
+    return success(c, { document_id: id, chunks: chunkCount });
+  });
+
+  app.delete(`${prefix}/docs/:id`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const id = c.req.param("id");
+    const { data, error } = await supabase
+      .from("documents")
+      .delete()
+      .eq("tenant_id", ctx.tenantId)
+      .eq("id", id)
+      .select("id")
+      .single();
+
+    if (error || !data) {
+      if (error) {
+        console.error("Docs delete error", error);
+      }
+      return failure(c, 404, "NOT_FOUND", "Document topilmadi.");
+    }
+
+    await writeAuditLog(ctx as TenantContext, {
+      action: "doc_delete",
+      trace_id: getTraceId(c),
+      payload: { document_id: id },
+      created_at: new Date().toISOString(),
+    });
+
+    return success(c, { document_id: id });
+  });
+
   app.get(`${prefix}/hr/cases`, async (c) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;

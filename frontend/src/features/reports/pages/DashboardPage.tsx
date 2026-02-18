@@ -36,7 +36,13 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
   const inboxCount = inbox.length;
   const unreadInbox = inbox.filter((i) => !i.isRead).length;
   const activeTasks = tasks.filter((t) => t.status !== "done").length;
-  const overdueTasks = tasks.filter((t) => t.dueDate && new Date(t.dueDate) < new Date()).length;
+  const today = new Date();
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const overdueTasks = tasks.filter((t) => {
+    if (t.status === "done" || !t.dueDate) return false;
+    const dueDate = parseDateOnly(t.dueDate);
+    return dueDate ? dueDate < todayStart : false;
+  }).length;
   const docsReviewCount = docs.filter((d) => (d as { status?: string }).status === "review").length;
   const aiHandledCount = tasks.filter((t) => t.status === "done").length;
   const insights = stats?.insights ?? [
@@ -293,17 +299,18 @@ function InboxRow({ item }: { item: any }) {
 
 function TaskRow({ task }: { task: any }) {
   const { translate } = useI18n();
-  const isOverdue = task.dueDate && new Date(task.dueDate) < new Date();
+  const today = new Date();
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const dueDate = task.dueDate ? parseDateOnly(task.dueDate) : null;
+  const isOverdue = !!(dueDate && dueDate < todayStart);
   const assignee = task.assignee?.name ?? "Barcha";
-  const dueLabel = task.dueDate
+  const dueLabel = dueDate
     ? (() => {
-        const d = new Date(task.dueDate);
-        const today = new Date();
-        const diff = Math.ceil((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        const diff = Math.ceil((dueDate.getTime() - todayStart.getTime()) / (1000 * 60 * 60 * 24));
         if (diff === 0) return "Bugun";
         if (diff === 1) return "Ertaga";
         if (diff > 0 && diff <= 7) return `${diff} kun`;
-        return d.toLocaleDateString("uz-UZ", { weekday: "short" });
+        return dueDate.toLocaleDateString("uz-UZ", { weekday: "short" });
       })()
     : "—";
   return (
@@ -326,6 +333,17 @@ function TaskRow({ task }: { task: any }) {
       </span>
     </div>
   );
+}
+
+function parseDateOnly(value: string): Date | null {
+  if (!value) return null;
+  const datePart = value.split("T")[0];
+  const [year, month, day] = datePart.split("-").map(Number);
+  if (!year || !month || !day) {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  return new Date(year, month - 1, day);
 }
 
 function InsightCard({ type, title, desc }: { type: string; title: string; desc: string }) {

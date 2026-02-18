@@ -33,3 +33,22 @@ export async function createDoc(
     body: JSON.stringify(payload),
   });
 }
+
+export async function updateDoc(
+  tenantId: string,
+  id: string,
+  payload: { title?: string; content?: string; metadata?: DocMetadata }
+) {
+  return apiRequest<{ document_id: string }>(`/docs/${id}`, {
+    tenantId,
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteDoc(tenantId: string, id: string) {
+  return apiRequest<{ document_id: string }>(`/docs/${id}`, {
+    tenantId,
+    method: "DELETE",
+  });
+}

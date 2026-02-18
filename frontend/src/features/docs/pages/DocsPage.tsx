@@ -1,9 +1,10 @@
 import React from "react";
 import { DocDetail } from "../components/DocDetail";
 import { DocCreateModal } from "../components/DocCreateModal";
+import { DocEditModal } from "../components/DocEditModal";
 import { DocList, DocItem } from "../components/DocList";
 import { DocSearchBar } from "../components/DocSearchBar";
-import { getDocs } from "../api/docsApi";
+import { deleteDoc, getDocs } from "../api/docsApi";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { Button } from "../../../shared/ui/button";
 
@@ -15,6 +16,7 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [createOpen, setCreateOpen] = React.useState(false);
+  const [editOpen, setEditOpen] = React.useState(false);
 
   React.useEffect(() => {
     loadDocs();
@@ -45,6 +47,12 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
     }
   }
 
+  async function handleDelete() {
+    if (!selected) return;
+    await deleteDoc(tenant.id, selected.id);
+    await loadDocs();
+  }
+
   return (
     <div className="flex h-[calc(100vh-8rem)] bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
       <div className="w-full md:w-1/3 border-r border-slate-200 flex flex-col bg-slate-50">
@@ -68,13 +76,24 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
         </div>
       </div>
       <div className="hidden md:flex flex-1 flex-col bg-white">
-        <DocDetail doc={selected} />
+        <DocDetail
+          doc={selected}
+          onEdit={() => setEditOpen(true)}
+          onDelete={handleDelete}
+        />
       </div>
       <DocCreateModal
         tenantId={tenant.id}
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         onCreated={loadDocs}
+      />
+      <DocEditModal
+        tenantId={tenant.id}
+        doc={selected}
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        onSaved={loadDocs}
       />
     </div>
   );
