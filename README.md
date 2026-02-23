@@ -4,6 +4,51 @@ AI Business Concierge – multi-tenant biznes operatsiyalari dashboardi. Inbox, 
 
 ---
 
+## Maqsad
+
+- **Auditoriya:** 50–200 xodimli SMB lar uchun AI-first SaaS
+- **AI = xodim:** AI COO + Shadow CFO – har kuni real qiymat berish
+- **Platform:** Gorizontal – integratsiyalar (Telegram, Email, AmoCRM, Google Sheets) orqali Unified Inbox + Tasks + HR + Docs + Reports
+- **Tillar:** UZ/RU bilingual
+
+---
+
+## Hozirgi holat
+
+### Tugallangan (MVP) ✅
+
+| Bo‘lim | Holat |
+|--------|-------|
+| Auth va rollar | Supabase Auth, multi-tenant, leader/hr/accounting/department_head/employee, `canAccess`, tenant switcher |
+| Modullar | Reports, Inbox, Tasks, HR, Docs, Integrations, AI Concierge, Settings |
+| R-001 | Resend email inbox webhook – qisman |
+| R-002 | Supabase Realtime – inbox, tasks |
+| R-015 | Vazifa biriktirish bildirishnomalari, tasdiqlash |
+
+### Qolgan (prioritet bo‘yicha)
+
+| ID | Talab |
+|----|-------|
+| R-003 | Billing / To‘lovlar |
+| R-004 | Audit log ko‘rinishi |
+| R-005 | Export/Import (Excel, CSV) |
+| R-006 | Push/bildirishnomalar |
+| R-007 | PWA / mobil |
+
+Batafsil: [REQUIREMENTS.md](docs/REQUIREMENTS.md), [ROADMAP.md](docs/ROADMAP.md)
+
+---
+
+## Arxitektura qarorlari
+
+**Maqsad (Primary stack):** Laravel 12 + Supabase (Postgres, Auth optional, Storage) + Redis + Horizon
+
+**Hozirgi implementatsiya (FALLBACK stack):** MVP tezligi uchun React + Supabase Edge Functions (Deno, Hono) ishlatilmoqda. Supabase Postgres va Auth baribir, backend faqat Laravel o‘rniga Hono/Deno da.
+
+**Kelajak:** Agar Laravel + Supabase integratsiyasida bloklovchi muammo bo‘lmasa, backend Laravel ga o‘tkazilishi mumkin. Prinsiplar o‘zgarmaydi: multi-tenant, audit, AI tool-calling, externalized prompts.
+
+---
+
 ## Loyiha tuzilishi (Folder & File Structure)
 
 ```
@@ -19,6 +64,7 @@ AI Business Concierge/
 
 | Fayl | Vazifa |
 |------|--------|
+| `DEPLOY_SETUP.md` | Push va deploy qo'llanmasi (GitHub, Supabase, Netlify) |
 | `REQUIREMENTS.md` | Talablar, kelajakdagi funksiyalar, prioritetlar |
 | `ROADMAP.md` | Bosqichlar va reja |
 | `DEMO_USERS.md` | Demo hisoblar va test ma'lumotlari |
@@ -143,7 +189,7 @@ supabase/
     ├── bright-api/         # Supabase Edge Function gateway
     │   └── index.ts        # Gateway kirish nuqtasi
     └── server/             # Asosiy API (Hono)
-        └── index.tsx       # Barcha endpointlar
+        └── index.ts        # Barcha endpointlar
 ```
 
 #### `supabase/schema.sql` – Asosiy jadvallar
@@ -176,6 +222,8 @@ supabase/
 
 ## Texnik stack
 
+**Hozirgi implementatsiya:**
+
 | Qatlam | Texnologiya |
 |--------|-------------|
 | Frontend | React 18, TypeScript, Vite, Tailwind CSS, Radix UI, Recharts, Framer Motion |
@@ -183,6 +231,8 @@ supabase/
 | DB | Supabase Postgres |
 | Auth | Supabase Auth |
 | Deploy | Netlify (frontend), Supabase (backend) |
+
+**Maqsad (kelajakda):** Laravel 12, Redis, Horizon, to‘liq audit/observability
 
 ---
 
@@ -225,7 +275,7 @@ npm run dev
 
 **Supabase (Edge Function):**
 
-- `supabase/functions/server/index.tsx` dan deploy
+- `supabase/functions/server/index.ts` dan deploy
 - Base URL: `https://<project-id>.supabase.co/functions/v1/bright-api/...`
 
 **Netlify (Frontend):**
