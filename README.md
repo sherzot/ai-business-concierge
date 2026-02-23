@@ -283,6 +283,7 @@ Standart javob:
 
 ## Hujjatlar
 
+- [DEPLOY_SETUP.md](docs/DEPLOY_SETUP.md) – Push va deploy qo'llanmasi (GitHub, Supabase, Netlify)
 - [REQUIREMENTS.md](docs/REQUIREMENTS.md) – Talablar va kelajakdagi funksiyalar
 - [ROADMAP.md](docs/ROADMAP.md) – Bosqichlar va reja
 - [DEMO_USERS.md](docs/DEMO_USERS.md) – Demo hisoblar
