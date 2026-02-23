@@ -4,6 +4,8 @@ import { HrCaseList, HrCase } from "../components/HrCaseList";
 import { HrSurveyForm } from "../components/HrSurveyForm";
 import { getHrCases, submitHrSurvey } from "../api/hrApi";
 import { useI18n } from "../../../app/providers/I18nProvider";
+import { ErrorState } from "../../../shared/components/ErrorState";
+import { normalizeError, getTraceIdFromError } from "../../../shared/lib/errorHandling";
 
 export function HrCasesPage({ tenant }: { tenant: { id: string; name: string } }) {
   const { translate } = useI18n();
@@ -11,7 +13,7 @@ export function HrCasesPage({ tenant }: { tenant: { id: string; name: string } }
   const [selected, setSelected] = React.useState<HrCase | undefined>(undefined);
   const [surveyLog, setSurveyLog] = React.useState<Array<{ score: number; comment: string }>>([]);
   const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<unknown>(null);
 
   React.useEffect(() => {
     loadCases();
@@ -55,7 +57,7 @@ export function HrCasesPage({ tenant }: { tenant: { id: string; name: string } }
       setSelected(mapped[0]);
     } catch (err) {
       console.error("Failed to load HR cases", err);
-      setError(translate("hr.loadError"));
+      setError(err ?? translate("hr.loadError"));
       setCases([]);
       setSelected(undefined);
     } finally {
@@ -73,7 +75,7 @@ export function HrCasesPage({ tenant }: { tenant: { id: string; name: string } }
           </p>
         </div>
         {loading && <div className="p-6 text-sm text-slate-400">{translate("common.loading")}</div>}
-        {!loading && error && <div className="p-6 text-sm text-rose-600">{error}</div>}
+        {!loading && error && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
         {!loading && !error && <HrCaseList cases={cases} selectedId={selected?.id} onSelect={setSelected} />}
       </div>
 

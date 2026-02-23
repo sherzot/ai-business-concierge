@@ -1,2 +1,2 @@
 // Entry point for Supabase Edge Function "bright-api"
-import "../server/index.tsx";
+import "../server/index.ts";

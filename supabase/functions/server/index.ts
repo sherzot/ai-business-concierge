@@ -3,6 +3,7 @@ import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
 import { createClient } from "npm:@supabase/supabase-js@2.49.8";
 import { Webhook } from "npm:svix@1.17.0";
+import { logRequest, logAudit, logAI, truncate } from "../_shared/logging.ts";
 
 const app = new Hono();
 const BASE_PATH = "/make-server-6c2837d6";
@@ -31,6 +32,7 @@ type TenantContext = {
 
 const TRACE_ID_KEY = "trace_id";
 const TENANT_CTX_KEY = "tenant_context";
+const TENANT_ID_KEY = "tenantId";
 const JWT_SECRET = Deno.env.get("JWT_SECRET") ?? "";
 const SB_URL = Deno.env.get("SB_URL") ?? Deno.env.get("SUPABASE_URL") ?? "";
 const SB_SERVICE_ROLE_KEY =
@@ -162,6 +164,7 @@ const INTEGRATIONS_SEED = [
 ];
 
 const getTraceId = (c: any) => c.get(TRACE_ID_KEY) ?? crypto.randomUUID();
+const getTenantId = (c: any) => c.get(TENANT_ID_KEY) ?? c.get(TENANT_CTX_KEY)?.tenantId;
 
 const success = (c: any, data: any, meta: Record<string, unknown> = {}) =>
   c.json({
@@ -278,16 +281,19 @@ const getTenantContext = async (c: any): Promise<TenantContext | null> => {
           permissions: payload.permissions ?? [],
         };
         c.set(TENANT_CTX_KEY, ctx);
+        c.set(TENANT_ID_KEY, tenantId);
         return ctx;
       }
       if (userId) {
+        const headerTenantId = c.req.header("x-tenant-id") ?? "";
         const ctx: TenantContext = {
-          tenantId: c.req.header("x-tenant-id") ?? "",
+          tenantId: headerTenantId,
           userId,
           roles: payload.roles ?? payload.app_metadata?.roles ?? [],
           permissions: payload.permissions ?? [],
         };
         c.set(TENANT_CTX_KEY, ctx);
+        c.set(TENANT_ID_KEY, headerTenantId);
         return ctx;
       }
     }
@@ -300,6 +306,7 @@ const getTenantContext = async (c: any): Promise<TenantContext | null> => {
       userId: c.req.header("x-user-id") ?? undefined,
     };
     c.set(TENANT_CTX_KEY, ctx);
+    c.set(TENANT_ID_KEY, tenantId);
     return ctx;
   }
 
@@ -330,9 +337,39 @@ const requireTenant = async (c: any) => {
   return ctx;
 };
 
-const writeAuditLog = async (ctx: TenantContext, entry: any) => {
-  const payload = { ...entry, tenant_id: ctx.tenantId, user_id: ctx.userId ?? null };
-  await supabase.from("audit_logs").insert(payload);
+const writeAuditLog = async (
+  ctx: TenantContext,
+  entry: {
+    event_type: string;
+    entity_type?: string;
+    entity_id?: string;
+    trace_id: string;
+    payload?: Record<string, unknown>;
+  },
+) => {
+  const row = {
+    tenant_id: ctx.tenantId,
+    user_id: ctx.userId ?? null,
+    event_type: entry.event_type,
+    entity_type: entry.entity_type ?? null,
+    entity_id: entry.entity_id ?? null,
+    trace_id: entry.trace_id,
+    payload: entry.payload ?? {},
+    action: entry.event_type,
+  };
+  try {
+    await supabase.from("audit_logs").insert(row);
+    logAudit({
+      message: entry.event_type,
+      traceId: entry.trace_id,
+      tenantId: ctx.tenantId,
+      userId: ctx.userId,
+      category: "audit",
+      data: { entity_type: entry.entity_type, entity_id: entry.entity_id },
+    });
+  } catch (e) {
+    logError({ message: "audit_log insert failed", traceId: entry.trace_id, data: { err: String(e) } });
+  }
 };
 
 /** Vazifa biriktirilganda mas'ulga bildirishnoma yaratish */
@@ -356,9 +393,48 @@ const createTaskAssignmentNotification = async (
   }
 };
 
-const writeAiInteraction = async (ctx: TenantContext, entry: any) => {
-  const payload = { ...entry, tenant_id: ctx.tenantId, user_id: ctx.userId ?? null };
-  await supabase.from("ai_interactions").insert(payload);
+type AiInteractionEntry = {
+  role: string;
+  prompt_name: string;
+  prompt_version: string;
+  locale: string;
+  input_excerpt?: string;
+  output_excerpt?: string;
+  tools_used?: Array<{ name: string; success: boolean; error_code?: string }>;
+  success_flag: boolean;
+  error_code?: string | null;
+  latency_ms: number;
+  trace_id: string;
+};
+
+const writeAiInteraction = async (ctx: TenantContext, entry: AiInteractionEntry) => {
+  const row = {
+    tenant_id: ctx.tenantId,
+    user_id: ctx.userId ?? null,
+    role: entry.role,
+    prompt_name: entry.prompt_name,
+    prompt_version: entry.prompt_version,
+    locale: entry.locale,
+    input_excerpt: truncate(entry.input_excerpt ?? "", 500),
+    output_excerpt: truncate(entry.output_excerpt ?? "", 500),
+    tools_used: entry.tools_used ?? [],
+    success_flag: entry.success_flag,
+    error_code: entry.error_code ?? null,
+    latency_ms: entry.latency_ms,
+    trace_id: entry.trace_id,
+  };
+  try {
+    await supabase.from("ai_interactions").insert(row);
+    logAI({
+      message: `AI ${entry.prompt_name} ${entry.success_flag ? "ok" : "error"}`,
+      traceId: entry.trace_id,
+      tenantId: ctx.tenantId,
+      userId: ctx.userId,
+      data: { latency_ms: entry.latency_ms, success: entry.success_flag },
+    });
+  } catch (e) {
+    logError({ message: "ai_interaction insert failed", traceId: entry.trace_id, data: { err: String(e) } });
+  }
 };
 
 app.use("*", async (c, next) => {
@@ -369,20 +445,31 @@ app.use("*", async (c, next) => {
     await next();
   } finally {
     const ctx = await getTenantContext(c);
+    const durationMs = Date.now() - startedAt;
+    const statusCode = c.res?.status ?? 200;
     const logEntry = {
       trace_id: traceId,
       method: c.req.method,
       path: c.req.path,
-      status: c.res.status,
-      latency_ms: Date.now() - startedAt,
+      status_code: statusCode,
+      duration_ms: durationMs,
       tenant_id: ctx?.tenantId ?? null,
       user_id: ctx?.userId ?? null,
-      created_at: new Date().toISOString(),
+      ip: c.req.header("x-forwarded-for") ?? c.req.header("x-real-ip") ?? null,
+      user_agent: c.req.header("user-agent") ?? null,
+      extra: {},
     };
     try {
       await supabase.from("request_logs").insert(logEntry);
-    } catch {
-      console.error("request log write failed");
+      logRequest({
+        message: `${c.req.method} ${c.req.path}`,
+        traceId,
+        tenantId: ctx?.tenantId,
+        userId: ctx?.userId,
+        data: { status_code: statusCode, duration_ms: durationMs },
+      });
+    } catch (e) {
+      logError({ message: "request_log insert failed", traceId, data: { err: String(e) } });
     }
   }
 });
@@ -611,19 +698,91 @@ const registerRoutes = (prefix: string) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
 
-    const { data: tasks } = await supabase.from("tasks").select("*").eq("tenant_id", ctx.tenantId);
-    const { data: inboxItems } = await supabase.from("inbox_items").select("*").eq("tenant_id", ctx.tenantId);
+    const { data: viewRow } = await supabase
+      .from("tenant_daily_stats")
+      .select("total_tasks, open_tasks, overdue_tasks, done_tasks, inbox_unread_count, pending_approvals")
+      .eq("tenant_id", ctx.tenantId)
+      .single();
+
     const { data: documents } = await supabase
       .from("documents")
       .select("id, title, metadata")
       .eq("tenant_id", ctx.tenantId)
       .limit(100);
 
-    const safeTasks = tasks?.length ? tasks : getMockTasks();
-    const safeInbox = inboxItems?.length ? inboxItems : getMockInbox();
     const safeDocs = documents ?? [];
+    const overdue = viewRow?.overdue_tasks ?? 0;
+    const doneCount = viewRow?.done_tasks ?? 0;
+    const pendingApprovals = viewRow?.pending_approvals ?? 0;
+    const healthScore = Math.max(60, Math.min(100, 100 - overdue * 5 - pendingApprovals * 3));
+    const monthlyRevenue = 40000 + doneCount * 500 - overdue * 200;
 
-    const stats = computeDashboardStats(safeTasks, safeInbox, safeDocs);
+    const chartData = DAY_LABELS.map((day, i) => ({
+      day,
+      score: Math.max(60, Math.min(100, healthScore - (6 - i) * 2 + (i % 2))),
+    }));
+
+    const insights: { type: "danger" | "warning" | "info"; title: string; desc: string }[] = [];
+    if (overdue > 0 || pendingApprovals > 0) {
+      insights.push({
+        type: "danger",
+        title: "Kassadagi yetishmovchilik xavfi",
+        desc: overdue > 0
+          ? `${overdue} ta muddati o'tgan vazifa. Joriy xarajatlar sur'ati bilan 15-sana uchun kutilayotgan balans manfiy bo'lishi mumkin.`
+          : "Billing xabarlari kutilmoqda. Joriy xarajatlar sur'ati bilan 15-sana uchun kutilayotgan balans manfiy bo'lishi mumkin.",
+      });
+    }
+    const hrCount = viewRow?.inbox_unread_count ?? 0;
+    if (hrCount >= 2 || pendingApprovals > 0) {
+      insights.push({
+        type: "warning",
+        title: "HR: Diqqat talab qiladi",
+        desc: hrCount >= 2
+          ? `Oxirgi so'rovnomalarda Marketing bo'limida stress darajasi oshgan. ${hrCount} ta HR xabari kutilmoqda.`
+          : `${pendingApprovals} ta tasdiqlash kutilmoqda. Oxirgi so'rovnomalarda stress darajasi oshgan bo'lishi mumkin.`,
+      });
+    }
+    const now = new Date();
+    const expiringDocs = safeDocs.filter((d: any) => {
+      const exp = d.metadata?.expiry_date;
+      if (!exp) return false;
+      const daysLeft = Math.ceil((new Date(exp).getTime() - now.getTime()) / 86400000);
+      return daysLeft > 0 && daysLeft <= 14;
+    });
+    if (expiringDocs.length > 0) {
+      const d = expiringDocs[0];
+      const exp = d.metadata?.expiry_date;
+      const daysLeft = exp ? Math.ceil((new Date(exp).getTime() - now.getTime()) / 86400000) : 0;
+      insights.push({
+        type: "info",
+        title: "Shartnoma muddati tugamoqda",
+        desc: `Shartnoma ${daysLeft} kundan keyin tugaydi. Avto-yangilash o'chiq.`,
+      });
+    }
+    if (insights.length === 0) {
+      insights.push({
+        type: "info",
+        title: "Hammasi yaxshi",
+        desc: "Hozircha diqqat talab qiladigan masalalar yo'q. Davom eting!",
+      });
+    }
+
+    const trendOverdue = overdue - Math.max(0, overdue - 1);
+    const trendHealth = healthScore >= 95 ? "+2%" : healthScore >= 85 ? "+1%" : "0%";
+    const trendRevenue = doneCount > 0 ? `+${Math.min(15, doneCount * 2)}%` : "0%";
+
+    const stats = {
+      healthScore,
+      monthlyRevenue,
+      tasksOverdue: overdue,
+      pendingApprovals,
+      chartData,
+      insights,
+      trendHealth,
+      trendRevenue,
+      trendOverdue: trendOverdue <= 0 ? `${trendOverdue}` : `+${trendOverdue}`,
+      trendApprovals: pendingApprovals > 0 ? `${pendingApprovals}` : "0",
+    };
     return success(c, stats);
   });
 
@@ -678,10 +837,10 @@ const registerRoutes = (prefix: string) => {
     }
 
     await writeAuditLog(ctx as TenantContext, {
-      action: "inbox_ingest",
+      event_type: "inbox_ingest",
+      entity_type: "inbox_item",
       trace_id: getTraceId(c),
       payload: { source_message_id: sourceMessageId, source: newItem.source },
-      created_at: new Date().toISOString(),
     });
 
     return success(c, data, { idempotent: false });
@@ -854,10 +1013,11 @@ const registerRoutes = (prefix: string) => {
     }
 
     await writeAuditLog(ctx as TenantContext, {
-      action: "task_create",
+      event_type: "task_create",
+      entity_type: "task",
+      entity_id: data.id,
       trace_id: getTraceId(c),
       payload: { task_id: data.id, title: newTask.title },
-      created_at: new Date().toISOString(),
     });
 
     const assignee = body.assignee;
@@ -1025,29 +1185,36 @@ const registerRoutes = (prefix: string) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
 
-    const { message, context } = await c.req.json();
+    const body = await c.req.json().catch(() => ({}));
+    const { message, context, locale: reqLocale } = body;
     if (!message || typeof message !== "string") {
       return failure(c, 422, "VALIDATION_ERROR", "message majburiy.");
     }
+
+    const locale = (reqLocale ?? "uz") as string;
+    const promptName = "ai_coo";
+    const promptVersion = "v1";
+    const inputExcerpt = truncate(message, 500);
+    const aiStart = Date.now();
 
     const buildFallbackReply = (input: string) => {
       const lowerMsg = input.toLowerCase();
       if (lowerMsg.includes("xarajat") || lowerMsg.includes("expense") || lowerMsg.includes("budget")) {
         return {
           reply: "Yanvar oyi xarajatlari $12,400 ni tashkil etdi. Bu o'tgan oyga nisbatan 15% kamroq.",
-          toolUsed: { name: "ShadowCFO.check_budget", status: "success" },
+          toolUsed: { name: "ShadowCFO.check_budget", success: true },
         };
       }
       if (lowerMsg.includes("task") || lowerMsg.includes("vazifa")) {
         return {
           reply: "Sizda bugun 3 ta muhim vazifa bor. Eng asosiysi: 'Q4 Moliyaviy hisobot'.",
-          toolUsed: { name: "TaskPlanner.list_priorities", status: "success" },
+          toolUsed: { name: "TaskPlanner.list_priorities", success: true },
         };
       }
       if (lowerMsg.includes("report") || lowerMsg.includes("hisobot")) {
         return {
           reply: "Men oylik hisobotni shakllantirishni boshladim. Tayyor bo'lgach xabar beraman.",
-          toolUsed: { name: "ReportGenerator.generate", status: "loading" },
+          toolUsed: { name: "ReportGenerator.generate", success: true },
         };
       }
       return {
@@ -1058,7 +1225,9 @@ const registerRoutes = (prefix: string) => {
 
     const fallback = buildFallbackReply(message);
     let reply = fallback.reply;
-    let toolUsed: any = fallback.toolUsed;
+    let toolUsed: { name: string; success: boolean; error_code?: string } | null = fallback.toolUsed
+      ? { name: fallback.toolUsed.name, success: fallback.toolUsed.success ?? true }
+      : null;
 
     let openaiError: string | null = null;
 
@@ -1087,49 +1256,33 @@ const registerRoutes = (prefix: string) => {
           : "";
 
         reply = outputText || reply;
-        toolUsed = aiResponse?.tool_calls?.[0] ?? toolUsed;
+        const tc = aiResponse?.tool_calls?.[0];
+        toolUsed = tc
+          ? { name: tc.name ?? "unknown", success: tc.status === "success", error_code: tc.error }
+          : toolUsed;
       } catch (err) {
         openaiError = err instanceof Error ? err.message : "OPENAI_ERROR";
-        if (toolUsed) {
-          toolUsed = { ...toolUsed, status: "error", error: openaiError };
-        } else {
-          toolUsed = { name: "OpenAI", status: "error", error: openaiError };
-        }
+        toolUsed = { name: "OpenAI", success: false, error_code: openaiError };
       }
     }
 
-    if (openaiError) {
-      await writeAiInteraction(ctx as TenantContext, {
-        role: "ShadowCFO",
-        prompt_name: "shadow_cfo",
-        prompt_version: "v1",
-        locale: "uz",
-        input_excerpt: message.slice(0, 160),
-        output_excerpt: reply.slice(0, 160),
-        tools_used: toolUsed ? [toolUsed] : [],
-        success_flag: false,
-        error_code: "OPENAI_ERROR",
-        latency_ms: 800,
-        trace_id: getTraceId(c),
-        created_at: new Date().toISOString(),
-        context: { ...(context ?? {}), openai_error: openaiError },
-      });
-    }
+    const latencyMs = Date.now() - aiStart;
+    const toolsUsedArr = toolUsed
+      ? [{ name: toolUsed.name, success: toolUsed.success, error_code: toolUsed.error_code }]
+      : [];
 
     await writeAiInteraction(ctx as TenantContext, {
-      role: "ShadowCFO",
-      prompt_name: "shadow_cfo",
-      prompt_version: "v1",
-      locale: "uz",
-      input_excerpt: message.slice(0, 160),
-      output_excerpt: reply.slice(0, 160),
-      tools_used: toolUsed ? [toolUsed] : [],
-      success_flag: true,
-      error_code: null,
-      latency_ms: 800,
+      role: "AI_COO",
+      prompt_name: promptName,
+      prompt_version: promptVersion,
+      locale,
+      input_excerpt: inputExcerpt,
+      output_excerpt: truncate(reply, 500),
+      tools_used: toolsUsedArr,
+      success_flag: !openaiError,
+      error_code: openaiError ?? null,
+      latency_ms: latencyMs,
       trace_id: getTraceId(c),
-      created_at: new Date().toISOString(),
-      context: context ?? {},
     });
 
     const payload = openaiError ? { reply, toolUsed, warning: "OPENAI_ERROR" } : { reply, toolUsed };
@@ -1268,10 +1421,11 @@ const registerRoutes = (prefix: string) => {
     }
 
     await writeAuditLog(ctx as TenantContext, {
-      action: "doc_update",
+      event_type: "doc_update",
+      entity_type: "document",
+      entity_id: id,
       trace_id: getTraceId(c),
       payload: { document_id: id, title: nextTitle },
-      created_at: new Date().toISOString(),
     });
 
     return success(c, { document_id: id, chunks: chunkCount });
@@ -1298,10 +1452,11 @@ const registerRoutes = (prefix: string) => {
     }
 
     await writeAuditLog(ctx as TenantContext, {
-      action: "doc_delete",
+      event_type: "doc_delete",
+      entity_type: "document",
+      entity_id: id,
       trace_id: getTraceId(c),
       payload: { document_id: id },
-      created_at: new Date().toISOString(),
     });
 
     return success(c, { document_id: id });
@@ -1323,10 +1478,10 @@ const registerRoutes = (prefix: string) => {
     }
 
     await writeAuditLog(ctx as TenantContext, {
-      action: "hr_survey_submit",
+      event_type: "hr_survey_submit",
+      entity_type: "hr_survey",
       trace_id: getTraceId(c),
       payload: { score, comment: comment ?? "" },
-      created_at: new Date().toISOString(),
     });
 
     return success(c, { status: "received" });
@@ -1346,10 +1501,10 @@ const registerRoutes = (prefix: string) => {
     const payload = await c.req.json().catch(() => ({}));
 
     await writeAuditLog(ctx as TenantContext, {
-      action: "integration_update",
+      event_type: "integration_update",
+      entity_type: "integration",
       trace_id: getTraceId(c),
       payload: { id, ...payload },
-      created_at: new Date().toISOString(),
     });
 
     return success(c, { id, status: "saved" });
@@ -1391,10 +1546,11 @@ const registerRoutes = (prefix: string) => {
     }
 
     await writeAuditLog(ctx as TenantContext, {
-      action: "doc_index",
+      event_type: "doc_index",
+      entity_type: "document",
+      entity_id: doc.id,
       trace_id: getTraceId(c),
       payload: { document_id: doc.id, title },
-      created_at: new Date().toISOString(),
     });
 
     return success(c, { document_id: doc.id, chunks: chunks.length });

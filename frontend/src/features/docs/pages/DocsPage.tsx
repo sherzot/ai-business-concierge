@@ -7,6 +7,8 @@ import { DocSearchBar } from "../components/DocSearchBar";
 import { deleteDoc, getDocs } from "../api/docsApi";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { Button } from "../../../shared/ui/button";
+import { ErrorState } from "../../../shared/components/ErrorState";
+import { normalizeError, getTraceIdFromError } from "../../../shared/lib/errorHandling";
 
 export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
   const { translate } = useI18n();
@@ -14,7 +16,7 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
   const [docs, setDocs] = React.useState<DocItem[]>([]);
   const [selected, setSelected] = React.useState<DocItem | undefined>(undefined);
   const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<unknown>(null);
   const [createOpen, setCreateOpen] = React.useState(false);
   const [editOpen, setEditOpen] = React.useState(false);
 
@@ -39,7 +41,7 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
       setSelected(mapped[0]);
     } catch (err) {
       console.error("Failed to load docs", err);
-      setError(translate("docs.loadError"));
+      setError(err ?? translate("docs.loadError"));
       setDocs([]);
       setSelected(undefined);
     } finally {
@@ -69,7 +71,7 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
         </div>
         <div className="flex-1 overflow-y-auto">
           {loading && <div className="p-6 text-sm text-slate-400">{translate("common.loading")}</div>}
-          {!loading && error && <div className="p-6 text-sm text-rose-600">{error}</div>}
+          {!loading && error && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
           {!loading && !error && (
             <DocList docs={docs} selectedId={selected?.id} onSelect={setSelected} />
           )}

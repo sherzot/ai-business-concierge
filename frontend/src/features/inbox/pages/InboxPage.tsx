@@ -21,6 +21,8 @@ import { format } from 'date-fns';
 import { getInboxItems } from "../api/inboxApi";
 import { useRealtimeInbox } from "../hooks/useRealtimeInbox";
 import { useI18n } from "../../../app/providers/I18nProvider";
+import { ErrorState } from "../../../shared/components/ErrorState";
+import { normalizeError, getTraceIdFromError } from "../../../shared/lib/errorHandling";
 
 type Tenant = {
   id: string;
@@ -51,7 +53,7 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
   const [selectedItem, setSelectedItem] = useState<InboxItem | null>(null);
   const [filter, setFilter] = useState<'all' | 'HR' | 'Sales' | 'Support'>('all');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   React.useEffect(() => {
     loadInbox();
@@ -68,7 +70,7 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
       setSelectedItem(data[0] ?? null);
     } catch (err) {
       console.error("Failed to load inbox", err);
-      setError(translate("inbox.loadError"));
+      setError(err ?? translate("inbox.loadError"));
     } finally {
       setLoading(false);
     }
@@ -123,7 +125,7 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
             <div className="p-6 text-sm text-slate-400">{translate("common.loading")}</div>
           )}
           {!loading && error && (
-            <div className="p-6 text-sm text-rose-600">{error}</div>
+            <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />
           )}
           {!loading && !error && filteredItems.length === 0 && (
             <div className="p-6 text-sm text-slate-400">{translate("inbox.empty")}</div>

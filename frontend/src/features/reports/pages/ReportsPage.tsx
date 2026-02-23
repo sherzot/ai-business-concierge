@@ -30,6 +30,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../shared/ui/dialog";
+import { ErrorState } from "../../../shared/components/ErrorState";
+import { normalizeError, getTraceIdFromError } from "../../../shared/lib/errorHandling";
 
 type Tenant = {
   id: string;
@@ -59,7 +61,7 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
   const userName = currentTenant?.fullName?.split(" ")[0] ?? profile?.tenants?.[0]?.fullName?.split(" ")[0] ?? profile?.user?.email?.split("@")[0] ?? "User";
   const [stats, setStats] = React.useState<DashboardStats | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<unknown>(null);
   const [auditOpen, setAuditOpen] = React.useState(false);
   const [auditLoading, setAuditLoading] = React.useState(false);
   const [auditResult, setAuditResult] = React.useState<string | null>(null);
@@ -135,7 +137,7 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
       setStats(data);
     } catch (err) {
       console.error("Failed to load dashboard stats", err);
-      setError(translate("reports.loadError"));
+      setError(err ?? translate("reports.loadError"));
       setStats(null);
     } finally {
       setLoading(false);
@@ -223,7 +225,7 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
               <option>{translate("reports.last30")}</option>
             </select>
           </div>
-          {error && <div className="mb-4 text-sm text-rose-600">{translate("reports.loadError")}</div>}
+          {error && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={stats?.chartData ?? []}>

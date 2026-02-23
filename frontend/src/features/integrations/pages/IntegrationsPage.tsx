@@ -3,13 +3,15 @@ import { IntegrationConfigForm } from "../components/IntegrationConfigForm";
 import { IntegrationList, IntegrationItem } from "../components/IntegrationList";
 import { getIntegrations, updateIntegration } from "../api/integrationsApi";
 import { useI18n } from "../../../app/providers/I18nProvider";
+import { ErrorState } from "../../../shared/components/ErrorState";
+import { normalizeError, getTraceIdFromError } from "../../../shared/lib/errorHandling";
 
 export function IntegrationsPage({ tenant }: { tenant: { id: string; name: string } }) {
   const { translate } = useI18n();
   const [integrations, setIntegrations] = React.useState<IntegrationItem[]>([]);
   const [selected, setSelected] = React.useState<IntegrationItem | undefined>(undefined);
   const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<unknown>(null);
 
   React.useEffect(() => {
     loadIntegrations();
@@ -45,7 +47,7 @@ export function IntegrationsPage({ tenant }: { tenant: { id: string; name: strin
       setSelected(mapped[0]);
     } catch (err) {
       console.error("Failed to load integrations", err);
-      setError(translate("integrations.loadError"));
+      setError(err ?? translate("integrations.loadError"));
       setIntegrations([]);
       setSelected(undefined);
     } finally {
@@ -64,7 +66,7 @@ export function IntegrationsPage({ tenant }: { tenant: { id: string; name: strin
         </div>
         <div className="flex-1 overflow-y-auto">
           {loading && <div className="p-6 text-sm text-slate-400">{translate("common.loading")}</div>}
-          {!loading && error && <div className="p-6 text-sm text-rose-600">{error}</div>}
+          {!loading && error && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
           {!loading && !error && (
             <IntegrationList integrations={integrations} selectedId={selected?.id} onSelect={setSelected} />
           )}

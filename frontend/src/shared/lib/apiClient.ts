@@ -3,6 +3,8 @@ import { supabase } from "./supabase";
 
 export type ApiOptions = RequestInit & { tenantId?: string };
 
+export type ApiError = Error & { traceId?: string };
+
 export async function apiRequest<T>(endpoint: string, options: ApiOptions = {}): Promise<T> {
   const { tenantId, ...fetchOptions } = options;
   const { data: { session } } = await supabase.auth.getSession();
@@ -20,12 +22,23 @@ export async function apiRequest<T>(endpoint: string, options: ApiOptions = {}):
     headers,
   });
 
+  const result = await response.json().catch(() => ({}));
+  const traceId = result?.meta?.trace_id;
+
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    const msg = errorData.meta?.errors?.[0]?.message ?? errorData.message ?? `API Error: ${response.statusText}`;
-    throw new Error(msg);
+    const msg = result?.meta?.errors?.[0]?.message ?? result?.message ?? `API Error: ${response.statusText}`;
+    const err = new Error(msg) as ApiError;
+    err.traceId = traceId;
+    throw err;
   }
 
-  const result = await response.json();
+  if (traceId && import.meta.env.DEV) {
+    console.debug("trace_id", traceId, endpoint);
+  }
+  if (traceId && typeof (window as any)?.Sentry !== "undefined") {
+    (window as any).Sentry.addBreadcrumb({ category: "api", message: endpoint, data: { trace_id: traceId } });
+    (window as any).Sentry.setTag("trace_id", traceId);
+  }
+
   return result.data ?? result;
 }

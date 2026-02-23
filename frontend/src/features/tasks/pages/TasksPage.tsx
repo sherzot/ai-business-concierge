@@ -37,6 +37,8 @@ import {
 } from "../../../shared/ui/alert-dialog";
 import { Button } from "../../../shared/ui/button";
 import { useAuthContext } from "../../auth/context/AuthContext";
+import { ErrorState } from "../../../shared/components/ErrorState";
+import { normalizeError, getTraceIdFromError } from "../../../shared/lib/errorHandling";
 
 // Actually, I'll stick to a clean UI without complex dnd libraries first to ensure stability, 
 // but I will design it to LOOK like a Kanban board.
@@ -64,7 +66,7 @@ export function TasksPage({ tenant }: { tenant: any }) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [members, setMembers] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deletingTask, setDeletingTask] = useState<Task | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -87,7 +89,7 @@ export function TasksPage({ tenant }: { tenant: any }) {
       setTasks(data);
     } catch (err) {
       console.error("Failed to load tasks", err);
-      setError(translate("tasks.loadError"));
+      setError(err ?? translate("tasks.loadError"));
     } finally {
       setLoading(false);
     }
@@ -106,7 +108,7 @@ export function TasksPage({ tenant }: { tenant: any }) {
       setTasks(prev => [...prev, created]);
     } catch (err) {
       console.error("Error creating task", err);
-      setError(translate("tasks.createError"));
+      setError(err ?? translate("tasks.createError"));
     }
   }
 
@@ -128,7 +130,7 @@ export function TasksPage({ tenant }: { tenant: any }) {
       setDeletingTask(null);
     } catch (err) {
       console.error("Error deleting task", err);
-      setError(translate("tasks.loadError"));
+      setError(err ?? translate("tasks.loadError"));
     } finally {
       setDeleteLoading(false);
     }
@@ -151,8 +153,8 @@ export function TasksPage({ tenant }: { tenant: any }) {
 
   if (error) {
     return (
-      <div className="h-full flex items-center justify-center text-rose-600 text-sm">
-        {error}
+      <div className="h-full flex items-center justify-center">
+        <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />
       </div>
     );
   }
