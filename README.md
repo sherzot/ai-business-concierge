@@ -340,3 +340,17 @@ Standart javob:
 - [R001_EMAIL_SETUP.md](docs/R001_EMAIL_SETUP.md) – Resend email inbox sozlash
 - [R002_REALTIME_SETUP.md](docs/R002_REALTIME_SETUP.md) – Supabase Realtime sozlash
 - [R015_TASK_NOTIFICATIONS.md](docs/R015_TASK_NOTIFICATIONS.md) – Vazifa bildirishnomalari
+
+---
+
+## Security yangilanishi: `tenant_daily_stats` (RLS + SECURITY INVOKER)
+
+- **Muammo:** `public.tenant_daily_stats` view Supabase Security Advisor bo‘yicha `SECURITY DEFINER` sifatida flag qilingan, bu RLS siyosatlari o‘rniga view owner privilegiyalaridan foydalanishi va multi-tenant isolation’ni buzishi mumkin edi.
+- **Yechim:** yangi migration qo‘shildi – `supabase/migrations/20260304_fix_tenant_daily_stats_security.sql`, u:
+  - `public.tenants` jadvali uchun `tenants_select_own` RLS policy’ni yaratadi (authenticated user faqat `user_tenants` orqali bog‘langan tenant(lar)ini ko‘radi);
+  - `public.tenant_daily_stats` view’ini `SECURITY INVOKER` semantics bilan qayta yaratadi;
+  - view uchun `authenticated` roliga `SELECT` ruxsatini beradi (pastdagi RLS baribir ishlaydi).
+- **Prodga qo‘llash:** Supabase Dashboard → **SQL Editor** → **New query** → ushbu migration faylidagi SQL ni to‘liq nusxalab **Run** qiling, so‘ng:
+  - `alter view public.tenant_daily_stats set (security_invoker = true);`
+  - Security Advisor sahifasida **Refresh** qilib, `public.tenant_daily_stats` bo‘yicha `Security Definer View` alerti yo‘qligini tekshiring.
+- **Tenant isolation:** `tenant_daily_stats` endi foydalanuvchi kontekstida bajariladi (`SECURITY INVOKER`) va `tenants`, `tasks`, `inbox_items` ustidagi RLS siyosatlari orqali faqat o‘z tenant(lar)i uchun statistikani qaytaradi.
