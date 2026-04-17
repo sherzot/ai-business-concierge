@@ -1,19 +1,31 @@
 # PLAN.md — AI Business Concierge
 
 > Bosqichma-bosqich amalga oshirish rejasi
-> Har bir phase = aniq natija + o'lchov ko'rsatkichlari
+> Version: 2.0 | Yangilandi: 2026-04-16
+> ⚡ BOZOR URGENTSIYASI: SQB "AI Maslahatchi" chiqqan — tezlashtirilgan jadval
 
 ---
 
-## UMUMIY TIMELINE
+## STRATEGIK KONTEKST
+
+SQB davlat banki 2026 yilda "AI Maslahatchi" mahsulotini chiqardi. Bu:
+- **Bozorni tasdiqlaydi** — talab bor, sarmoya oqlanadi
+- **Bizni tezlashtirishga undaydi** — horizontal kundalik yechim bilan bozorga birinchi kirish kerak
+- **Raqib emas, funnel** — SQB startup bosqichni qoplaydi, biz kundalik operatsiyalarni
+
+**Maqsad:** 2026 Q2 (iyun) gacha Telegram MVP bilan bozorda bo'lish.
+
+---
+
+## TEZLASHTIRILGAN TIMELINE
 
 ```
-Phase 0: Tayyorgarlik .............. Hafta 1-2    (Infra + KB)
-Phase 1: Telegram MVP .............. Hafta 3-6    (Maslahatchi bot)
-Phase 2: Hujjatchi + Landing ....... Hafta 7-10   (Hujjat gen + web)
-Phase 3: Savdo Bot + To'lov ....... Hafta 11-14  (Monetizatsiya)
-Phase 4: Admin + Polish ........... Hafta 15-18  (Sifat + admin)
-Phase 5: Scale .................... Hafta 19-24  (O'sish)
+Phase 0: Tayyorgarlik .............. Hafta 1-2    (o'zgarmadi)
+Phase 1: Telegram MVP .............. Hafta 3-5    (4 haftadan → 3 haftaga ⚡)
+Phase 2: Hujjatchi + Landing ....... Hafta 6-9    (4 hafta)
+Phase 3: Savdo Bot + To'lov ....... Hafta 10-13  (4 hafta)
+Phase 4: Admin + Polish ........... Hafta 14-17  (4 hafta)
+Phase 5: Scale .................... Hafta 18-24  (7 hafta)
 ```
 
 ---
@@ -22,380 +34,223 @@ Phase 5: Scale .................... Hafta 19-24  (O'sish)
 
 **Maqsad:** Infra tayyor, AI ishlaydi, KB to'ldirilgan
 
-### 0.1 LLM Migration (OpenAI → Claude)
+### 0.1 LLM Migration (OpenAI → Claude) ⚡ BIRINCHI PRIORITET
 - [ ] Anthropic SDK o'rnatish (Deno uchun)
-- [ ] LLM Router service yaratish (`services/llm-router.ts`)
-  - Complexity classifier
+- [ ] LLM Router service (`services/llm-router.ts`)
+  - Complexity classifier (simple/document/analysis)
   - Haiku/Sonnet auto-selection
   - Cost tracking
   - Response caching (Supabase da)
   - Fallback logic
-- [ ] Mavjud AI Concierge endpointni Claude ga o'tkazish
-- [ ] 20 ta test savol bilan tekshirish (UZ va RU)
+- [ ] Mavjud `/ai/chat` endpointni Claude ga o'tkazish
+- [ ] 20 ta test savol (UZ + RU)
 - [ ] OpenAI kodni fallback sifatida saqlash
 
-### 0.2 Knowledge Base Setup
+### 0.2 Knowledge Base Setup ⚡ RAQOBAT USTUNLIGI
 - [ ] pgvector extension enable (Supabase)
-- [ ] `knowledge_base` jadvali yaratish (migration)
+- [ ] `knowledge_base` jadvali + migration
 - [ ] Knowledge Base service (`services/knowledge-base.ts`)
-  - Content embedding (Claude yoki OpenAI embedding)
-  - Semantic search
+  - Embedding (OpenAI text-embedding-3-small)
+  - Semantic search (cosine similarity)
   - Version management
-- [ ] Dastlabki kontent kiritish:
-  - O'zbekiston 2026-yil soliq qoidalari (YaTT 1% stavka, QQS, foyda solig'i)
-  - Soliq hisobot topshirish muddatlari
-  - Mehnat kodeksi asoslari (ishga olish, bo'shatish, ta'til)
+- [ ] Dastlabki kontent (50+ savol-javob):
+  - O'zbekiston 2026 soliq qoidalari (YaTT 1%, QQS 12%, foyda 15%)
+  - Soliq hisobot muddatlari
+  - Mehnat kodeksi asoslari
   - YaTT ro'yxatdan o'tish tartibi
-  - Eng ko'p so'raladigan 50 ta savol + javoblar
+  - **SQB qoplamaydigan** kundalik operatsion savollarga javoblar
 
-### 0.3 Database yangilash
-- [ ] Yangi jadvallar migration:
-  - `subscriptions`
-  - `payments`
-  - `ai_conversations`
-  - `ai_messages`
-  - `ai_feedback`
-  - `doc_templates`
-  - `doc_generated`
-  - `sales_bots`
-  - `catalogs`
-  - `orders`
-  - `knowledge_base`
-  - `audit_log`
-  - `usage_tracking`
+### 0.3 Database Migration (12 ta yangi jadval)
+- [ ] `subscriptions` — obunalar
+- [ ] `payments` — to'lovlar
+- [ ] `ai_conversations` — AI suhbatlar
+- [ ] `ai_messages` — AI xabarlar
+- [ ] `ai_feedback` — javob baholash
+- [ ] `doc_templates` — hujjat shablonlar
+- [ ] `doc_generated` — yaratilgan hujjatlar
+- [ ] `sales_bots` — savdo botlar
+- [ ] `catalogs` — mahsulot katalog
+- [ ] `orders` — buyurtmalar
+- [ ] `knowledge_base` — bilimlar bazasi (pgvector)
+- [ ] `audit_log` — audit log
+- [ ] `usage_tracking` — foydalanish hisobi
 - [ ] RLS policies barcha yangi jadvallar uchun
-- [ ] Indexes (performance uchun)
+- [ ] Performance indexes
 
 ### 0.4 Rol tizimi yangilash
 - [ ] `SUPER_ADMIN` roli qo'shish
-- [ ] `canAccess` funksiyasini yangilash (yangi modullar uchun)
-- [ ] Role-based route guard yangilash
+- [ ] `canAccess` funksiyasini yangilash
+- [ ] Route guard yangilash
 
 **Natija:** Claude API ishlaydi, KB 50+ savolga javob beradi, DB tayyor
-**O'lchov:** AI 10 ta test savolga 90%+ aniq javob beradi
+**O'lchov:** 20 ta test savolga 90%+ aniq javob
 
 ---
 
-## PHASE 1: TELEGRAM MVP (Hafta 3-6)
+## PHASE 1: TELEGRAM MVP (Hafta 3-5) ⚡ TEZLASHTIRILDI
 
 **Maqsad:** Telegram botda AI Maslahatchi ishlaydi, 50 beta user
+**Differensiator:** SQB faqat web/app — biz Telegram da, foydalanuvchi allaqachon bor
 
 ### 1.1 Telegram Bot Setup
 - [ ] grammY framework setup (Supabase Edge Function)
 - [ ] Bot webhook endpoint (`/v1/telegram/webhook`)
-- [ ] Bot commands:
-  - `/start` — onboarding (til tanlash, ro'yxatdan o'tish)
-  - `/help` — yordam
-  - `/language` — til o'zgartirish
-  - `/account` — hisob ma'lumotlari
-  - `/history` — suhbat tarixi
+- [ ] Commands: `/start`, `/help`, `/language`, `/account`, `/history`
+- [ ] Error handler — bot HECH QACHON crash bo'lmaydi
 
 ### 1.2 Onboarding Flow
 - [ ] `/start` → til tanlash (UZ/RU inline keyboard)
-- [ ] Salom xabari + nima qila olishi tushuntirish
+- [ ] Salom + nima qila olishi tushuntirish
 - [ ] Asosiy menu (reply keyboard):
   ```
   [💼 Maslahat olish]
-  [📄 Hujjat yaratish]  (Phase 2 da ochiladi)
-  [🛒 Savdo bot]         (Phase 3 da ochiladi)
+  [📄 Hujjat yaratish]   (Phase 2 da ochiladi)
+  [🛒 Savdo bot]          (Phase 3 da ochiladi)
   [⚙️ Sozlamalar]
   ```
-- [ ] Foydalanuvchini Supabase da yaratish (Telegram ID → user)
-- [ ] Tenant avtomatik yaratish (bitta user = bitta tenant MVP da)
+- [ ] Supabase da user yaratish (Telegram ID → user)
+- [ ] Tenant avtomatik yaratish
 
-### 1.3 AI Maslahatchi (Module 1 — Telegram)
-- [ ] Suhbat boshqarish:
-  - Yangi suhbat boshlash
-  - Kontekstni saqlash (oxirgi 10 xabar)
-  - Mavzu tanlash: Soliq | Kadrlar | Biznes | Boshqa
+### 1.3 AI Maslahatchi (Module 1)
+- [ ] Mavzu tanlash: Soliq | Kadrlar | Biznes | Boshqa
 - [ ] AI pipeline:
   1. User xabar → LLM Router
-  2. Knowledge Base semantic search
-  3. Prompt assembly (system + KB context + user message)
+  2. KB semantic search
+  3. Prompt assembly (system + KB + user)
   4. Claude Haiku/Sonnet → javob
-  5. Confidence check → disclaimer qo'shish
-  6. Javobni yuborish + feedback tugmalari
-- [ ] Feedback system:
-  - [👍] [👎] inline keyboard
-  - Salbiy feedback → `ai_feedback` jadvaliga saqlash
-- [ ] Usage tracking:
-  - Kunlik so'rov hisobi
-  - Bepul limit: 5 so'rov/kun
-  - Limitga yetganda: "Davom etish uchun obuna bo'ling" xabari
+  5. Confidence check → disclaimer
+  6. [👍] [👎] feedback tugmalari
+- [ ] Suhbat konteksti (oxirgi 10 xabar)
+- [ ] Usage tracking: bepul limit 5 so'rov/kun
 
 ### 1.4 Sifat tekshiruv
-- [ ] 100 ta test savol tayyorlash (UZ va RU):
-  - 30 ta soliq savollari
-  - 20 ta kadrlar savollari
-  - 20 ta tadbirkorlik savollari
-  - 15 ta aralash/murakkab
-  - 15 ta "bilmasligi kerak" (tibbiy, yuridik maslahat)
-- [ ] Har bir savolga kutilgan javob yozish
+- [ ] 100 ta test savol (UZ + RU):
+  - 30 soliq, 20 kadrlar, 20 tadbirkorlik, 15 murakkab, 15 "bilmasligi kerak"
 - [ ] Automated test pipeline
-- [ ] Aniqlik o'lchash: maqsad 90%+
+- [ ] Maqsad: 90%+ aniqlik, <3s javob vaqti
 
-### 1.5 Beta Launch
+### 1.5 Beta Launch ⚡
 - [ ] 5 ta O'zbek Telegram developer guruhlarida e'lon
-- [ ] 50 beta user topish
-- [ ] Feedback yig'ish (Google Form yoki bot ichida)
-- [ ] Bug fix sprint (1 hafta)
+- [ ] **SQB mijozlarini target qilish** — "Kredit oldingizmi? Endi biznesni boshqarish uchun..."
+- [ ] 50 beta user
+- [ ] Feedback yig'ish
+- [ ] Bug fix sprint
 
-**Natija:** Bot ishlaydi, 50 user sinab ko'rgan, feedback yig'ilgan
-**O'lchov:** 90%+ aniqlik, < 3s javob vaqti, 50+ beta user, NPS 7+
+**Natija:** Bot live, 50 beta user, feedback yig'ilgan
+**O'lchov:** 90%+ aniqlik, <3s, 50+ beta user, NPS 7+
 
 ---
 
-## PHASE 2: HUJJATCHI + LANDING (Hafta 7-10)
+## PHASE 2: HUJJATCHI + LANDING (Hafta 6-9)
 
-**Maqsad:** Hujjat generatsiya ishlaydi, landing page tayyor
+**Maqsad:** Hujjat generatsiya, landing page
+**Differensiator:** SQB faqat kredit hujjati — biz 15+ turdagi kundalik hujjat
 
 ### 2.1 AI Hujjatchi (Module 2)
-- [ ] Hujjat shablonlar tayyorlash (dastlabki 15 ta):
-
-  **Shartnomalar:**
-  1. Ijara shartnomasi (turar-joy)
-  2. Ijara shartnomasi (tijorat binosi)
-  3. Mehnat shartnomasi
-  4. Xizmat ko'rsatish shartnomasi
-  5. Oldi-sotdi shartnomasi
-  6. Pudrat shartnomasi
-
-  **Arizalar:**
-  7. YaTT ro'yxatdan o'tish arizasi
-  8. Soliq organiga ariza
-  9. Xodim ishga olish buyrug'i
-  10. Xodim bo'shatish buyrug'i
-  11. Ta'til buyrug'i
-
-  **Boshqa:**
-  12. Ishonchnoma (umumiy)
-  13. Tilxat
-  14. Qarz shartnomasi
-  15. Hamkorlik shartnomasi
-
-- [ ] Hujjat generatsiya pipeline:
-  1. User shablon tanlaydi
-  2. AI savollar beradi (shablon `fields` asosida)
-  3. User javob beradi (step by step)
-  4. AI shablonni to'ldiradi
-  5. PDF yoki DOCX generatsiya
-  6. Telegram orqali yuborish + Supabase Storage da saqlash
-
-- [ ] PDF generatsiya (pdf-lib):
-  - O'zbek/Rus fontlar (Noto Sans)
-  - Professional layout
-  - Logo/stamp joy
-
-- [ ] DOCX generatsiya (docx npm):
-  - Formatted document
-  - Editable format
+- [ ] 15 ta shablon:
+  - **Shartnomalar:** Ijara (turar-joy), Ijara (tijorat), Mehnat, Xizmat, Oldi-sotdi, Pudrat
+  - **Arizalar:** YaTT ro'yxat, Soliq organiga, Ishga olish buyrug'i, Bo'shatish buyrug'i, Ta'til
+  - **Boshqa:** Ishonchnoma, Tilxat, Qarz shartnomasi, Hamkorlik
+- [ ] Generatsiya pipeline: shablon → AI savollar → to'ldirish → PDF/DOCX
+- [ ] Noto Sans font (O'zbek/Rus harflar)
+- [ ] Supabase Storage integratsiya
 
 ### 2.2 Telegram da Hujjatchi
-- [ ] "📄 Hujjat yaratish" tugmasi faollashtirish
-- [ ] Shablon tanlash (inline keyboard, kategoriyalari bilan)
-- [ ] Step-by-step savol-javob flow (conversation handler)
-- [ ] Hujjat yuborish (document message type)
-- [ ] "✏️ O'zgartirish" — qayta to'ldirish imkoniyati
+- [ ] "📄 Hujjat yaratish" faollashtirish
+- [ ] Step-by-step savol-javob flow
+- [ ] Hujjat yuborish (Telegram document message)
 
-### 2.3 Landing Page (Web)
-- [ ] Yangi `features/landing/` module
-- [ ] Sahifalar:
-  - `/` — Bosh sahifa (hero + modullar + narxlar + FAQ)
-  - `/pricing` — Tariflar batafsil
-  - `/about` — Biz haqimizda
-- [ ] Responsive dizayn (mobile-first)
-- [ ] O'zbek va Rus tilida
-- [ ] SEO asoslari (meta tags, OG)
-- [ ] Telegram bot link — CTA
+### 2.3 Landing Page
+- [ ] Hero: "Biznesingiz allaqachon ishlayaptimi? AI yordamchingiz shu yerda."
+- [ ] 3 modul tushuntirish
+- [ ] Narxlar, FAQ
+- [ ] Mobile-first, UZ/RU, SEO
 
-### 2.4 Web Dashboard yangilash
-- [ ] `/ai-assistant` sahifa — AI Maslahatchi web versiya
-  - Chat interfeys
-  - Suhbatlar tarixi (sidebar)
-  - Mavzu filtrlash
-- [ ] `/documents` sahifa yangilash
-  - "Yangi hujjat yaratish" flow
-  - Generatsiya qilingan hujjatlar arxivi
-  - Yuklab olish / qayta yaratish
-
-**Natija:** 15 ta hujjat shabloni ishlaydi, landing page live
-**O'lchov:** Hujjat generatsiya < 10s, 0 format xato, landing 90+ Lighthouse score
+**Natija:** 15 shablon, landing live
+**O'lchov:** Hujjat gen <10s, landing 90+ Lighthouse
 
 ---
 
-## PHASE 3: SAVDO BOT + TO'LOV (Hafta 11-14)
+## PHASE 3: SAVDO BOT + TO'LOV (Hafta 10-13)
 
-**Maqsad:** Savdo bot ishlaydi, to'lov tizimi ishlaydi, birinchi pulli userlar
+**Maqsad:** Monetizatsiya, savdo bot
+**Differensiator:** SQB savdo bot bermaydi — bu bizning eksklyuziv moduli
 
 ### 3.1 AI Sotuvchi (Module 3)
-- [ ] Savdo bot yaratish flow:
-  1. Tadbirkor "🛒 Savdo bot" tanlaydi
-  2. Bot nomi, tavsifi kiritadi
-  3. BotFather dan token olish yo'riqnomasi
-  4. Token kiritish → bot aktivlashadi
-  5. Katalog kiritish (mahsulot nomi, narx, rasm)
+- [ ] Bot yaratish flow (token → katalog → aktivlash)
+- [ ] Mijoz funksionalligi: mahsulotlar, buyurtma berish
+- [ ] Tadbirkor uchun: katalog boshqarish, buyurtmalar, statistika
 
-- [ ] Savdo bot funksionalligi:
-  - Mijoz `/start` → mahsulotlar ro'yxati
-  - Kategoriyalar bo'yicha ko'rish
-  - Mahsulot tanlash → batafsil ma'lumot
-  - Buyurtma berish (ism, telefon, manzil)
-  - AI javob berish (FAQ, mahsulot haqida savol)
-
-- [ ] Tadbirkor uchun boshqaruv:
-  - Katalog qo'shish/o'zgartirish/o'chirish
-  - Buyurtmalarni ko'rish va statusini o'zgartirish
-  - Bot statistikasi (xabarlar soni, buyurtmalar)
-
-### 3.2 To'lov integratsiya
-- [ ] Click API integratsiya:
-  - Prepare endpoint
-  - Complete endpoint
-  - Webhook handling (idempotent)
-- [ ] Payme API integratsiya:
-  - CreateTransaction
-  - PerformTransaction
-  - Webhook handling
-- [ ] Subscription management:
-  - Plan upgrade/downgrade
-  - Auto-renewal
-  - Grace period (3 kun)
-  - Cancel flow
+### 3.2 To'lov (Click + Payme)
+- [ ] Click: Prepare + Complete + webhook (idempotent)
+- [ ] Payme: CreateTransaction + PerformTransaction + webhook
+- [ ] Subscription management (upgrade/downgrade, grace period 3 kun)
 
 ### 3.3 Usage Limiting
-- [ ] Middleware: tarifga mos limitlar tekshirish
-- [ ] Limit yetganda: user-friendly upsell xabari
-- [ ] Usage dashboard (user o'z sarfini ko'radi)
+- [ ] Tarifga mos limit middleware
+- [ ] Upsell xabar (limit yetganda)
 
-### 3.4 Telegram da To'lov
-- [ ] Obuna taklif xabari (limit yetganda)
-- [ ] Click/Payme to'lov linki generatsiya
-- [ ] To'lov tasdiqlash → bot ichida bildirishnoma
-- [ ] Obuna holati ko'rsatish (`/account`)
-
-**Natija:** To'lov tizimi ishlaydi, savdo bot ishlaydi, birinchi revenue
-**O'lchov:** To'lov 99.9% ishonchli, 50+ pulli user, $200+ MRR
+**Natija:** To'lov ishlaydi, savdo bot ishlaydi, birinchi revenue
+**O'lchov:** 99.9% to'lov ishonchlilik, 50+ pulli user, $200+ MRR
 
 ---
 
-## PHASE 4: ADMIN + POLISH (Hafta 15-18)
+## PHASE 4: ADMIN + POLISH (Hafta 14-17)
 
-**Maqsad:** Super Admin panel, sifat oshirish, barqarorlik
+**Maqsad:** Admin panel, sifat 95%+, barqarorlik
 
 ### 4.1 Super Admin Panel
-- [ ] `/admin` — Umumiy ko'rsatkichlar dashboard:
-  - Jami tenantlar, userlar, AI so'rovlar
-  - Kunlik/oylik daromad grafik
-  - AI error rate
-  - Eng ko'p so'raladigan savollar
-- [ ] `/admin/tenants` — Tenant boshqarish:
-  - Ro'yxat + qidiruv + filter
-  - Tenant detail (userlar, obuna, AI usage)
-  - Bloklash / faollashtirish
-- [ ] `/admin/ai` — AI Monitoring:
-  - So'rovlar logi (real-time)
-  - Aniqlik ko'rsatkichlari
-  - Salbiy feedback lari
-  - Model usage va narx
-  - Knowledge Base gaps (javob berilmagan savollar)
-- [ ] `/admin/knowledge-base` — KB boshqarish:
-  - Kontent qo'shish / yangilash / o'chirish
-  - Versiya boshqarish
-  - Import (Markdown)
-- [ ] `/admin/billing` — Moliyaviy ko'rsatkichlar:
-  - MRR, churn, LTV
-  - To'lovlar tarixi
-  - Refund boshqarish
-- [ ] `/admin/audit` — Audit log:
-  - Barcha harakatlar logi
-  - Filter (user, action, date)
-  - Export (CSV)
+- [ ] `/admin` — Statistika dashboard (users, revenue, AI usage, error rate)
+- [ ] `/admin/tenants` — Tenant boshqarish
+- [ ] `/admin/ai` — AI monitoring (so'rovlar, aniqlik, narx, KB gaps)
+- [ ] `/admin/knowledge-base` — KB boshqarish
+- [ ] `/admin/billing` — MRR, churn, LTV
+- [ ] `/admin/audit` — Audit log
 
 ### 4.2 Sifat oshirish
-- [ ] AI aniqlikni 95%+ ga yetkazish:
-  - Salbiy feedbacklarni tahlil qilish
-  - Knowledge Base to'ldirish (gaps)
-  - Prompt tuning
-- [ ] Performance optimizatsiya:
-  - API response time < 200ms (AI bo'lmagan endpointlar)
-  - AI response time < 3s (Haiku), < 8s (Sonnet)
-  - Frontend Lighthouse 90+
-- [ ] Bug fix sprint:
-  - Sentry dagi barcha xatolarni tuzatish
-  - Edge case handling
-- [ ] UX polish:
-  - Loading skeletonlar
-  - Micro-animatsiyalar
-  - Error xabarlari yaxshilash
-  - Empty state dizaynlari
+- [ ] AI aniqlik 95%+ (salbiy feedback tahlil + KB gaps to'ldirish)
+- [ ] API <200ms (AI bo'lmagan), <3s (Haiku), <8s (Sonnet)
+- [ ] Sentry barcha xatolarni tuzatish
+- [ ] UX polish (skeleton, micro-animation, empty states)
 
-### 4.3 Testing
-- [ ] Unit testlar: util funksiyalar, LLM router, KB search
-- [ ] Integration testlar: API endpointlar
-- [ ] AI test suite: 100 savol × 2 til = 200 test case
-- [ ] Manual QA: 30 ta asosiy scenario
-
-**Natija:** Admin panel to'liq ishlaydi, sifat yuqori, barqaror tizim
-**O'lchov:** 95%+ AI aniqlik, 0 critical bug, admin panel to'liq
+**Natija:** Admin panel to'liq, 95%+ AI aniqlik
+**O'lchov:** 0 critical bug, admin to'liq
 
 ---
 
-## PHASE 5: SCALE (Hafta 19-24)
+## PHASE 5: SCALE (Hafta 18-24)
 
-**Maqsad:** O'sish, marketing, IT Park
+**Maqsad:** 5,000+ user, $8,000+ MRR, IT Park
 
 ### 5.1 Marketing
-- [ ] Telegram kanal yaratish (kontentlar)
-- [ ] YouTube seriya: "AI bilan biznes boshqarish" (o'zbek tilida)
-- [ ] Telegram guruhlarida organik marketing
-- [ ] IT Park tadbirlari va hackathonlarda qatnashish
+- [ ] Telegram kanal (kontentlar)
+- [ ] YouTube: "AI bilan biznes boshqarish" (o'zbek tilida)
+- [ ] **SQB mijozlari uchun retargeting** — "Kredit oldingizmi? Endi boshqaring"
 - [ ] Referral dasturi (invite → 1 oy bepul Pro)
 
 ### 5.2 IT Park
 - [ ] IT Park rezident arizasi
-- [ ] Digital Startups dasturiga ariza (avtomatik rezident status)
-- [ ] Soliq imtiyozlari (12%)
-- [ ] Xalqaro akselerator uchun ariza (50% xarajat qoplanadi)
+- [ ] Digital Startups dasturi (soliq imtiyozlari 12%)
+- [ ] Xalqaro akselerator ariza
 
 ### 5.3 Funksional kengaytirish
-- [ ] my.soliq.uz integratsiya (agar API mavjud bo'lsa)
-- [ ] EHF (Elektron Hisob-Faktura) integratsiya
-- [ ] Bank statement import (CSV/PDF)
-- [ ] Advanced analytics (Kompaniya tarifi)
+- [ ] my.soliq.uz integratsiya
+- [ ] EHF (Elektron Hisob-Faktura)
+- [ ] Bank statement import
 - [ ] API access (Kompaniya tarifi)
-- [ ] Webhook'lar (tashqi tizimlar uchun)
 
 ### 5.4 Regional ekspansiya
-- [ ] Qozog'iston bozori tadqiqoti
-- [ ] Qirg'iziston bozori tadqiqoti
-- [ ] Qozoq/qirg'iz tilida KB tayyorlash
-- [ ] Mahalliy soliq qoidalari kiritish
-
-**Natija:** 5,000+ user, $8,000+ MRR, IT Park rezident
-**O'lchov:** User growth 30%+ oylik, churn < 5%, NPS 8+
+- [ ] Qozog'iston, Qirg'iziston bozori tadqiqoti
 
 ---
 
 ## HAFTALIK RITM
 
-Har bir hafta:
-
 ```
 Dushanba:    Sprint planning (1 soat)
-             → Haftalik maqsad belgilash
-             → Task larni aniqlash
-
 Seshanba-Juma: Build (1-2 soat/kun)
-             → Kod yozish
-             → Test qilish
-
 Shanba:      Review + Deploy (1 soat)
-             → Haftali natijani tekshirish
-             → Production ga deploy
-
-Yakshanba:   Dam olish + Fikrlash
-             → User feedback o'qish
-             → Keyingi hafta reja
+Yakshanba:   Dam olish + Feedback o'qish
 ```
 
 ---
@@ -408,13 +263,13 @@ Yakshanba:   Dam olish + Fikrlash
 | Pulli users | 0 | 50 | 2,000 |
 | MRR | $0 | $200 | $8,000 |
 | AI aniqlik | 90% | 93% | 95%+ |
-| Javob vaqti (Haiku) | < 5s | < 3s | < 2s |
-| Bug count (critical) | < 5 | 0 | 0 |
-| NPS | 7+ | 8+ | 8+ |
+| Javob vaqti (Haiku) | <5s | <3s | <2s |
 | Hujjat shablonlar | 0 | 15 | 30+ |
 | KB articles | 50 | 200 | 500+ |
+| SQB dan konvertatsiya | — | 10% | 20% |
 
 ---
 
-*PLAN.md — AI Business Concierge v1.0*
+*PLAN.md — AI Business Concierge v2.0*
+*Yangilandi: 2026-04-16 — SQB raqobati kontekstida tezlashtirilgan jadval*
 *Ishga kirishamiz! 🚀*

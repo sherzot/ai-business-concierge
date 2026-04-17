@@ -2,14 +2,39 @@
 
 > Claude Code uchun loyiha konteksti va qoidalar
 > Bu faylni har bir sessiya boshida o'qi
+> Version: 2.0 | Yangilandi: 2026-04-16
 
 ---
 
 ## LOYIHA HAQIDA
 
-AI Business Concierge — O'zbekistondagi kichik biznes egalari uchun AI biznes yordamchi.
-3 ta modul: AI Maslahatchi (soliq/biznes), AI Hujjatchi (shartnoma/ariza), AI Sotuvchi (Telegram savdo bot).
-Telegram bot (asosiy) + Web dashboard (to'liq) + Admin panel.
+AI Business Concierge — O'zbekistondagi **allaqachon ishlayotgan** kichik biznes egalari uchun **kundalik operatsion boshqaruv** AI yordamchisi.
+
+**Kalit pozitsiya:** Bank AI yechimlari (SQB va boshqalar) biznes BOSHLASHGA yordam beradi. Biz biznes YURITISHGA — 365 kun, har kuni — yordam beramiz.
+
+**3 ta modul:**
+1. **AI Maslahatchi** — soliq/biznes/kadrlar savollari (Knowledge Base + Claude)
+2. **AI Hujjatchi** — shartnoma/ariza/buyruq generatsiya (PDF/DOCX)
+3. **AI Sotuvchi** — Telegram savdo bot yaratish va boshqarish
+
+**Platformalar:** Telegram bot (70% traffic, asosiy) + Web dashboard (25%) + Admin panel (5%)
+
+**Bozor urgentsiyasi:** SQB "AI Maslahatchi" chiqqan (2026) — biz tezroq va kengroq horizontal yechim bilan bozorga kirishimiz kerak. Maqsad: 2026 Q2 da Telegram MVP live.
+
+---
+
+## RAQOBAT KONTEKSTI
+
+| Raqobatchi | Nima qiladi | Bizning farqimiz |
+|---|---|---|
+| SQB AI | Kredit olishga yordam, biznes reja | Kundalik ops, Telegram, hujjat gen, savdo bot |
+| My.soliq.uz | Rasmiy soliq portali | AI maslahat, natural til, tez javob |
+| ChatGPT | Umumiy AI | O'zbekiston qonunlari KB, hujjat generatsiya |
+| 1C | Buxgalteriya dastur | Oddiy, Telegram, AI maslahat |
+
+**SQB raqib emas — funnel:** Ular kredit beradi → mijoz biznes boshlaydi → **bizning botga keladi** kundalik masalalar bilan.
+
+---
 
 ## TEXNIK STACK
 
@@ -24,129 +49,116 @@ Telegram bot (asosiy) + Web dashboard (to'liq) + Admin panel.
 - **Hosting:** Netlify (frontend) + Supabase (backend)
 - **Monitoring:** Sentry
 
+---
+
+## MAVJUD REPO HOLATI (2026-04-16)
+
+✅ **Tayyor modullar:** Auth, Tasks, Inbox, HR, Docs, Reports, Integrations, Notifications, Settings, Tenants
+
+✅ **Tayyor infra:** Supabase Auth, RLS, Hono API (~20+ endpoint), React Query, Zustand, i18n (uz/ru/en/ja), Realtime, 40+ Radix UI komponentlar
+
+✅ **AI qismi:** AIChat komponenti + `/ai/chat` endpoint (OpenAI bilan) + 8 ta prompt fayl
+
+❌ **Qo'shilishi kerak:**
+- LLM Router (OpenAI → Claude Haiku/Sonnet)
+- Knowledge Base (pgvector + embedding + RAG)
+- Telegram Bot (grammY)
+- AI Hujjatchi (PDF/DOCX generatsiya)
+- AI Sotuvchi (savdo bot)
+- Billing (Click/Payme)
+- Landing Page
+- Admin Panel
+- 12 ta yangi DB jadval
+
+---
+
 ## LOYIHA TUZILISHI
 
 ```
 ai-business-concierge/
-├── docs/                        # Hujjatlar
-│   ├── SPEC.md                  # Asosiy spetsifikatsiya
-│   ├── PLAN.md                  # Bosqichma-bosqich reja
-│   └── ...                      # Mavjud hujjatlar
-├── frontend/                    # React web app
-│   └── src/
-│       ├── app/                 # Global config, providers, router
-│       ├── features/            # Feature modules
-│       │   ├── admin/           # YANGI: Super Admin panel
-│       │   ├── ai-assistant/    # YANGI: AI Maslahatchi UI
-│       │   ├── auth/            # Mavjud: Auth
-│       │   ├── billing/         # YANGI: Obuna va to'lov
-│       │   ├── docs/            # Mavjud + YANGILASH: Hujjatchi
-│       │   ├── hr/              # Mavjud: HR
-│       │   ├── inbox/           # Mavjud: Inbox
-│       │   ├── landing/         # YANGI: Bosh sahifa
-│       │   ├── reports/         # Mavjud: Hisobotlar
-│       │   ├── sales-bots/      # YANGI: Savdo botlar
-│       │   ├── settings/        # Mavjud: Sozlamalar
-│       │   ├── tasks/           # Mavjud: Vazifalar
-│       │   └── tenants/         # Mavjud: Tenant boshqarish
-│       ├── shared/              # Umumiy komponentlar
-│       └── styles/              # Global CSS
+├── docs/                        # CLAUDE.md, SPEC.md, PLAN.md + boshqa hujjatlar
+├── frontend/src/
+│   ├── app/                     # Global config, providers, router
+│   ├── features/
+│   │   ├── admin/               # YANGI: Super Admin panel
+│   │   ├── ai-assistant/        # YANGI: AI Maslahatchi UI
+│   │   ├── auth/                # Mavjud
+│   │   ├── billing/             # YANGI: Obuna va to'lov
+│   │   ├── docs/                # Mavjud + YANGILASH
+│   │   ├── landing/             # YANGI: Bosh sahifa
+│   │   ├── sales-bots/          # YANGI: Savdo botlar
+│   │   └── ...                  # hr, inbox, reports, settings, tasks, tenants
+│   └── shared/
 ├── supabase/
-│   ├── schema.sql               # DB schema
-│   ├── migrations/              # SQL migratsiyalar
+│   ├── migrations/
 │   └── functions/
-│       ├── bright-api/          # Mavjud API gateway
-│       │   └── index.ts
-│       ├── server/              # Asosiy API (Hono)
-│       │   ├── index.ts         # Barcha routelar
-│       │   ├── routes/          # YANGI: Route modullari
-│       │   │   ├── ai.ts        # AI endpointlari
-│       │   │   ├── docs.ts      # Hujjat endpointlari
-│       │   │   ├── sales-bot.ts # Savdo bot endpointlari
-│       │   │   ├── billing.ts   # To'lov endpointlari
-│       │   │   └── admin.ts     # Admin endpointlari
-│       │   ├── services/        # YANGI: Biznes logika
-│       │   │   ├── llm-router.ts    # LLM model tanlash
-│       │   │   ├── knowledge-base.ts # KB qidiruv
-│       │   │   ├── doc-generator.ts  # Hujjat yaratish
-│       │   │   └── payment.ts       # To'lov logika
-│       │   └── middleware/      # YANGI: Middleware
-│       │       ├── rate-limit.ts
-│       │       ├── usage-track.ts
-│       │       └── audit.ts
-│       └── telegram-bot/        # YANGI: Telegram bot
-│           ├── index.ts         # Bot entry point
-│           ├── handlers/        # Command va message handlers
-│           ├── keyboards/       # Inline va reply keyboards
-│           └── middleware/       # Bot middleware
+│       ├── server/              # Hono API (routes/, services/, middleware/)
+│       └── telegram-bot/        # YANGI: grammY bot
 └── resources/
-    ├── prompts/                 # AI promptlar (mavjud + yangi)
-    │   ├── maslahatchi/         # Module 1 promptlari
-    │   ├── hujjatchi/           # Module 2 promptlari
-    │   └── sotuvchi/            # Module 3 promptlari
-    ├── knowledge-base/          # YANGI: KB source fayllar
-    │   ├── soliq-2026.md        # Soliq kodeksi
-    │   ├── mehnat-kodeksi.md    # Mehnat kodeksi
-    │   └── tadbirkorlik-faq.md  # Tez-tez so'raladigan savollar
-    └── templates/               # YANGI: Hujjat shablonlar
-        ├── shartnomalar/
-        ├── arizalar/
-        └── buyruqlar/
+    ├── prompts/                 # mavjud + maslahatchi/, hujjatchi/, sotuvchi/
+    ├── knowledge-base/          # YANGI: soliq-2026.md, mehnat-kodeksi.md
+    └── templates/               # YANGI: shartnomalar/, arizalar/, buyruqlar/
 ```
+
+---
 
 ## MUHIM QOIDALAR
 
 ### Umumiy
 1. **TypeScript strict mode** — `strict: true` har doim
-2. **Zod** — barcha API input/output validatsiya qilinadi
-3. **Error handling** — try/catch har doim, user-friendly xato xabarlari
-4. **Audit log** — muhim harakatlar (login, AI query, doc gen, payment) loglanadi
+2. **Zod** — barcha API input/output validatsiya
+3. **Error handling** — try/catch, user-friendly xato xabarlari
+4. **Audit log** — muhim harakatlar loglanadi
 5. **RLS** — har bir yangi jadvalda Row Level Security SHART
 6. **Tillar** — barcha UI stringlar i18n orqali (uz, ru, en)
+7. **Mavjud kodni buzma** — yangi feature qo'shganda mavjud funksionallik ishlashda davom etadi
 
-### AI qoidalar
+### AI qoidalari
 1. **Hallucination prevention** — AI faqat knowledge base dagi ma'lumotni ishlatadi
-2. **Confidence scoring** — har bir AI javobda ishonch darajasi bo'ladi
+2. **Confidence scoring** — har bir AI javobda ishonch darajasi
 3. **Disclaimer** — "Bu AI maslahat, professional maslahat o'rnini bosmaydi"
-4. **Feedback** — har bir javobga 👍/👎 baho berish imkoniyati
+4. **Feedback** — har bir javobga 👍/👎
 5. **Cost tracking** — har bir AI so'rov narxi saqlanadi
-6. **Cache** — tez-tez so'raladigan savollar cache qilinadi
+6. **Cache** — tez-tez so'raladigan savollar
 
-### Frontend qoidalar
-1. **Mobile-first** — barcha UI avval mobile uchun, keyin desktop
+### LLM Router mantiq
+- **simple** → Claude Haiku 3.5, 500 token
+- **document** → Claude Sonnet 4, 2000 token
+- **analysis** → Claude Sonnet 4, 1500 token
+- **default** → Claude Haiku 3.5, 800 token
+
+### Frontend qoidalari
+1. **Mobile-first** — avval mobile, keyin desktop
 2. **Accessibility** — ARIA attributes, keyboard navigation
-3. **Loading states** — har bir async operatsiya uchun loading ko'rsatkich
-4. **Error states** — har bir xato uchun tushunarli xabar va qayta urinish tugmasi
-5. **Empty states** — bo'sh ro'yxatlar uchun tushunarli ko'rsatmalar
-6. **Optimistic UI** — imkon qadar tez feedback berish
+3. **Loading/Error/Empty states** — har biri uchun
 
-### Backend qoidalar
-1. **Rate limiting** — tarifga mos limitlar
-2. **Input validation** — Zod schema har doim
-3. **Tenant isolation** — so'rov faqat o'z tenant ma'lumotini ko'radi
-4. **Idempotency** — to'lov webhooklari idempotent bo'lishi SHART
-5. **Logging** — structured JSON logs
+### Backend qoidalari
+1. **Rate limiting** — tarifga mos
+2. **Tenant isolation** — so'rov faqat o'z tenant ma'lumotini ko'radi
+3. **Idempotency** — to'lov webhooklari idempotent SHART
 
-### Telegram Bot qoidalar
-1. **Graceful errors** — bot hech qachon crash bo'lmaydi, user-friendly xabar beradi
-2. **Timeout** — 25 soniyadan uzoq javob bo'lsa, "Javob tayyorlanmoqda..." xabar
-3. **Conversation state** — har bir user'ning suhbat holati saqlanadi
-4. **Rate limit** — bepul: 5 so'rov/kun, pulli: tarifga mos
+### Telegram Bot qoidalari
+1. **Graceful errors** — bot hech qachon crash bo'lmaydi
+2. **Timeout** — 25s dan uzoq bo'lsa "Javob tayyorlanmoqda..." xabar
+3. **Rate limit** — bepul: 5 so'rov/kun
+
+---
 
 ## COMMIT QOIDALARI
 
-Format: `type(scope): description`
-
 ```
-feat(telegram): add maslahatchi module
-fix(ai): fix hallucination in tax answers
-docs(spec): update API endpoints
-refactor(llm): extract router to service
-test(ai): add tax question test suite
-chore(deps): update grammy to v1.x
+type(scope): description
 ```
-
 Scope'lar: `telegram`, `ai`, `docs`, `sales-bot`, `billing`, `admin`, `auth`, `ui`, `db`, `api`
+
+**Misol:**
+```
+feat(telegram): add maslahatchi module with KB integration
+fix(ai): prevent hallucination in tax date answers
+feat(db): add subscriptions and payments migration
+```
+
+---
 
 ## ENVIRONMENT VARIABLES
 
@@ -173,13 +185,16 @@ PAYME_MERCHANT_ID=
 PAYME_KEY=
 RESEND_API_KEY=
 SENTRY_DSN=
+OPENAI_API_KEY=        # Embedding uchun (text-embedding-3-small)
 ```
+
+---
 
 ## DOIMIY ESLATMALAR
 
-- **Mavjud kodni buzma** — yangi feature qo'shganda mavjud funksionallik ishlashda davom etishi SHART
 - **Migration** — DB o'zgarish faqat migration fayl orqali
 - **Test** — yangi API endpoint = yangi test
 - **i18n** — yangi UI string = uz + ru tarjima
 - **Mobile** — har bir UI o'zgarish mobile da tekshiriladi
 - **AI test** — AI prompt o'zgarish = 10 ta test savol bilan tekshirish
+- **Raqobat** — SQB raqib emas, funnel. Biz kundalik ops, ular startup bosqich.
