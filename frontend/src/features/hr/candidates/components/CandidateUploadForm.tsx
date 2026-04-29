@@ -89,45 +89,53 @@ export function CandidateUploadForm({ onSubmit, isSubmitting = false, defaultLoc
         />
       </div>
 
-      {/* Locale + depth */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="block text-sm font-medium text-slate-900">Hisobot tili</label>
-          <div className="mt-1 inline-flex rounded-lg border border-slate-300 bg-white p-1">
-            {(["uz", "ja", "en"] as Locale[]).map((l) => (
-              <button
-                type="button"
-                key={l}
-                onClick={() => setLocale(l)}
-                className={
-                  "rounded-md px-3 py-1.5 text-sm font-medium transition " +
-                  (locale === l ? "bg-indigo-600 text-white" : "text-slate-600 hover:bg-slate-100")
-                }
-              >
-                {l === "uz" ? "O'zbekcha" : l === "ja" ? "日本語" : "English"}
-              </button>
-            ))}
-          </div>
+      {/* Locale */}
+      <div>
+        <label className="block text-sm font-medium text-slate-900">Hisobot tili</label>
+        <div className="mt-1.5 flex w-full gap-1 rounded-lg border border-slate-300 bg-white p-1">
+          {(["uz", "ja", "en"] as Locale[]).map((l) => (
+            <button
+              type="button"
+              key={l}
+              onClick={() => setLocale(l)}
+              className={
+                "flex-1 rounded-md px-2 py-2 text-sm font-medium transition whitespace-nowrap " +
+                (locale === l
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100")
+              }
+            >
+              {l === "uz" ? "O'zbekcha" : l === "ja" ? "日本語" : "English"}
+            </button>
+          ))}
         </div>
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium text-slate-900">Tahlil chuqurligi</label>
-          <div className="mt-1 inline-flex rounded-lg border border-slate-300 bg-white p-1">
-            {(["fast", "deep"] as AnalysisDepth[]).map((d) => (
-              <button
-                type="button"
-                key={d}
-                onClick={() => setAnalysisDepth(d)}
-                className={
-                  "rounded-md px-3 py-1.5 text-sm font-medium transition " +
-                  (analysisDepth === d ? "bg-indigo-600 text-white" : "text-slate-600 hover:bg-slate-100")
-                }
-              >
-                {d === "fast" ? "Tez (Haiku)" : "Chuqur (Sonnet)"}
-              </button>
-            ))}
-          </div>
+      {/* Depth */}
+      <div>
+        <label className="block text-sm font-medium text-slate-900">Tahlil chuqurligi</label>
+        <div className="mt-1.5 flex w-full gap-1 rounded-lg border border-slate-300 bg-white p-1">
+          {(["fast", "deep"] as AnalysisDepth[]).map((d) => (
+            <button
+              type="button"
+              key={d}
+              onClick={() => setAnalysisDepth(d)}
+              className={
+                "flex-1 rounded-md px-3 py-2 text-sm font-medium transition whitespace-nowrap " +
+                (analysisDepth === d
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100")
+              }
+            >
+              {d === "fast" ? "Tez · Haiku" : "Chuqur · Sonnet"}
+            </button>
+          ))}
         </div>
+        <p className="mt-1 text-xs text-slate-500">
+          {analysisDepth === "fast"
+            ? "Tezroq, arzonroq — Haiku asosiy skor uchun yetarli"
+            : "Chuqurroq tahlil — Sonnet, batafsil intervyu savollari (tavsiya etiladi)"}
+        </p>
       </div>
 
       {/* Submit */}
