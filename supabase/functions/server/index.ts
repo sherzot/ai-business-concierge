@@ -4,6 +4,8 @@ import { logger } from "npm:hono/logger";
 import { createClient } from "npm:@supabase/supabase-js@2.49.8";
 import { Webhook } from "npm:svix@1.17.0";
 import { logRequest, logAudit, logAI, truncate } from "../_shared/logging.ts";
+import { callClaude, classifyComplexity } from "./services/llm-router.ts";
+import { searchKnowledgeBase, addDisclaimerIfNeeded } from "./services/knowledge-base.ts";
 
 const app = new Hono();
 const BASE_PATH = "/make-server-6c2837d6";
@@ -43,6 +45,7 @@ const SB_ANON_KEY =
   Deno.env.get("SB_ANON_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY") ?? "";
 const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") ?? "gpt-4o-mini";
+const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
 const RESEND_WEBHOOK_SECRET = Deno.env.get("RESEND_WEBHOOK_SECRET") ?? "";
 
 const supabase = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
@@ -630,11 +633,12 @@ const computeDashboardStats = (
 };
 
 const ROLE_ACCESS: Record<string, string[]> = {
-  leader: ["reports", "inbox", "tasks", "hr", "docs", "integrations", "settings"],
-  hr: ["reports", "inbox", "tasks", "hr", "docs", "settings"],
-  accounting: ["reports", "docs", "integrations", "settings"],
+  super_admin: ["admin", "reports", "inbox", "tasks", "hr", "docs", "integrations", "settings", "billing", "ai", "knowledge_base"],
+  leader:          ["reports", "inbox", "tasks", "hr", "docs", "integrations", "settings"],
+  hr:              ["reports", "inbox", "tasks", "hr", "docs", "settings"],
+  accounting:      ["reports", "docs", "integrations", "settings"],
   department_head: ["reports", "inbox", "tasks", "docs", "settings"],
-  employee: ["inbox", "tasks", "settings"],
+  employee:        ["inbox", "tasks", "settings"],
 };
 
 const registerRoutes = (prefix: string) => {
@@ -1186,52 +1190,125 @@ const registerRoutes = (prefix: string) => {
     if (!(ctx as any).tenantId) return ctx;
 
     const body = await c.req.json().catch(() => ({}));
-    const { message, context, locale: reqLocale } = body;
+    const { message, context, locale: reqLocale, system_prompt } = body;
     if (!message || typeof message !== "string") {
       return failure(c, 422, "VALIDATION_ERROR", "message majburiy.");
     }
 
     const locale = (reqLocale ?? "uz") as string;
-    const promptName = "ai_coo";
-    const promptVersion = "v1";
+    const promptVersion = "v2";
     const inputExcerpt = truncate(message, 500);
+    const traceId = getTraceId(c);
     const aiStart = Date.now();
 
-    const buildFallbackReply = (input: string) => {
-      const lowerMsg = input.toLowerCase();
-      if (lowerMsg.includes("xarajat") || lowerMsg.includes("expense") || lowerMsg.includes("budget")) {
-        return {
-          reply: "Yanvar oyi xarajatlari $12,400 ni tashkil etdi. Bu o'tgan oyga nisbatan 15% kamroq.",
-          toolUsed: { name: "ShadowCFO.check_budget", success: true },
-        };
+    // Murakkablikni aniqlash
+    const complexity = classifyComplexity(message);
+    const promptName = `ai_coo_${complexity}`;
+
+    // Statik fallback (AI mavjud bo'lmasa)
+    const buildFallbackReply = (input: string): string => {
+      const m = input.toLowerCase();
+      if (m.includes("xarajat") || m.includes("expense") || m.includes("budget")) {
+        return locale === "ru"
+          ? "Расходы за январь составили $12,400. Это на 15% меньше прошлого месяца."
+          : "Yanvar oyi xarajatlari $12,400 ni tashkil etdi. Bu o'tgan oyga nisbatan 15% kamroq.";
       }
-      if (lowerMsg.includes("task") || lowerMsg.includes("vazifa")) {
-        return {
-          reply: "Sizda bugun 3 ta muhim vazifa bor. Eng asosiysi: 'Q4 Moliyaviy hisobot'.",
-          toolUsed: { name: "TaskPlanner.list_priorities", success: true },
-        };
+      if (m.includes("task") || m.includes("vazifa") || m.includes("задача")) {
+        return locale === "ru"
+          ? "У вас сегодня 3 важные задачи."
+          : "Sizda bugun 3 ta muhim vazifa bor.";
       }
-      if (lowerMsg.includes("report") || lowerMsg.includes("hisobot")) {
-        return {
-          reply: "Men oylik hisobotni shakllantirishni boshladim. Tayyor bo'lgach xabar beraman.",
-          toolUsed: { name: "ReportGenerator.generate", success: true },
-        };
-      }
-      return {
-        reply: "Tushunarli. Buni o'rganib chiqaman.",
-        toolUsed: null,
-      };
+      return locale === "ru" ? "Понятно. Изучу этот вопрос." : "Tushunarli. Buni o'rganib chiqaman.";
     };
 
-    const fallback = buildFallbackReply(message);
-    let reply = fallback.reply;
-    let toolUsed: { name: string; success: boolean; error_code?: string } | null = fallback.toolUsed
-      ? { name: fallback.toolUsed.name, success: fallback.toolUsed.success ?? true }
-      : null;
+    let reply = buildFallbackReply(message);
+    let llmProvider = "fallback";
+    let llmModel = "none";
+    let llmError: string | null = null;
+    let inputTokens = 0;
+    let outputTokens = 0;
+    let costUsd = 0;
+    let cached = false;
 
-    let openaiError: string | null = null;
-
+    // 0) Knowledge Base semantic search (agar OpenAI embedding mavjud bo'lsa)
+    let kbContext = context ?? "";
+    let kbFound = false;
+    let kbSimilarity = 0;
     if (OPENAI_API_KEY) {
+      try {
+        const kbResult = await searchKnowledgeBase(supabase, OPENAI_API_KEY, {
+          query: message,
+          locale: locale as "uz" | "ru" | "en",
+        });
+        if (kbResult.found) {
+          kbContext = kbResult.contextText + (context ? `\n\n${context}` : "");
+          kbFound = true;
+          kbSimilarity = kbResult.bestSimilarity;
+        }
+      } catch (_kbErr) {
+        // KB xatosi — davom etamiz (contextSiz)
+      }
+    }
+
+    // 1) Claude (asosiy)
+    if (ANTHROPIC_API_KEY) {
+      try {
+        const claudeRes = await callClaude(ANTHROPIC_API_KEY, {
+          message,
+          systemPrompt: system_prompt,
+          context: kbContext || undefined,
+          locale,
+          complexity,
+        });
+        reply = claudeRes.text || reply;
+        llmProvider = "claude";
+        llmModel = claudeRes.model;
+        inputTokens = claudeRes.inputTokens;
+        outputTokens = claudeRes.outputTokens;
+        costUsd = claudeRes.costUsd;
+        cached = claudeRes.cached;
+      } catch (err) {
+        llmError = err instanceof Error ? err.message : "CLAUDE_ERROR";
+        logAI({
+          message: "Claude xato, OpenAI fallback ga o'tildi",
+          traceId,
+          data: { error: llmError },
+        });
+
+        // 2) OpenAI fallback
+        if (OPENAI_API_KEY) {
+          try {
+            const aiResponse = await callOpenAI({
+              model: OPENAI_MODEL,
+              input: [
+                {
+                  role: "system",
+                  content: "Sen AI Business Concierge. Javoblar qisqa, amaliy va foydali bo'lsin.",
+                },
+                { role: "user", content: message },
+              ],
+            });
+            const outputText = Array.isArray(aiResponse.output)
+              ? aiResponse.output
+                  .flatMap((item: any) => item.content || [])
+                  .map((part: any) => part.text)
+                  .filter(Boolean)
+                  .join("\n")
+              : "";
+            reply = outputText || reply;
+            llmProvider = "openai_fallback";
+            llmModel = OPENAI_MODEL;
+            llmError = null; // OpenAI ishladi
+          } catch (fallbackErr) {
+            // Ikkala AI ham ishlamadi — statik fallback qoladi
+            llmError = `CLAUDE:${llmError} | OPENAI:${
+              fallbackErr instanceof Error ? fallbackErr.message : "OPENAI_ERROR"
+            }`;
+          }
+        }
+      }
+    } else if (OPENAI_API_KEY) {
+      // Faqat OpenAI mavjud
       try {
         const aiResponse = await callOpenAI({
           model: OPENAI_MODEL,
@@ -1240,13 +1317,9 @@ const registerRoutes = (prefix: string) => {
               role: "system",
               content: "Sen AI Business Concierge. Javoblar qisqa, amaliy va foydali bo'lsin.",
             },
-            {
-              role: "user",
-              content: message,
-            },
+            { role: "user", content: message },
           ],
         });
-
         const outputText = Array.isArray(aiResponse.output)
           ? aiResponse.output
               .flatMap((item: any) => item.content || [])
@@ -1254,22 +1327,22 @@ const registerRoutes = (prefix: string) => {
               .filter(Boolean)
               .join("\n")
           : "";
-
         reply = outputText || reply;
-        const tc = aiResponse?.tool_calls?.[0];
-        toolUsed = tc
-          ? { name: tc.name ?? "unknown", success: tc.status === "success", error_code: tc.error }
-          : toolUsed;
+        llmProvider = "openai";
+        llmModel = OPENAI_MODEL;
       } catch (err) {
-        openaiError = err instanceof Error ? err.message : "OPENAI_ERROR";
-        toolUsed = { name: "OpenAI", success: false, error_code: openaiError };
+        llmError = err instanceof Error ? err.message : "OPENAI_ERROR";
       }
     }
 
     const latencyMs = Date.now() - aiStart;
-    const toolsUsedArr = toolUsed
-      ? [{ name: toolUsed.name, success: toolUsed.success, error_code: toolUsed.error_code }]
-      : [];
+    const toolsUsedArr = [
+      {
+        name: llmModel,
+        success: llmError === null,
+        error_code: llmError ?? undefined,
+      },
+    ];
 
     await writeAiInteraction(ctx as TenantContext, {
       role: "AI_COO",
@@ -1279,20 +1352,105 @@ const registerRoutes = (prefix: string) => {
       input_excerpt: inputExcerpt,
       output_excerpt: truncate(reply, 500),
       tools_used: toolsUsedArr,
-      success_flag: !openaiError,
-      error_code: openaiError ?? null,
+      success_flag: llmError === null,
+      error_code: llmError ?? null,
       latency_ms: latencyMs,
-      trace_id: getTraceId(c),
+      trace_id: traceId,
     });
 
-    const payload = openaiError ? { reply, toolUsed, warning: "OPENAI_ERROR" } : { reply, toolUsed };
-    return success(c, payload);
+    // Disclaimer — KB topilmasa yoki past similarity
+    if (!kbFound || kbSimilarity < 0.85) {
+      const disclaimer = locale === "ru"
+        ? "\n\n⚠️ Это AI-консультация, которая не заменяет профессиональную юридическую или финансовую помощь."
+        : "\n\n⚠️ Bu AI maslahat bo'lib, professional huquqiy yoki moliyaviy maslahat o'rnini bosmaydi.";
+      if (llmProvider !== "fallback") reply = reply + disclaimer;
+    }
+
+    const responsePayload: Record<string, unknown> = {
+      reply,
+      provider: llmProvider,
+      model: llmModel,
+      complexity,
+      cached,
+      kb_found: kbFound,
+    };
+    if (llmError) responsePayload.warning = "AI_ERROR";
+    if (costUsd > 0) responsePayload.cost_usd = costUsd;
+
+    return success(c, responsePayload);
   });
 
   app.get(`${prefix}/ai/tools`, async (c) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
     return success(c, TOOL_REGISTRY);
+  });
+
+  // ---------------------------------------------------------------------------
+  // POST /ai/feedback — AI javobiga 👍/👎 baholash (CLAUDE.md §AI qoidalari №4)
+  // ---------------------------------------------------------------------------
+  app.post(`${prefix}/ai/feedback`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const body = await c.req.json().catch(() => ({}));
+    const { message_id, rating, comment } = body as {
+      message_id?: string;
+      rating?: number;
+      comment?: string;
+    };
+
+    if (!message_id || typeof message_id !== "string") {
+      return failure(c, 422, "VALIDATION_ERROR", "message_id majburiy.");
+    }
+    if (rating !== 1 && rating !== -1) {
+      return failure(c, 422, "VALIDATION_ERROR", "rating 1 yoki -1 bo'lishi kerak.");
+    }
+
+    const { error } = await supabase
+      .from("ai_feedback")
+      .insert({
+        message_id,
+        tenant_id: ctx.tenantId,
+        user_id: (ctx as any).userId ?? null,
+        rating,
+        comment: comment?.toString().slice(0, 500) ?? null,
+      });
+
+    if (error) {
+      return failure(c, 500, "DB_ERROR", "Feedbackni saqlab bo'lmadi.", {
+        details: error.message,
+      });
+    }
+
+    return success(c, { saved: true });
+  });
+
+  // ---------------------------------------------------------------------------
+  // POST /hr/candidates/analyze — HR Candidate Analysis (skeleton)
+  // To'liq dizayn: docs/HR_CANDIDATE_ANALYSIS.md
+  // Implementatsiya: services/hr-candidate/* (TODO bloklari to'ldirilgach)
+  // ---------------------------------------------------------------------------
+  app.post(`${prefix}/hr/candidates/analyze`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    // TODO: rol guard — HR | MANAGER | TENANT_ADMIN | SUPER_ADMIN
+    // TODO: usage-tracking guardUsage({ resource: 'ai_requests' })
+    // TODO: services/hr-candidate/index.ts.analyzeCandidate() ni chaqirish
+
+    return c.json(
+      {
+        ok: false,
+        error: {
+          code: "NOT_IMPLEMENTED",
+          message_uz: "HR Candidate Analysis modul implementatsiya jarayonida.",
+          message_ja: "HR 候補者分析モジュールは実装中です。",
+          message_en: "HR Candidate Analysis is under implementation.",
+        },
+      },
+      501,
+    );
   });
 
   app.get(`${prefix}/docs`, async (c) => {

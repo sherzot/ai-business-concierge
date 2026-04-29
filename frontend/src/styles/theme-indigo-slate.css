@@ -1,0 +1,165 @@
+/* ============================================================================
+   Indigo + Slate brand tema — AI Business Concierge
+   Phase 0 design refresh — 2026-04-29
+
+   Maqsad:
+     • Asosiy rang: Indigo 600 (#4f46e5) — ishonchli, professional, fintech ko'rinishi.
+     • Neutrallar: Slate (oklab-clean grey, ko'k undertone) — aniqlik va toza kontrast.
+     • Mavjud theme.css ni buzmaydi — bu fayl uning ustiga import qilinadi.
+
+   Ishlatish:
+     globals.css yoki main.tsx da quyidagi tartibda import qiling:
+       @import "./tailwind.css";
+       @import "./theme.css";
+       @import "./theme-indigo-slate.css";   // <-- bu eng oxirida
+
+   Tailwind uchun:
+     `bg-indigo-600`, `text-slate-900` to'g'ridan ishlaydi.
+     Brand tokens ham: bg-[var(--brand-primary)] yoki shadcn "primary" classlari.
+============================================================================ */
+
+:root {
+  /* ------------------------------------------------------------------------
+   * Brand primary — Indigo 600 oilasi
+   * ------------------------------------------------------------------------ */
+  --brand-primary:        #4f46e5;   /* indigo-600 */
+  --brand-primary-hover:  #4338ca;   /* indigo-700 */
+  --brand-primary-active: #3730a3;   /* indigo-800 */
+  --brand-primary-soft:   #eef2ff;   /* indigo-50 */
+  --brand-primary-fg:     #ffffff;
+  --brand-primary-ring:   rgba(79, 70, 229, 0.35);
+
+  /* ------------------------------------------------------------------------
+   * Neutral — Slate
+   * ------------------------------------------------------------------------ */
+  --brand-bg:             #ffffff;
+  --brand-bg-soft:        #f8fafc;   /* slate-50 */
+  --brand-surface:        #ffffff;
+  --brand-surface-alt:    #f1f5f9;   /* slate-100 */
+  --brand-border:         #e2e8f0;   /* slate-200 */
+  --brand-border-strong:  #cbd5e1;   /* slate-300 */
+
+  --brand-text:           #0f172a;   /* slate-900 */
+  --brand-text-muted:     #475569;   /* slate-600 */
+  --brand-text-soft:      #94a3b8;   /* slate-400 */
+
+  /* ------------------------------------------------------------------------
+   * Status palette (success / warning / danger / info)
+   * ------------------------------------------------------------------------ */
+  --brand-success:        #10b981;   /* emerald-500 */
+  --brand-success-soft:   #d1fae5;
+  --brand-warning:        #f59e0b;   /* amber-500 */
+  --brand-warning-soft:   #fef3c7;
+  --brand-danger:         #e11d48;   /* rose-600 */
+  --brand-danger-soft:    #ffe4e6;
+  --brand-info:           #0ea5e9;   /* sky-500 */
+  --brand-info-soft:      #e0f2fe;
+
+  /* ------------------------------------------------------------------------
+   * shadcn token override — `--primary` ni Indigo ga ulaymiz
+   * ------------------------------------------------------------------------ */
+  --primary:              var(--brand-primary);
+  --primary-foreground:   var(--brand-primary-fg);
+  --ring:                 var(--brand-primary-ring);
+
+  /* Sidebar — yengil indigo accent */
+  --sidebar:              var(--brand-bg-soft);
+  --sidebar-primary:      var(--brand-primary);
+  --sidebar-accent:       var(--brand-primary-soft);
+  --sidebar-border:       var(--brand-border);
+
+  /* Chart akkordi — indigo asoslangan turli tonlar */
+  --chart-1: #4f46e5;   /* indigo-600 */
+  --chart-2: #6366f1;   /* indigo-500 */
+  --chart-3: #818cf8;   /* indigo-400 */
+  --chart-4: #0ea5e9;   /* sky-500 — kontrast */
+  --chart-5: #10b981;   /* emerald-500 — pozitiv */
+
+  /* Burchak radiuslari — yumshoqroq, modernroq */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  /* Shadow ladder — yengil, fintech uslubi */
+  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.06), 0 1px 3px 0 rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+}
+
+/* ============================================================================
+   Dark mode — chuqur slate fond, Indigo aksent
+============================================================================ */
+.dark {
+  --brand-bg:             #0f172a;   /* slate-900 */
+  --brand-bg-soft:        #1e293b;   /* slate-800 */
+  --brand-surface:        #1e293b;
+  --brand-surface-alt:    #334155;   /* slate-700 */
+  --brand-border:         #334155;
+  --brand-border-strong:  #475569;
+
+  --brand-text:           #f8fafc;   /* slate-50 */
+  --brand-text-muted:     #cbd5e1;   /* slate-300 */
+  --brand-text-soft:      #94a3b8;
+
+  --brand-primary:        #818cf8;   /* indigo-400 — dark da bright primary */
+  --brand-primary-hover:  #a5b4fc;
+  --brand-primary-active: #c7d2fe;
+  --brand-primary-soft:   #1e1b4b;   /* indigo-950 */
+  --brand-primary-fg:     #0f172a;
+
+  --primary:              var(--brand-primary);
+  --primary-foreground:   var(--brand-primary-fg);
+  --ring:                 rgba(165, 180, 252, 0.35);
+}
+
+/* ============================================================================
+   Yordamchi class lar — komponentlarda tezda ishlatish uchun
+============================================================================ */
+
+.bc-btn-primary {
+  background-color: var(--brand-primary);
+  color: var(--brand-primary-fg);
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  padding: 0.625rem 1rem;
+  transition: background-color 150ms ease;
+}
+.bc-btn-primary:hover  { background-color: var(--brand-primary-hover); }
+.bc-btn-primary:active { background-color: var(--brand-primary-active); }
+.bc-btn-primary:disabled {
+  background-color: var(--brand-text-soft);
+  cursor: not-allowed;
+}
+
+.bc-card {
+  background: var(--brand-surface);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.bc-input {
+  background: var(--brand-bg-soft);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--radius-md);
+  padding: 0.625rem 0.875rem;
+  color: var(--brand-text);
+}
+.bc-input:focus {
+  outline: 2px solid var(--brand-primary-ring);
+  outline-offset: 1px;
+  border-color: var(--brand-primary);
+}
+
+.bc-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 9999px;
+  background: var(--brand-primary-soft);
+  color: var(--brand-primary);
+  font-weight: 500;
+}

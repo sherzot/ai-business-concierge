@@ -1,0 +1,68 @@
+{
+  "page": {
+    "title": "候補者分析",
+    "subtitle": "GitHub プロフィールと CV を送信してください — AI が 6 カテゴリで評価し、面接質問を作成します。",
+    "breadcrumb": "HR · 候補者分析"
+  },
+  "form": {
+    "github_label": "GitHub ユーザー名または URL",
+    "github_placeholder": "octocat または https://github.com/octocat",
+    "cv_label": "CV（PDF または DOCX、5 MB 以下）",
+    "jd_label": "求人説明",
+    "jd_optional": "（任意）",
+    "jd_placeholder": "求人説明を入力すると、AI が役割適合度も評価します",
+    "locale_label": "レポート言語",
+    "depth_label": "分析の深さ",
+    "depth_fast": "高速（Haiku）",
+    "depth_deep": "詳細（Sonnet）",
+    "submit": "候補者を分析",
+    "submitting": "分析中…（約 25 秒）"
+  },
+  "result": {
+    "overall_score": "総合スコア",
+    "grade": "評価",
+    "strengths": "強み",
+    "weaknesses": "弱み",
+    "summary": "総評",
+    "interview_questions": "面接質問",
+    "expected_signal": "期待されるシグナル",
+    "copy_all": "すべてコピー",
+    "inconsistencies": "不一致",
+    "confidence": "信頼度",
+    "github_failed": "GitHub データを取得できませんでした — 結果は CV のみに基づきます。",
+    "github_partial": "部分的",
+    "top_languages": "主要技術",
+    "account_age": "アカウント年数"
+  },
+  "categories": {
+    "tech_depth": "技術的深さ",
+    "project_quality": "プロジェクト品質",
+    "activity": "活動レベル",
+    "communication_docs": "ドキュメント／コミュニケーション",
+    "cv_github_consistency": "CV ↔ GitHub 整合性",
+    "role_fit": "役割適合度"
+  },
+  "decisions": {
+    "strong_hire": "強く推奨",
+    "interview": "面接推奨",
+    "borderline": "判断保留",
+    "do_not_proceed": "不採用推奨"
+  },
+  "errors": {
+    "INVALID_GITHUB_INPUT": "GitHub ユーザー名または URL が無効です",
+    "GITHUB_USER_NOT_FOUND": "指定された GitHub ユーザーが見つかりません",
+    "CV_PARSE_FAILED": "CV ファイルを解析できませんでした",
+    "CV_TOO_LARGE": "CV は 5 MB 以下である必要があります",
+    "UNSUPPORTED_FILE_TYPE": "PDF または DOCX のみアップロード可能です",
+    "RATE_LIMITED": "プランの上限に達しました — しばらくしてから再度お試しください",
+    "TIMEOUT": "分析が 30 秒を超えました。短い CV でお試しください",
+    "INTERNAL": "内部エラーが発生しました。しばらくしてから再度お試しください"
+  },
+  "empty": "フォームを記入し「候補者を分析」ボタンを押してください",
+  "pending": {
+    "title": "分析中…（約 25 秒）",
+    "step_github": "GitHub プロフィールを取得中…",
+    "step_cv": "CV を構造化中…",
+    "step_score": "スコアと面接質問を生成中…"
+  }
+}

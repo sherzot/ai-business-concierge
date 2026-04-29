@@ -1,0 +1,68 @@
+{
+  "page": {
+    "title": "Candidate analysis",
+    "subtitle": "Submit a GitHub profile and a CV — AI scores the candidate across 6 categories and prepares interview questions.",
+    "breadcrumb": "HR · Candidate analysis"
+  },
+  "form": {
+    "github_label": "GitHub username or URL",
+    "github_placeholder": "octocat or https://github.com/octocat",
+    "cv_label": "CV (PDF or DOCX, ≤ 5 MB)",
+    "jd_label": "Job description",
+    "jd_optional": "(optional)",
+    "jd_placeholder": "If you paste the job description, AI will also score role-fit",
+    "locale_label": "Report language",
+    "depth_label": "Analysis depth",
+    "depth_fast": "Fast (Haiku)",
+    "depth_deep": "Deep (Sonnet)",
+    "submit": "Analyse candidate",
+    "submitting": "Analysing… (~25 seconds)"
+  },
+  "result": {
+    "overall_score": "Overall score",
+    "grade": "Grade",
+    "strengths": "Strengths",
+    "weaknesses": "Weaknesses",
+    "summary": "Summary",
+    "interview_questions": "Interview questions",
+    "expected_signal": "Expected signal",
+    "copy_all": "Copy all",
+    "inconsistencies": "Inconsistencies",
+    "confidence": "Confidence",
+    "github_failed": "Could not fetch GitHub data — result is based on the CV only.",
+    "github_partial": "partial",
+    "top_languages": "Top languages",
+    "account_age": "Account age"
+  },
+  "categories": {
+    "tech_depth": "Tech depth",
+    "project_quality": "Project quality",
+    "activity": "Activity",
+    "communication_docs": "Docs / communication",
+    "cv_github_consistency": "CV ↔ GitHub",
+    "role_fit": "Role fit"
+  },
+  "decisions": {
+    "strong_hire": "Strong hire",
+    "interview": "Interview",
+    "borderline": "Borderline",
+    "do_not_proceed": "Do not proceed"
+  },
+  "errors": {
+    "INVALID_GITHUB_INPUT": "Invalid GitHub username or URL",
+    "GITHUB_USER_NOT_FOUND": "GitHub user not found",
+    "CV_PARSE_FAILED": "Could not parse the CV file",
+    "CV_TOO_LARGE": "CV must be ≤ 5 MB",
+    "UNSUPPORTED_FILE_TYPE": "Only PDF or DOCX accepted",
+    "RATE_LIMITED": "Plan limit reached — please try later",
+    "TIMEOUT": "Analysis exceeded 30 seconds. Please try a shorter CV",
+    "INTERNAL": "An internal error occurred. Please try again shortly"
+  },
+  "empty": "Fill in the form and click \"Analyse candidate\"",
+  "pending": {
+    "title": "Analysing… (about 25 seconds)",
+    "step_github": "Fetching GitHub profile…",
+    "step_cv": "Structuring CV…",
+    "step_score": "Generating scores and interview questions…"
+  }
+}

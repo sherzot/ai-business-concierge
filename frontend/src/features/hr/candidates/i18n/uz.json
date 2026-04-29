@@ -1,0 +1,68 @@
+{
+  "page": {
+    "title": "Nomzod tahlili",
+    "subtitle": "GitHub profil va CV ni yuboring — AI nomzodni 6 kategoriyada baholaydi va intervyu savollarini tayyorlaydi.",
+    "breadcrumb": "HR · Nomzod tahlili"
+  },
+  "form": {
+    "github_label": "GitHub username yoki URL",
+    "github_placeholder": "octocat yoki https://github.com/octocat",
+    "cv_label": "CV (PDF yoki DOCX, ≤ 5 MB)",
+    "jd_label": "Lavozim ta'rifi",
+    "jd_optional": "(ixtiyoriy)",
+    "jd_placeholder": "Vakansiya ta'rifini yozsangiz, AI nomzodning rolga mosligini ham baholaydi",
+    "locale_label": "Hisobot tili",
+    "depth_label": "Tahlil chuqurligi",
+    "depth_fast": "Tez (Haiku)",
+    "depth_deep": "Chuqur (Sonnet)",
+    "submit": "Nomzodni tahlil qilish",
+    "submitting": "Tahlil qilinmoqda… (~25 soniya)"
+  },
+  "result": {
+    "overall_score": "Umumiy ball",
+    "grade": "Baho",
+    "strengths": "Kuchli tomonlari",
+    "weaknesses": "Kuchsiz tomonlari",
+    "summary": "Qisqa xulosa",
+    "interview_questions": "Intervyu savollari",
+    "expected_signal": "Kutilgan signal",
+    "copy_all": "Hammasini nusxalash",
+    "inconsistencies": "Mos kelmasliklar",
+    "confidence": "Ishonch",
+    "github_failed": "GitHub ma'lumotlarini olib bo'lmadi — natija CV asosida.",
+    "github_partial": "qisman",
+    "top_languages": "Asosiy texnologiyalar",
+    "account_age": "Yosh (yil)"
+  },
+  "categories": {
+    "tech_depth": "Texnik chuqurlik",
+    "project_quality": "Loyiha sifati",
+    "activity": "Faollik",
+    "communication_docs": "Hujjat va aloqa",
+    "cv_github_consistency": "CV ↔ GitHub mosligi",
+    "role_fit": "Rolga mos"
+  },
+  "decisions": {
+    "strong_hire": "Albatta yollang",
+    "interview": "Intervyu o'tkazing",
+    "borderline": "Chegaraviy",
+    "do_not_proceed": "Davom etmang"
+  },
+  "errors": {
+    "INVALID_GITHUB_INPUT": "GitHub username yoki URL noto'g'ri",
+    "GITHUB_USER_NOT_FOUND": "GitHub'da bunday foydalanuvchi topilmadi",
+    "CV_PARSE_FAILED": "CV faylni tahlil qilib bo'lmadi",
+    "CV_TOO_LARGE": "CV 5 MB dan oshmasligi kerak",
+    "UNSUPPORTED_FILE_TYPE": "Faqat PDF yoki DOCX yuklanadi",
+    "RATE_LIMITED": "Tarif limiti yetdi — keyinroq urinib ko'ring",
+    "TIMEOUT": "Tahlil 30 soniyadan oshdi. Iltimos, qisqaroq CV bilan urinib ko'ring",
+    "INTERNAL": "Ichki xato yuz berdi. Iltimos, biroz keyin qayta urinib ko'ring"
+  },
+  "empty": "Forma to'ldirib, \"Nomzodni tahlil qilish\" tugmasini bosing",
+  "pending": {
+    "title": "Tahlil qilinmoqda… (taxminan 25 soniya)",
+    "step_github": "GitHub profil tekshirilmoqda…",
+    "step_cv": "CV strukturali ma'lumotga aylantirilmoqda…",
+    "step_score": "Skor va intervyu savollari tayyorlanmoqda…"
+  }
+}
