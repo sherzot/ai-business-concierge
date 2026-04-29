@@ -10,14 +10,14 @@
  *   • Long timeout (35s) because backend hard-stops at 30s.
  */
 
+import { API_BASE_URL } from "../../../../app/config";
 import type {
   AnalyzeFormInput,
   CandidateAnalysisResult,
-} from "../types.ts";
+} from "../types";
 
-// TODO: replace with real config from app/config (e.g. VITE_API_BASE_URL)
-const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL ?? "/api";
-const ENDPOINT = `${API_BASE}/v1/hr/candidates/analyze`;
+// API_BASE_URL = ".../bright-api/make-server-6c2837d6/v1"  (config.ts dan)
+const ENDPOINT = `${API_BASE_URL}/hr/candidates/analyze`;
 const REQUEST_TIMEOUT_MS = 35_000;
 
 export async function analyzeCandidate(

@@ -7,7 +7,7 @@
  * can analyse model quality (CLAUDE.md §AI qoidalari №4).
  */
 
-import { config } from "../../app/config";
+import { API_BASE_URL } from "../../app/config";
 
 export type AiFeedbackRating = 1 | -1;
 
@@ -23,7 +23,7 @@ export type SendAiFeedbackResult =
   | { ok: true; saved: true }
   | { ok: false; error: { code: string; message: string } };
 
-const ENDPOINT = `${config.apiBaseUrl ?? "/api"}/v1/ai/feedback`;
+const ENDPOINT = `${API_BASE_URL}/ai/feedback`;
 
 export async function sendAiFeedback(input: SendAiFeedbackInput): Promise<SendAiFeedbackResult> {
   try {
