@@ -37,9 +37,12 @@ export function useCandidateAnalysis() {
       setState({ data: result, error: null, isPending: false });
       return result;
     } catch (err) {
+      // Rethrow QILMAYMIZ — caller "fire and forget" ishlatadi.
+      // Xato state.error ga yoziladi, UI banner ko'rsatadi.
       const error = err instanceof Error ? err : new Error(String(err));
+      console.error("[useCandidateAnalysis] mutation error", error);
       setState({ data: null, error, isPending: false });
-      throw error;
+      return null;
     }
   }, [currentTenant?.id]);
 
