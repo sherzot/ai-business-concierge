@@ -973,6 +973,117 @@ const registerRoutes = (prefix: string) => {
     return success(c, members);
   });
 
+  // ---------------------------------------------------------------------------
+  // POST /tenants/:id/members — Yangi xodim qo'shish (faqat leader | hr)
+  // ---------------------------------------------------------------------------
+  app.post(`${prefix}/tenants/:id/members`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const tenantId = c.req.param("id");
+    if (tenantId !== ctx.tenantId) {
+      return failure(c, 403, "FORBIDDEN", "Boshqa tenantga xodim qo'shib bo'lmaydi.");
+    }
+
+    // Caller rolini tekshirish — faqat leader yoki hr
+    const callerRoles = ((ctx as any).roles ?? []) as string[];
+    const callerRole = callerRoles[0] ?? "";
+    if (callerRole !== "leader" && callerRole !== "hr") {
+      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Rahbar yoki HR xodim qo'sha oladi.");
+    }
+
+    const body = await c.req.json().catch(() => ({}));
+    const { email, full_name, role, mode, password } = body as {
+      email?: string;
+      full_name?: string;
+      role?: string;
+      mode?: "invite" | "password";
+      password?: string;
+    };
+
+    // Validatsiya
+    const ALLOWED_ROLES = ["leader", "hr", "accounting", "department_head", "employee"];
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return failure(c, 422, "VALIDATION_ERROR", "Email yaroqsiz.");
+    }
+    if (!full_name || full_name.trim().length < 2) {
+      return failure(c, 422, "VALIDATION_ERROR", "Ism kamida 2 belgi bo'lishi kerak.");
+    }
+    if (!role || !ALLOWED_ROLES.includes(role)) {
+      return failure(c, 422, "VALIDATION_ERROR", "Rol yaroqsiz.");
+    }
+    if (mode !== "invite" && mode !== "password") {
+      return failure(c, 422, "VALIDATION_ERROR", "Mode 'invite' yoki 'password' bo'lishi kerak.");
+    }
+    if (mode === "password" && (!password || password.length < 8)) {
+      return failure(c, 422, "VALIDATION_ERROR", "Parol kamida 8 belgi.");
+    }
+
+    // 1. Auth user yaratish — invite yoki password
+    let userId: string | null = null;
+    let actionMessage = "";
+
+    try {
+      if (mode === "invite") {
+        const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
+          data: { full_name, tenant_id: tenantId, role },
+        });
+        if (error) throw error;
+        userId = data.user?.id ?? null;
+        actionMessage = "invited";
+      } else {
+        const { data, error } = await supabase.auth.admin.createUser({
+          email,
+          password: password!,
+          email_confirm: true,
+          user_metadata: { full_name, tenant_id: tenantId, role },
+        });
+        if (error) throw error;
+        userId = data.user?.id ?? null;
+        actionMessage = "created";
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "AUTH_ERROR";
+      // Email allaqachon mavjud bo'lsa Supabase 422 yoki 400 qaytaradi
+      if (/already registered|exists|duplicate/i.test(msg)) {
+        return failure(c, 409, "EMAIL_EXISTS", "Bu email allaqachon ro'yxatdan o'tgan.");
+      }
+      return failure(c, 500, "AUTH_ERROR", `Foydalanuvchi yaratib bo'lmadi: ${msg}`);
+    }
+
+    if (!userId) {
+      return failure(c, 500, "AUTH_ERROR", "Foydalanuvchi ID olinmadi.");
+    }
+
+    // 2. user_tenants jadvaliga bog'lash
+    const { error: linkError } = await supabase
+      .from("user_tenants")
+      .insert({
+        user_id: userId,
+        tenant_id: tenantId,
+        role,
+        full_name: full_name.trim(),
+      });
+
+    if (linkError) {
+      // Rollback: agar user_tenants insert fail bo'lsa, auth user'ni o'chirish
+      try {
+        await supabase.auth.admin.deleteUser(userId);
+      } catch {
+        // best-effort rollback
+      }
+      return failure(c, 500, "DB_ERROR", `Tenantga bog'lashda xato: ${linkError.message}`);
+    }
+
+    return success(c, {
+      user_id: userId,
+      tenant_id: tenantId,
+      role,
+      full_name: full_name.trim(),
+      status: actionMessage,
+    });
+  });
+
   app.get(`${prefix}/tasks`, async (c) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;

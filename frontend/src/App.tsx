@@ -43,6 +43,7 @@ import { TasksPage } from "./features/tasks/pages/TasksPage";
 import { HrCasesPage } from "./features/hr/pages/HrCasesPage";
 import { HrSurveysPage } from "./features/hr/pages/HrSurveysPage";
 import { CandidateAnalysisPage } from "./features/hr/candidates/pages/CandidateAnalysisPage";
+import { AddEmployeePage } from "./features/hr/pages/AddEmployeePage";
 import { DocsPage } from "./features/docs/pages/DocsPage";
 import { IntegrationsPage } from "./features/integrations/pages/IntegrationsPage";
 import { SettingsPage } from "./features/settings/pages/SettingsPage";
@@ -79,6 +80,7 @@ const NAV_HR: { key: string; module: string; icon: React.ReactNode; permission: 
   { key: "hrSurveys", module: "hr-surveys", icon: <ClipboardList size={18} />, permission: "hr" },
   { key: "hrIssues", module: "hr-cases", icon: <Briefcase size={18} />, permission: "hr" },
   { key: "hrCandidates", module: "hr-candidates", icon: <UserPlus size={18} />, permission: "hr" },
+  { key: "hrAddEmployee", module: "hr-add-employee", icon: <Plus size={18} />, permission: "hr" },
   { key: "hrReports", module: "reports", icon: <BarChart3 size={18} />, permission: "hr" },
 ];
 
@@ -188,6 +190,8 @@ export default function App() {
         return <HrSurveysPage tenant={tenant} />;
       case "hr-candidates":
         return <CandidateAnalysisPage />;
+      case "hr-add-employee":
+        return <AddEmployeePage tenant={tenant} />;
       case "docs":
         return <DocsPage tenant={tenant} />;
       case "integrations":
