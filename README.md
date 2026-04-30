@@ -1,326 +1,338 @@
+<div align="center">
+
 # AI Business Concierge
 
-AI Business Concierge – multi-tenant biznes operatsiyalari dashboardi. Inbox, vazifalar, HR, hujjatlar, hisobotlar va integratsiyalarni bitta interfeysda birlashtiradi. AI yordamchisi (Concierge) chat va tool orqali qo‘llab-quvvatlaydi.
+**O'zbekistondagi kichik biznes egalari uchun kundalik operatsion AI yordamchisi**
+
+[![Stack](https://img.shields.io/badge/stack-Supabase%20%2B%20React%20%2B%20Hono-4f46e5)](#technical-stack)
+[![Status](https://img.shields.io/badge/status-Phase%200%20yakuni-10b981)](docs/PLAN.md)
+[![License](https://img.shields.io/badge/license-Proprietary-64748b)](#license)
+
+🇺🇿 [O'zbekcha](#-ozbekcha) · 🇷🇺 [Русский](#-русский) · 🇬🇧 [English](#-english) · 🇯🇵 [日本語](#-日本語)
+
+</div>
 
 ---
 
-## Maqsad
+## 🇺🇿 O'zbekcha
 
-- **Auditoriya:** 50–200 xodimli SMB lar uchun AI-first SaaS
-- **AI = xodim:** AI COO + Shadow CFO – har kuni real qiymat berish
-- **Platform:** Gorizontal – integratsiyalar (Telegram, Email, AmoCRM, Google Sheets) orqali Unified Inbox + Tasks + HR + Docs + Reports
-- **Tillar:** UZ/RU bilingual
+### Loyiha haqida
 
----
+AI Business Concierge — O'zbekistondagi **allaqachon ishlayotgan** kichik biznes egalari uchun **kundalik operatsion boshqaruv** AI yordamchisi. Bank AI yechimlari (SQB va boshqalar) biznes BOSHLASHGA yordam beradi — biz biznes YURITISHGA, 365 kun, har kuni yordam beramiz.
 
-## Hozirgi holat
+### 3 ta modul
 
-### Tugallangan (MVP) ✅
+| Modul | Tavsif | Platforma |
+|---|---|---|
+| 🤖 **AI Maslahatchi** | Soliq, kadrlar, biznes savollar (KB + Claude) | Telegram + Web |
+| 📄 **AI Hujjatchi** | Shartnoma, ariza, buyruq generatsiya (PDF/DOCX) | Telegram + Web |
+| 🛒 **AI Sotuvchi** | Telegram savdo bot yaratish va boshqarish | Telegram |
 
-| Bo‘lim | Holat |
-|--------|-------|
-| Auth va rollar | Supabase Auth, multi-tenant, leader/hr/accounting/department_head/employee, `canAccess`, tenant switcher |
-| Modullar | Reports, Inbox, Tasks, HR, Docs, Integrations, AI Concierge, Settings |
-| R-001 | Resend email inbox webhook – qisman |
-| R-002 | Supabase Realtime – inbox, tasks |
-| R-015 | Vazifa biriktirish bildirishnomalari, tasdiqlash |
+### Mavjud modullar (Phase 0)
 
-### Qolgan (prioritet bo‘yicha)
+- **Manager Reports** — KPI, health score, trend grafiklar, AI Audit
+- **Unified Inbox** — Email/Telegram/CRM tarzidagi kategoriyali inbox
+- **Tasks & Compliance** — Board/list view, CRUD, biriktirish, tasdiqlash
+- **HR Pulse** — Cases, survey, nomzod tahlili (skeleton)
+- **Docs Hub** — Hujjatlar ro'yxati, qidiruv, indexlash
+- **Integrations** — Telegram, Email, AmoCRM
+- **AI Concierge** — Chat + tool: vazifa yaratish, hujjat qidirish, inbox tasniflash
+- **Settings** — Profil, til (uz / ru / en / ja)
 
-| ID | Talab |
-|----|-------|
-| R-003 | Billing / To‘lovlar |
-| R-004 | Audit log ko‘rinishi |
-| R-005 | Export/Import (Excel, CSV) |
-| R-006 | Push/bildirishnomalar |
-| R-007 | PWA / mobil |
+### Hujjatlar
 
-Batafsil: [REQUIREMENTS.md](docs/REQUIREMENTS.md), [ROADMAP.md](docs/ROADMAP.md)
+- 📋 [SPEC.md](docs/SPEC.md) — to'liq spetsifikatsiya
+- 🗓 [PLAN.md](docs/PLAN.md) — bosqichma-bosqich amalga oshirish rejasi
+- 🤝 [CLAUDE.md](docs/CLAUDE.md) — AI yordamchi uchun loyiha konteksti
+- 🔌 [CONNECTIONS.md](docs/CONNECTIONS.md) — Supabase, Anthropic, Telegram, Click, Payme sozlash
+- 🚀 [FIRST_PUSH.md](docs/FIRST_PUSH.md) — birinchi deploy qo'llanmasi
+- 👥 [HR_CANDIDATE_ANALYSIS.md](docs/HR_CANDIDATE_ANALYSIS.md) — nomzod tahlili modul dizayni
+- 📦 [DEPLOY_SETUP.md](docs/DEPLOY_SETUP.md) — umumiy deploy qo'llanma
+- ✅ [REQUIREMENTS.md](docs/REQUIREMENTS.md) · [ROADMAP.md](docs/ROADMAP.md)
 
----
-
-## Arxitektura qarorlari
-
-**Maqsad (Primary stack):** Laravel 12 + Supabase (Postgres, Auth optional, Storage) + Redis + Horizon
-
-**Hozirgi implementatsiya (FALLBACK stack):** MVP tezligi uchun React + Supabase Edge Functions (Deno, Hono) ishlatilmoqda. Supabase Postgres va Auth baribir, backend faqat Laravel o‘rniga Hono/Deno da.
-
-**Kelajak:** Agar Laravel + Supabase integratsiyasida bloklovchi muammo bo‘lmasa, backend Laravel ga o‘tkazilishi mumkin. Prinsiplar o‘zgarmaydi: multi-tenant, audit, AI tool-calling, externalized prompts.
-
----
-
-## Loyiha tuzilishi (Folder & File Structure)
-
-```
-AI Business Concierge/
-├── docs/                          # Hujjatlar
-├── frontend/                      # React frontend
-├── resources/                     # AI promptlar va resurslar
-├── supabase/                      # Backend va DB
-└── README.md
-```
-
-### `docs/` – Hujjatlar
-
-| Fayl | Vazifa |
-|------|--------|
-| `DEPLOY_SETUP.md` | Push va deploy qo'llanmasi (GitHub, Supabase, Netlify) |
-| `REQUIREMENTS.md` | Talablar, kelajakdagi funksiyalar, prioritetlar |
-| `ROADMAP.md` | Bosqichlar va reja |
-| `DEMO_USERS.md` | Demo hisoblar va test ma'lumotlari |
-| `R001_EMAIL_SETUP.md` | Resend email inbox sozlash |
-| `R002_REALTIME_SETUP.md` | Supabase Realtime sozlash |
-| `R015_TASK_NOTIFICATIONS.md` | Vazifa biriktirish bildirishnomalari |
-
----
-
-### `frontend/` – React frontend (Vite + TypeScript)
-
-```
-frontend/
-├── public/                 # Statik fayllar (favicon, index.html)
-├── src/
-│   ├── App.tsx             # Asosiy layout, navigatsiya, modullar
-│   ├── main.tsx            # Kirish nuqtasi
-│   ├── env.d.ts            # TypeScript env tipi
-│   │
-│   ├── app/                # Global sozlamalar va konfiguratsiya
-│   │   ├── config.ts       # API URL, Supabase project ID
-│   │   ├── i18n.ts         # Tarjimalar (uz, ru, en, ja)
-│   │   ├── queryClient.ts  # React Query client
-│   │   ├── router.tsx      # React Router sozlamalari
-│   │   ├── store.ts        # Global state (Zustand)
-│   │   └── providers/
-│   │       ├── AppProviders.tsx      # Barcha providerlar
-│   │       ├── I18nProvider.tsx      # Ko‘p tillilik
-│   │       └── RealtimeAuthSync.tsx  # Auth va realtime sinxronizatsiya
-│   │
-│   ├── features/           # Feature-based modullar
-│   │   ├── auth/           # Autentifikatsiya
-│   │   ├── docs/           # Hujjatlar (Docs Hub)
-│   │   ├── hr/             # HR Pulse
-│   │   ├── inbox/          # Unified Inbox
-│   │   ├── integrations/  # Integratsiyalar
-│   │   ├── notifications/  # Bildirishnomalar
-│   │   ├── reports/        # Manager Reports
-│   │   ├── settings/       # Sozlamalar
-│   │   ├── tasks/          # Vazifalar & Compliance
-│   │   └── tenants/        # Tenant boshqaruvi
-│   │
-│   ├── shared/             # Umumiy komponentlar va utilitilar
-│   │   ├── components/     # Qayta ishlatiladigan UI
-│   │   ├── hooks/          # Umumiy hooklar
-│   │   ├── lib/            # API client, Supabase, AI
-│   │   ├── types/          # Umumiy tiplar
-│   │   └── ui/             # Radix UI komponentlari
-│   │
-│   ├── styles/             # Global CSS
-│   └── utils/              # Yordamchi funksiyalar
-│
-├── index.html
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-├── postcss.config.mjs
-└── eslint.config.js
-```
-
-#### `frontend/src/features/` – Modullar tuzilishi
-
-Har bir modul quyidagi strukturaga ega:
-
-```
-features/<module>/
-├── api/           # API chaqiruvlari
-├── components/    # Modul komponentlari
-├── hooks/         # Modul hooklari
-├── pages/         # Sahifalar
-└── types.ts       # Modul tiplari
-```
-
-| Modul | Vazifa |
-|-------|--------|
-| **auth** | Login, rol, tenant konteksti, `AuthContext`, `ProtectedLayout` |
-| **docs** | Hujjatlar ro‘yxati, qidiruv, batafsil ko‘rinish, index |
-| **hr** | HR cases, survey form, case detail |
-| **inbox** | Unified inbox, filtrlar, realtime yangilanishlar |
-| **integrations** | Telegram, Email, AmoCRM integratsiyalari |
-| **notifications** | Vazifa biriktirish bildirishnomalari, dropdown |
-| **reports** | Dashboard KPIs, hisobot yuklash, AI Audit |
-| **settings** | Profil, til almashtirish |
-| **tasks** | Board/list view, CRUD, assignee, tasdiqlash |
-| **tenants** | Tenant switcher, tenant sozlamalari |
-
-#### `frontend/src/shared/` – Umumiy resurslar
-
-| Papka/Fayl | Vazifa |
-|------------|--------|
-| **components/** | `AIChat`, `Topbar`, `Sidebar`, `Layout`, `ErrorState`, `EmptyState`, `ConfirmDialog`, `LoadingSpinner` |
-| **hooks/** | `useToast`, `useAuth`, `useDebounce` |
-| **lib/** | `apiClient`, `aiApi`, `supabase`, `formatters`, `errorHandling`, `i18nHelpers` |
-| **types/** | `common.ts` – umumiy tiplar |
-| **ui/** | Radix UI asosidagi komponentlar (button, dialog, select, input, table, tabs, va boshqalar) |
-
----
-
-### `resources/` – AI promptlar
-
-| Fayl | Vazifa |
-|------|--------|
-| `ai_coo.uz.v1.md` | AI COO roli |
-| `doc_searcher.ru.v1.md` | Hujjat qidiruv prompti |
-| `hr_summarizer.uz.v1.md` | HR xulosa prompti |
-| `inbox_classifier.*.v1.md` | Inbox tasniflash (uz, ru) |
-| `report_generator.uz.v1.md` | Hisobot generatsiya |
-| `shadow_cfo.uz.v1.md` | Shadow CFO roli |
-| `task_planner.ru.v1.md` | Vazifa rejalash prompti |
-
----
-
-### `supabase/` – Backend va ma'lumotlar bazasi
-
-```
-supabase/
-├── schema.sql              # Asosiy DB sxemasi (tenants, tasks, inbox, docs, notifications)
-├── migrations/             # Migratsiya fayllari
-│   ├── 20250213000000_task_notifications.sql
-│   └── 20260205_r002_realtime.sql
-└── functions/
-    ├── bright-api/         # Supabase Edge Function gateway
-    │   └── index.ts        # Gateway kirish nuqtasi
-    └── server/             # Asosiy API (Hono)
-        └── index.ts        # Barcha endpointlar
-```
-
-#### `supabase/schema.sql` – Asosiy jadvallar
-
-| Jadval | Vazifa |
-|--------|--------|
-| `tenants` | Tenantlar (id, name, plan) |
-| `user_tenants` | Foydalanuvchi–tenant bog‘lanishi, rol, full_name |
-| `tasks` | Vazifalar (title, status, priority, assignee, due_date) |
-| `notifications` | Bildirishnomalar (task_assigned va boshqalar) |
-| `inbox_items` | Inbox xabarlar |
-| `docs` | Hujjatlar |
-| `doc_chunks` | Hujjat bo‘laklari (search uchun) |
-| `integrations` | Integratsiya sozlamalari |
-
----
-
-## Funksionallik
-
-- **Manager Reports** – KPI, health score, trend grafik, AI insights, hisobot yuklash (CSV), AI Audit
-- **Unified Inbox** – Email/Telegram/CRM uslubidagi inbox, kategoriyalar
-- **Tasks & Compliance** – Board va list view, CRUD, assignee, tasdiqlash, bildirishnomalar
-- **HR Pulse** – Cases, survey yuborish
-- **Docs Hub** – Hujjatlar ro‘yxati, qidiruv, index
-- **Integrations** – Telegram, Email, AmoCRM sozlamalari
-- **AI Concierge** – Chat, tool orqali vazifa yaratish, hujjat qidiruv, inbox tasniflash
-- **Settings** – Profil, til (uz, ru, en, ja)
-
----
-
-## Texnik stack
-
-**Hozirgi implementatsiya:**
-
-| Qatlam | Texnologiya |
-|--------|-------------|
-| Frontend | React 18, TypeScript, Vite, Tailwind CSS, Radix UI, Recharts, Framer Motion |
-| Backend | Supabase Edge Function (Deno), Hono |
-| DB | Supabase Postgres |
-| Auth | Supabase Auth |
-| Deploy | Netlify (frontend), Supabase (backend) |
-
-**Maqsad (kelajakda):** Laravel 12, Redis, Horizon, to‘liq audit/observability
-
----
-
-## Lokal ishga tushirish
-
-### Frontend
+### Tezkor boshlash
 
 ```bash
-cd frontend
-npm i
-npm run dev
+git clone git@github.com:sherzot/ai-business-concierge.git
+cd ai-business-concierge
+
+# Frontend
+cd frontend && cp .env.example .env  # qiymatlarni to'ldiring
+npm install && npm run dev
+
+# Backend (Supabase Edge Functions)
+cd ..
+supabase link --project-ref <your-ref>
+supabase db push
+supabase functions deploy server
+supabase functions deploy bright-api
 ```
 
-### Backend
-
-1. Supabase SQL Editor orqali `supabase/schema.sql` va `migrations/` fayllarini bajarish
-2. Edge Function deploy: `supabase functions deploy bright-api`
-
-### Environment o‘zgaruvchilari
-
-**Frontend** (`frontend/.env` yoki Netlify):
-
-- `VITE_SUPABASE_PROJECT_ID` – Supabase loyiha ID
-- `VITE_SUPABASE_ANON_KEY` – Supabase anon key
-- `VITE_API_BASE_URL` – API base URL (ixtiyoriy)
-- `VITE_SENTRY_DSN` – Sentry (ixtiyoriy)
-
-**Backend** (Supabase Edge Function secrets):
-
-- `SB_URL` / `SUPABASE_URL`
-- `SB_SERVICE_ROLE_KEY` / `SUPABASE_SERVICE_ROLE_KEY`
-- `SB_ANON_KEY` / `SUPABASE_ANON_KEY` (ixtiyoriy)
-- `OPENAI_API_KEY`
-- `OPENAI_MODEL` (ixtiyoriy, default: `gpt-4o-mini`)
-- `RESEND_WEBHOOK_SECRET` (R-001 email uchun)
+To'liq qadamlar — [docs/FIRST_PUSH.md](docs/FIRST_PUSH.md).
 
 ---
 
-## Deploy
+## 🇷🇺 Русский
 
-**Supabase (Edge Function):**
+### О проекте
 
-- `supabase/functions/server/index.ts` dan deploy
-- Base URL: `https://<project-id>.supabase.co/functions/v1/bright-api/...`
+AI Business Concierge — это AI-ассистент для **повседневного операционного управления** для **уже работающих** малых бизнесов в Узбекистане. Банковские AI-решения (SQB и другие) помогают **начать** бизнес — мы помогаем **вести** бизнес, 365 дней, каждый день.
 
-**Netlify (Frontend):**
+### 3 модуля
 
-- Base directory: `frontend`
-- Build: `npm run build`
-- Publish: `dist`
+| Модуль | Описание | Платформа |
+|---|---|---|
+| 🤖 **AI-Консультант** | Налоги, кадры, бизнес-вопросы (KB + Claude) | Telegram + Web |
+| 📄 **AI-Документовод** | Договоры, заявления, приказы (PDF/DOCX) | Telegram + Web |
+| 🛒 **AI-Продавец** | Создание и управление Telegram-ботами продаж | Telegram |
+
+### Существующие модули (Phase 0)
+
+- **Manager Reports** — KPI, health score, тренды, AI Audit
+- **Unified Inbox** — единый ящик с категориями (Email/Telegram/CRM)
+- **Tasks & Compliance** — board/list, CRUD, назначение, подтверждение
+- **HR Pulse** — кейсы, опросы, анализ кандидатов (скелет)
+- **Docs Hub** — список документов, поиск, индексация
+- **Integrations** — Telegram, Email, AmoCRM
+- **AI Concierge** — чат с инструментами
+- **Settings** — профиль, язык (uz / ru / en / ja)
+
+### Документация
+
+- 📋 [SPEC.md](docs/SPEC.md) — полная спецификация
+- 🗓 [PLAN.md](docs/PLAN.md) — план поэтапной реализации
+- 🤝 [CLAUDE.md](docs/CLAUDE.md) — контекст проекта для AI
+- 🔌 [CONNECTIONS.md](docs/CONNECTIONS.md) — внешние сервисы
+- 🚀 [FIRST_PUSH.md](docs/FIRST_PUSH.md) — руководство по первому деплою
+
+### Быстрый старт
+
+```bash
+git clone git@github.com:sherzot/ai-business-concierge.git
+cd ai-business-concierge
+cd frontend && cp .env.example .env && npm install && npm run dev
+```
+
+Полное руководство — [docs/FIRST_PUSH.md](docs/FIRST_PUSH.md).
 
 ---
 
-## API endpointlar
+## 🇬🇧 English
 
-Barcha endpointlar `/v1/*` ostida, tenant konteksti talab qilinadi:
+### About
 
-- `X-Tenant-Id` header
-- yoki `Authorization: Bearer <jwt>` va `tenant_id` claim
+AI Business Concierge — a daily operational AI assistant for **already-running** small businesses in Uzbekistan. Bank AI solutions (SQB and others) help businesses **start** — we help businesses **run**, 365 days a year, every day.
 
-| Method | Endpoint | Vazifa |
-|--------|----------|--------|
+### Three modules
+
+| Module | Description | Platform |
+|---|---|---|
+| 🤖 **AI Consultant** | Tax, HR, business Q&A (KB + Claude) | Telegram + Web |
+| 📄 **AI Doc Generator** | Contracts, applications, orders (PDF/DOCX) | Telegram + Web |
+| 🛒 **AI Salesperson** | Build and manage Telegram sales bots | Telegram |
+
+### Existing modules (Phase 0)
+
+- **Manager Reports** — KPIs, health score, trends, AI Audit
+- **Unified Inbox** — categorised inbox across Email/Telegram/CRM
+- **Tasks & Compliance** — board/list views, CRUD, assignment, sign-off
+- **HR Pulse** — cases, surveys, candidate analysis (skeleton)
+- **Docs Hub** — document list, search, indexing
+- **Integrations** — Telegram, Email, AmoCRM
+- **AI Concierge** — chat with tools (create task, search docs, classify inbox)
+- **Settings** — profile, language (uz / ru / en / ja)
+
+### Documentation
+
+- 📋 [SPEC.md](docs/SPEC.md) — full specification
+- 🗓 [PLAN.md](docs/PLAN.md) — phased implementation plan
+- 🤝 [CLAUDE.md](docs/CLAUDE.md) — project context for AI assistants
+- 🔌 [CONNECTIONS.md](docs/CONNECTIONS.md) — external services setup
+- 🚀 [FIRST_PUSH.md](docs/FIRST_PUSH.md) — first-deploy guide
+- 👥 [HR_CANDIDATE_ANALYSIS.md](docs/HR_CANDIDATE_ANALYSIS.md) — candidate analysis module design
+
+### Quick start
+
+```bash
+git clone git@github.com:sherzot/ai-business-concierge.git
+cd ai-business-concierge
+cd frontend && cp .env.example .env && npm install && npm run dev
+```
+
+Full guide — [docs/FIRST_PUSH.md](docs/FIRST_PUSH.md).
+
+---
+
+## 🇯🇵 日本語
+
+### プロジェクトについて
+
+AI Business Concierge は、ウズベキスタンの**既に運営中**の中小企業向け**日常業務管理 AI アシスタント**です。銀行系 AI ソリューション（SQB 等）は事業の**開始**を支援しますが、当サービスは事業の**運営**を 365 日、毎日サポートします。
+
+### 3 つのモジュール
+
+| モジュール | 説明 | プラットフォーム |
+|---|---|---|
+| 🤖 **AI コンサルタント** | 税務・人事・経営の質問（KB + Claude） | Telegram + Web |
+| 📄 **AI 文書ジェネレーター** | 契約書・申請書・命令書（PDF/DOCX） | Telegram + Web |
+| 🛒 **AI セールスエージェント** | Telegram 販売ボットの作成と運用 | Telegram |
+
+### 既存モジュール（Phase 0）
+
+- **Manager Reports** — KPI、ヘルススコア、トレンド、AI 監査
+- **Unified Inbox** — Email/Telegram/CRM 統合受信箱
+- **Tasks & Compliance** — ボード/リスト表示、CRUD、担当割当、承認
+- **HR Pulse** — 案件、アンケート、候補者分析（スケルトン）
+- **Docs Hub** — 文書一覧、検索、インデックス
+- **Integrations** — Telegram、Email、AmoCRM
+- **AI Concierge** — ツール付きチャット
+- **Settings** — プロフィール、言語（uz / ru / en / ja）
+
+### ドキュメント
+
+- 📋 [SPEC.md](docs/SPEC.md) — 完全な仕様書
+- 🗓 [PLAN.md](docs/PLAN.md) — フェーズ別実装計画
+- 🤝 [CLAUDE.md](docs/CLAUDE.md) — AI アシスタント向けコンテキスト
+- 🔌 [CONNECTIONS.md](docs/CONNECTIONS.md) — 外部サービス
+- 🚀 [FIRST_PUSH.md](docs/FIRST_PUSH.md) — 初回デプロイガイド
+
+### クイックスタート
+
+```bash
+git clone git@github.com:sherzot/ai-business-concierge.git
+cd ai-business-concierge
+cd frontend && cp .env.example .env && npm install && npm run dev
+```
+
+完全ガイド — [docs/FIRST_PUSH.md](docs/FIRST_PUSH.md)。
+
+---
+
+<a id="technical-stack"></a>
+
+## Technical Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 18 + TypeScript + Vite + Tailwind CSS + Radix UI + Recharts + Framer Motion |
+| State | Zustand + native React hooks (no React Query yet) |
+| Backend | Supabase Edge Functions (Deno) + Hono framework |
+| Database | Supabase PostgreSQL + pgvector |
+| Auth | Supabase Auth (multi-tenant, JWT) |
+| AI (primary, 80%) | Claude Haiku 3.5 (`claude-3-5-haiku-20241022`) |
+| AI (deep, 20%) | Claude Sonnet 4.5 (`claude-sonnet-4-5`) |
+| Embeddings | OpenAI `text-embedding-3-small` (KB only) |
+| Telegram | grammY framework (Deno) |
+| Payments | Click API + Payme API (Phase 3) |
+| Hosting | Netlify (frontend) + Supabase (backend) |
+| Monitoring | Sentry |
+| i18n | uz, ru, en, ja |
+
+> **Stack note:** The project runs entirely on **Supabase + Hono (Deno)**. There is no Laravel, Express, NestJS, or Redis dependency. Earlier roadmap drafts mentioned Laravel as an aspirational target — that direction has been formally abandoned in favour of staying on Supabase Edge Functions.
+
+## Project structure
+
+```
+ai-business-concierge/
+├── docs/                       # Specification & guides
+│   ├── CLAUDE.md
+│   ├── SPEC.md
+│   ├── PLAN.md
+│   ├── CONNECTIONS.md
+│   ├── FIRST_PUSH.md
+│   ├── HR_CANDIDATE_ANALYSIS.md
+│   ├── DEPLOY_SETUP.md
+│   ├── REQUIREMENTS.md
+│   └── ROADMAP.md
+│
+├── frontend/                   # React + Vite + Tailwind
+│   └── src/
+│       ├── app/                # Global config, providers, router, i18n
+│       ├── features/           # Feature-based modules:
+│       │   ├── auth/
+│       │   ├── docs/
+│       │   ├── hr/
+│       │   │   └── candidates/  # HR Candidate Analysis (skeleton)
+│       │   ├── inbox/
+│       │   ├── integrations/
+│       │   ├── notifications/
+│       │   ├── reports/
+│       │   ├── settings/
+│       │   ├── tasks/
+│       │   └── tenants/
+│       ├── shared/             # Common UI, hooks, lib (apiClient, supabase, AI)
+│       └── styles/             # globals.css, theme.css, theme-indigo-slate.css
+│
+├── supabase/
+│   ├── migrations/             # PostgreSQL migrations (schema, RLS, hardening)
+│   └── functions/
+│       ├── server/             # Main Hono API (~1700 lines)
+│       │   ├── index.ts
+│       │   ├── routes/         # hr-candidate.ts, …
+│       │   └── services/       # llm-router, knowledge-base, hr-candidate, usage-tracking
+│       ├── bright-api/         # Frontend gateway (re-exports server)
+│       └── _shared/            # logging, helpers
+│
+└── resources/
+    ├── prompts/                # AI prompts (uz/ru): ai_coo, shadow_cfo, inbox_classifier, …
+    ├── knowledge-base/         # Tax, labour code Q&A (Phase 0.2)
+    └── templates/              # Document templates (Phase 2)
+```
+
+## Modules in `frontend/src/features/`
+
+| Module | Purpose |
+|---|---|
+| **auth** | Login, role, tenant context, `AuthContext`, `ProtectedLayout` |
+| **docs** | Document list, search, detail view, indexing |
+| **hr** | HR cases, surveys; `hr/candidates/` — Candidate analysis (skeleton) |
+| **inbox** | Unified inbox, filters, real-time updates |
+| **integrations** | Telegram, Email, AmoCRM settings |
+| **notifications** | Task assignment notifications, dropdown |
+| **reports** | Dashboard KPIs, report download, AI Audit |
+| **settings** | Profile, language switcher |
+| **tasks** | Board/list view, CRUD, assignee, acknowledge |
+| **tenants** | Tenant switcher, tenant settings |
+
+## Database tables (Phase 0 complete)
+
+| Table | Purpose |
+|---|---|
+| `tenants`, `user_tenants` | Multi-tenant + role mapping |
+| `tasks`, `notifications`, `inbox_items` | Existing modules |
+| `documents`, `doc_chunks` | Docs Hub + search |
+| `subscriptions`, `payments` | Billing (Phase 3) |
+| `ai_conversations`, `ai_messages`, `ai_feedback` | AI chat history + feedback |
+| `doc_templates`, `doc_generated` | Document generation (Phase 2) |
+| `sales_bots`, `catalogs`, `orders` | Telegram sales bots (Phase 3) |
+| `knowledge_base` | pgvector-backed RAG (Phase 0.2) |
+| `usage_tracking` | Per-tenant per-day usage limits |
+| `audit_logs`, `request_logs` | Observability |
+
+All tables have RLS enabled with full select/insert/update/delete policies (see `20260429_phase0_rls_complete.sql`).
+
+## API endpoints (subset)
+
+All endpoints under `/v1/*`, require tenant context (`X-Tenant-Id` header or JWT `tenant_id` claim):
+
+| Method | Endpoint | Purpose |
+|---|---|---|
 | GET | `/health` | Health check |
-| GET | `/auth/me` | Joriy foydalanuvchi |
-| GET | `/dashboard` | Dashboard statistikalar |
-| GET | `/inbox` | Inbox ro‘yxati |
-| POST | `/inbox/ingest` | Inbox import |
-| POST | `/inbox/webhook/resend` | Resend webhook |
-| GET | `/tenants/:id/members` | Tenant a'zolari |
-| GET | `/tasks` | Vazifalar ro‘yxati |
-| POST | `/tasks` | Vazifa yaratish |
-| PATCH | `/tasks/:id` | Vazifa yangilash |
-| DELETE | `/tasks/:id` | Vazifa o‘chirish |
-| POST | `/tasks/:id/acknowledge` | Vazifani tasdiqlash |
-| GET | `/notifications` | Bildirishnomalar |
-| PATCH | `/notifications/:id/read` | Bildirishnomani o‘qilgan qilish |
-| POST | `/ai/chat` | AI chat |
-| GET | `/ai/tools` | AI tool registry |
-| GET | `/docs` | Hujjatlar ro‘yxati |
-| GET | `/docs/:id` | Hujjat batafsil |
-| POST | `/docs/index` | Hujjat indexlash |
-| POST | `/docs/search` | Hujjat qidiruv |
-| GET | `/hr/cases` | HR cases |
-| POST | `/hr/surveys` | HR survey yuborish |
-| GET | `/integrations` | Integratsiyalar |
-| POST | `/integrations/:id` | Integratsiya yangilash |
+| GET | `/auth/me` | Current user |
+| GET | `/dashboard` | Dashboard stats |
+| GET, POST | `/inbox`, `/inbox/ingest` | Inbox + ingest |
+| GET, POST, PATCH, DELETE | `/tasks`, `/tasks/:id` | Task CRUD |
+| POST | `/tasks/:id/acknowledge` | Acknowledge task |
+| GET, PATCH | `/notifications`, `/notifications/:id/read` | Notifications |
+| POST | `/ai/chat` | AI chat (Claude + KB RAG) |
+| POST | `/ai/feedback` | 👍/👎 feedback |
+| GET | `/ai/tools` | Tool registry |
+| GET, POST | `/docs`, `/docs/index`, `/docs/search` | Docs |
+| GET, POST | `/hr/cases`, `/hr/surveys` | HR |
+| POST | `/hr/candidates/analyze` | Candidate analysis (501 stub) |
+| GET, POST | `/integrations`, `/integrations/:id` | Integrations |
 
-Standart javob:
+Standard response envelope:
 
 ```json
 {
@@ -329,28 +341,44 @@ Standart javob:
 }
 ```
 
----
+## Status (2026-04-29)
 
-## Hujjatlar
+✅ **Phase 0 complete** — DB schema (12 new tables), RLS policies, security hardening, LLM Router (Claude Haiku/Sonnet), Knowledge Base (pgvector + RAG), AI feedback, Indigo + Slate theme tokens, env templates, CONNECTIONS.md, FIRST_PUSH.md.
 
-- [DEPLOY_SETUP.md](docs/DEPLOY_SETUP.md) – Push va deploy qo'llanmasi (GitHub, Supabase, Netlify)
-- [REQUIREMENTS.md](docs/REQUIREMENTS.md) – Talablar va kelajakdagi funksiyalar
-- [ROADMAP.md](docs/ROADMAP.md) – Bosqichlar va reja
-- [DEMO_USERS.md](docs/DEMO_USERS.md) – Demo hisoblar
-- [R001_EMAIL_SETUP.md](docs/R001_EMAIL_SETUP.md) – Resend email inbox sozlash
-- [R002_REALTIME_SETUP.md](docs/R002_REALTIME_SETUP.md) – Supabase Realtime sozlash
-- [R015_TASK_NOTIFICATIONS.md](docs/R015_TASK_NOTIFICATIONS.md) – Vazifa bildirishnomalari
+⏳ **Phase 1 (next)** — Telegram MVP: grammY bot setup, AI Maslahatchi via Telegram, 50 beta users.
 
----
+See [docs/PLAN.md](docs/PLAN.md) for the full roadmap.
 
-## Security yangilanishi: `tenant_daily_stats` (RLS + SECURITY INVOKER)
+## Local development
 
-- **Muammo:** `public.tenant_daily_stats` view Supabase Security Advisor bo‘yicha `SECURITY DEFINER` sifatida flag qilingan, bu RLS siyosatlari o‘rniga view owner privilegiyalaridan foydalanishi va multi-tenant isolation’ni buzishi mumkin edi.
-- **Yechim:** yangi migration qo‘shildi – `supabase/migrations/20260304_fix_tenant_daily_stats_security.sql`, u:
-  - `public.tenants` jadvali uchun `tenants_select_own` RLS policy’ni yaratadi (authenticated user faqat `user_tenants` orqali bog‘langan tenant(lar)ini ko‘radi);
-  - `public.tenant_daily_stats` view’ini `SECURITY INVOKER` semantics bilan qayta yaratadi;
-  - view uchun `authenticated` roliga `SELECT` ruxsatini beradi (pastdagi RLS baribir ishlaydi).
-- **Prodga qo‘llash:** Supabase Dashboard → **SQL Editor** → **New query** → ushbu migration faylidagi SQL ni to‘liq nusxalab **Run** qiling, so‘ng:
-  - `alter view public.tenant_daily_stats set (security_invoker = true);`
-  - Security Advisor sahifasida **Refresh** qilib, `public.tenant_daily_stats` bo‘yicha `Security Definer View` alerti yo‘qligini tekshiring.
-- **Tenant isolation:** `tenant_daily_stats` endi foydalanuvchi kontekstida bajariladi (`SECURITY INVOKER`) va `tenants`, `tasks`, `inbox_items` ustidagi RLS siyosatlari orqali faqat o‘z tenant(lar)i uchun statistikani qaytaradi.
+### Frontend
+
+```bash
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
+```
+
+### Backend (Supabase Edge Functions)
+
+```bash
+supabase link --project-ref <your-ref>
+supabase db push
+supabase functions deploy server
+supabase functions deploy bright-api
+```
+
+Required environment variables — see `frontend/.env.example` and `supabase/.env.example`.
+
+## Security note — `tenant_daily_stats` and `phase0_rls_health`
+
+Both views are explicitly created with `with (security_invoker = true)` so RLS policies of the calling user apply, not the view owner's. See `supabase/migrations/20260429120000_security_hardening.sql`.
+
+## Contributing
+
+This is a private project. Repository owner: [@sherzot](https://github.com/sherzot).
+
+## License
+
+Proprietary. © 2026 Sher Musurmonov. All rights reserved.

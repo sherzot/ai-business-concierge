@@ -241,6 +241,202 @@ Phase 5: Scale .................... Hafta 18-24  (7 hafta)
 
 ### 5.4 Regional ekspansiya
 - [ ] Qozog'iston, Qirg'iziston bozori tadqiqoti
+- [ ] **Yapon bozori tadqiqoti** — `ja` lokalizatsiya allaqachon bor (HR Candidate Analysis modulidan)
+
+---
+
+## QO'SHIMCHA TEXNIK BACKLOG — 17 ta strategik talab
+
+> Yuklangan `ai-business-concierge-promptlari.md` (2026-04-30) dan kelib chiqqan strategik talablar.
+> Har biri PLAN.md ichidagi tegishli phase'ga taqsimlangan.
+
+### Phase 0 — Foundation (qoldi)
+
+#### B-005 · Database optimallashtirish (deleted_at + indexlar)
+- [ ] Har asosiy jadvalga `deleted_at timestamptz null` (soft delete)
+- [ ] Indexlar:
+  - `tasks (tenant_id, status, deleted_at)`
+  - `inbox_items (tenant_id, created_at, deleted_at)`
+  - `notifications (user_id, read_at, created_at)`
+- [ ] Full-text search: `documents` jadvalida GIN index (uz va ru tsvector)
+- [ ] Partial index: `where deleted_at is null`
+- [ ] Migration fayl: `20260501_db_optimization.sql`
+
+#### B-006 · Audit log triggerlari
+- [ ] Mavjud `audit_logs` jadvaliga schema audit:
+  - `id, table_name, record_id, action, old_data jsonb, new_data jsonb`
+  - `performed_by uuid, tenant_id text, created_at timestamptz`
+- [ ] Postgres trigger'lar: `tasks`, `inbox_items`, `documents`, `hr_cases`
+- [ ] Edge Function: `GET /v1/audit-logs` (faqat `leader|hr_admin|super_admin`)
+- [ ] 90 kunlik retention — Postgres `pg_cron` yoki Supabase scheduled function
+
+#### B-011 · Structured logging middleware
+- [ ] Hono middleware: har request uchun structured JSON log
+  - `timestamp, trace_id, tenant_id, user_id, method, path, duration_ms, status, error`
+- [ ] Levels: DEBUG, INFO, WARN, ERROR
+- [ ] Storage: Supabase `request_logs` jadval (allaqachon mavjud)
+- [ ] 2s+ query'larga avtomat WARN
+
+### Phase 1 — Telegram MVP (Hafta 3-5)
+
+#### B-007 · AI Prompt injection protection
+- [ ] Input sanitizatsiya: blocklist (`ignore previous instructions`, `system prompt`, `you are now`, `</system>`, `[INST]`, ...)
+- [ ] Input validation: max 4000 token, HTML/script tag strip
+- [ ] Prompt layering: foydalanuvchi xabari `User message:` blokida ajratilgan
+- [ ] Rate limit: per user 10 xabar/daqiqa
+- [ ] OpenAI Moderation API: toxic / hate / violence flag
+- [ ] Implementatsiya: `services/ai-safety.ts` + `routes/ai.ts` middleware
+
+#### B-008 · AI cost tracking dashboard (per tenant)
+- [x] `ai_messages` jadval va cost ustun mavjud (Phase 0)
+- [ ] `GET /v1/ai/usage` — tenant uchun aggregat (kun/oy)
+- [ ] Plan limitlari: Free $5/oy, Pro $50/oy, Company cheksiz
+- [ ] Limit oshganda chat'da "Limit tugadi, planni yangilang" xabari
+- [ ] Admin dashboardda usage grafigi
+
+#### B-014 · Semantic search (RAG)
+- [x] pgvector + embedding pipeline mavjud (Phase 0.2)
+- [ ] AI chat'da explicit "Hujjatlar orasida qidir" tool
+- [ ] Embedding caching: bir xil query → in-memory map (5 min TTL)
+- [ ] Top-5 chunks + citation in response
+
+### Phase 2 — Hujjatchi + Landing (Hafta 6-9)
+
+#### B-001 · Unit tests (Vitest + RTL)
+- [ ] `vitest`, `@testing-library/react`, `jsdom` qo'shish (`frontend/package.json`)
+- [ ] Module 1: `features/tasks/` — task CRUD + assignee notification
+- [ ] Module 2: `features/inbox/` — kategoriya tasniflash + tenant isolation
+- [ ] Mocks: `supabase` client, `useAuth`, `toast`
+- [ ] Coverage threshold: 80%+ (CI'da fail bo'ladi)
+- [ ] Sample test cases:
+  - Task yaratganda assignee'ga notification ketadi
+  - Boshqa tenant task'i ko'rinmaydi
+  - Due_date o'tgan task overdue status oladi
+
+#### B-013 · OpenAPI auto-generation
+- [ ] `@hono/zod-openapi` + `scalar` o'rnatish
+- [ ] Har endpoint uchun Zod schema (request body + response 200/400/401/403/500)
+- [ ] Bearer JWT va `X-Tenant-Id` headerlar docs'da ko'rsatilgan
+- [ ] Misol request/response har endpoint'da
+- [ ] Endpoint: `GET /docs/api` (Scalar UI)
+
+#### B-012 · Health check (kengaytirilgan)
+- [ ] `GET /health` ni quyidagilarni tekshirsin:
+  - Postgres `select 1` (latency_ms)
+  - Supabase Auth ping
+  - Anthropic API ping (cheap, faqat list models)
+  - OpenAI API ping (embedding endpoint)
+  - Resend API status
+  - Realtime subscription status
+- [ ] Output: `{"status": "healthy|degraded|unhealthy", "checks": {...}, "timestamp"}`
+- [ ] Degraded → 200 (monitoring dashboard alert qiladi)
+
+### Phase 3 — Savdo Bot + To'lov (Hafta 10-13)
+
+#### B-003 · Async AI job pattern
+- [ ] `ai_jobs` jadvali: `id, tenant_id, user_id, type, status, params jsonb, result jsonb, error, created_at, completed_at`
+- [ ] `POST /v1/ai/jobs` → `{job_id, status: "pending"}` (darhol)
+- [ ] Background processing — Edge Function ichida `EdgeRuntime.waitUntil()` yoki Supabase scheduled function
+- [ ] Realtime broadcast: `ai_jobs` row update → frontend subscribe
+- [ ] `GET /v1/ai/jobs/:id` — status + natija
+- [ ] Timeout: 50s'gacha sync javob, undan keyin async route'ga tushadi
+- [ ] **Kerak:** uzoq hisobotlar, HR Candidate Analysis (deep mode), bulk doc generation
+
+#### B-004 · Rate limiting (sliding window)
+- [ ] `rate_limits` jadvali: `(tenant_id, user_id, endpoint, count, window_start, reset_at)`
+- [ ] Limitlar:
+  - Tenant: 100 AI request/soat
+  - User: 10 AI request/daqiqa
+  - IP (auth'siz): 30 request/daqiqa
+- [ ] Hono middleware: har request'da check
+- [ ] Sliding window algorithm (deletion + insert har so'rovda)
+- [ ] 429 + `Retry-After` header
+- [ ] **Eslatma:** `services/usage-tracking.ts` mavjud (Phase 0) — uni kengaytiramiz
+
+#### B-010 · Usage-based billing
+- [ ] `plans` jadval (Free/Pro $29/Enterprise $99) — `subscriptions` da plan column allaqachon bor
+- [ ] Limit ma'lumotlari: task count, AI credits, storage GB, user count
+- [ ] Usage aggregation: `tasks.count`, `ai_usage.sum`, `storage.size`
+- [ ] Billing cycle: oy boshidan oxirigacha
+- [ ] Click + Payme integration (Phase 3 da yozilgan)
+- [ ] Grace period: to'lov o'tmagan tenant `frozen` status (3 kun)
+
+#### B-017 · Resend webhook idempotency
+- [ ] `webhook_events` jadval: `idempotency_key, payload, processed_at, status`
+- [ ] Bir xil `idempotency_key` (Resend signature) → 200 lekin re-process emas
+- [ ] Failed event'lar uchun retry: 3 marta exponential backoff
+- [ ] Admin dashboard: failed queue
+- [ ] Signature verification: `RESEND_WEBHOOK_SECRET` HMAC
+
+### Phase 4 — Admin + Polish (Hafta 14-17)
+
+#### B-002 · E2E tests (Playwright)
+- [ ] `@playwright/test` o'rnatish
+- [ ] Test scenarios:
+  1. Login → Dashboard → Task yaratish → AI Chat orqali task yaratish → Logout
+  2. Multi-tenant isolation: User A tenant 1 task → User B tenant 2'da ko'rinmaydi
+  3. Realtime: Browser A da task yaratish → Browser B avtomat yangilanadi
+  4. Offline mode: Internet uzilsa form xato beradi (Service Worker)
+- [ ] Lokal: `supabase start` bilan ishlaydi
+- [ ] CI: GitHub Actions matrix (Chrome + Firefox + Safari)
+
+#### B-015 · Multi-turn AI memory
+- [x] `ai_conversations` + `ai_messages` mavjud (Phase 0)
+- [ ] Har yangi chatda:
+  - Oxirgi 10 xabar yuklanadi
+  - 10+ bo'lsa eski xabarlar `summary` ga aylantiriladi (Haiku)
+- [ ] Token limit: 4000 → eski tarix sumarize
+- [ ] User "Kechagi vazifalarni eslaysanmi?" → tarix asosida javob
+
+#### B-016 · GDPR / O'zbekiston data export
+- [ ] `GET /v1/export/my-data` — auth'd user ma'lumotlari JSON
+  - Profile (auth.users + user_tenants)
+  - Tasks (yaratgan + assigned)
+  - Inbox, notifications, AI history, HR cases
+- [ ] Async: 50MB+ uchun job pattern (B-003)
+- [ ] Email link: Resend orqali signed download URL
+- [ ] `DELETE /v1/account` — soft delete + 30 kun grace + cron full delete
+- [ ] RLS: faqat o'z ma'lumoti
+
+### Phase 5 — Scale (Hafta 18-24)
+
+#### B-009 · PWA implementatsiya
+- [ ] `vite-plugin-pwa` qo'shish
+- [ ] Service Worker:
+  - Offline shell + asset caching
+  - Task list IndexedDB cache
+  - Background Sync API: offline yaratilgan tasklar internet kelganda push
+- [ ] Web Push notifications:
+  - Supabase Realtime → service worker → notification
+  - Use cases: task assigned, deadline yaqin
+- [ ] App manifest: ikonka, theme color (Indigo), `display: standalone`
+- [ ] Mobile UX: task board mobile-friendly drag, AI chat optimized
+
+---
+
+## TAQSIMOT MATRIXI
+
+| ID | Vazifa | Phase | Effort | Status |
+|---|---|---|---|---|
+| B-001 | Unit tests (Vitest) | Phase 2 | M | TODO |
+| B-002 | E2E tests (Playwright) | Phase 4 | L | TODO |
+| B-003 | Async AI job pattern | Phase 3 | M | TODO |
+| B-004 | Rate limiting | Phase 3 | M | Partial (usage-tracking mavjud) |
+| B-005 | DB optimization | Phase 0 | S | TODO |
+| B-006 | Audit log triggers | Phase 0 | M | TODO |
+| B-007 | Prompt injection protection | Phase 1 | M | TODO |
+| B-008 | AI cost dashboard | Phase 1 | S | Partial (cost tracking mavjud) |
+| B-009 | PWA | Phase 5 | L | TODO |
+| B-010 | Usage-based billing | Phase 3 | L | Partial |
+| B-011 | Structured logging | Phase 0 | S | Partial |
+| B-012 | Health check | Phase 2 | S | Partial (`/health` mavjud) |
+| B-013 | OpenAPI auto-gen | Phase 2 | M | TODO |
+| B-014 | Semantic search RAG | Phase 1 | S | Done (Phase 0.2) |
+| B-015 | Multi-turn AI memory | Phase 4 | M | TODO |
+| B-016 | GDPR data export | Phase 4 | M | TODO |
+| B-017 | Resend webhook idempotency | Phase 3 | S | TODO |
+
+**Effort:** S=1-3 kun · M=1 hafta · L=2 hafta
 
 ---
 
@@ -270,6 +466,17 @@ Yakshanba:   Dam olish + Feedback o'qish
 
 ---
 
-*PLAN.md — AI Business Concierge v2.0*
-*Yangilandi: 2026-04-16 — SQB raqobati kontekstida tezlashtirilgan jadval*
+*PLAN.md — AI Business Concierge v2.1*
+*Yangilandi: 2026-04-30 — 17 ta strategik talab phase'larga taqsimlangan (B-001 ... B-017)*
+*Avvalgi: v2.0 (2026-04-16) — SQB raqobati kontekstida tezlashtirilgan jadval*
 *Ishga kirishamiz! 🚀*
+
+---
+
+## CHANGELOG
+
+| Sana | Versiya | O'zgarish |
+|---|---|---|
+| 2026-04-30 | v2.1 | 17 strategik talab phase'larga taqsimlangan (B-001..B-017) — testing, async jobs, rate limiting, audit log, prompt injection, RAG memory, GDPR, PWA |
+| 2026-04-29 | v2.0+ | Phase 0 yakuni: 12 jadval RLS, security hardening, LLM Router, KB pgvector, AI feedback, Indigo+Slate tema, CONNECTIONS.md, FIRST_PUSH.md |
+| 2026-04-16 | v2.0 | SQB raqobati tahlili + Telegram MVP timeline tezlashtirilgan |
