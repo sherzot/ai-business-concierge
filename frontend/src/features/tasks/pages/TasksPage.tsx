@@ -68,6 +68,7 @@ export function TasksPage({ tenant }: { tenant: any }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [creatingTask, setCreatingTask] = useState(false);
   const [deletingTask, setDeletingTask] = useState<Task | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -192,8 +193,8 @@ export function TasksPage({ tenant }: { tenant: any }) {
            <button className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50">
              <Filter size={16} /> {translate("tasks.filter")}
            </button>
-           <button 
-             onClick={handleCreateMockTask}
+           <button
+             onClick={() => setCreatingTask(true)}
              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 shadow-sm shadow-indigo-200 transition-all"
            >
              <Plus size={18} /> {translate("tasks.newTask")}
@@ -335,11 +336,19 @@ export function TasksPage({ tenant }: { tenant: any }) {
 
       <TaskEditModal
         task={editingTask}
+        mode={creatingTask ? "create" : "edit"}
         tenantId={tenant.id}
         members={members}
-        open={!!editingTask}
-        onClose={() => setEditingTask(null)}
-        onSaved={() => { loadTasks(); setEditingTask(null); }}
+        open={!!editingTask || creatingTask}
+        onClose={() => {
+          setEditingTask(null);
+          setCreatingTask(false);
+        }}
+        onSaved={() => {
+          loadTasks();
+          setEditingTask(null);
+          setCreatingTask(false);
+        }}
       />
 
       <AlertDialog open={!!deletingTask} onOpenChange={(o) => !o && setDeletingTask(null)}>

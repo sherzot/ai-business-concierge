@@ -24,6 +24,7 @@ export async function createTask(tenantId: string, task: any) {
 
 export async function updateTask(tenantId: string, taskId: string, updates: Partial<{
   title: string;
+  description: string | null;
   status: string;
   priority: string;
   assignee: { id?: string; name: string } | null;

@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "../../../shared/ui/select";
 import { useI18n } from "../../../app/providers/I18nProvider";
-import { updateTask } from "../api/tasksApi";
+import { updateTask, createTask } from "../api/tasksApi";
 
 type TaskStatus = "todo" | "in_progress" | "review" | "done";
 type TaskPriority = "high" | "medium" | "low";
@@ -25,6 +25,7 @@ type TaskPriority = "high" | "medium" | "low";
 type Task = {
   id: string;
   title: string;
+  description?: string | null;
   status: TaskStatus;
   priority: TaskPriority;
   assignee?: { id?: string; name: string };
@@ -37,7 +38,10 @@ type Member = { id: string; name: string };
 const UNSET_ASSIGNEE = "__none__";
 
 type Props = {
+  /** null = create mode, Task = edit mode */
   task: Task | null;
+  /** create mode'ni majburlab yoqish (task=null bo'lganda kerak) */
+  mode?: "create" | "edit";
   tenantId: string;
   members: Member[];
   open: boolean;
@@ -45,9 +49,20 @@ type Props = {
   onSaved: () => void;
 };
 
-export function TaskEditModal({ task, tenantId, members, open, onClose, onSaved }: Props) {
+export function TaskEditModal({
+  task,
+  mode,
+  tenantId,
+  members,
+  open,
+  onClose,
+  onSaved,
+}: Props) {
   const { translate } = useI18n();
+  const isCreate = mode === "create" || (mode === undefined && task === null);
+
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [status, setStatus] = useState<TaskStatus>("todo");
   const [priority, setPriority] = useState<TaskPriority>("medium");
   const [assigneeId, setAssigneeId] = useState(UNSET_ASSIGNEE);
@@ -55,29 +70,59 @@ export function TaskEditModal({ task, tenantId, members, open, onClose, onSaved 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Reset / hydrate form when modal opens
   useEffect(() => {
+    if (!open) return;
     if (task) {
-      setTitle(task.title);
+      setTitle(task.title ?? "");
+      setDescription(task.description ?? "");
       setStatus(task.status);
       setPriority(task.priority);
-      const aid = task.assignee?.id ?? (task.assignee?.name ? members.find((m) => m.name === task.assignee?.name)?.id : null) ?? UNSET_ASSIGNEE;
+      const aid =
+        task.assignee?.id ??
+        (task.assignee?.name ? members.find((m) => m.name === task.assignee?.name)?.id : null) ??
+        UNSET_ASSIGNEE;
       setAssigneeId(aid);
       setDueDate(task.dueDate ? task.dueDate.slice(0, 10) : "");
+    } else {
+      setTitle("");
+      setDescription("");
+      setStatus("todo");
+      setPriority("medium");
+      setAssigneeId(UNSET_ASSIGNEE);
+      setDueDate("");
     }
-  }, [task, members]);
+    setError(null);
+  }, [open, task, members]);
 
   async function handleSave() {
-    if (!task) return;
+    if (!title.trim()) {
+      setError(translate("tasks.errorTitleRequired"));
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
-      await updateTask(tenantId, task.id, {
-        title,
+      const assignee =
+        assigneeId && assigneeId !== UNSET_ASSIGNEE
+          ? { id: assigneeId, name: members.find((m) => m.id === assigneeId)?.name ?? "" }
+          : null;
+
+      const payload = {
+        title: title.trim(),
+        description: description.trim() || null,
         status,
         priority,
-        assignee: assigneeId && assigneeId !== UNSET_ASSIGNEE ? { id: assigneeId, name: members.find((m) => m.id === assigneeId)?.name ?? "" } : null,
+        assignee,
         dueDate: dueDate || null,
-      });
+      };
+
+      if (isCreate) {
+        await createTask(tenantId, payload);
+      } else if (task) {
+        await updateTask(tenantId, task.id, payload);
+      }
+
       onSaved();
       onClose();
     } catch (e) {
@@ -87,19 +132,38 @@ export function TaskEditModal({ task, tenantId, members, open, onClose, onSaved 
     }
   }
 
-  if (!task) return null;
-
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{translate("tasks.editTask")}</DialogTitle>
+          <DialogTitle>
+            {isCreate ? translate("tasks.createTitle") : translate("tasks.editTask")}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label>{translate("tasks.title")}</Label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={translate("tasks.title")} />
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={translate("tasks.titlePlaceholder")}
+              autoFocus
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label>
+              {translate("tasks.description")}{" "}
+              <span className="text-xs text-slate-400">{translate("tasks.descriptionOptional")}</span>
+            </Label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              placeholder={translate("tasks.descriptionPlaceholder")}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -154,15 +218,21 @@ export function TaskEditModal({ task, tenantId, members, open, onClose, onSaved 
             <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
           </div>
 
-          {error && <p className="text-sm text-rose-600">{error}</p>}
+          {error && (
+            <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>
+          )}
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={saving}>
             {translate("common.cancel")}
           </Button>
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? "..." : translate("common.save")}
+          <Button onClick={handleSave} disabled={saving || !title.trim()}>
+            {saving
+              ? "..."
+              : isCreate
+                ? translate("tasks.create")
+                : translate("common.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

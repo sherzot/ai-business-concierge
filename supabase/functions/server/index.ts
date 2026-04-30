@@ -1339,6 +1339,7 @@ const registerRoutes = (prefix: string) => {
     const newTask = {
       tenant_id: ctx.tenantId,
       title: body.title,
+      description: typeof body.description === "string" ? body.description.trim() || null : null,
       status: body.status || "todo",
       priority: body.priority || "medium",
       assignee: body.assignee ?? null,
@@ -1377,6 +1378,11 @@ const registerRoutes = (prefix: string) => {
 
     const updates: Record<string, unknown> = {};
     if (body.title !== undefined) updates.title = body.title;
+    if (body.description !== undefined) {
+      updates.description = typeof body.description === "string"
+        ? body.description.trim() || null
+        : null;
+    }
     if (body.status !== undefined) {
       if (!ALLOWED_TASK_STATUSES.includes(body.status)) {
         return failure(c, 422, "VALIDATION_ERROR", "status noto'g'ri.");
