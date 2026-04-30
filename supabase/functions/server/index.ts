@@ -985,9 +985,21 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 403, "FORBIDDEN", "Boshqa tenantga xodim qo'shib bo'lmaydi.");
     }
 
-    // Caller rolini tekshirish — faqat leader yoki hr
-    const callerRoles = ((ctx as any).roles ?? []) as string[];
-    const callerRole = callerRoles[0] ?? "";
+    // Caller rolini user_tenants jadvalidan o'qish (JWT'da role claim yo'q)
+    const callerUserId = (ctx as any).userId ?? null;
+    if (!callerUserId) {
+      return failure(c, 401, "UNAUTHORIZED", "Foydalanuvchi ID yo'q.");
+    }
+    const { data: callerRow, error: callerErr } = await supabase
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", callerUserId)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    if (callerErr) {
+      return failure(c, 500, "DB_ERROR", "Caller rolini o'qishda xato.");
+    }
+    const callerRole = (callerRow?.role as string) ?? "";
     if (callerRole !== "leader" && callerRole !== "hr") {
       return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Rahbar yoki HR xodim qo'sha oladi.");
     }

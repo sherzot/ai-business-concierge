@@ -238,9 +238,14 @@ export default function App() {
             </div>
             <div className="flex-1 text-left min-w-0">
               <p className="text-sm font-semibold text-white truncate">{currentTenant.name}</p>
-              <p className="text-xs text-slate-400">
-                {translate("nav.employeesCount", { count: String(memberCount) })}
-              </p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="inline-flex items-center rounded-full bg-indigo-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-300 ring-1 ring-indigo-400/30">
+                  {translate(ROLE_KEYS[currentTenant.role] ?? "auth.role.employee")}
+                </span>
+                <span className="text-xs text-slate-400 truncate">
+                  · {translate("nav.employeesCount", { count: String(memberCount) })}
+                </span>
+              </div>
             </div>
             <ChevronDown size={16} className="text-slate-400 shrink-0" />
           </button>
