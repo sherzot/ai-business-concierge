@@ -57,6 +57,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(false);
         return;
       }
+      // MUHIM: profile fetch boshlanyapti — loading=true qilamiz, aks holda
+      // ProtectedLayout 'Profil topilmadi' banner'ini noto'g'ri ko'rsatadi
+      // (profile hali yuklanmagan, lekin session bor).
+      setLoading(true);
       try {
         const p = await fetchAuthProfile();
         if (!mounted) return;
