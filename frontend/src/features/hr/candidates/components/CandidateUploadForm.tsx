@@ -12,31 +12,35 @@
  *   • Analysis depth — radio group: "Tez" (Haiku) | "Chuqur" (Sonnet, default)
  *   • Submit button: full-width on mobile, primary indigo
  *
- * TODO (implementation):
- *   • Wire react-hook-form + Zod schema for client validation
- *   • Wire useCandidateAnalysis() hook
- *   • Show inline progress (~25s) — skeleton + estimated time
- *   • Drag/drop file preview + size badge
- *   • i18n via useTranslation('hr.candidates')
+ * i18n: all strings via useI18n().translate() (4 locales)
  */
 
 import { useState } from "react";
+import { useI18n } from "../../../../app/providers/I18nProvider";
 import type { AnalyzeFormInput, Locale, AnalysisDepth } from "../types";
 
 type Props = {
   onSubmit: (input: AnalyzeFormInput) => void;
   isSubmitting?: boolean;
-  defaultLocale?: Locale;
 };
 
-export function CandidateUploadForm({ onSubmit, isSubmitting = false, defaultLocale = "uz" }: Props) {
+const LOCALE_OPTIONS: { id: Locale; label: string }[] = [
+  { id: "uz", label: "O'zbekcha" },
+  { id: "ja", label: "日本語" },
+  { id: "en", label: "English" },
+];
+
+export function CandidateUploadForm({ onSubmit, isSubmitting = false }: Props) {
+  const { translate, locale: globalLocale } = useI18n();
+  // Form locale defaults to global UI locale; user can pick a different report locale
   const [githubInput, setGithubInput] = useState("");
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
-  const [locale, setLocale] = useState<Locale>(defaultLocale);
+  const [locale, setLocale] = useState<Locale>(
+    (globalLocale === "ru" ? "uz" : globalLocale) as Locale,
+  );
   const [analysisDepth, setAnalysisDepth] = useState<AnalysisDepth>("deep");
 
-  // TODO: client-side validation (Zod) — return readable errors per field
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!githubInput || !cvFile) return;
@@ -47,25 +51,29 @@ export function CandidateUploadForm({ onSubmit, isSubmitting = false, defaultLoc
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* GitHub input */}
       <div>
-        <label className="block text-sm font-medium text-slate-900">GitHub username yoki URL</label>
+        <label className="block text-sm font-medium text-slate-900">
+          {translate("hr.candidates.form.githubLabel")}
+        </label>
         <input
           type="text"
           value={githubInput}
           onChange={(e) => setGithubInput(e.target.value)}
-          placeholder="octocat yoki https://github.com/octocat"
-          className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-3 text-base focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          placeholder={translate("hr.candidates.form.githubPlaceholder")}
+          className="mt-1.5 w-full rounded-lg border border-slate-300 px-4 py-2.5 text-base focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-200"
           required
         />
       </div>
 
-      {/* CV drop zone — TODO: full drag/drop with @radix-ui patterns */}
+      {/* CV drop zone */}
       <div>
-        <label className="block text-sm font-medium text-slate-900">CV (PDF yoki DOCX, ≤ 5 MB)</label>
+        <label className="block text-sm font-medium text-slate-900">
+          {translate("hr.candidates.form.cvLabel")}
+        </label>
         <input
           type="file"
           accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
           onChange={(e) => setCvFile(e.target.files?.[0] ?? null)}
-          className="mt-1 w-full rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm hover:border-indigo-400"
+          className="mt-1.5 w-full rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm hover:border-indigo-400"
           required
         />
         {cvFile && (
@@ -78,34 +86,37 @@ export function CandidateUploadForm({ onSubmit, isSubmitting = false, defaultLoc
       {/* Job description (optional) */}
       <div>
         <label className="block text-sm font-medium text-slate-900">
-          Lavozim ta'rifi <span className="text-slate-500">(ixtiyoriy)</span>
+          {translate("hr.candidates.form.jdLabel")}{" "}
+          <span className="text-slate-500">{translate("hr.candidates.form.jdOptional")}</span>
         </label>
         <textarea
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
           rows={4}
-          placeholder="Vakansiya ta'rifini yozsangiz, AI nomzodning rolga mosligini ham baholaydi"
-          className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-3 text-base focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          placeholder={translate("hr.candidates.form.jdPlaceholder")}
+          className="mt-1.5 w-full rounded-lg border border-slate-300 px-4 py-2.5 text-base focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-200"
         />
       </div>
 
       {/* Locale */}
       <div>
-        <label className="block text-sm font-medium text-slate-900">Hisobot tili</label>
+        <label className="block text-sm font-medium text-slate-900">
+          {translate("hr.candidates.form.localeLabel")}
+        </label>
         <div className="mt-1.5 flex w-full gap-1 rounded-lg border border-slate-300 bg-white p-1">
-          {(["uz", "ja", "en"] as Locale[]).map((l) => (
+          {LOCALE_OPTIONS.map((opt) => (
             <button
               type="button"
-              key={l}
-              onClick={() => setLocale(l)}
+              key={opt.id}
+              onClick={() => setLocale(opt.id)}
               className={
                 "flex-1 rounded-md px-2 py-2 text-sm font-medium transition whitespace-nowrap " +
-                (locale === l
+                (locale === opt.id
                   ? "bg-indigo-600 text-white shadow-sm"
                   : "text-slate-600 hover:bg-slate-100")
               }
             >
-              {l === "uz" ? "O'zbekcha" : l === "ja" ? "日本語" : "English"}
+              {opt.label}
             </button>
           ))}
         </div>
@@ -113,7 +124,9 @@ export function CandidateUploadForm({ onSubmit, isSubmitting = false, defaultLoc
 
       {/* Depth */}
       <div>
-        <label className="block text-sm font-medium text-slate-900">Tahlil chuqurligi</label>
+        <label className="block text-sm font-medium text-slate-900">
+          {translate("hr.candidates.form.depthLabel")}
+        </label>
         <div className="mt-1.5 flex w-full gap-1 rounded-lg border border-slate-300 bg-white p-1">
           {(["fast", "deep"] as AnalysisDepth[]).map((d) => (
             <button
@@ -127,14 +140,16 @@ export function CandidateUploadForm({ onSubmit, isSubmitting = false, defaultLoc
                   : "text-slate-600 hover:bg-slate-100")
               }
             >
-              {d === "fast" ? "Tez · Haiku" : "Chuqur · Sonnet"}
+              {d === "fast"
+                ? translate("hr.candidates.form.depthFast")
+                : translate("hr.candidates.form.depthDeep")}
             </button>
           ))}
         </div>
         <p className="mt-1 text-xs text-slate-500">
           {analysisDepth === "fast"
-            ? "Tezroq, arzonroq — Haiku asosiy skor uchun yetarli"
-            : "Chuqurroq tahlil — Sonnet, batafsil intervyu savollari (tavsiya etiladi)"}
+            ? translate("hr.candidates.form.depthFastHint")
+            : translate("hr.candidates.form.depthDeepHint")}
         </p>
       </div>
 
@@ -142,9 +157,11 @@ export function CandidateUploadForm({ onSubmit, isSubmitting = false, defaultLoc
       <button
         type="submit"
         disabled={isSubmitting || !githubInput || !cvFile}
-        className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-base font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
+        className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-base font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300"
       >
-        {isSubmitting ? "Tahlil qilinmoqda… (~25 soniya)" : "Nomzodni tahlil qilish"}
+        {isSubmitting
+          ? translate("hr.candidates.form.submitting")
+          : translate("hr.candidates.form.submit")}
       </button>
     </form>
   );

@@ -1432,6 +1432,14 @@ const registerRoutes = (prefix: string) => {
   // Implementatsiya: services/hr-candidate/* (TODO bloklari to'ldirilgach)
   // ---------------------------------------------------------------------------
   app.post(`${prefix}/hr/candidates/analyze`, async (c) => {
+    // MUHIM: multipart body'ni drain qilish kerak, aks holda Deno
+    // response'ni flush qilolmaydi va function timeout'ga tushadi.
+    try {
+      await c.req.arrayBuffer();
+    } catch {
+      // Drain xatosi — davom etamiz
+    }
+
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
 
@@ -1439,13 +1447,17 @@ const registerRoutes = (prefix: string) => {
     // TODO: usage-tracking guardUsage({ resource: 'ai_requests' })
     // TODO: services/hr-candidate/index.ts.analyzeCandidate() ni chaqirish
 
+    // Frontend types.ts dagi CandidateAnalysisResult shape ga mos
     return c.json(
       {
-        ok: false,
+        request_id: crypto.randomUUID(),
+        status: "error" as const,
+        duration_ms: 0,
+        locale: "uz" as const,
         error: {
           code: "NOT_IMPLEMENTED",
-          message_uz: "HR Candidate Analysis modul implementatsiya jarayonida.",
-          message_ja: "HR 候補者分析モジュールは実装中です。",
+          message_uz: "HR Candidate Analysis modul hozircha tayyor emas. Tez orada implementatsiya tugaydi.",
+          message_ja: "HR 候補者分析モジュールはまだ準備中です。",
           message_en: "HR Candidate Analysis is under implementation.",
         },
       },

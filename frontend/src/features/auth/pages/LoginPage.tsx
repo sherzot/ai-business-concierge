@@ -4,9 +4,17 @@ import { useAuthContext } from "../context/AuthContext";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import type { Locale } from "../../../app/i18n";
+
+const LOCALE_OPTIONS: { id: Locale; label: string }[] = [
+  { id: "uz", label: "O'zbek" },
+  { id: "ru", label: "Русский" },
+  { id: "en", label: "English" },
+  { id: "ja", label: "日本語" },
+];
 
 export function LoginPage() {
-  const { translate } = useI18n();
+  const { translate, locale, setLocale } = useI18n();
   const { session, loading } = useAuthContext();
   const navigate = useNavigate();
 
@@ -29,7 +37,25 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 relative">
+      {/* Til selektori — auth'siz holatda ham o'zgartirish mumkin */}
+      <div className="absolute top-4 right-4 flex gap-1 rounded-full bg-white/10 backdrop-blur p-1 border border-white/20">
+        {LOCALE_OPTIONS.map((opt) => (
+          <button
+            key={opt.id}
+            onClick={() => setLocale(opt.id)}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+              locale === opt.id
+                ? "bg-white text-indigo-700"
+                : "text-white/70 hover:text-white hover:bg-white/10"
+            }`}
+            aria-label={`Switch to ${opt.label}`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
       <div className="w-full max-w-md p-8">
         <div className="text-center mb-8">
           <div className="inline-flex w-16 h-16 rounded-xl bg-indigo-500 items-center justify-center mb-4 shadow-lg shadow-indigo-500/30">

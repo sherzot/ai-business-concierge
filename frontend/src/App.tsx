@@ -38,6 +38,7 @@ import { useI18n } from "./app/providers/I18nProvider";
 import { InboxPage } from "./features/inbox/pages/InboxPage";
 import { ReportsPage } from "./features/reports/pages/ReportsPage";
 import { DashboardPage } from "./features/reports/pages/DashboardPage";
+import { RoleBasedDashboard } from "./features/reports/pages/RoleBasedDashboard";
 import { TasksPage } from "./features/tasks/pages/TasksPage";
 import { HrCasesPage } from "./features/hr/pages/HrCasesPage";
 import { HrSurveysPage } from "./features/hr/pages/HrSurveysPage";
@@ -173,7 +174,7 @@ export default function App() {
     const tenant = { id: currentTenant.id, name: currentTenant.name, plan: currentTenant.plan };
     switch (activeModule) {
       case "dashboard":
-        return <DashboardPage tenant={tenant} onNavigate={setActiveModule} />;
+        return <RoleBasedDashboard tenant={tenant} onNavigate={setActiveModule} />;
       case "reports":
         return <ReportsPage tenant={tenant} />;
       case "inbox":
@@ -205,14 +206,14 @@ export default function App() {
       {/* Sidebar - 2-rasm dizayni */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-[260px] bg-gradient-to-b from-slate-900 to-slate-950 text-white transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 flex flex-col shadow-2xl",
+          "fixed inset-y-0 left-0 z-50 w-[260px] bg-gradient-to-b from-indigo-950 via-slate-900 to-slate-950 text-white transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 flex flex-col shadow-2xl",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Logo */}
         <div className="h-20 flex flex-col justify-center px-5 border-b border-slate-800/80">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-500/30 ring-1 ring-white/10">
               <Zap size={22} className="text-white" strokeWidth={2.5} />
             </div>
             <div>
@@ -336,8 +337,8 @@ export default function App() {
           />
           <div className="flex items-center gap-3 px-3 py-2.5 bg-slate-800/90 rounded-xl border border-slate-700/50">
             <div className="relative">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-400/20 to-blue-500/20 flex items-center justify-center">
-                <Zap size={18} className="text-cyan-400" />
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-400/25 to-indigo-600/25 flex items-center justify-center ring-1 ring-indigo-300/20">
+                <Zap size={18} className="text-indigo-300" />
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-slate-800" />
             </div>
@@ -432,7 +433,7 @@ export default function App() {
                   <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium text-sm">
                     {userName.charAt(0).toUpperCase()}
                   </div>
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full border-2 border-white" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-indigo-500 rounded-full border-2 border-white" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -569,7 +570,7 @@ function NavItem({
         "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
         indent && "py-2",
         active
-          ? "bg-blue-600/90 text-white shadow-md"
+          ? "bg-indigo-600 text-white shadow-md shadow-indigo-900/40"
           : "text-slate-400 hover:text-white hover:bg-slate-800/60"
       )}
     >

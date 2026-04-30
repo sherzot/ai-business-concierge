@@ -1,56 +1,49 @@
 /**
  * CandidateScoreCard — overall score + 6 category breakdown.
  *
- * Status: SKELETON.
- * Owner: frontend agent.
- *
- * Design:
- *   • Top: large overall score circle (Indigo gradient) + grade letter
- *   • Below: 6 category bars (Slate background, Indigo fill)
- *   • role_fit shown muted if null (no JD provided)
+ * i18n: useI18n() — global locale, hr.candidates.* keys
  */
 
+import { useI18n } from "../../../../app/providers/I18nProvider";
 import type { CandidateAnalysisPayload, CategoryKey } from "../types";
 
-const CATEGORY_LABELS: Record<CategoryKey, { uz: string; ja: string; en: string }> = {
-  tech_depth:            { uz: "Texnik chuqurlik",   ja: "技術的深さ",       en: "Tech depth" },
-  project_quality:       { uz: "Loyiha sifati",       ja: "プロジェクト品質", en: "Project quality" },
-  activity:              { uz: "Faollik",             ja: "活動レベル",       en: "Activity" },
-  communication_docs:    { uz: "Hujjat va aloqa",     ja: "ドキュメント",     en: "Docs / comm" },
-  cv_github_consistency: { uz: "CV ↔ GitHub mosligi", ja: "CV↔GitHub整合性", en: "CV ↔ GitHub" },
-  role_fit:              { uz: "Rolga mos",           ja: "役割適合度",       en: "Role fit" },
-};
+const CATEGORY_KEYS: CategoryKey[] = [
+  "tech_depth",
+  "project_quality",
+  "activity",
+  "communication_docs",
+  "cv_github_consistency",
+  "role_fit",
+];
 
 type Props = {
   payload: CandidateAnalysisPayload;
-  locale: "uz" | "ja" | "en";
 };
 
-export function CandidateScoreCard({ payload, locale }: Props) {
+export function CandidateScoreCard({ payload }: Props) {
+  const { translate } = useI18n();
   const { overall_score, grade, category_scores } = payload;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      {/* Overall */}
       <div className="flex items-center gap-6">
         <ScoreRing score={overall_score} grade={grade} />
         <div>
           <p className="text-sm uppercase tracking-wide text-slate-500">
-            {locale === "uz" ? "Umumiy ball" : locale === "ja" ? "総合スコア" : "Overall score"}
+            {translate("hr.candidates.result.overallScore")}
           </p>
           <p className="text-3xl font-bold text-slate-900">{overall_score}/100</p>
           <p className="mt-1 text-sm text-slate-600">
-            {locale === "uz" ? "Baho" : locale === "ja" ? "評価" : "Grade"}: <span className="font-semibold">{grade}</span>
+            {translate("hr.candidates.result.grade")}: <span className="font-semibold">{grade}</span>
           </p>
         </div>
       </div>
 
-      {/* Category bars */}
       <ul className="mt-6 space-y-3">
-        {(Object.keys(CATEGORY_LABELS) as CategoryKey[]).map((key) => {
+        {CATEGORY_KEYS.map((key) => {
           const value = category_scores[key];
           const isNull = value == null;
-          const label = CATEGORY_LABELS[key][locale];
+          const label = translate(`hr.candidates.categories.${key}`);
           return (
             <li key={key}>
               <div className="mb-1 flex items-center justify-between text-sm">
@@ -75,12 +68,7 @@ export function CandidateScoreCard({ payload, locale }: Props) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// ScoreRing — TODO: replace with proper SVG ring (Radix Progress + custom svg)
-// ---------------------------------------------------------------------------
-
 function ScoreRing({ score, grade }: { score: number; grade: string }) {
-  // Placeholder gradient circle. Implementation will use SVG arcs.
   const angle = Math.round((score / 100) * 360);
   return (
     <div

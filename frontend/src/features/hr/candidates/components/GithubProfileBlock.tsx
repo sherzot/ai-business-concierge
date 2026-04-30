@@ -1,29 +1,19 @@
 /**
  * GithubProfileBlock — shows raw GitHub signals (stats, languages, pinned repos).
- *
- * Status: SKELETON.
- * Owner: frontend agent.
- *
- * When fetch_status === "failed":
- *   render a muted note ("GitHub ma'lumotlarini olib bo'lmadi") instead of the cards.
- *
- * When fetch_status === "partial":
- *   show a small amber chip near the heading.
  */
 
+import { useI18n } from "../../../../app/providers/I18nProvider";
 import type { GithubSignals } from "../types";
 
-type Props = { github: GithubSignals; locale: "uz" | "ja" | "en" };
+type Props = { github: GithubSignals };
 
-export function GithubProfileBlock({ github, locale }: Props) {
+export function GithubProfileBlock({ github }: Props) {
+  const { translate } = useI18n();
+
   if (github.fetch_status === "failed") {
     return (
       <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-500">
-        {locale === "uz"
-          ? "GitHub ma'lumotlarini olib bo'lmadi — natija CV asosida."
-          : locale === "ja"
-            ? "GitHub データを取得できませんでした — 結果は CV のみに基づきます。"
-            : "Could not fetch GitHub data — result is based on the CV only."}
+        {translate("hr.candidates.result.githubFailed")}
       </p>
     );
   }
@@ -31,33 +21,39 @@ export function GithubProfileBlock({ github, locale }: Props) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5">
       <div className="flex items-baseline justify-between">
-        <a href={github.profile_url} target="_blank" rel="noreferrer" className="text-base font-semibold text-indigo-700 hover:underline">
+        <a
+          href={github.profile_url}
+          target="_blank"
+          rel="noreferrer"
+          className="text-base font-semibold text-indigo-700 hover:underline"
+        >
           @{github.username}
         </a>
         {github.fetch_status === "partial" && (
           <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
-            partial
+            {translate("hr.candidates.result.githubPartial")}
           </span>
         )}
       </div>
 
-      {/* Top metrics */}
       <dl className="mt-3 grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
         <Stat label="Repos" value={github.public_repos} />
         <Stat label="Stars" value={github.total_stars_received} />
         <Stat label="Followers" value={github.followers} />
-        <Stat label={locale === "uz" ? "Yosh (yil)" : locale === "ja" ? "年数" : "Account age"} value={fmtYears(github.account_age_years)} />
+        <Stat label={translate("hr.candidates.result.accountAge")} value={fmtYears(github.account_age_years)} />
       </dl>
 
-      {/* Languages */}
       {github.primary_languages && github.primary_languages.length > 0 && (
         <div className="mt-4">
           <p className="text-xs uppercase tracking-wide text-slate-500">
-            {locale === "uz" ? "Asosiy texnologiyalar" : locale === "ja" ? "主要技術" : "Top languages"}
+            {translate("hr.candidates.result.topLanguages")}
           </p>
           <ul className="mt-1 flex flex-wrap gap-1.5">
             {github.primary_languages.slice(0, 5).map((l) => (
-              <li key={l.name} className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700">
+              <li
+                key={l.name}
+                className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700"
+              >
                 {l.name} · {l.percent.toFixed(0)}%
               </li>
             ))}
@@ -65,7 +61,6 @@ export function GithubProfileBlock({ github, locale }: Props) {
         </div>
       )}
 
-      {/* Pinned repos */}
       {github.pinned_repos && github.pinned_repos.length > 0 && (
         <div className="mt-5">
           <p className="text-xs uppercase tracking-wide text-slate-500">Pinned</p>
