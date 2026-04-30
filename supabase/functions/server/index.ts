@@ -1035,10 +1035,18 @@ const registerRoutes = (prefix: string) => {
     let userId: string | null = null;
     let actionMessage = "";
 
+    // Production URL — env'dan yoki Origin header'dan
+    const appUrl =
+      Deno.env.get("APP_URL") ??
+      c.req.header("origin") ??
+      c.req.header("referer")?.replace(/\/$/, "") ??
+      "https://ai-business-concierge1.netlify.app";
+
     try {
       if (mode === "invite") {
         const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
           data: { full_name, tenant_id: tenantId, role },
+          redirectTo: `${appUrl}/login`,
         });
         if (error) throw error;
         userId = data.user?.id ?? null;
