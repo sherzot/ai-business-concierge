@@ -960,17 +960,222 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 403, "FORBIDDEN", "Boshqa tenant a'zolariga kirish mumkin emas.");
     }
 
-    const { data, error } = await supabase
+    // ?status=active|terminated|all (default: active)
+    const statusFilter = c.req.query("status") ?? "active";
+    if (!["active", "terminated", "all"].includes(statusFilter)) {
+      return failure(c, 422, "VALIDATION_ERROR", "status parametri yaroqsiz.");
+    }
+
+    let query = supabase
       .from("user_tenants")
-      .select("user_id, full_name")
+      .select("user_id, full_name, role, status, terminated_at, termination_reason")
       .eq("tenant_id", tenantId);
 
+    if (statusFilter !== "all") {
+      query = query.eq("status", statusFilter);
+    }
+
+    // Faol xodimlar — yangi qo'shilgan birinchi; ketganlar — eng yaqin ketgan birinchi
+    if (statusFilter === "terminated") {
+      query = query.order("terminated_at", { ascending: false });
+    }
+
+    const { data, error } = await query;
     if (error) {
       return failure(c, 500, "DB_ERROR", "A'zolar yuklashda xatolik.");
     }
 
-    const members = (data ?? []).map((r) => ({ id: r.user_id, name: r.full_name }));
+    // Email'larni auth.users'dan olish
+    const userIds = (data ?? []).map((r) => r.user_id).filter(Boolean);
+    const emailMap = new Map<string, string>();
+    if (userIds.length > 0) {
+      // Supabase admin API: list users (paginated), filter by IDs we need
+      // Optimal emas, lekin MVP uchun ishlaydi (yuzlab xodim uchun OK)
+      try {
+        const { data: usersRes } = await supabase.auth.admin.listUsers({
+          page: 1,
+          perPage: 1000,
+        });
+        for (const u of usersRes?.users ?? []) {
+          if (userIds.includes(u.id)) {
+            emailMap.set(u.id, u.email ?? "");
+          }
+        }
+      } catch {
+        // Email yo'qligi blokchi emas — UI'da "—" ko'rinadi
+      }
+    }
+
+    const members = (data ?? []).map((r) => ({
+      id: r.user_id,
+      name: r.full_name,
+      email: emailMap.get(r.user_id) ?? null,
+      role: r.role,
+      status: r.status,
+      terminated_at: r.terminated_at,
+      termination_reason: r.termination_reason,
+    }));
     return success(c, members);
+  });
+
+  // ---------------------------------------------------------------------------
+  // PATCH /tenants/:id/members/:userId — role va full_name yangilash
+  // ---------------------------------------------------------------------------
+  app.patch(`${prefix}/tenants/:id/members/:userId`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const tenantId = c.req.param("id");
+    const targetUserId = c.req.param("userId");
+    if (tenantId !== ctx.tenantId) {
+      return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
+    }
+
+    // Caller rolini tekshirish (user_tenants'dan)
+    const callerUserId = (ctx as any).userId ?? null;
+    if (!callerUserId) return failure(c, 401, "UNAUTHORIZED", "User ID yo'q.");
+    const { data: callerRow } = await supabase
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", callerUserId)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    const callerRole = (callerRow?.role as string) ?? "";
+    if (callerRole !== "leader" && callerRole !== "hr") {
+      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Rahbar yoki HR tahrir qila oladi.");
+    }
+
+    // O'zining rolini o'zgartirishni taqiqlash
+    if (callerUserId === targetUserId) {
+      return failure(c, 403, "SELF_EDIT_FORBIDDEN", "O'zingizning rolingizni o'zgartirib bo'lmaydi.");
+    }
+
+    const body = await c.req.json().catch(() => ({}));
+    const { role, full_name } = body as { role?: string; full_name?: string };
+
+    const ALLOWED_ROLES = ["leader", "hr", "accounting", "department_head", "employee"];
+    const updates: Record<string, unknown> = {};
+    if (role !== undefined) {
+      if (!ALLOWED_ROLES.includes(role)) {
+        return failure(c, 422, "VALIDATION_ERROR", "Rol yaroqsiz.");
+      }
+      updates.role = role;
+    }
+    if (full_name !== undefined) {
+      if (typeof full_name !== "string" || full_name.trim().length < 2) {
+        return failure(c, 422, "VALIDATION_ERROR", "Ism kamida 2 belgi.");
+      }
+      updates.full_name = full_name.trim();
+    }
+    if (Object.keys(updates).length === 0) {
+      return failure(c, 422, "VALIDATION_ERROR", "Hech narsa o'zgartirilmagan.");
+    }
+
+    const { error } = await supabase
+      .from("user_tenants")
+      .update(updates)
+      .eq("user_id", targetUserId)
+      .eq("tenant_id", tenantId);
+
+    if (error) {
+      return failure(c, 500, "DB_ERROR", `Yangilashda xato: ${error.message}`);
+    }
+    return success(c, { user_id: targetUserId, ...updates });
+  });
+
+  // ---------------------------------------------------------------------------
+  // DELETE /tenants/:id/members/:userId — soft delete (status='terminated')
+  // ---------------------------------------------------------------------------
+  app.delete(`${prefix}/tenants/:id/members/:userId`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const tenantId = c.req.param("id");
+    const targetUserId = c.req.param("userId");
+    if (tenantId !== ctx.tenantId) {
+      return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
+    }
+
+    // Caller rolini tekshirish
+    const callerUserId = (ctx as any).userId ?? null;
+    if (!callerUserId) return failure(c, 401, "UNAUTHORIZED", "User ID yo'q.");
+    if (callerUserId === targetUserId) {
+      return failure(c, 403, "SELF_DELETE_FORBIDDEN", "O'zingizni ishdan ketkaza olmaysiz.");
+    }
+    const { data: callerRow } = await supabase
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", callerUserId)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    const callerRole = (callerRow?.role as string) ?? "";
+    if (callerRole !== "leader" && callerRole !== "hr") {
+      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Rahbar yoki HR ishdan ketkaza oladi.");
+    }
+
+    // Sabab body'da yoki query'da kelishi mumkin
+    const body = await c.req.json().catch(() => ({}));
+    const reason = (body as { reason?: string }).reason?.toString().slice(0, 500) ?? null;
+
+    const { error } = await supabase
+      .from("user_tenants")
+      .update({
+        status: "terminated",
+        terminated_at: new Date().toISOString(),
+        termination_reason: reason,
+        terminated_by: callerUserId,
+      })
+      .eq("user_id", targetUserId)
+      .eq("tenant_id", tenantId)
+      .eq("status", "active"); // qayta-qayta o'chirishni oldini olish
+
+    if (error) {
+      return failure(c, 500, "DB_ERROR", `Ishdan ketkazishda xato: ${error.message}`);
+    }
+    return success(c, { user_id: targetUserId, status: "terminated" });
+  });
+
+  // ---------------------------------------------------------------------------
+  // POST /tenants/:id/members/:userId/restore — qayta tiklash
+  // ---------------------------------------------------------------------------
+  app.post(`${prefix}/tenants/:id/members/:userId/restore`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const tenantId = c.req.param("id");
+    const targetUserId = c.req.param("userId");
+    if (tenantId !== ctx.tenantId) {
+      return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
+    }
+
+    const callerUserId = (ctx as any).userId ?? null;
+    if (!callerUserId) return failure(c, 401, "UNAUTHORIZED", "User ID yo'q.");
+    const { data: callerRow } = await supabase
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", callerUserId)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    const callerRole = (callerRow?.role as string) ?? "";
+    if (callerRole !== "leader" && callerRole !== "hr") {
+      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Rahbar yoki HR tiklash mumkin.");
+    }
+
+    const { error } = await supabase
+      .from("user_tenants")
+      .update({
+        status: "active",
+        terminated_at: null,
+        termination_reason: null,
+        terminated_by: null,
+      })
+      .eq("user_id", targetUserId)
+      .eq("tenant_id", tenantId);
+
+    if (error) {
+      return failure(c, 500, "DB_ERROR", `Tiklashda xato: ${error.message}`);
+    }
+    return success(c, { user_id: targetUserId, status: "active" });
   });
 
   // ---------------------------------------------------------------------------

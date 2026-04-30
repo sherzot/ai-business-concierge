@@ -44,6 +44,7 @@ import { HrCasesPage } from "./features/hr/pages/HrCasesPage";
 import { HrSurveysPage } from "./features/hr/pages/HrSurveysPage";
 import { CandidateAnalysisPage } from "./features/hr/candidates/pages/CandidateAnalysisPage";
 import { AddEmployeePage } from "./features/hr/pages/AddEmployeePage";
+import { EmployeesPage } from "./features/hr/pages/EmployeesPage";
 import { DocsPage } from "./features/docs/pages/DocsPage";
 import { IntegrationsPage } from "./features/integrations/pages/IntegrationsPage";
 import { SettingsPage } from "./features/settings/pages/SettingsPage";
@@ -184,6 +185,7 @@ export default function App() {
       case "tasks":
         return <TasksPage tenant={tenant} />;
       case "hr":
+        return <EmployeesPage tenant={tenant} />;
       case "hr-cases":
         return <HrCasesPage tenant={tenant} />;
       case "hr-surveys":
