@@ -103,3 +103,24 @@ export async function restoreEmployee(tenantId: string, userId: string): Promise
     tenantId,
   });
 }
+
+export type HardDeleteResult = {
+  user_id: string;
+  removed_from_tenant: boolean;
+  auth_user_deleted: boolean;
+};
+
+export async function hardDeleteEmployee(
+  tenantId: string,
+  userId: string,
+  confirmName: string,
+): Promise<HardDeleteResult> {
+  return apiRequest<HardDeleteResult>(
+    `/tenants/${tenantId}/members/${userId}/hard-delete`,
+    {
+      method: "POST",
+      body: JSON.stringify({ confirm_name: confirmName }),
+      tenantId,
+    },
+  );
+}

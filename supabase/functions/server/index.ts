@@ -396,6 +396,25 @@ const createTaskAssignmentNotification = async (
   }
 };
 
+const createDocAssignmentNotification = async (
+  tenantId: string,
+  assigneeId: string,
+  docId: string,
+  docTitle: string,
+) => {
+  try {
+    await supabase.from("notifications").insert({
+      tenant_id: tenantId,
+      user_id: assigneeId,
+      type: "doc_assigned",
+      title: "Yangi hujjat biriktirildi",
+      message: `"${docTitle}" hujjati sizga biriktirildi. Iltimos ko'rib chiqing.`,
+    });
+  } catch (e) {
+    console.error("createDocAssignmentNotification error:", e);
+  }
+};
+
 type AiInteractionEntry = {
   role: string;
   prompt_name: string;
@@ -1133,6 +1152,105 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 500, "DB_ERROR", `Ishdan ketkazishda xato: ${error.message}`);
     }
     return success(c, { user_id: targetUserId, status: "terminated" });
+  });
+
+  // ---------------------------------------------------------------------------
+  // POST /tenants/:id/members/:userId/hard-delete — butunlay o'chirish
+  // (adashib kiritilgan yoki test data uchun)
+  // ---------------------------------------------------------------------------
+  app.post(`${prefix}/tenants/:id/members/:userId/hard-delete`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const tenantId = c.req.param("id");
+    const targetUserId = c.req.param("userId");
+    if (tenantId !== ctx.tenantId) {
+      return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
+    }
+
+    // Caller permission
+    const callerUserId = (ctx as any).userId ?? null;
+    if (!callerUserId) return failure(c, 401, "UNAUTHORIZED", "User ID yo'q.");
+    if (callerUserId === targetUserId) {
+      return failure(c, 403, "SELF_DELETE_FORBIDDEN", "O'zingizni butunlay o'chira olmaysiz.");
+    }
+    const { data: callerRow } = await supabase
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", callerUserId)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    const callerRole = (callerRow?.role as string) ?? "";
+    if (callerRole !== "leader" && callerRole !== "hr") {
+      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Rahbar yoki HR butunlay o'chira oladi.");
+    }
+
+    // Confirmation: target xodim ismini yuborish kerak (typo prevention)
+    const body = await c.req.json().catch(() => ({}));
+    const confirmName = (body as { confirm_name?: string }).confirm_name?.trim() ?? "";
+    if (!confirmName) {
+      return failure(c, 422, "VALIDATION_ERROR", "Tasdiqlash uchun xodim ismi majburiy.");
+    }
+    const { data: targetRow } = await supabase
+      .from("user_tenants")
+      .select("full_name")
+      .eq("user_id", targetUserId)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    if (!targetRow) {
+      return failure(c, 404, "NOT_FOUND", "Xodim topilmadi.");
+    }
+    if (targetRow.full_name?.trim() !== confirmName) {
+      return failure(c, 422, "NAME_MISMATCH", "Yozilgan ism mos kelmadi.");
+    }
+
+    // 1. Boshqa tenantlardagi a'zoligini hisoblash
+    const { count: otherCount, error: countErr } = await supabase
+      .from("user_tenants")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", targetUserId)
+      .neq("tenant_id", tenantId);
+
+    if (countErr) {
+      return failure(c, 500, "DB_ERROR", "Boshqa tenant a'zoligini tekshirishda xato.");
+    }
+
+    // 2. Bu tenantdan unlink
+    const { error: unlinkErr } = await supabase
+      .from("user_tenants")
+      .delete()
+      .eq("user_id", targetUserId)
+      .eq("tenant_id", tenantId);
+
+    if (unlinkErr) {
+      return failure(c, 500, "DB_ERROR", `Unlink xato: ${unlinkErr.message}`);
+    }
+
+    // 3. Agar boshqa tenant yo'q bo'lsa — auth user ham o'chiriladi
+    let authUserDeleted = false;
+    if ((otherCount ?? 0) === 0) {
+      try {
+        await supabase.auth.admin.deleteUser(targetUserId);
+        authUserDeleted = true;
+      } catch (e) {
+        // Auth deletion fail bo'lsa ham unlink muvaffaqiyatli edi — log qilamiz
+        console.error("auth.admin.deleteUser failed", e);
+      }
+    }
+
+    await writeAuditLog(ctx as TenantContext, {
+      event_type: "employee_hard_delete",
+      entity_type: "user_tenants",
+      entity_id: targetUserId,
+      trace_id: getTraceId(c),
+      payload: { auth_user_deleted: authUserDeleted, confirmed_name: confirmName },
+    });
+
+    return success(c, {
+      user_id: targetUserId,
+      removed_from_tenant: true,
+      auth_user_deleted: authUserDeleted,
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -2064,6 +2182,12 @@ const registerRoutes = (prefix: string) => {
       trace_id: getTraceId(c),
       payload: { document_id: doc.id, title },
     });
+
+    // Mas'ul biriktirilgan bo'lsa — notification yuborish
+    const assigneeId = (metadata as Record<string, unknown> | null)?.assignee_id as string | undefined;
+    if (assigneeId && typeof assigneeId === "string") {
+      await createDocAssignmentNotification(ctx.tenantId, assigneeId, doc.id, title);
+    }
 
     return success(c, { document_id: doc.id, chunks: chunks.length });
   });

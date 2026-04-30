@@ -19,8 +19,10 @@ import {
 } from "../../../shared/ui/select";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { createDoc } from "../api/docsApi";
+import { listEmployees, type Employee } from "../../hr/api/employeesApi";
 
 type DocStatus = "draft" | "review" | "approved" | "expired";
+const UNSET = "__none__";
 
 type Props = {
   tenantId: string;
@@ -32,21 +34,29 @@ type Props = {
 export function DocCreateModal({ tenantId, open, onClose, onCreated }: Props) {
   const { translate } = useI18n();
   const [title, setTitle] = useState("");
-  const [owner, setOwner] = useState("");
+  const [assigneeId, setAssigneeId] = useState<string>(UNSET);
   const [status, setStatus] = useState<DocStatus>("draft");
   const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loadingEmps, setLoadingEmps] = useState(false);
 
+  // Reset form on open + load employees
   useEffect(() => {
-    if (open) {
-      setTitle("");
-      setOwner("");
-      setStatus("draft");
-      setContent("");
-      setError(null);
-    }
-  }, [open]);
+    if (!open) return;
+    setTitle("");
+    setAssigneeId(UNSET);
+    setStatus("draft");
+    setContent("");
+    setError(null);
+
+    setLoadingEmps(true);
+    listEmployees(tenantId, "active")
+      .then(setEmployees)
+      .catch(() => setEmployees([]))
+      .finally(() => setLoadingEmps(false));
+  }, [open, tenantId]);
 
   async function handleCreate() {
     if (!title.trim() || !content.trim()) {
@@ -56,11 +66,13 @@ export function DocCreateModal({ tenantId, open, onClose, onCreated }: Props) {
     setSaving(true);
     setError(null);
     try {
+      const assignee = employees.find((e) => e.id === assigneeId);
       await createDoc(tenantId, {
         title: title.trim(),
         content: content.trim(),
         metadata: {
-          owner: owner.trim() || undefined,
+          owner: assignee?.name,
+          assignee_id: assignee?.id,
           status,
         },
       });
@@ -93,11 +105,31 @@ export function DocCreateModal({ tenantId, open, onClose, onCreated }: Props) {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
               <Label>{translate("docs.ownerLabel")}</Label>
-              <Input
-                value={owner}
-                onChange={(e) => setOwner(e.target.value)}
-                placeholder={translate("docs.ownerPlaceholder")}
-              />
+              <Select value={assigneeId} onValueChange={setAssigneeId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={
+                    loadingEmps
+                      ? translate("common.loading")
+                      : translate("docs.ownerSelectPlaceholder")
+                  } />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={UNSET}>—</SelectItem>
+                  {employees.map((emp) => (
+                    <SelectItem key={emp.id} value={emp.id}>
+                      {emp.name}{" "}
+                      <span className="text-xs text-slate-500">
+                        ({translate(`auth.role.${emp.role}`)})
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {assigneeId !== UNSET && (
+                <p className="text-xs text-indigo-600">
+                  ✓ {translate("docs.ownerNotificationHint")}
+                </p>
+              )}
             </div>
             <div className="grid gap-2">
               <Label>{translate("docs.statusLabel")}</Label>
@@ -121,6 +153,7 @@ export function DocCreateModal({ tenantId, open, onClose, onCreated }: Props) {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder={translate("docs.contentPlaceholder")}
+              rows={8}
             />
           </div>
 

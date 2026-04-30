@@ -14,7 +14,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { Pencil, UserMinus, RotateCcw, X } from "lucide-react";
+import { Pencil, UserMinus, RotateCcw, Trash2, X, AlertTriangle } from "lucide-react";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { useAuthContext } from "../../auth/context/AuthContext";
 import {
@@ -22,6 +22,7 @@ import {
   updateEmployee,
   terminateEmployee,
   restoreEmployee,
+  hardDeleteEmployee,
   type Employee,
   type EmployeeRole,
   type EmployeeStatus,
@@ -55,6 +56,8 @@ export function EmployeesPage({ tenant }: Props) {
   const [editing, setEditing] = useState<Employee | null>(null);
   // Termination state
   const [terminating, setTerminating] = useState<Employee | null>(null);
+  // Hard delete state (tizimdan butunlay)
+  const [hardDeleting, setHardDeleting] = useState<Employee | null>(null);
 
   async function reload(forStatus: EmployeeStatus = tab) {
     setLoading(true);
@@ -178,45 +181,58 @@ export function EmployeesPage({ tenant }: Props) {
                         <td className="px-4 py-3 text-right">
                           {isSelf ? (
                             <span className="text-xs text-slate-400">—</span>
-                          ) : tab === "active" ? (
-                            <div className="inline-flex gap-1">
+                          ) : (
+                            <div className="inline-flex gap-1 flex-wrap justify-end">
+                              {tab === "active" && (
+                                <>
+                                  <button
+                                    onClick={() => setEditing(emp)}
+                                    className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50"
+                                    title={translate("employees.list.edit")}
+                                  >
+                                    <Pencil size={14} />
+                                    {translate("employees.list.edit")}
+                                  </button>
+                                  <button
+                                    onClick={() => setTerminating(emp)}
+                                    className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-amber-700 hover:bg-amber-50"
+                                    title={translate("employees.list.terminate")}
+                                  >
+                                    <UserMinus size={14} />
+                                    {translate("employees.list.terminate")}
+                                  </button>
+                                </>
+                              )}
+                              {tab === "terminated" && (
+                                <button
+                                  disabled={busyId === emp.id}
+                                  onClick={async () => {
+                                    setBusyId(emp.id);
+                                    try {
+                                      await restoreEmployee(tenant.id, emp.id);
+                                      await reload();
+                                    } catch (e) {
+                                      setError(e instanceof Error ? e.message : "Tiklab bo'lmadi");
+                                    } finally {
+                                      setBusyId(null);
+                                    }
+                                  }}
+                                  className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+                                  title={translate("employees.list.restore")}
+                                >
+                                  <RotateCcw size={14} />
+                                  {translate("employees.list.restore")}
+                                </button>
+                              )}
                               <button
-                                onClick={() => setEditing(emp)}
-                                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50"
-                                title={translate("employees.list.edit")}
-                              >
-                                <Pencil size={14} />
-                                {translate("employees.list.edit")}
-                              </button>
-                              <button
-                                onClick={() => setTerminating(emp)}
+                                onClick={() => setHardDeleting(emp)}
                                 className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50"
-                                title={translate("employees.list.terminate")}
+                                title={translate("employees.list.hardDelete")}
                               >
-                                <UserMinus size={14} />
-                                {translate("employees.list.terminate")}
+                                <Trash2 size={14} />
+                                {translate("employees.list.hardDelete")}
                               </button>
                             </div>
-                          ) : (
-                            <button
-                              disabled={busyId === emp.id}
-                              onClick={async () => {
-                                setBusyId(emp.id);
-                                try {
-                                  await restoreEmployee(tenant.id, emp.id);
-                                  await reload();
-                                } catch (e) {
-                                  setError(e instanceof Error ? e.message : "Tiklab bo'lmadi");
-                                } finally {
-                                  setBusyId(null);
-                                }
-                              }}
-                              className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
-                              title={translate("employees.list.restore")}
-                            >
-                              <RotateCcw size={14} />
-                              {translate("employees.list.restore")}
-                            </button>
                           )}
                         </td>
                       )}
@@ -253,6 +269,20 @@ export function EmployeesPage({ tenant }: Props) {
           onClose={() => setTerminating(null)}
           onConfirmed={async () => {
             setTerminating(null);
+            await reload();
+          }}
+          tenantId={tenant.id}
+          translate={translate}
+        />
+      )}
+
+      {/* Hard delete modal — adashib kiritilgan ma'lumot uchun */}
+      {hardDeleting && (
+        <HardDeleteModal
+          employee={hardDeleting}
+          onClose={() => setHardDeleting(null)}
+          onConfirmed={async () => {
+            setHardDeleting(null);
             await reload();
           }}
           tenantId={tenant.id}
@@ -395,6 +425,92 @@ function EditModal({
             className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:bg-slate-300"
           >
             {pending ? translate("employees.edit.saving") : translate("employees.edit.save")}
+          </button>
+        </div>
+      </div>
+    </ModalShell>
+  );
+}
+
+function HardDeleteModal({
+  employee,
+  onClose,
+  onConfirmed,
+  tenantId,
+  translate,
+}: {
+  employee: Employee;
+  onClose: () => void;
+  onConfirmed: () => void;
+  tenantId: string;
+  translate: (k: string, p?: Record<string, string>) => string;
+}) {
+  const [confirmName, setConfirmName] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const targetName = (employee.name ?? "").trim();
+  const matches = confirmName.trim() === targetName && targetName.length > 0;
+
+  async function confirm() {
+    if (!matches) return;
+    setPending(true);
+    setError(null);
+    try {
+      const result = await hardDeleteEmployee(tenantId, employee.id, confirmName.trim());
+      onConfirmed();
+      void result;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Bajarib bo'lmadi");
+      setPending(false);
+    }
+  }
+
+  return (
+    <ModalShell title={translate("employees.hardDelete.title")} onClose={onClose}>
+      <div className="space-y-4">
+        <div className="flex items-start gap-3 rounded-lg bg-rose-50 p-3 text-rose-800">
+          <AlertTriangle size={18} className="shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-semibold">{translate("employees.hardDelete.warningTitle")}</p>
+            <p className="mt-1 text-rose-700">
+              {translate("employees.hardDelete.warningBody", { name: targetName })}
+            </p>
+          </div>
+        </div>
+
+        <p className="text-sm text-slate-600">
+          {translate("employees.hardDelete.typeNamePrompt")}{" "}
+          <span className="font-mono font-semibold text-slate-900">{targetName}</span>
+        </p>
+
+        <input
+          type="text"
+          value={confirmName}
+          onChange={(e) => setConfirmName(e.target.value)}
+          placeholder={translate("employees.hardDelete.typePlaceholder")}
+          className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-base font-mono focus:border-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-200"
+          autoFocus
+        />
+
+        {error && (
+          <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>
+        )}
+
+        <div className="flex justify-end gap-2 pt-2">
+          <button
+            onClick={onClose}
+            className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+          >
+            {translate("employees.edit.cancel")}
+          </button>
+          <button
+            disabled={!matches || pending}
+            onClick={confirm}
+            className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:bg-slate-300 disabled:cursor-not-allowed"
+          >
+            {pending
+              ? translate("employees.terminate.submitting")
+              : translate("employees.hardDelete.submit")}
           </button>
         </div>
       </div>
