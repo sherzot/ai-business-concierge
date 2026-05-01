@@ -81,8 +81,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (mounted) applySession(session);
+      (event, newSession) => {
+        if (!mounted) return;
+
+        // TOKEN_REFRESHED — token avtomat yangilandi (vaqti ketgan,
+        // tab fokus qaytarganda, har 1 soatda). User va profile o'zgarmagan,
+        // shuning uchun fetchAuthProfile() qaytadan ishlatish KERAK EMAS.
+        // Aks holda har tab almashtirilganda butun sahifa "yuklanmoqda"
+        // holatiga tushadi va foydalanuvchining ishi yo'qoladi.
+        if (event === "TOKEN_REFRESHED") {
+          setSession(newSession);
+          return;
+        }
+
+        // INITIAL_SESSION, SIGNED_IN, SIGNED_OUT, USER_UPDATED — full reload
+        applySession(newSession);
       }
     );
 
