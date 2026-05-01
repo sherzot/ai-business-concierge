@@ -104,6 +104,27 @@ export async function restoreEmployee(tenantId: string, userId: string): Promise
   });
 }
 
+export type ResetPasswordMode = "link" | "set";
+export type ResetPasswordResult = {
+  user_id: string;
+  status: "password_set" | "reset_link_sent";
+  email?: string;
+};
+
+export async function resetEmployeePassword(
+  tenantId: string,
+  userId: string,
+  mode: ResetPasswordMode,
+  newPassword?: string,
+): Promise<ResetPasswordResult> {
+  const body: Record<string, unknown> = { mode };
+  if (mode === "set" && newPassword) body.new_password = newPassword;
+  return apiRequest<ResetPasswordResult>(
+    `/tenants/${tenantId}/members/${userId}/reset-password`,
+    { method: "POST", body: JSON.stringify(body), tenantId },
+  );
+}
+
 export type HardDeleteResult = {
   user_id: string;
   removed_from_tenant: boolean;

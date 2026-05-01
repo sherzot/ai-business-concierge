@@ -44,7 +44,10 @@ export function EmployeesPage({ tenant }: Props) {
   const { currentTenant, profile } = useAuthContext();
   const callerRole = currentTenant?.role;
   const callerUserId = profile?.user.id ?? "";
-  const canManage = callerRole === "leader" || callerRole === "hr";
+  const canManage =
+    callerRole === "leader" ||
+    callerRole === "hr" ||
+    callerRole === "super_admin";
 
   const [tab, setTab] = useState<EmployeeStatus>("active");
   const [employees, setEmployees] = useState<Employee[]>([]);

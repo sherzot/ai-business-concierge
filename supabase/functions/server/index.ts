@@ -1060,8 +1060,8 @@ const registerRoutes = (prefix: string) => {
       .eq("tenant_id", tenantId)
       .maybeSingle();
     const callerRole = (callerRow?.role as string) ?? "";
-    if (callerRole !== "leader" && callerRole !== "hr") {
-      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Rahbar yoki HR tahrir qila oladi.");
+    if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
+      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR tahrir qila oladi.");
     }
 
     // O'zining rolini o'zgartirishni taqiqlash
@@ -1128,8 +1128,8 @@ const registerRoutes = (prefix: string) => {
       .eq("tenant_id", tenantId)
       .maybeSingle();
     const callerRole = (callerRow?.role as string) ?? "";
-    if (callerRole !== "leader" && callerRole !== "hr") {
-      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Rahbar yoki HR ishdan ketkaza oladi.");
+    if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
+      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR ishdan ketkaza oladi.");
     }
 
     // Sabab body'da yoki query'da kelishi mumkin
@@ -1152,6 +1152,68 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 500, "DB_ERROR", `Ishdan ketkazishda xato: ${error.message}`);
     }
     return success(c, { user_id: targetUserId, status: "terminated" });
+  });
+
+  // ---------------------------------------------------------------------------
+  // POST /tenants/:id/members/:userId/reset-password — admin parolni reset qilish
+  // Faqat leader|hr|super_admin. Email link orqali yoki to'g'ridan-to'g'ri yangi parol.
+  // ---------------------------------------------------------------------------
+  app.post(`${prefix}/tenants/:id/members/:userId/reset-password`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const tenantId = c.req.param("id");
+    const targetUserId = c.req.param("userId");
+    if (tenantId !== ctx.tenantId) {
+      return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
+    }
+
+    const callerUserId = (ctx as any).userId ?? null;
+    if (!callerUserId) return failure(c, 401, "UNAUTHORIZED", "User ID yo'q.");
+    const { data: callerRow } = await supabase
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", callerUserId)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    const callerRole = (callerRow?.role as string) ?? "";
+    if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
+      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR parolni reset qila oladi.");
+    }
+
+    const body = await c.req.json().catch(() => ({}));
+    const { mode, new_password } = body as { mode?: "link" | "set"; new_password?: string };
+
+    if (mode === "set") {
+      if (!new_password || new_password.length < 8) {
+        return failure(c, 422, "VALIDATION_ERROR", "Yangi parol kamida 8 belgi.");
+      }
+      const { error } = await supabase.auth.admin.updateUserById(targetUserId, {
+        password: new_password,
+      });
+      if (error) {
+        return failure(c, 500, "AUTH_ERROR", `Parolni o'zgartirib bo'lmadi: ${error.message}`);
+      }
+      return success(c, { user_id: targetUserId, status: "password_set" });
+    }
+
+    // Default: link orqali reset
+    const { data: targetUser } = await supabase.auth.admin.getUserById(targetUserId);
+    if (!targetUser?.user?.email) {
+      return failure(c, 404, "NOT_FOUND", "Xodim email topilmadi.");
+    }
+    const appUrl =
+      Deno.env.get("APP_URL") ??
+      c.req.header("origin") ??
+      "https://ai-business-concierge1.netlify.app";
+    const { error: linkErr } = await supabase.auth.resetPasswordForEmail(
+      targetUser.user.email,
+      { redirectTo: `${appUrl}/reset-password` },
+    );
+    if (linkErr) {
+      return failure(c, 500, "AUTH_ERROR", `Reset link yuborib bo'lmadi: ${linkErr.message}`);
+    }
+    return success(c, { user_id: targetUserId, status: "reset_link_sent", email: targetUser.user.email });
   });
 
   // ---------------------------------------------------------------------------
@@ -1181,8 +1243,8 @@ const registerRoutes = (prefix: string) => {
       .eq("tenant_id", tenantId)
       .maybeSingle();
     const callerRole = (callerRow?.role as string) ?? "";
-    if (callerRole !== "leader" && callerRole !== "hr") {
-      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Rahbar yoki HR butunlay o'chira oladi.");
+    if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
+      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR butunlay o'chira oladi.");
     }
 
     // Confirmation: target xodim ismini yuborish kerak (typo prevention)
@@ -1275,8 +1337,8 @@ const registerRoutes = (prefix: string) => {
       .eq("tenant_id", tenantId)
       .maybeSingle();
     const callerRole = (callerRow?.role as string) ?? "";
-    if (callerRole !== "leader" && callerRole !== "hr") {
-      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Rahbar yoki HR tiklash mumkin.");
+    if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
+      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR tiklash mumkin.");
     }
 
     const { error } = await supabase
@@ -1323,8 +1385,8 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 500, "DB_ERROR", "Caller rolini o'qishda xato.");
     }
     const callerRole = (callerRow?.role as string) ?? "";
-    if (callerRole !== "leader" && callerRole !== "hr") {
-      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Rahbar yoki HR xodim qo'sha oladi.");
+    if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
+      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR xodim qo'sha oladi.");
     }
 
     const body = await c.req.json().catch(() => ({}));
@@ -1368,8 +1430,8 @@ const registerRoutes = (prefix: string) => {
     try {
       if (mode === "invite") {
         const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
-          data: { full_name, tenant_id: tenantId, role },
-          redirectTo: `${appUrl}/login`,
+          data: { full_name, tenant_id: tenantId, role, setup_complete: false },
+          redirectTo: `${appUrl}/setup-account`,
         });
         if (error) throw error;
         userId = data.user?.id ?? null;

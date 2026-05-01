@@ -21,7 +21,10 @@ export function AddEmployeePage({ tenant }: Props) {
   const { translate } = useI18n();
   const { currentTenant } = useAuthContext();
   const callerRole = currentTenant?.role;
-  const canInvite = callerRole === "leader" || callerRole === "hr";
+  const canInvite =
+    callerRole === "leader" ||
+    callerRole === "hr" ||
+    callerRole === "super_admin";
 
   // Form state
   const [email, setEmail] = useState("");

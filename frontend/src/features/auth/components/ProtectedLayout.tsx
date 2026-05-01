@@ -15,6 +15,13 @@ export function ProtectedLayout() {
       navigate("/login", { replace: true });
       return;
     }
+    // Yangi xodim email invite orqali kelgan, parol/telefon/DOB hali kiritmagan —
+    // dashboard'ga ruxsat yo'q, avval /setup-account ni tugatsin.
+    const meta = (session.user.user_metadata ?? {}) as Record<string, unknown>;
+    if (meta.setup_complete === false) {
+      navigate("/setup-account", { replace: true });
+      return;
+    }
   }, [session, loading, navigate]);
 
   if (loading) {
