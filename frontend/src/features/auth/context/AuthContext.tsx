@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "../../../shared/lib/supabase";
 import { fetchAuthProfile } from "../api/authApi";
@@ -25,6 +25,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentTenant, setCurrentTenant] = useState<TenantAssignment | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  // Joriy user.id ni eslab qolamiz — TOKEN_REFRESHED yoki tab focus
+  // hodisalarida profile'ni qaytadan yuklamaslik uchun.
+  const currentUserIdRef = useRef<string | null>(null);
 
   const refetchProfile = useCallback(async () => {
     if (!session) return;
@@ -52,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session);
       setError(null);
       if (!session) {
+        currentUserIdRef.current = null;
         setProfile(null);
         setCurrentTenant(null);
         setLoading(false);
@@ -66,6 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!mounted) return;
         setProfile(p);
         setCurrentTenant(p.defaultTenant);
+        currentUserIdRef.current = session.user.id;
       } catch (e) {
         if (!mounted) return;
         setProfile(null);
@@ -84,17 +89,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (event, newSession) => {
         if (!mounted) return;
 
-        // TOKEN_REFRESHED — token avtomat yangilandi (vaqti ketgan,
-        // tab fokus qaytarganda, har 1 soatda). User va profile o'zgarmagan,
-        // shuning uchun fetchAuthProfile() qaytadan ishlatish KERAK EMAS.
-        // Aks holda har tab almashtirilganda butun sahifa "yuklanmoqda"
-        // holatiga tushadi va foydalanuvchining ishi yo'qoladi.
-        if (event === "TOKEN_REFRESHED") {
+        // ASOSIY OPTIMIZATSIYA:
+        // Agar yangi session AYNI O'SHA user uchun (id mos kelsa), bu
+        // shunchaki token refresh / tab focus / silent re-auth.
+        // Profile va boshqa ma'lumotlar o'zgarmagan — fetchAuthProfile
+        // chaqirish kerak emas. Aks holda har tab almashtirganda
+        // foydalanuvchining ishi (form ma'lumotlari, ochiq modallar) yo'qoladi.
+        const newUserId = newSession?.user?.id ?? null;
+        if (
+          newUserId &&
+          currentUserIdRef.current &&
+          newUserId === currentUserIdRef.current
+        ) {
+          // Faqat token yangilanadi (Realtime ham yangi tokenni oladi)
           setSession(newSession);
           return;
         }
 
-        // INITIAL_SESSION, SIGNED_IN, SIGNED_OUT, USER_UPDATED — full reload
+        // Yangi user (login/logout/account o'zgarish) — full applySession
         applySession(newSession);
       }
     );
@@ -119,6 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
+    currentUserIdRef.current = null;
     setProfile(null);
     setCurrentTenant(null);
   }, []);
