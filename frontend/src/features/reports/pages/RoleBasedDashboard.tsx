@@ -90,7 +90,9 @@ function RoleHeader({
 
 function RoleIcon({ role }: { role: string }) {
   const iconClass = "w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center";
+  const adminClass = "w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center";
   switch (role) {
+    case "super_admin":     return <div className={adminClass}><Sparkles size={24} /></div>;
     case "leader":          return <div className={iconClass}><TrendingUp size={24} /></div>;
     case "hr":              return <div className={iconClass}><HeartPulse size={24} /></div>;
     case "accounting":      return <div className={iconClass}><Calculator size={24} /></div>;
@@ -141,6 +143,12 @@ function RoleQuickActions({
 }
 
 const ROLE_ACTIONS: Record<string, { module: string; icon: React.ReactNode; labelKey: string }[]> = {
+  super_admin: [
+    { module: "reports", icon: <TrendingUp size={18} />, labelKey: "nav.reports" },
+    { module: "hr",      icon: <Users size={18} />,      labelKey: "nav.hrEmployees" },
+    { module: "tasks",   icon: <CheckSquare size={18} />, labelKey: "nav.tasks" },
+    { module: "settings", icon: <Sparkles size={18} />,  labelKey: "nav.settings" },
+  ],
   leader: [
     { module: "reports", icon: <TrendingUp size={18} />, labelKey: "nav.reports" },
     { module: "tasks",   icon: <CheckSquare size={18} />, labelKey: "nav.tasks" },

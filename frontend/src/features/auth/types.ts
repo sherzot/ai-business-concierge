@@ -1,5 +1,6 @@
 export type UserRole =
-  | "leader"
+  | "super_admin"      // Platforma admin (barcha tenantlarni ko'radi)
+  | "leader"           // Tenant admin (kompaniya rahbari)
   | "hr"
   | "accounting"
   | "department_head"
