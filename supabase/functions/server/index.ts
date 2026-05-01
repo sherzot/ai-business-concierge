@@ -692,6 +692,29 @@ const registerRoutes = (prefix: string) => {
       permissions: ROLE_ACCESS[a.role] ?? [],
     }));
 
+    // SUPER_ADMIN cross-tenant access:
+    // Foydalanuvchi super_admin rolida bo'lsa, tizimdagi BARCHA tenantlarga
+    // (a'zo bo'lmaganlariga ham) super_admin sifatida kira oladi.
+    // Bu tenant switcher'da hammasini ko'rsatish va boshqarish uchun.
+    const isSuperAdmin = tenants.some((t) => t.role === "super_admin");
+    if (isSuperAdmin) {
+      const { data: allTenants } = await supabase
+        .from("tenants")
+        .select("id, name, plan");
+      const existingIds = new Set(tenants.map((t) => t.id));
+      const fullName = tenants[0]?.fullName ?? user.email ?? "Super Admin";
+      for (const t of allTenants ?? []) {
+        if (!existingIds.has(t.id)) {
+          tenants.push({
+            id: t.id,
+            role: "super_admin",
+            fullName,
+            permissions: ROLE_ACCESS["super_admin"] ?? ROLE_ACCESS["leader"] ?? [],
+          });
+        }
+      }
+    }
+
     const { data: tenantRows } = await supabase
       .from("tenants")
       .select("id, name, plan")
@@ -1053,13 +1076,14 @@ const registerRoutes = (prefix: string) => {
     // Caller rolini tekshirish (user_tenants'dan)
     const callerUserId = (ctx as any).userId ?? null;
     if (!callerUserId) return failure(c, 401, "UNAUTHORIZED", "User ID yo'q.");
-    const { data: callerRow } = await supabase
+    // Super_admin har tenantda ruxsatga ega; boshqalar — faqat o'z tenantida
+    const { data: callerRows } = await supabase
       .from("user_tenants")
-      .select("role")
-      .eq("user_id", callerUserId)
-      .eq("tenant_id", tenantId)
-      .maybeSingle();
-    const callerRole = (callerRow?.role as string) ?? "";
+      .select("role, tenant_id")
+      .eq("user_id", callerUserId);
+    const isSuperAdmin = (callerRows ?? []).some((r) => r.role === "super_admin");
+    const tenantSpecificRole = (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
+    const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
     if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
       return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR tahrir qila oladi.");
     }
@@ -1121,13 +1145,14 @@ const registerRoutes = (prefix: string) => {
     if (callerUserId === targetUserId) {
       return failure(c, 403, "SELF_DELETE_FORBIDDEN", "O'zingizni ishdan ketkaza olmaysiz.");
     }
-    const { data: callerRow } = await supabase
+    // Super_admin har tenantda ruxsatga ega; boshqalar — faqat o'z tenantida
+    const { data: callerRows } = await supabase
       .from("user_tenants")
-      .select("role")
-      .eq("user_id", callerUserId)
-      .eq("tenant_id", tenantId)
-      .maybeSingle();
-    const callerRole = (callerRow?.role as string) ?? "";
+      .select("role, tenant_id")
+      .eq("user_id", callerUserId);
+    const isSuperAdmin = (callerRows ?? []).some((r) => r.role === "super_admin");
+    const tenantSpecificRole = (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
+    const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
     if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
       return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR ishdan ketkaza oladi.");
     }
@@ -1170,13 +1195,14 @@ const registerRoutes = (prefix: string) => {
 
     const callerUserId = (ctx as any).userId ?? null;
     if (!callerUserId) return failure(c, 401, "UNAUTHORIZED", "User ID yo'q.");
-    const { data: callerRow } = await supabase
+    // Super_admin har tenantda ruxsatga ega; boshqalar — faqat o'z tenantida
+    const { data: callerRows } = await supabase
       .from("user_tenants")
-      .select("role")
-      .eq("user_id", callerUserId)
-      .eq("tenant_id", tenantId)
-      .maybeSingle();
-    const callerRole = (callerRow?.role as string) ?? "";
+      .select("role, tenant_id")
+      .eq("user_id", callerUserId);
+    const isSuperAdmin = (callerRows ?? []).some((r) => r.role === "super_admin");
+    const tenantSpecificRole = (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
+    const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
     if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
       return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR parolni reset qila oladi.");
     }
@@ -1236,13 +1262,14 @@ const registerRoutes = (prefix: string) => {
     if (callerUserId === targetUserId) {
       return failure(c, 403, "SELF_DELETE_FORBIDDEN", "O'zingizni butunlay o'chira olmaysiz.");
     }
-    const { data: callerRow } = await supabase
+    // Super_admin har tenantda ruxsatga ega; boshqalar — faqat o'z tenantida
+    const { data: callerRows } = await supabase
       .from("user_tenants")
-      .select("role")
-      .eq("user_id", callerUserId)
-      .eq("tenant_id", tenantId)
-      .maybeSingle();
-    const callerRole = (callerRow?.role as string) ?? "";
+      .select("role, tenant_id")
+      .eq("user_id", callerUserId);
+    const isSuperAdmin = (callerRows ?? []).some((r) => r.role === "super_admin");
+    const tenantSpecificRole = (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
+    const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
     if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
       return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR butunlay o'chira oladi.");
     }
@@ -1330,13 +1357,14 @@ const registerRoutes = (prefix: string) => {
 
     const callerUserId = (ctx as any).userId ?? null;
     if (!callerUserId) return failure(c, 401, "UNAUTHORIZED", "User ID yo'q.");
-    const { data: callerRow } = await supabase
+    // Super_admin har tenantda ruxsatga ega; boshqalar — faqat o'z tenantida
+    const { data: callerRows } = await supabase
       .from("user_tenants")
-      .select("role")
-      .eq("user_id", callerUserId)
-      .eq("tenant_id", tenantId)
-      .maybeSingle();
-    const callerRole = (callerRow?.role as string) ?? "";
+      .select("role, tenant_id")
+      .eq("user_id", callerUserId);
+    const isSuperAdmin = (callerRows ?? []).some((r) => r.role === "super_admin");
+    const tenantSpecificRole = (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
+    const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
     if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
       return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR tiklash mumkin.");
     }
