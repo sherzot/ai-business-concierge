@@ -660,8 +660,80 @@ const ROLE_ACCESS: Record<string, string[]> = {
   employee:        ["inbox", "tasks", "settings"],
 };
 
+// ─── In-memory rate limit: IP → { count, resetAt } ───────────────────────────
+const contactRateMap = new Map<string, { count: number; resetAt: number }>();
+const CONTACT_LIMIT = 3;         // 3 murojaatgacha
+const CONTACT_WINDOW_MS = 60 * 60 * 1000; // 1 soat
+
+function checkContactRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = contactRateMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    contactRateMap.set(ip, { count: 1, resetAt: now + CONTACT_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= CONTACT_LIMIT) return false;
+  entry.count += 1;
+  return true;
+}
+
 const registerRoutes = (prefix: string) => {
   app.get(`${prefix}/health`, (c) => c.json({ status: "ok" }));
+
+  // ─── POST /v1/contact — public, rate limited ──────────────────────────────
+  app.post(`${prefix}/contact`, async (c) => {
+    const ip = c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    if (!checkContactRateLimit(ip)) {
+      return c.json({ error: { code: "RATE_LIMITED", message: "Soatda 3 ta murojaat yubora olasiz. Keyinroq urinib ko'ring." } }, 429);
+    }
+
+    let body: Record<string, unknown>;
+    try { body = await c.req.json(); }
+    catch { return c.json({ error: { code: "INVALID_JSON", message: "JSON format xato." } }, 400); }
+
+    const full_name     = String(body.full_name   ?? "").trim();
+    const phone         = String(body.phone        ?? "").trim();
+    const email         = String(body.email        ?? "").trim();
+    const company_name  = String(body.company_name ?? "").trim() || null;
+    const stir          = String(body.stir         ?? "").trim() || null;
+    const business_type = String(body.business_type ?? "").trim() || null;
+    const employee_count= String(body.employee_count?? "").trim() || null;
+    const message       = String(body.message      ?? "").trim() || null;
+    const source        = String(body.source       ?? "").trim() || null;
+
+    if (!full_name || !phone || !email) {
+      return c.json({ error: { code: "VALIDATION_ERROR", message: "full_name, phone, email majburiy." } }, 400);
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return c.json({ error: { code: "VALIDATION_ERROR", message: "Email format noto'g'ri." } }, 400);
+    }
+
+    const allowed_bt = ["yatt","llc","jsc","other",null];
+    const allowed_ec = ["1-10","11-50","51-200","200+",null];
+    const allowed_src = ["ads","referral","search","telegram","other",null];
+    if (!allowed_bt.includes(business_type as string | null)) {
+      return c.json({ error: { code: "VALIDATION_ERROR", message: "business_type noto'g'ri." } }, 400);
+    }
+
+    const { error: dbErr } = await supabase.from("contact_requests").insert({
+      full_name, phone, email, company_name, stir,
+      business_type: allowed_bt.includes(business_type as string | null) ? business_type : null,
+      employee_count: allowed_ec.includes(employee_count as string | null) ? employee_count : null,
+      message,
+      source: allowed_src.includes(source as string | null) ? source : null,
+      status: "new",
+    });
+
+    if (dbErr) {
+      console.error("[contact] db error:", dbErr);
+      return c.json({ error: { code: "SERVER_ERROR", message: "Server xatosi. Qaytadan urinib ko'ring." } }, 500);
+    }
+
+    // TODO: Resend orqali admin emailiga xabar yuborish (Phase 1.5.4)
+    console.info(`[contact] new request from ${email} (${company_name ?? "—"})`);
+
+    return c.json({ success: true }, 201);
+  });
 
   app.get(`${prefix}/auth/me`, async (c) => {
     const auth = c.req.header("authorization");
@@ -2310,6 +2382,63 @@ const registerRoutes = (prefix: string) => {
       query,
       results: data ?? [],
     });
+  });
+
+  // ─── GET /v1/admin/contacts — super_admin / sub_admin ─────────────────────
+  app.get(`${prefix}/admin/contacts`, async (c) => {
+    const auth = c.req.header("authorization");
+    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+
+    const { data: ut } = await supabase
+      .from("user_tenants").select("role").eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
+    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+
+    const status = c.req.query("status");
+    let q = supabase.from("contact_requests")
+      .select("id,full_name,company_name,phone,email,business_type,employee_count,message,source,status,admin_note,created_at")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (status && status !== "all") q = q.eq("status", status);
+
+    const { data, error } = await q;
+    if (error) return failure(c, 500, "DB_ERROR", error.message);
+    return success(c, data ?? []);
+  });
+
+  // ─── PATCH /v1/admin/contacts/:id/status ─────────────────────────────────
+  app.patch(`${prefix}/admin/contacts/:id/status`, async (c) => {
+    const auth = c.req.header("authorization");
+    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+
+    const { data: ut } = await supabase
+      .from("user_tenants").select("role").eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
+    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+
+    const id = c.req.param("id");
+    const body = await c.req.json().catch(() => ({}));
+    const allowed = ["new","contacted","invite_sent","registered","rejected"];
+    if (!allowed.includes(body.status)) {
+      return failure(c, 400, "VALIDATION_ERROR", "Status noto'g'ri.");
+    }
+
+    const update: Record<string, unknown> = {
+      status: body.status,
+      handled_by: user.id,
+    };
+    if (body.admin_note !== undefined) update.admin_note = body.admin_note;
+
+    const { data, error } = await supabase
+      .from("contact_requests").update(update).eq("id", id).select().single();
+    if (error) return failure(c, 500, "DB_ERROR", error.message);
+    return success(c, data);
   });
 };
 

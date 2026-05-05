@@ -8,6 +8,8 @@ type ForWhoItem = { icon: string; title: string; desc: string };
 
 type OnboardingStep = { icon: string; step: string; title: string; desc: string };
 type OnboardingFeature = { icon: string; text: string };
+type ContactSources = { ads: string; referral: string; search: string; telegram: string; other: string };
+type BusinessTypes = { yatt: string; llc: string; jsc: string; other: string };
 
 type LandingDict = {
   nav: { login: string; contact: string };
@@ -44,6 +46,23 @@ type LandingDict = {
     cta: string;
     ctaNote: string;
     alreadyAccount: string;
+  };
+  contact: {
+    title: string; subtitle: string;
+    fullName: string; fullNamePlaceholder: string;
+    companyName: string; companyNamePlaceholder: string;
+    stir: string; stirPlaceholder: string;
+    phone: string; phonePlaceholder: string;
+    email: string; emailPlaceholder: string;
+    businessType: string; businessTypePlaceholder: string;
+    businessTypes: BusinessTypes;
+    employeeCount: string; employeeCountPlaceholder: string;
+    message: string; messagePlaceholder: string;
+    source: string; sourcePlaceholder: string;
+    sources: ContactSources;
+    submit: string; submitting: string;
+    successTitle: string; successDesc: string; successNote: string;
+    backToHome: string; required: string;
   };
   pricing: {
     title: string; subtitle: string;
@@ -274,6 +293,27 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
       cta: "Murojaat qilish",
       ctaNote: "Bepul konsultatsiya · 24 soat ichida javob · Majburiyat yo'q",
       alreadyAccount: "Allaqachon accountingiz bormi?",
+    },
+    contact: {
+      title: "Murojaat qilish",
+      subtitle: "Ma'lumotlaringizni qoldiring — biz 24 soat ichida bog'lanamiz va tizimni ko'rsatamiz.",
+      fullName: "To'liq ism *", fullNamePlaceholder: "Familiya Ism",
+      companyName: "Kompaniya nomi", companyNamePlaceholder: "Mas: Jahongir Trade MChJ",
+      stir: "STIR (ixtiyoriy)", stirPlaceholder: "123456789",
+      phone: "Telefon *", phonePlaceholder: "+998 90 123 45 67",
+      email: "Email *", emailPlaceholder: "email@company.com",
+      businessType: "Biznes turi", businessTypePlaceholder: "Tanlang",
+      businessTypes: { yatt: "YaTT (Yakka tartibdagi tadbirkor)", llc: "MChJ (Mas'uliyati cheklangan jamiyat)", jsc: "AJ (Aksiyadorlik jamiyati)", other: "Boshqa" },
+      employeeCount: "Xodimlar soni (taxminan)", employeeCountPlaceholder: "Tanlang",
+      message: "Savol yoki muammo (ixtiyoriy)", messagePlaceholder: "Tizimdan qanday foydalanmoqchisiz? Asosiy muammolaringiz nima?",
+      source: "Bizni qayerdan bildingiz?", sourcePlaceholder: "Tanlang",
+      sources: { ads: "Reklama", referral: "Do'st tavsiyasi", search: "Internet qidiruv", telegram: "Telegram", other: "Boshqa" },
+      submit: "Murojaat yuborish", submitting: "Yuborilmoqda...",
+      successTitle: "Murojaatingiz qabul qilindi!",
+      successDesc: "Siz bilan 24 soat ichida bog'lanamiz va tizimni ko'rsatamiz.",
+      successNote: "To'g'ridan-to'g'ri aloqa:",
+      backToHome: "Bosh sahifaga qaytish",
+      required: "* — majburiy maydonlar",
     },
     pricing: {
       title: "Narxlar",
@@ -533,6 +573,27 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
       ctaNote: "Бесплатная консультация · Ответ за 24 часа · Без обязательств",
       alreadyAccount: "Уже есть аккаунт?",
     },
+    contact: {
+      title: "Оставить заявку",
+      subtitle: "Оставьте ваши данные — мы свяжемся в течение 24 часов и покажем систему.",
+      fullName: "Полное имя *", fullNamePlaceholder: "Фамилия Имя",
+      companyName: "Название компании", companyNamePlaceholder: "Напр: Jahongir Trade ООО",
+      stir: "STIR (необязательно)", stirPlaceholder: "123456789",
+      phone: "Телефон *", phonePlaceholder: "+998 90 123 45 67",
+      email: "Email *", emailPlaceholder: "email@company.com",
+      businessType: "Тип бизнеса", businessTypePlaceholder: "Выберите",
+      businessTypes: { yatt: "ИП (Индивидуальный предприниматель)", llc: "ООО (Общество с ограниченной ответственностью)", jsc: "АО (Акционерное общество)", other: "Другое" },
+      employeeCount: "Кол-во сотрудников (примерно)", employeeCountPlaceholder: "Выберите",
+      message: "Вопрос или проблема (необязательно)", messagePlaceholder: "Как планируете использовать систему? Какие основные задачи?",
+      source: "Откуда узнали о нас?", sourcePlaceholder: "Выберите",
+      sources: { ads: "Реклама", referral: "Рекомендация друга", search: "Интернет-поиск", telegram: "Telegram", other: "Другое" },
+      submit: "Отправить заявку", submitting: "Отправляется...",
+      successTitle: "Заявка принята!",
+      successDesc: "Мы свяжемся с вами в течение 24 часов и покажем систему.",
+      successNote: "Прямая связь:",
+      backToHome: "Вернуться на главную",
+      required: "* — обязательные поля",
+    },
     pricing: {
       title: "Тарифы",
       subtitle: "Бесплатно в период бета. Pro план скоро.",
@@ -791,6 +852,27 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
       ctaNote: "Free consultation · 24-hour response · No commitment",
       alreadyAccount: "Already have an account?",
     },
+    contact: {
+      title: "Contact Us",
+      subtitle: "Fill in your details — we'll get in touch within 24 hours and show you the system.",
+      fullName: "Full name *", fullNamePlaceholder: "Last name First name",
+      companyName: "Company name", companyNamePlaceholder: "e.g. Jahongir Trade LLC",
+      stir: "Tax ID (optional)", stirPlaceholder: "123456789",
+      phone: "Phone *", phonePlaceholder: "+998 90 123 45 67",
+      email: "Email *", emailPlaceholder: "email@company.com",
+      businessType: "Business type", businessTypePlaceholder: "Select",
+      businessTypes: { yatt: "Sole trader (YaTT)", llc: "LLC (Limited liability company)", jsc: "JSC (Joint stock company)", other: "Other" },
+      employeeCount: "Number of employees (approx)", employeeCountPlaceholder: "Select",
+      message: "Question or problem (optional)", messagePlaceholder: "How do you plan to use the system? What are your main challenges?",
+      source: "How did you hear about us?", sourcePlaceholder: "Select",
+      sources: { ads: "Advertisement", referral: "Friend's recommendation", search: "Internet search", telegram: "Telegram", other: "Other" },
+      submit: "Submit request", submitting: "Submitting...",
+      successTitle: "Request received!",
+      successDesc: "We will contact you within 24 hours and show you the system.",
+      successNote: "Direct contact:",
+      backToHome: "Back to home",
+      required: "* — required fields",
+    },
     pricing: {
       title: "Pricing",
       subtitle: "Free during beta. Pro plan coming soon.",
@@ -1048,6 +1130,27 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
       cta: "お問い合わせ",
       ctaNote: "無料相談 · 24時間以内に回答 · 義務なし",
       alreadyAccount: "すでにアカウントをお持ちですか？",
+    },
+    contact: {
+      title: "お問い合わせ",
+      subtitle: "情報をご入力ください — 24時間以内にご連絡し、システムをご案内します。",
+      fullName: "氏名 *", fullNamePlaceholder: "姓 名",
+      companyName: "会社名", companyNamePlaceholder: "例: Jahongir Trade LLC",
+      stir: "税務番号（任意）", stirPlaceholder: "123456789",
+      phone: "電話番号 *", phonePlaceholder: "+998 90 123 45 67",
+      email: "メール *", emailPlaceholder: "email@company.com",
+      businessType: "事業形態", businessTypePlaceholder: "選択してください",
+      businessTypes: { yatt: "個人事業主", llc: "合同会社（LLC）", jsc: "株式会社（JSC）", other: "その他" },
+      employeeCount: "従業員数（概算）", employeeCountPlaceholder: "選択してください",
+      message: "質問や課題（任意）", messagePlaceholder: "システムをどのように活用したいですか？主な課題は何ですか？",
+      source: "どこで知りましたか？", sourcePlaceholder: "選択してください",
+      sources: { ads: "広告", referral: "友人の紹介", search: "インターネット検索", telegram: "Telegram", other: "その他" },
+      submit: "送信する", submitting: "送信中...",
+      successTitle: "お問い合わせを受け付けました！",
+      successDesc: "24時間以内にご連絡し、システムをご案内します。",
+      successNote: "直接お問い合わせ:",
+      backToHome: "ホームへ戻る",
+      required: "* — 必須項目",
     },
     pricing: {
       title: "料金プラン",
