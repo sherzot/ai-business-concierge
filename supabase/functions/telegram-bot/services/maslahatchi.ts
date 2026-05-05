@@ -79,11 +79,11 @@ export async function askMaslahatchi(
 
   const llmResponse = await callClaude(ANTHROPIC_API_KEY, request);
 
-  // 3. Disclaimer (past confidence bo'lsa)
+  // 3. Disclaimer — user tilida (kbLocale emas, to'liq locale)
   const finalAnswer = addDisclaimerIfNeeded(
     llmResponse.text,
     kbResult,
-    kbLocale,
+    locale,
   );
 
   // 4. User xabarini saqlash

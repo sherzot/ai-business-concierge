@@ -103,13 +103,16 @@ export async function updateLocale(
   chatId: number,
   locale: TelegramLocale,
 ): Promise<void> {
-  // KbLocale supports uz/ru/en only — ja maps to "en" for KB search
-  await supabase
+  const { error } = await supabase
     .from("ai_conversations")
     .update({ locale, updated_at: new Date().toISOString() })
     .eq("telegram_chat_id", chatId)
     .eq("platform", "telegram")
     .eq("status", "active");
+
+  if (error) {
+    console.error("[UPDATE_LOCALE ERROR]", error.message, { chatId, locale });
+  }
 }
 
 /** Kunlik rate limit tekshirish (free: 5 so'rov/kun) */

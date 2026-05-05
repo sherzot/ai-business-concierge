@@ -1,5 +1,5 @@
 import type { Context, CallbackQueryContext } from "npm:grammy@1";
-import { supabase } from "../services/session.ts";
+import { supabase, getOrCreateSession } from "../services/session.ts";
 
 const FEEDBACK_THANKS: Record<string, { good: string; bad: string }> = {
   uz: {
@@ -28,7 +28,9 @@ export async function handleFeedbackCallback(
   const rating = parts[1] as "good" | "bad";
   const messageId = parts.slice(2).join(":"); // UUID could theoretically contain ":"
 
-  const tenantId = `tg_${ctx.chat?.id}`;
+  const chatId = ctx.chat?.id;
+  const firstName = ctx.from?.first_name ?? "Foydalanuvchi";
+  const tenantId = `tg_${chatId}`;
 
   try {
     await supabase.from("ai_feedback").insert({
@@ -40,9 +42,15 @@ export async function handleFeedbackCallback(
     console.error("[FEEDBACK ERROR]", (err as Error).message);
   }
 
-  // Til aniqlash — oddiy fallback
-  const lang = "uz";
-  const thanks = FEEDBACK_THANKS[lang];
+  let lang = "uz";
+  if (chatId) {
+    try {
+      const session = await getOrCreateSession(chatId, firstName);
+      lang = session.locale;
+    } catch {}
+  }
+
+  const thanks = FEEDBACK_THANKS[lang] ?? FEEDBACK_THANKS.uz;
   const text = rating === "good" ? thanks.good : thanks.bad;
 
   await ctx.answerCallbackQuery(text);

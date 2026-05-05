@@ -25,6 +25,13 @@ const ERROR_MSG: Record<TelegramLocale, string> = {
   ja: "❌ エラーが発生しました。もう一度お試しください。",
 };
 
+const REMAINING_MSG: Record<TelegramLocale, (r: number, l: number) => string> = {
+  uz: (r, l) => `\n\n📊 Bugun qolgan: ${r}/${l} so'rov`,
+  ru: (r, l) => `\n\n📊 Осталось сегодня: ${r}/${l} запросов`,
+  en: (r, l) => `\n\n📊 Remaining today: ${r}/${l} requests`,
+  ja: (r, l) => `\n\n📊 本日の残り: ${r}/${l}リクエスト`,
+};
+
 const FEEDBACK_LABELS: Record<TelegramLocale, { good: string; bad: string }> = {
   uz: { good: "👍 Foydali", bad: "👎 Foydali emas" },
   ru: { good: "👍 Полезно", bad: "👎 Бесполезно" },
@@ -70,13 +77,16 @@ export async function handleMessage(ctx: Context): Promise<void> {
       .deleteMessage(chatId, thinkingMsg.message_id)
       .catch(() => {});
 
+    const remaining = rateCheck.limit - (rateCheck.used + 1);
+    const footer = REMAINING_MSG[locale](remaining, rateCheck.limit);
+
     // Feedback tugmalari
     const labels = FEEDBACK_LABELS[locale];
     const keyboard = new InlineKeyboard()
       .text(labels.good, `feedback:good:${result.messageId}`)
       .text(labels.bad, `feedback:bad:${result.messageId}`);
 
-    await ctx.reply(result.answer, { reply_markup: keyboard });
+    await ctx.reply(result.answer + footer, { reply_markup: keyboard });
   } catch (err) {
     console.error("[MASLAHATCHI ERROR]", (err as Error).message, "chatId:", chatId);
     await ctx.api

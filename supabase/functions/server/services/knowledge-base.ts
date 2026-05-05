@@ -249,17 +249,21 @@ export const updateKbEntry = async (
 
 const DISCLAIMER_UZ = "\n\n⚠️ Bu AI maslahat bo'lib, professional huquqiy yoki moliyaviy maslahat o'rnini bosmaydi.";
 const DISCLAIMER_RU = "\n\n⚠️ Это AI-консультация, которая не заменяет профессиональную юридическую или финансовую помощь.";
+const DISCLAIMER_EN = "\n\n⚠️ This is AI advice and does not replace professional legal or financial consultation.";
+const DISCLAIMER_JA = "\n\n⚠️ これはAIアドバイスであり、専門的な法律・財務相談の代替ではありません。";
 
-/**
- * Agar KB natijasi topilmasa yoki similarity past bo'lsa — disclaimer qo'shadi
- */
 export const addDisclaimerIfNeeded = (
   answer: string,
   kbResult: KbSearchResult,
-  locale: KbLocale = "uz",
+  locale: KbLocale | "ja" = "uz",
 ): string => {
   if (!kbResult.found || kbResult.bestSimilarity < 0.85) {
-    return answer + (locale === "ru" ? DISCLAIMER_RU : DISCLAIMER_UZ);
+    const disclaimer =
+      locale === "ru" ? DISCLAIMER_RU :
+      locale === "en" ? DISCLAIMER_EN :
+      locale === "ja" ? DISCLAIMER_JA :
+      DISCLAIMER_UZ;
+    return answer + disclaimer;
   }
   return answer;
 };

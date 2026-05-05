@@ -6,10 +6,10 @@ const CHOOSE_LANG =
   "🌐 Til tanlang / Выберите язык / Choose language / 言語を選択：";
 
 const LANG_SET: Record<TelegramLocale, string> = {
-  uz: "✅ Til o'zgartirildi: O'zbek tili 🇺🇿\n\nEndi savol berishingiz mumkin! 💬",
-  ru: "✅ Язык изменён: Русский 🇷🇺\n\nТеперь можно задавать вопросы! 💬",
-  en: "✅ Language changed: English 🇬🇧\n\nYou can now ask questions! 💬",
-  ja: "✅ 言語が変更されました：日本語 🇯🇵\n\n質問をどうぞ！ 💬",
+  uz: "✅ Til o'zgartirildi: O'zbek tili 🇺🇿\n\nSavol bering yoki /help buyrug'ini ko'ring. 💬",
+  ru: "✅ Язык изменён: Русский 🇷🇺\n\nЗадайте вопрос или введите /help. 💬",
+  en: "✅ Language changed: English 🇬🇧\n\nAsk a question or type /help. 💬",
+  ja: "✅ 言語が変更されました：日本語 🇯🇵\n\n質問をどうぞ。/help でヘルプを表示。 💬",
 };
 
 const VALID_LOCALES: TelegramLocale[] = ["uz", "ru", "en", "ja"];

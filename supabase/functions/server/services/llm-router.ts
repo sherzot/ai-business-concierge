@@ -40,7 +40,7 @@ export type LLMResponse = {
 export const HAIKU_MODEL =
   Deno.env.get("CLAUDE_HAIKU_MODEL") ?? "claude-3-5-haiku-20241022";
 export const SONNET_MODEL =
-  Deno.env.get("CLAUDE_SONNET_MODEL") ?? "claude-sonnet-4-5";
+  Deno.env.get("CLAUDE_SONNET_MODEL") ?? "claude-sonnet-4-6";
 
 // Narx (1M token uchun USD) — cost tracking uchun
 const PRICING: Record<string, { input: number; output: number }> = {
@@ -141,11 +141,15 @@ export const callClaude = async (
   const maxTokens = MAX_TOKENS[complexity];
   const locale = request.locale ?? "uz";
 
-  // System prompt — default til bo'yicha
+  // System prompt — default (barcha 4 til uchun)
   const systemPrompt =
     request.systemPrompt ??
     (locale === "ru"
       ? "Ты AI Business Concierge — помощник для малого бизнеса Узбекистана. Отвечай кратко, практично и точно. Если не знаешь — скажи честно."
+      : locale === "en"
+      ? "You are AI Business Concierge for small businesses in Uzbekistan. Keep answers brief, practical and accurate. If unknown, say so honestly."
+      : locale === "ja"
+      ? "あなたはウズベキスタンの中小企業向けAIビジネスコンシェルジュです。簡潔、実用的、正確に回答してください。不明な場合は正直に伝えてください。"
       : "Sen AI Business Concierge — O'zbekiston kichik bizneslari uchun AI yordamchisi. Javoblar qisqa, amaliy va aniq bo'lsin. Bilmasang — halol ayt.");
 
   // Cache tekshirish

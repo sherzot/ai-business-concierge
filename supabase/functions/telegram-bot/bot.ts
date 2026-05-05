@@ -11,6 +11,8 @@ import {
 } from "./handlers/language.ts";
 import { handleMessage } from "./handlers/message.ts";
 import { handleFeedbackCallback } from "./handlers/feedback.ts";
+import { handleStats } from "./handlers/stats.ts";
+import { handleMedia } from "./handlers/media.ts";
 
 const TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN") ?? "";
 
@@ -23,6 +25,7 @@ export const bot = new Bot(TOKEN);
 // Buyruqlar
 bot.command("start", handleStart);
 bot.command("help", handleHelp);
+bot.command("stats", handleStats);
 bot.command("til", handleLanguage);       // O'zbek: /til
 bot.command("language", handleLanguage);  // English: /language
 bot.command("язык", handleLanguage);      // Russian: /язык
@@ -33,6 +36,13 @@ bot.callbackQuery(/^feedback:(good|bad):.+$/, handleFeedbackCallback);
 
 // Matn xabarlar (barcha text buyruq bo'lmasa)
 bot.on("message:text", handleMessage);
+
+// Matn bo'lmagan xabarlar — rasm, ovoz, fayl va h.k.
+bot.on(
+  ["message:photo", "message:voice", "message:document",
+   "message:sticker", "message:video", "message:audio", "message:video_note"],
+  handleMedia,
+);
 
 // Global xato handler — bot hech qachon crash bo'lmaydi
 bot.catch((err) => {

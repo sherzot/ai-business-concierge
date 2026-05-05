@@ -2,6 +2,13 @@ import type { Context } from "npm:grammy@1";
 import { InlineKeyboard } from "npm:grammy@1";
 import { getOrCreateSession } from "../services/session.ts";
 
+const WELCOME_BACK: Record<string, string> = {
+  uz: `👋 Qaytib kelganingizdan xursandmiz!\n\nSavol bering — javob beraman! 💬\n\n🌐 Tilni o'zgartirish: /til`,
+  ru: `👋 Рады снова видеть вас!\n\nЗадайте вопрос — отвечу! 💬\n\n🌐 Сменить язык: /язык`,
+  en: `👋 Welcome back!\n\nAsk a question — I'll answer! 💬\n\n🌐 Change language: /language`,
+  ja: `👋 おかえりなさい！\n\n質問をどうぞ！ 💬\n\n🌐 言語変更: /language`,
+};
+
 const WELCOME: Record<string, string> = {
   uz: `👋 <b>AI Business Concierge</b> ga xush kelibsiz!
 
@@ -63,6 +70,13 @@ export async function handleStart(ctx: Context): Promise<void> {
   if (!chatId) return;
 
   const session = await getOrCreateSession(chatId, firstName);
+
+  if (!session.isNew) {
+    await ctx.reply(WELCOME_BACK[session.locale] ?? WELCOME_BACK.uz, {
+      parse_mode: "HTML",
+    });
+    return;
+  }
 
   const keyboard = new InlineKeyboard()
     .text("🇺🇿 O'zbek", "lang:uz")
