@@ -59,6 +59,12 @@ export function LandingNavbar({ locale, onLocaleChange, t }: Props) {
               </button>
             ))}
           </div>
+          <a
+            href="#company-onboarding"
+            className="hidden sm:inline-flex px-4 py-2 rounded-lg text-sm font-medium border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 transition-colors"
+          >
+            {t.contact}
+          </a>
           <button
             onClick={() => navigate("/login")}
             className="px-4 py-2 rounded-lg text-sm font-medium bg-white text-slate-900 hover:bg-slate-100 transition-colors"

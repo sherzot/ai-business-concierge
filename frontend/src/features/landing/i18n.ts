@@ -6,8 +6,11 @@ type ProblemItem = { emoji: string; problem: string; before: string; after: stri
 type AutomationItem = { icon: string; title: string; desc: string };
 type ForWhoItem = { icon: string; title: string; desc: string };
 
+type OnboardingStep = { icon: string; step: string; title: string; desc: string };
+type OnboardingFeature = { icon: string; text: string };
+
 type LandingDict = {
-  nav: { login: string };
+  nav: { login: string; contact: string };
   hero: { badge: string; title: string; subtitle: string; ctaTelegram: string; ctaLogin: string };
   stats: { items: StatItem[] };
   features: {
@@ -31,6 +34,17 @@ type LandingDict = {
     step2: { title: string; desc: string };
     step3: { title: string; desc: string };
   };
+  companyOnboarding: {
+    badge: string;
+    title: string;
+    subtitle: string;
+    steps: OnboardingStep[];
+    featuresTitle: string;
+    features: OnboardingFeature[];
+    cta: string;
+    ctaNote: string;
+    alreadyAccount: string;
+  };
   pricing: {
     title: string; subtitle: string;
     free: { name: string; price: string; period: string; cta: string; features: string[] };
@@ -42,7 +56,7 @@ type LandingDict = {
 export const landingI18n: Record<LandingLocale, LandingDict> = {
   // ─────────────────────────────── UZ ───────────────────────────────
   uz: {
-    nav: { login: "Kirish" },
+    nav: { login: "Kirish", contact: "Murojaat" },
     hero: {
       badge: "Beta — Hozir bepul kirish",
       title: "O'zbekistondagi mahalliy va xalqaro kichik bizneslar uchun AI yordamchi",
@@ -218,6 +232,49 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
       step2: { title: "AI tahlil qiladi", desc: "O'zbekiston qonunlari bilimlar bazasi + Claude AI — aniq, ishonchli javob" },
       step3: { title: "Darhol javob oling", desc: "5 soniyada amaliy maslahat, kerak bo'lsa hujjat yoki bot ham yaratib beradi" },
     },
+    companyOnboarding: {
+      badge: "Kompaniyalar uchun",
+      title: "Kompaniyangizni tizimga ulang",
+      subtitle: "Biznesingizni bir joyda boshqaring — xodimlar, vazifalar, moliya, hujjatlar va AI maslahat.",
+      steps: [
+        {
+          icon: "📋",
+          step: "1-qadam",
+          title: "Murojaat qiling",
+          desc: "Kompaniya ma'lumotlaringizni yuboring. Biz 24 soat ichida siz bilan bog'lanamiz.",
+        },
+        {
+          icon: "🤝",
+          step: "2-qadam",
+          title: "Demo va kelishuv",
+          desc: "Tizimni ko'rsatamiz, savollarga javob beramiz. Kelishsak — sizga maxsus havola yuboramiz.",
+        },
+        {
+          icon: "🏢",
+          step: "3-qadam",
+          title: "Kompaniyangizni ro'yxatdan o'tkaring",
+          desc: "Havola orqali kompaniya ma'lumotlari va login-parol o'rnating. Tasdiqlanishni kuting.",
+        },
+        {
+          icon: "✅",
+          step: "4-qadam",
+          title: "Ishga kirishing",
+          desc: "Biz tasdiqlaganimizdan so'ng tizimga kirib, xodimlar qo'shishni va boshqaruvni boshlang.",
+        },
+      ],
+      featuresTitle: "Kompaniya dashboardida nimalar bor?",
+      features: [
+        { icon: "👥", text: "Xodimlar boshqaruvi — HR, rol, lavozim, ma'lumotlar" },
+        { icon: "✅", text: "Vazifalar va maqsadlar — butun jamoa uchun" },
+        { icon: "💰", text: "Moliya va maosh — daromad, xarajat, hisobotlar" },
+        { icon: "📄", text: "Hujjat generatsiya — shartnoma, buyruq, ariza (PDF/DOCX)" },
+        { icon: "🤖", text: "AI Maslahatchi — soliq, huquq, HR savollari 24/7" },
+        { icon: "🔒", text: "Xavfsizlik — har bir xodim faqat o'z ma'lumotlarini ko'radi" },
+      ],
+      cta: "Murojaat qilish",
+      ctaNote: "Bepul konsultatsiya · 24 soat ichida javob · Majburiyat yo'q",
+      alreadyAccount: "Allaqachon accountingiz bormi?",
+    },
     pricing: {
       title: "Narxlar",
       subtitle: "Beta davrida bepul. Tez kunda Pro plan.",
@@ -257,7 +314,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
 
   // ─────────────────────────────── RU ───────────────────────────────
   ru: {
-    nav: { login: "Войти" },
+    nav: { login: "Войти", contact: "Связаться" },
     hero: {
       badge: "Бета — Бесплатный доступ",
       title: "AI-помощник для местного и международного малого бизнеса в Узбекистане",
@@ -433,6 +490,49 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
       step2: { title: "AI анализирует", desc: "База знаний по законам Узбекистана + Claude AI — точный, надёжный ответ" },
       step3: { title: "Получите ответ мгновенно", desc: "За 5 секунд практический совет, при необходимости — документ или бот" },
     },
+    companyOnboarding: {
+      badge: "Для компаний",
+      title: "Подключите вашу компанию",
+      subtitle: "Управляйте бизнесом в одном месте — сотрудники, задачи, финансы, документы и AI-консультант.",
+      steps: [
+        {
+          icon: "📋",
+          step: "Шаг 1",
+          title: "Оставьте заявку",
+          desc: "Отправьте данные вашей компании. Мы свяжемся с вами в течение 24 часов.",
+        },
+        {
+          icon: "🤝",
+          step: "Шаг 2",
+          title: "Демо и договорённость",
+          desc: "Покажем систему, ответим на вопросы. При достижении договорённости — отправим вам персональную ссылку.",
+        },
+        {
+          icon: "🏢",
+          step: "Шаг 3",
+          title: "Зарегистрируйте компанию",
+          desc: "По ссылке введите данные компании и создайте логин-пароль. Ожидайте подтверждения.",
+        },
+        {
+          icon: "✅",
+          step: "Шаг 4",
+          title: "Начните работу",
+          desc: "После нашего подтверждения войдите в систему, добавьте сотрудников и начните управлять.",
+        },
+      ],
+      featuresTitle: "Что есть в дашборде компании?",
+      features: [
+        { icon: "👥", text: "Управление сотрудниками — HR, роли, должности, данные" },
+        { icon: "✅", text: "Задачи и цели — для всей команды" },
+        { icon: "💰", text: "Финансы и зарплата — доходы, расходы, отчёты" },
+        { icon: "📄", text: "Генерация документов — договор, приказ, заявление (PDF/DOCX)" },
+        { icon: "🤖", text: "AI-консультант — налоги, право, HR-вопросы 24/7" },
+        { icon: "🔒", text: "Безопасность — каждый сотрудник видит только свои данные" },
+      ],
+      cta: "Оставить заявку",
+      ctaNote: "Бесплатная консультация · Ответ за 24 часа · Без обязательств",
+      alreadyAccount: "Уже есть аккаунт?",
+    },
     pricing: {
       title: "Тарифы",
       subtitle: "Бесплатно в период бета. Pro план скоро.",
@@ -472,7 +572,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
 
   // ─────────────────────────────── EN ───────────────────────────────
   en: {
-    nav: { login: "Sign In" },
+    nav: { login: "Sign In", contact: "Contact Us" },
     hero: {
       badge: "Beta — Free access now",
       title: "AI Assistant for Local and International Small Businesses in Uzbekistan",
@@ -648,6 +748,49 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
       step2: { title: "AI analyses", desc: "Uzbekistan law knowledge base + Claude AI — accurate, reliable answer" },
       step3: { title: "Get your answer instantly", desc: "Practical advice in 5 seconds, documents or a bot if needed" },
     },
+    companyOnboarding: {
+      badge: "For Companies",
+      title: "Connect Your Company",
+      subtitle: "Manage your business in one place — employees, tasks, finance, documents and AI consulting.",
+      steps: [
+        {
+          icon: "📋",
+          step: "Step 1",
+          title: "Submit a Request",
+          desc: "Send your company details. We will get in touch within 24 hours.",
+        },
+        {
+          icon: "🤝",
+          step: "Step 2",
+          title: "Demo & Agreement",
+          desc: "We show you the system and answer your questions. Once agreed — we send you a personal invite link.",
+        },
+        {
+          icon: "🏢",
+          step: "Step 3",
+          title: "Register Your Company",
+          desc: "Via the invite link, fill in your company info and set your login credentials. Wait for approval.",
+        },
+        {
+          icon: "✅",
+          step: "Step 4",
+          title: "Start Working",
+          desc: "After our approval, sign in, add your employees and start managing everything.",
+        },
+      ],
+      featuresTitle: "What's in the Company Dashboard?",
+      features: [
+        { icon: "👥", text: "Employee management — HR, roles, positions, full data" },
+        { icon: "✅", text: "Tasks & goals — for the entire team" },
+        { icon: "💰", text: "Finance & payroll — income, expenses, reports" },
+        { icon: "📄", text: "Document generation — contracts, orders, applications (PDF/DOCX)" },
+        { icon: "🤖", text: "AI Advisor — tax, legal, HR questions 24/7" },
+        { icon: "🔒", text: "Security — each employee sees only their own data" },
+      ],
+      cta: "Submit a Request",
+      ctaNote: "Free consultation · 24-hour response · No commitment",
+      alreadyAccount: "Already have an account?",
+    },
     pricing: {
       title: "Pricing",
       subtitle: "Free during beta. Pro plan coming soon.",
@@ -687,7 +830,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
 
   // ─────────────────────────────── JA ───────────────────────────────
   ja: {
-    nav: { login: "ログイン" },
+    nav: { login: "ログイン", contact: "お問い合わせ" },
     hero: {
       badge: "ベータ版 — 無料アクセス中",
       title: "ウズベキスタンの国内・外資中小企業向けAIアシスタント",
@@ -862,6 +1005,49 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
       step1: { title: "ボットかWebにアクセス", desc: "@ai_business_concierge_botへ、またはWebダッシュボードから質問を送信" },
       step2: { title: "AIが分析", desc: "ウズベキスタン法ナレッジベース + Claude AI — 正確で信頼性の高い回答" },
       step3: { title: "即座に回答を受け取る", desc: "5秒で実用的なアドバイス、必要に応じて書類やボットも作成" },
+    },
+    companyOnboarding: {
+      badge: "企業向け",
+      title: "貴社をシステムに接続する",
+      subtitle: "ビジネスを一か所で管理 — 従業員・タスク・財務・書類・AIコンサルティング。",
+      steps: [
+        {
+          icon: "📋",
+          step: "ステップ1",
+          title: "お問い合わせ",
+          desc: "会社情報をお送りください。24時間以内にご連絡いたします。",
+        },
+        {
+          icon: "🤝",
+          step: "ステップ2",
+          title: "デモと合意",
+          desc: "システムをご案内し、ご質問にお答えします。合意後、専用の招待リンクをお送りします。",
+        },
+        {
+          icon: "🏢",
+          step: "ステップ3",
+          title: "会社を登録する",
+          desc: "招待リンクから会社情報を入力し、ログイン情報を設定します。承認をお待ちください。",
+        },
+        {
+          icon: "✅",
+          step: "ステップ4",
+          title: "業務開始",
+          desc: "承認後、ログインして従業員を追加し、すべての管理を始めてください。",
+        },
+      ],
+      featuresTitle: "企業ダッシュボードで何ができる？",
+      features: [
+        { icon: "👥", text: "従業員管理 — HR・役割・役職・全データ" },
+        { icon: "✅", text: "タスクと目標 — チーム全体向け" },
+        { icon: "💰", text: "財務と給与 — 収入・支出・レポート" },
+        { icon: "📄", text: "書類生成 — 契約書・命令書・申請書（PDF/DOCX）" },
+        { icon: "🤖", text: "AIアドバイザー — 税務・法律・HRの質問に24時間対応" },
+        { icon: "🔒", text: "セキュリティ — 各従業員は自分のデータのみ閲覧可能" },
+      ],
+      cta: "お問い合わせ",
+      ctaNote: "無料相談 · 24時間以内に回答 · 義務なし",
+      alreadyAccount: "すでにアカウントをお持ちですか？",
     },
     pricing: {
       title: "料金プラン",
