@@ -3,8 +3,13 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { ProtectedLayout } from "../features/auth/components/ProtectedLayout";
 import { LoginPage } from "../features/auth/pages/LoginPage";
 import { SetupAccountPage } from "../features/auth/pages/SetupAccountPage";
+import { LandingPage } from "../features/landing/pages/LandingPage";
 
 export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <LandingPage />,
+  },
   {
     path: "/login",
     element: <LoginPage />,
@@ -15,7 +20,7 @@ export const router = createBrowserRouter([
     element: <SetupAccountPage />,
   },
   {
-    path: "/",
+    path: "/app",
     element: <ProtectedLayout />,
   },
   {

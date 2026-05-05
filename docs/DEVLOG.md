@@ -4,7 +4,7 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
-## 2026-05-05 — Phase 1: Telegram Bot
+## 2026-05-05 10:00 — Phase 1: Telegram Bot
 
 ### Qilingan ishlar
 
@@ -32,7 +32,7 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
-## 2026-05-05 — Deployment: Xatolar va Yechimlar
+## 2026-05-05 14:00 — Deployment: Xatolar va Yechimlar
 
 ### ❌ 401 Unauthorized (Webhook)
 **Sabab:** Supabase JWT verification webhook so'rovlarini bloklagan.
@@ -87,7 +87,7 @@ Deploy: `supabase functions deploy telegram-bot --no-verify-jwt`
 
 ---
 
-## 2026-05-06 — Bot UX Yaxshilashlar
+## 2026-05-06 10:00 — Bot UX Yaxshilashlar
 
 ### Qilingan o'zgarishlar
 
@@ -108,7 +108,7 @@ Deploy: `supabase functions deploy telegram-bot --no-verify-jwt`
 
 ---
 
-## 2026-05-06 — Til Tizimi (Locale) Tuzatishlar
+## 2026-05-06 11:30 — Til Tizimi (Locale) Tuzatishlar
 
 ### Root Cause Tahlili
 
@@ -159,7 +159,47 @@ return answer + (locale === "ru" ? DISCLAIMER_RU : DISCLAIMER_UZ);
 
 ---
 
-## Joriy Holat (2026-05-06)
+## 2026-05-06 13:00 — Kredit Kerak Bo'ladigan Joylar (Bajarish Uchun Shart)
+
+### Anthropic API — Claude (ANTHROPIC_API_KEY)
+
+| Joy | Fayl | Tavsif |
+|-----|------|--------|
+| Telegram bot | `telegram-bot/services/maslahatchi.ts` | Har bir foydalanuvchi savoliga javob (Haiku 3.5 + Sonnet 4.6) |
+| Web chat | `server/index.ts` ~1804 qator | `/ai/chat` endpoint — asosiy LLM (Claude primary) |
+| HR CV Parser | `server/services/hr-candidate/cv-parser.ts` | CV matnini tahlil qilish (TODO, hali implement qilinmagan) |
+| HR Scorer | `server/services/hr-candidate/candidate-scorer.ts` | Nomzodlarni baholash (TODO) |
+| HR Report | `server/services/hr-candidate/report-generator.ts` | Hisobot yaratish (TODO) |
+
+**Kredit qo'shish:** [console.anthropic.com](https://console.anthropic.com) → Billing → $10+ qo'shish tavsiya qilinadi
+
+---
+
+### OpenAI API (OPENAI_API_KEY)
+
+| Joy | Fayl | Tavsif | Chastota |
+|-----|------|--------|----------|
+| KB Seed | `scripts/seed_kb.ts` | 53 ta KB yozuvi uchun embedding generatsiya | **Bir martalik** |
+| KB Search (bot) | `server/services/knowledge-base.ts` → `getEmbedding()` | Har bir bot savolini vektorga aylantirish | Har so'rovda |
+| KB Search (web) | `server/index.ts` ~1789 qator | Web chat da KB qidiruv | Har so'rovda |
+| Web chat fallback | `server/index.ts` ~1860 qator | Claude ishlamasa → `gpt-4o-mini` fallback | Xatolikda |
+
+**Muhim:** OpenAI `text-embedding-3-small` KB qidiruvda DOIM ishlatiladi — faqat seed uchun emas.
+**Kredit qo'shish:** [platform.openai.com](https://platform.openai.com) → Billing → $5+ qo'shish
+
+---
+
+### Kredit Kelganda Bajarish Tartibi
+
+1. **OpenAI kredit qo'shish** → `supabase secrets set OPENAI_API_KEY="..."` → `scripts/seed_kb.ts` ishga tushirish (KB to'ldirish)
+2. **Anthropic kredit qo'shish** → `supabase secrets set ANTHROPIC_API_KEY="..."` → bot test qilish
+3. **Bot savolga javob berishi** tekshiriladi → KB semantic search ishlayaptimi?
+4. **Web chat** `/ai/chat` endpoint tekshiriladi
+5. **HR module** Claude integratsiyasi (cv-parser, scorer, report-generator)
+
+---
+
+## 2026-05-06 13:30 — Joriy Holat
 
 ### ✅ Ishlayotganlar
 - Bot webhook va deployment

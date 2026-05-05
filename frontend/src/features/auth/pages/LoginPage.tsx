@@ -20,7 +20,7 @@ export function LoginPage() {
 
   useEffect(() => {
     if (!loading && session) {
-      navigate("/", { replace: true });
+      navigate("/app", { replace: true });
     }
   }, [session, loading, navigate]);
 

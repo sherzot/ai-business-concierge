@@ -49,7 +49,7 @@ export function SetupAccountPage() {
     // Agar foydalanuvchi allaqachon setup tugatgan bo'lsa, dashboard'ga
     const meta = (session.user.user_metadata ?? {}) as Record<string, unknown>;
     if (meta.setup_complete === true) {
-      navigate("/", { replace: true });
+      navigate("/app", { replace: true });
     }
   }, [session, loading, navigate]);
 
@@ -98,7 +98,7 @@ export function SetupAccountPage() {
       if (updateError) throw updateError;
 
       // Muvaffaqiyat — dashboard'ga
-      navigate("/", { replace: true });
+      navigate("/app", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : translate("setup.errorGeneric"));
     } finally {
