@@ -1,4 +1,4 @@
-import type { Locale } from "../../app/i18n";
+import type { LandingLocale } from "./types";
 
 type LandingDict = {
   nav: { login: string; getStarted: string };
@@ -24,7 +24,7 @@ type LandingDict = {
   footer: { tagline: string; rights: string };
 };
 
-export const landingI18n: Record<Locale, LandingDict> = {
+export const landingI18n: Record<LandingLocale, LandingDict> = {
   uz: {
     nav: {
       login: "Kirish",
@@ -32,7 +32,7 @@ export const landingI18n: Record<Locale, LandingDict> = {
     },
     hero: {
       badge: "Beta — Hozir bepul kirish",
-      title: "O'zbekiston kichik biznesi uchun AI yordamchi",
+      title: "O'zbekistondagi mahalliy va xalqaro kichik bizneslar uchun AI yordamchi",
       subtitle: "Soliq, mehnat kodeksi, biznes savollari — 24/7, darhol, aniq. Telegram bot yoki web dashboard orqali.",
       ctaTelegram: "Telegram botni sinab ko'rish",
       ctaLogin: "Dashboard ga kirish",
@@ -93,7 +93,7 @@ export const landingI18n: Record<Locale, LandingDict> = {
     },
     hero: {
       badge: "Beta — Бесплатный доступ",
-      title: "AI-помощник для малого бизнеса Узбекистана",
+      title: "AI-помощник для местного и международного малого бизнеса в Узбекистане",
       subtitle: "Налоги, трудовой кодекс, вопросы бизнеса — 24/7, мгновенно, точно. Через Telegram бот или веб-дашборд.",
       ctaTelegram: "Попробовать Telegram бот",
       ctaLogin: "Войти в дашборд",
@@ -154,7 +154,7 @@ export const landingI18n: Record<Locale, LandingDict> = {
     },
     hero: {
       badge: "Beta — Free access now",
-      title: "AI Assistant for Small Businesses in Uzbekistan",
+      title: "AI Assistant for Local and International Small Businesses in Uzbekistan",
       subtitle: "Tax, labor code, business questions — answered 24/7, instantly, accurately. Via Telegram bot or web dashboard.",
       ctaTelegram: "Try Telegram Bot",
       ctaLogin: "Open Dashboard",
@@ -215,7 +215,7 @@ export const landingI18n: Record<Locale, LandingDict> = {
     },
     hero: {
       badge: "ベータ版 — 無料アクセス中",
-      title: "ウズベキスタン中小企業向けAIアシスタント",
+      title: "ウズベキスタンの国内・外資中小企業向けAIアシスタント",
       subtitle: "税務・労働法・ビジネス相談を24時間即座に正確に回答。TelegramボットまたはWebダッシュボードから。",
       ctaTelegram: "Telegramボットを試す",
       ctaLogin: "ダッシュボードを開く",
