@@ -222,6 +222,32 @@ return answer + (locale === "ru" ? DISCLAIMER_RU : DISCLAIMER_UZ);
 
 ---
 
+## 2026-05-06 06:50 — Phase 1.5 (1): DB Migrations + Landing Company Onboarding
+
+### DB — 5 ta migration (Supabase ga apply qilindi ✅)
+
+| Migration | Nima qildi |
+|---|---|
+| `phase15_contact_requests` | Kompaniya murojaatlari CRM jadvali + RLS (faqat admin) |
+| `phase15_tenant_company_info` | `tenants` ga: status, STIR, yuridik ma'lumotlar, bank, tasdiqlash |
+| `phase15_roles_update` | `user_tenants` ga: sub_admin, company_admin, accountant, manager + status/position |
+| `phase15_employee_profiles` | To'liq HR ma'lumotlari jadvali (pasport, JSHSHIR, maosh, favqulodda) |
+| `phase15_employee_invites` | Bir martalik invite token jadvali (24 soat TTL, resend hisobi) |
+
+### Landing Page
+
+- **CompanyOnboardingSection** — yangi komponent: 4 qadam kartalar + features grid + CTA
+- **LandingNavbar** — "Murojaat/Contact Us" tugmasi qo'shildi (anchor link)
+- **i18n** — `companyOnboarding` + `nav.contact` barcha 4 tilda: uz/ru/en/ja
+- Sahifa tartibida: HowItWorks → **CompanyOnboarding** → Pricing
+
+### Keyingi qadam (Phase 1.5 davomi)
+- `/contact` sahifasi — murojaat formasi
+- Backend: `POST /v1/contact` endpoint
+- Admin: `/admin/contacts` — murojaat ko'rish va boshqarish
+
+---
+
 ## 2026-05-06 06:15 — Arxitektura: Kompaniya Onboarding, Rol Tizimi, Admin AI
 
 ### Qilingan ishlar (docs)
