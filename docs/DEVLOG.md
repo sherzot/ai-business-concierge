@@ -222,6 +222,28 @@ return answer + (locale === "ru" ? DISCLAIMER_RU : DISCLAIMER_UZ);
 
 ---
 
+## 2026-05-06 05:30 — Global Locale Unification
+
+### Muammo
+
+Landing page `"landing_locale"` localStorage kalitiga yozardi.
+`I18nProvider` (butun app) esa `"abc_locale"` kalitidan o'qirdi.
+Natija: foydalanuvchi landing page da tilni o'zgartirsa, `/app` da eski til ko'rinardi (sahifa yangilanmasa).
+
+### Yechim
+
+`useLandingLocale` hook to'liq qayta yozildi — endi `useI18n()` ni delegate qiladi.
+Bir React state, real-time sinxronizatsiya, sahifa yangilanishsiz ishlaydi.
+
+**O'zgargan fayllar:**
+- `frontend/src/features/landing/hooks/useLandingLocale.ts` — `useI18n()` ga delegate
+- `frontend/src/features/landing/types.ts` — `getDefaultLocale` endi `"abc_locale"` o'qiydi
+- `frontend/src/features/landing/__tests__/useLandingLocale.test.ts` — `I18nProvider` wrapper qo'shildi
+
+**Natija:** 14/14 test o'tdi. LP → App locale real-time ishlamoqda.
+
+---
+
 ## Muhim Ma'lumotlar
 
 | Parametr | Qiymat |

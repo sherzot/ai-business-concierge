@@ -1,7 +1,12 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import React from "react";
 import { renderHook, act } from "@testing-library/react";
 import { useLandingLocale } from "../hooks/useLandingLocale";
 import { DEFAULT_LOCALE } from "../types";
+import { I18nProvider } from "../../../app/providers/I18nProvider";
+
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  React.createElement(I18nProvider, null, children);
 
 beforeEach(() => {
   localStorage.clear();
@@ -9,12 +14,12 @@ beforeEach(() => {
 
 describe("useLandingLocale", () => {
   it("boshlang'ich holat: DEFAULT_LOCALE qaytaradi", () => {
-    const { result } = renderHook(() => useLandingLocale());
+    const { result } = renderHook(() => useLandingLocale(), { wrapper });
     expect(result.current.locale).toBe(DEFAULT_LOCALE);
   });
 
   it("setLocale: yangi lokalni o'rnatadi", () => {
-    const { result } = renderHook(() => useLandingLocale());
+    const { result } = renderHook(() => useLandingLocale(), { wrapper });
     act(() => {
       result.current.setLocale("ru");
     });
@@ -22,24 +27,24 @@ describe("useLandingLocale", () => {
   });
 
   it("setLocale: noto'g'ri lokal o'zgarishsiz qoladi", () => {
-    const { result } = renderHook(() => useLandingLocale());
+    const { result } = renderHook(() => useLandingLocale(), { wrapper });
     act(() => {
       result.current.setLocale("fr" as never);
     });
     expect(result.current.locale).toBe(DEFAULT_LOCALE);
   });
 
-  it("setLocale: localStorage ga yozadi", () => {
-    const { result } = renderHook(() => useLandingLocale());
+  it("setLocale: abc_locale kalitiga yozadi", () => {
+    const { result } = renderHook(() => useLandingLocale(), { wrapper });
     act(() => {
       result.current.setLocale("ja");
     });
-    expect(localStorage.getItem("landing_locale")).toBe("ja");
+    expect(localStorage.getItem("abc_locale")).toBe("ja");
   });
 
   it("localStorage da saqlangan lokal bilan boshlanadi", () => {
-    localStorage.setItem("landing_locale", "en");
-    const { result } = renderHook(() => useLandingLocale());
+    localStorage.setItem("abc_locale", "en");
+    const { result } = renderHook(() => useLandingLocale(), { wrapper });
     expect(result.current.locale).toBe("en");
   });
 });

@@ -12,7 +12,7 @@ export function isLocaleSupported(locale: string): locale is LandingLocale {
 
 export function getDefaultLocale(): LandingLocale {
   const saved = typeof localStorage !== "undefined"
-    ? localStorage.getItem("landing_locale")
+    ? localStorage.getItem("abc_locale")
     : null;
   return saved && isLocaleSupported(saved) ? saved : DEFAULT_LOCALE;
 }

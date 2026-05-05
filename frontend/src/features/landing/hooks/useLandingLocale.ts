@@ -1,9 +1,5 @@
-import { useState, useCallback } from "react";
-import {
-  type LandingLocale,
-  getDefaultLocale,
-  isLocaleSupported,
-} from "../types";
+import { useI18n } from "../../../app/providers/I18nProvider";
+import { type LandingLocale, isLocaleSupported, DEFAULT_LOCALE } from "../types";
 
 export type UseLandingLocaleReturn = {
   locale: LandingLocale;
@@ -11,17 +7,14 @@ export type UseLandingLocaleReturn = {
 };
 
 export function useLandingLocale(): UseLandingLocaleReturn {
-  const [locale, setLocaleState] = useState<LandingLocale>(getDefaultLocale);
+  const { locale: globalLocale, setLocale: setGlobalLocale } = useI18n();
 
-  const setLocale = useCallback((next: LandingLocale) => {
+  const locale: LandingLocale = isLocaleSupported(globalLocale) ? globalLocale : DEFAULT_LOCALE;
+
+  const setLocale = (next: LandingLocale) => {
     if (!isLocaleSupported(next)) return;
-    setLocaleState(next);
-    try {
-      localStorage.setItem("landing_locale", next);
-    } catch {
-      // localStorage unavailable (SSR/private mode) — silently ignored
-    }
-  }, []);
+    setGlobalLocale(next);
+  };
 
   return { locale, setLocale };
 }
