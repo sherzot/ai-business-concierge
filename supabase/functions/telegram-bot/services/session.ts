@@ -15,7 +15,7 @@ export const supabase = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
 
-export type TelegramLocale = "uz" | "ru" | "en";
+export type TelegramLocale = "uz" | "ru" | "en" | "ja";
 
 export type TelegramSession = {
   tenantId: string;
@@ -103,6 +103,7 @@ export async function updateLocale(
   chatId: number,
   locale: TelegramLocale,
 ): Promise<void> {
+  // KbLocale supports uz/ru/en only — ja maps to "en" for KB search
   await supabase
     .from("ai_conversations")
     .update({ locale, updated_at: new Date().toISOString() })

@@ -14,6 +14,10 @@ const FEEDBACK_THANKS: Record<string, { good: string; bad: string }> = {
     good: "✅ Thanks! Glad the answer was helpful.",
     bad: "📝 Understood. We'll work on giving better answers.",
   },
+  ja: {
+    good: "✅ ありがとうございます！お役に立てて嬉しいです。",
+    bad: "📝 承知しました。より良い回答ができるよう努めます。",
+  },
 };
 
 export async function handleFeedbackCallback(

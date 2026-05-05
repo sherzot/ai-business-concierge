@@ -8,24 +8,28 @@ const RATE_LIMIT_MSG: Record<TelegramLocale, string> = {
   uz: "⚠️ Bugungi so'rovlar limiti tugadi (5/5). Ertaga yana murojaat qiling.\n\n💡 Pro planga o'ting — 50 ta so'rov/kun!",
   ru: "⚠️ Дневной лимит исчерпан (5/5). Обратитесь завтра.\n\n💡 Перейдите на Pro — 50 запросов/день!",
   en: "⚠️ Daily limit reached (5/5). Please try again tomorrow.\n\n💡 Upgrade to Pro — 50 requests/day!",
+  ja: "⚠️ 本日の利用上限に達しました（5/5）。明日またご利用ください。\n\n💡 Proプランで50回/日利用可能！",
 };
 
 const THINKING_MSG: Record<TelegramLocale, string> = {
   uz: "🤔 Javob tayyorlanmoqda...",
   ru: "🤔 Готовлю ответ...",
   en: "🤔 Preparing answer...",
+  ja: "🤔 回答を準備中...",
 };
 
 const ERROR_MSG: Record<TelegramLocale, string> = {
   uz: "❌ Xatolik yuz berdi. Iltimos qayta urinib ko'ring.",
   ru: "❌ Произошла ошибка. Попробуйте ещё раз.",
   en: "❌ An error occurred. Please try again.",
+  ja: "❌ エラーが発生しました。もう一度お試しください。",
 };
 
 const FEEDBACK_LABELS: Record<TelegramLocale, { good: string; bad: string }> = {
   uz: { good: "👍 Foydali", bad: "👎 Foydali emas" },
   ru: { good: "👍 Полезно", bad: "👎 Бесполезно" },
   en: { good: "👍 Helpful", bad: "👎 Not helpful" },
+  ja: { good: "👍 役に立った", bad: "👎 役に立たなかった" },
 };
 
 export async function handleMessage(ctx: Context): Promise<void> {

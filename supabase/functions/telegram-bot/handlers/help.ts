@@ -55,6 +55,24 @@ const HELP: Record<string, string> = {
 📊 <b>Daily limit:</b> free — 5 requests/day
 
 <i>⚠️ This is AI advice, not professional legal consultation.</i>`,
+
+  ja: `ℹ️ <b>AI Business Concierge — ヘルプ</b>
+
+📌 <b>コマンド：</b>
+/start — ボットを再起動
+/help — ヘルプ
+/language — 言語を変更
+
+💬 <b>質問の例：</b>
+• 個人事業主の税率は？
+• 雇用契約書の作り方は？
+• 従業員の採用手続きは？
+• 付加価値税の申告期限は？
+• ビジネス登録に必要な書類は？
+
+📊 <b>1日の利用制限：</b>無料 — 5回/日
+
+<i>⚠️ これはAIアドバイスであり、専門的な法律・財務相談の代替ではありません。</i>`,
 };
 
 export async function handleHelp(ctx: Context): Promise<void> {

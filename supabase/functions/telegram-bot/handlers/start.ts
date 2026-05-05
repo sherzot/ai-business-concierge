@@ -41,6 +41,19 @@ I'm an AI assistant for small businesses in Uzbekistan.
 Ask a question — I'll answer! 💬
 
 Choose language:`,
+
+  ja: `👋 <b>AI Business Concierge</b> へようこそ！
+
+ウズベキスタンの中小企業向け AI アシスタントです。
+
+📌 <b>サポート内容：</b>
+• 税務・会計の質問
+• 人事・労働法
+• ビジネス・ライセンス
+
+質問をどうぞ — すぐに回答します！ 💬
+
+言語を選択してください：`,
 };
 
 export async function handleStart(ctx: Context): Promise<void> {
@@ -54,7 +67,9 @@ export async function handleStart(ctx: Context): Promise<void> {
   const keyboard = new InlineKeyboard()
     .text("🇺🇿 O'zbek", "lang:uz")
     .text("🇷🇺 Русский", "lang:ru")
-    .text("🇬🇧 English", "lang:en");
+    .row()
+    .text("🇬🇧 English", "lang:en")
+    .text("🇯🇵 日本語", "lang:ja");
 
   await ctx.reply(WELCOME[session.locale] ?? WELCOME.uz, {
     parse_mode: "HTML",

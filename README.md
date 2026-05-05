@@ -5,7 +5,7 @@
 **O'zbekistondagi kichik biznes egalari uchun kundalik operatsion AI yordamchisi**
 
 [![Stack](https://img.shields.io/badge/stack-Supabase%20%2B%20React%20%2B%20Hono-4f46e5)](#technical-stack)
-[![Status](https://img.shields.io/badge/status-Phase%200%20yakuni-10b981)](docs/PLAN.md)
+[![Status](https://img.shields.io/badge/status-Phase%201%20Telegram%20MVP-f59e0b)](docs/PLAN.md)
 [![License](https://img.shields.io/badge/license-Proprietary-64748b)](#license)
 
 🇺🇿 [O'zbekcha](#-ozbekcha) · 🇷🇺 [Русский](#-русский) · 🇬🇧 [English](#-english) · 🇯🇵 [日本語](#-日本語)
@@ -28,16 +28,17 @@ AI Business Concierge — O'zbekistondagi **allaqachon ishlayotgan** kichik bizn
 | 📄 **AI Hujjatchi** | Shartnoma, ariza, buyruq generatsiya (PDF/DOCX) | Telegram + Web |
 | 🛒 **AI Sotuvchi** | Telegram savdo bot yaratish va boshqarish | Telegram |
 
-### Mavjud modullar (Phase 0)
+### Mavjud modullar (Phase 0 + Phase 1)
 
 - **Manager Reports** — KPI, health score, trend grafiklar, AI Audit
 - **Unified Inbox** — Email/Telegram/CRM tarzidagi kategoriyali inbox
 - **Tasks & Compliance** — Board/list view, CRUD, biriktirish, tasdiqlash
-- **HR Pulse** — Cases, survey, nomzod tahlili (skeleton)
+- **HR Pulse** — Cases, survey, nomzod tahlili
 - **Docs Hub** — Hujjatlar ro'yxati, qidiruv, indexlash
 - **Integrations** — Telegram, Email, AmoCRM
 - **AI Concierge** — Chat + tool: vazifa yaratish, hujjat qidirish, inbox tasniflash
 - **Settings** — Profil, til (uz / ru / en / ja)
+- 🆕 **AI Maslahatchi Bot** — Telegram bot (grammY), 4 til, KB + Claude, rate limit
 
 ### Hujjatlar
 
@@ -86,16 +87,17 @@ AI Business Concierge — это AI-ассистент для **повседне
 | 📄 **AI-Документовод** | Договоры, заявления, приказы (PDF/DOCX) | Telegram + Web |
 | 🛒 **AI-Продавец** | Создание и управление Telegram-ботами продаж | Telegram |
 
-### Существующие модули (Phase 0)
+### Существующие модули (Phase 0 + Phase 1)
 
 - **Manager Reports** — KPI, health score, тренды, AI Audit
 - **Unified Inbox** — единый ящик с категориями (Email/Telegram/CRM)
 - **Tasks & Compliance** — board/list, CRUD, назначение, подтверждение
-- **HR Pulse** — кейсы, опросы, анализ кандидатов (скелет)
+- **HR Pulse** — кейсы, опросы, анализ кандидатов
 - **Docs Hub** — список документов, поиск, индексация
 - **Integrations** — Telegram, Email, AmoCRM
 - **AI Concierge** — чат с инструментами
 - **Settings** — профиль, язык (uz / ru / en / ja)
+- 🆕 **AI-Консультант Бот** — Telegram-бот (grammY), 4 языка, KB + Claude, лимиты
 
 ### Документация
 
@@ -131,16 +133,17 @@ AI Business Concierge — a daily operational AI assistant for **already-running
 | 📄 **AI Doc Generator** | Contracts, applications, orders (PDF/DOCX) | Telegram + Web |
 | 🛒 **AI Salesperson** | Build and manage Telegram sales bots | Telegram |
 
-### Existing modules (Phase 0)
+### Existing modules (Phase 0 + Phase 1)
 
 - **Manager Reports** — KPIs, health score, trends, AI Audit
 - **Unified Inbox** — categorised inbox across Email/Telegram/CRM
 - **Tasks & Compliance** — board/list views, CRUD, assignment, sign-off
-- **HR Pulse** — cases, surveys, candidate analysis (skeleton)
+- **HR Pulse** — cases, surveys, candidate analysis
 - **Docs Hub** — document list, search, indexing
 - **Integrations** — Telegram, Email, AmoCRM
 - **AI Concierge** — chat with tools (create task, search docs, classify inbox)
 - **Settings** — profile, language (uz / ru / en / ja)
+- 🆕 **AI Maslahatchi Bot** — Telegram bot (grammY), 4 languages, KB + Claude, rate limiting
 
 ### Documentation
 
@@ -177,16 +180,17 @@ AI Business Concierge は、ウズベキスタンの**既に運営中**の中小
 | 📄 **AI 文書ジェネレーター** | 契約書・申請書・命令書（PDF/DOCX） | Telegram + Web |
 | 🛒 **AI セールスエージェント** | Telegram 販売ボットの作成と運用 | Telegram |
 
-### 既存モジュール（Phase 0）
+### 既存モジュール（Phase 0 + Phase 1）
 
 - **Manager Reports** — KPI、ヘルススコア、トレンド、AI 監査
 - **Unified Inbox** — Email/Telegram/CRM 統合受信箱
 - **Tasks & Compliance** — ボード/リスト表示、CRUD、担当割当、承認
-- **HR Pulse** — 案件、アンケート、候補者分析（スケルトン）
+- **HR Pulse** — 案件、アンケート、候補者分析
 - **Docs Hub** — 文書一覧、検索、インデックス
 - **Integrations** — Telegram、Email、AmoCRM
 - **AI Concierge** — ツール付きチャット
 - **Settings** — プロフィール、言語（uz / ru / en / ja）
+- 🆕 **AI コンサルタント Bot** — Telegram ボット（grammY）、4言語、KB + Claude、利用制限
 
 ### ドキュメント
 
@@ -268,8 +272,14 @@ ai-business-concierge/
 │   └── functions/
 │       ├── server/             # Main Hono API (~1700 lines)
 │       │   ├── index.ts
+│       │   ├── middleware/     # auth.ts, tenant.ts
 │       │   ├── routes/         # hr-candidate.ts, …
 │       │   └── services/       # llm-router, knowledge-base, hr-candidate, usage-tracking
+│       ├── telegram-bot/       # 🆕 Phase 1: AI Maslahatchi Telegram bot (grammY)
+│       │   ├── index.ts        # Webhook entry point
+│       │   ├── bot.ts          # Command + callback registration
+│       │   ├── handlers/       # start, help, language, message, feedback
+│       │   └── services/       # session.ts, maslahatchi.ts
 │       ├── bright-api/         # Frontend gateway (re-exports server)
 │       └── _shared/            # logging, helpers
 │
@@ -341,11 +351,19 @@ Standard response envelope:
 }
 ```
 
-## Status (2026-04-29)
+## Status (2026-05-05)
 
-✅ **Phase 0 complete** — DB schema (12 new tables), RLS policies, security hardening, LLM Router (Claude Haiku/Sonnet), Knowledge Base (pgvector + RAG), AI feedback, Indigo + Slate theme tokens, env templates, CONNECTIONS.md, FIRST_PUSH.md.
+✅ **Phase 0 complete** — DB schema (12 new tables), RLS policies, security hardening, LLM Router (Claude Haiku/Sonnet), Knowledge Base (pgvector + RAG), AI feedback, Indigo + Slate theme tokens.
 
-⏳ **Phase 1 (next)** — Telegram MVP: grammY bot setup, AI Maslahatchi via Telegram, 50 beta users.
+✅ **Architecture upgrade** — DDD/Clean Architecture: full domain types, proper ViewModel hooks, 34 unit tests (Vitest), `docs/ARCHITECTURE.md` as canonical guide.
+
+🚀 **Phase 1 in progress** — Telegram MVP:
+- `supabase/functions/telegram-bot/` — grammY bot, 4 languages (uz/ru/en/ja), AI Maslahatchi pipeline
+- Session management via `ai_conversations` (one tenant per Telegram user)
+- Rate limiting: 5 requests/day (free plan)
+- KB semantic search → Claude Haiku/Sonnet → `ai_messages` persistence
+
+⏳ **Phase 1 remaining** — Knowledge Base seeding (50+ Q&A), webhook deployment, 50 beta users.
 
 See [docs/PLAN.md](docs/PLAN.md) for the full roadmap.
 
@@ -367,6 +385,7 @@ supabase link --project-ref <your-ref>
 supabase db push
 supabase functions deploy server
 supabase functions deploy bright-api
+supabase functions deploy telegram-bot
 ```
 
 Required environment variables — see `frontend/.env.example` and `supabase/.env.example`.

@@ -28,7 +28,7 @@ bot.command("language", handleLanguage);  // English: /language
 bot.command("язык", handleLanguage);      // Russian: /язык
 
 // Callback query'lar
-bot.callbackQuery(/^lang:(uz|ru|en)$/, handleLanguageCallback);
+bot.callbackQuery(/^lang:(uz|ru|en|ja)$/, handleLanguageCallback);
 bot.callbackQuery(/^feedback:(good|bad):.+$/, handleFeedbackCallback);
 
 // Matn xabarlar (barcha text buyruq bo'lmasa)

@@ -41,6 +41,12 @@ Answer only based on the knowledge base provided.
 Keep answers brief (3-5 sentences), practical and accurate.
 Uzbekistan 2026 regulations: taxes, labor code, business registration.
 If unknown — say "I don't have accurate data on this, please consult a specialist".`,
+
+  ja: `あなたはウズベキスタンの中小企業向けAIビジネスコンシェルジュです。
+提供された知識ベースの情報のみに基づいて回答してください。
+回答は簡潔（3〜5文）、実用的、正確にしてください。
+2026年ウズベキスタンの税法・労働法・ビジネス登録に関する情報を提供します。
+不明な場合は「この件については正確な情報がございません。専門家にご相談ください」と伝えてください。`,
 };
 
 export async function askMaslahatchi(
@@ -49,10 +55,13 @@ export async function askMaslahatchi(
   question: string,
   locale: TelegramLocale,
 ): Promise<MaslahatchiResult> {
+  // ja → en fallback (KbLocale supports uz/ru/en only)
+  const kbLocale: KbLocale = locale === "ja" ? "en" : (locale as KbLocale);
+
   // 1. KB dan semantic qidiruv
   const kbResult = await searchKnowledgeBase(supabase, OPENAI_API_KEY, {
     query: question,
-    locale: locale as KbLocale,
+    locale: kbLocale,
   }).catch(() => ({
     found: false,
     entries: [],
@@ -74,7 +83,7 @@ export async function askMaslahatchi(
   const finalAnswer = addDisclaimerIfNeeded(
     llmResponse.text,
     kbResult,
-    locale as KbLocale,
+    kbLocale,
   );
 
   // 4. User xabarini saqlash
