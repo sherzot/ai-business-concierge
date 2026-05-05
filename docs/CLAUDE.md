@@ -144,6 +144,27 @@ server/
 
 ---
 
+## ROL ARXITEKTURASI (2026-05-06 dan)
+
+```
+TIZIM DARAJASI:
+  super_admin ≡ sub_admin  (bir xil huquq — barcha kompaniyalar, tizim, monitoring)
+
+KOMPANIYA DARAJASI (tenant ichida):
+  company_admin  → o'z kompaniyasi ustidan to'liq nazorat
+  hr             → xodim account yaratish + tasdiqlash
+  accountant     → moliya + soliq hujjatlar
+  manager        → o'z bo'limining vazifa va natijalarini
+  employee       → cheklangan (o'ziga tegishli vazifalar)
+```
+
+**Auth holatlari (tenant):** `pending_approval` → `active` → `suspended` / `blocked`
+**Auth holatlari (xodim):** `password_pending` → `password_set` → `active` / `blocked`
+
+> To'liq rol vazifalari, onboarding flowlari va DB schema: `docs/SPEC.md` §2, §11, §12
+
+---
+
 ## MUHIM QOIDALAR
 
 ### Umumiy
@@ -152,8 +173,9 @@ server/
 3. **Error handling** — try/catch, user-friendly xato xabarlari
 4. **Audit log** — muhim harakatlar loglanadi
 5. **RLS** — har bir yangi jadvalda Row Level Security SHART
-6. **Tillar** — barcha UI stringlar i18n orqali (uz, ru, en)
+6. **Tillar** — barcha UI stringlar i18n orqali (uz, ru, en, ja)
 7. **Mavjud kodni buzma** — yangi feature qo'shganda mavjud funksionallik ishlashda davom etadi
+8. **Invite token** — bir martalik JWT, RS256, TTL bilan (kompaniya 48h, xodim 24h)
 
 ### AI qoidalari
 1. **Hallucination prevention** — AI faqat knowledge base dagi ma'lumotni ishlatadi

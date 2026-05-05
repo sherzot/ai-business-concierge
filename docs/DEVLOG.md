@@ -222,6 +222,32 @@ return answer + (locale === "ru" ? DISCLAIMER_RU : DISCLAIMER_UZ);
 
 ---
 
+## 2026-05-06 06:15 — Arxitektura: Kompaniya Onboarding, Rol Tizimi, Admin AI
+
+### Qilingan ishlar (docs)
+
+**SPEC.md v3.0** — To'liq yangilandi:
+- §2 Rollar: `super_admin=sub_admin` → `company_admin` → `hr/accountant/manager/employee`
+- §11 Kompaniya onboarding jarayoni: murojaat → invite → ro'yxat → pending → tasdiqlash → active
+- §12 Xodim onboarding: HR yaratadi → email → parol → HR tasdiqlaydi → active
+- §13 Login/Auth sahifalari: holat xabarlari, parol tiklash, murojaat sahifasi
+- §14 Super Admin AI tizimi: 4 ta maxsus agent (KB, Support, Analytics, Health)
+
+**PLAN.md v3.0** — To'liq yangilandi:
+- Phase 1.5 (YANGI, DARHOL): Company Auth & Management — Hafta 6-8
+  - 6 ta yangi DB jadvali/ustun: `contact_requests`, `employee_invites`, tenant holatlari
+  - 15+ yangi API endpoint: murojaat, kompaniya boshqarish, xodim onboarding
+  - 10+ yangi sahifa: `/contact`, `/register`, `/set-password`, `/admin/contacts`, `/app/employees`
+  - 7 ta email shablon, real-time HR bildirishnomalar
+- B-018..B-030 backlog qo'shildi
+
+**CLAUDE.md** — Rol arxitekturasi bo'limi qo'shildi
+
+### Nima uchun Phase 1.5 DARHOL:
+Billing (Click/Payme) ishlashi uchun kompaniyalar to'g'ri ro'yxatda, rollari aniq, account holatlari to'g'ri bo'lishi SHART. Ro'yxatdan o'tish → billing → daromad zanjiri shu phaseda.
+
+---
+
 ## 2026-05-06 05:30 — Global Locale Unification
 
 ### Muammo

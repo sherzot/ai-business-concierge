@@ -91,66 +91,107 @@ BOSQICHI                 |
 ### 2.1 Rol arxitekturasi
 
 ```
-SUPER_ADMIN (tizim admini)
-  └── TENANT_ADMIN (kompaniya admini/biznes egasi)
-       ├── MANAGER (bo'lim boshlig'i)
-       ├── ACCOUNTANT (buxgalter)
-       ├── HR (kadrlar)
-       └── EMPLOYEE (xodim)
+TIZIM DARAJASI
+  super_admin  ≡  sub_admin  (bir xil to'liq huquq — tizim egasi va yordamchisi)
+      │
+KOMPANIYA DARAJASI
+      └── company_admin  (kompaniya rahbari — o'z kompaniyasi ustidan to'liq nazorat)
+              ├── hr             (kadrlar — xodimlarni boshqaradi, account yaratadi)
+              ├── accountant     (buxgalter — moliyaviy hujjatlar)
+              ├── manager        (menejer — o'z bo'limining vazifa va natijalarini)
+              └── employee       (xodim — cheklangan, o'ziga tegishli)
 ```
+
+> **Muhim:** `super_admin` va `sub_admin` — bir xil, tengdosh huquq. Ikkalasi ham barcha kompaniyalarga, tizimga, monitoring va boshqaruvga to'liq kirish huquqiga ega.
 
 ### 2.2 Rol vazifalari va ruxsatlari
 
-#### SUPER_ADMIN
+#### SUPER_ADMIN / SUB_ADMIN — Tizim darajasi
 | Ruxsat | Tafsilot |
 |---|---|
-| Tenantlarni boshqarish | Yaratish, o'chirish, faollashtirish, bloklash |
-| AI monitoring | Barcha AI so'rovlar, xatolar, sifat ko'rsatkichlari |
+| Kompaniyalarni boshqarish | Ro'yxatdan o'tkazish, tasdiqlash, bloklash, tahrirlash |
+| Murojaat formalarini ko'rish | Yangi kompaniya murojaatlari, status boshqarish |
+| Invite URL yuborish | Kelishuvdan so'ng kompaniyaga ro'yxatdan o'tish URL'i |
+| AI monitoring | Barcha AI so'rovlar, xatolar, sifat, narx |
 | Knowledge Base | Soliq qoidalari, hujjat shablonlar yangilash |
-| Analytics | Tizim darajasidagi statistika, daromad, churn |
-| Billing | To'lovlar, obunalar, refund |
-| Audit log | Barcha harakatlar logi |
+| Analytics | Tizim darajasidagi statistika, daromad, churn, NPS |
+| Billing | To'lovlar, obunalar, refund, MRR |
+| Audit log | Barcha harakatlar logi (barcha kompaniyalar bo'yicha) |
+| Health monitoring | Tizim holati, API statuslar, xatolar |
+| AI Agent tizimi | Maxsus agentlar: KB Agent, Support Agent, Analytics Agent |
+| Sub_admin boshqarish | Yangi sub_admin qo'shish/o'chirish |
 
-**Super Admin Dashboard:**
-- `/admin` — Umumiy ko'rsatkichlar
-- `/admin/tenants` — Tenantlar ro'yxati
-- `/admin/ai` — AI monitoring
+**Super/Sub Admin Dashboard (`/admin`):**
+- `/admin` — Umumiy ko'rsatkichlar (users, MRR, AI usage, error rate)
+- `/admin/companies` — Kompaniyalar ro'yxati + tasdiqlash
+- `/admin/contacts` — Yangi murojaat formalarini ko'rish va boshqarish
+- `/admin/ai` — AI monitoring (so'rovlar, aniqlik, narx, KB gaps)
 - `/admin/knowledge-base` — KB boshqarish
-- `/admin/billing` — To'lovlar
-- `/admin/audit` — Audit log
+- `/admin/billing` — MRR, churn, LTV, to'lov tarixi
+- `/admin/audit` — Audit log (global)
+- `/admin/health` — Tizim holati: DB, API, Telegram, AI, Resend
+- `/admin/ai-chat` — Admin AI yordamchisi (maxsus agentlar bilan)
+- `/admin/settings` — Tizim sozlamalari
 
-#### TENANT_ADMIN (Biznes Egasi)
+#### COMPANY_ADMIN — Kompaniya darajasi
+> Kompaniya rahbari. Faqat o'z kompaniyasi ichida to'liq huquq.
+
 | Ruxsat | Tafsilot |
 |---|---|
-| Xodimlarni boshqarish | Qo'shish, o'chirish, rol berish |
+| Kompaniya profil | To'liq kompaniya ma'lumotlarini boshqarish |
+| Xodimlarni boshqarish | Qo'shish, o'chirish, rol berish, bloklash |
 | Barcha modullar | AI Maslahatchi, Hujjatchi, Sotuvchi — to'liq |
 | Savdo botlar | Yaratish, sozlash, katalog boshqarish |
+| Moliya | Daromad/xarajatlar hisoboti, xodim maoshi |
 | Obuna | Tarif o'zgartirish, to'lov tarixi |
+| Vazifalar | Barcha xodimlarga biriktirish va ko'rish |
+| Hisobotlar | To'liq kompaniya analitikasi |
 
-#### MANAGER
+**Company Admin Dashboard (`/app`):**
+- `/app/dashboard` — Kompaniya ko'rsatkichlari
+- `/app/employees` — Xodimlar boshqarish + account yaratish
+- `/app/tasks` — Vazifalar (barcha xodimlar)
+- `/app/hr` — HR hujjatlar, mehnat shartnomalari
+- `/app/finance` — Daromad, xarajat, maosh
+- `/app/ai-assistant` — AI Maslahatchi (to'liq)
+- `/app/documents` — Hujjat generatsiya
+- `/app/sales-bots` — Savdo botlar
+- `/app/billing` — Obuna va to'lov
+- `/app/settings` — Kompaniya sozlamalari
+
+#### HR — Kadrlar bo'limi
+| Ruxsat | Tafsilot |
+|---|---|
+| Xodim account yaratish | HR o'zi yangi xodim uchun account ochadi (to'liq ma'lumotlar) |
+| Xodim account tasdiqlash | Xodim parol o'rnatgandan keyin HR tasdiqlaydi |
+| AI Maslahatchi | Kadrlar savollari (cheksiz) |
+| Hujjatlar | Mehnat shartnomasi, ishga olish/bo'shatish buyruqlari |
+| HR hisobotlar | Xodimlar, davomad, ta'tillar |
+| Xodimlar ko'rinishi | Barcha xodim profillari va holati |
+
+#### ACCOUNTANT — Buxgalteriya
+| Ruxsat | Tafsilot |
+|---|---|
+| AI Maslahatchi | Soliq va buxgalteriya savollari (kunlik limit kengaytirilgan) |
+| Hujjatlar | Moliyaviy hujjatlar yaratish va ko'rish (barcha) |
+| Moliya moduli | Kirim/chiqim, soliq hisobotlari |
+| Maoshlar | Ko'rish (o'zgartirish faqat company_admin) |
+
+#### MANAGER — Bo'lim boshlig'i
 | Ruxsat | Tafsilot |
 |---|---|
 | AI Maslahatchi | To'liq (o'z bo'limi kontekstida) |
 | Hujjatlar | Yaratish, ko'rish (o'z bo'limiga tegishli) |
-| Vazifalar | O'z bo'limi xodimlariga biriktirish |
+| Vazifalar | O'z bo'limi xodimlariga biriktirish va monitoring |
+| Hisobotlar | O'z bo'limi hisobotlari |
 
-#### ACCOUNTANT
+#### EMPLOYEE — Xodim
 | Ruxsat | Tafsilot |
 |---|---|
-| AI Maslahatchi | Soliq va buxgalteriya savollari |
-| Hujjatlar | Moliyaviy hujjatlar yaratish va ko'rish |
-
-#### HR
-| Ruxsat | Tafsilot |
-|---|---|
-| AI Maslahatchi | Kadrlar savollari |
-| Hujjatlar | Mehnat shartnomasi, buyruqlar |
-
-#### EMPLOYEE
-| Ruxsat | Tafsilot |
-|---|---|
-| AI Maslahatchi | Cheklangan (kunlik limit) |
-| Vazifalar | O'ziga biriktirilgan |
+| AI Maslahatchi | Cheklangan (kunlik 10 so'rov) |
+| Vazifalar | O'ziga biriktirilgan vazifalarni ko'rish va bajarish |
+| Hujjatlar | O'ziga tegishli hujjatlarni ko'rish |
+| Profil | O'z profil ma'lumotlarini yangilash |
 
 ---
 
@@ -334,8 +375,286 @@ Supabase Auth + JWT, RLS barcha jadvallarda, Supabase Vault (API keys), Zod vali
 | O'zbekcha (lotin) | `uz` | Asosiy til |
 | Русский | `ru` | Ikkinchi til |
 | English | `en` | Dashboard, admin, docs |
+| 日本語 | `ja` | Telegram bot, landing page |
 
 ---
 
-*SPEC.md — AI Business Concierge v2.0*
-*Yangilandi: 2026-04-16 — Raqobat tahlili + kuchli pozitsiyalash*
+## 11. KOMPANIYA RO'YXATDAN O'TISH JARAYONI
+
+### 11.1 Murojaat qabul qilish
+
+Kompaniya landing page dagi **Murojaat formasi** orqali ma'lumot yuboradi:
+```
+Murojaat formasi maydonlari:
+  - To'liq ism yoki mas'ul shaxs ismi
+  - Kompaniya nomi
+  - STIR (ixtiyoriy)
+  - Telefon raqami *
+  - Email *
+  - Biznes turi (YaTT / MChJ / AJ / Boshqa)
+  - Xodimlar soni (1-10 / 11-50 / 51-200 / 200+)
+  - Asosiy muammo (ixtiyoriy matn)
+  - Qanday bildingiz (reklama / tavsiya / qidiruv / Telegram)
+```
+
+**Jarayon:**
+1. Forma yuboriladi → `contact_requests` jadvaliga yoziladi
+2. super_admin/sub_admin ga email + tizim bildirishnomasi
+3. Admin `/admin/contacts` da yangi murojaatni ko'radi
+4. Admin `status: "contacted"` → telefon/email orqali kompaniya bilan bog'lanadi
+5. Kelishuvga erishilsa → admin "Invite yuborish" tugmasini bosadi
+6. Tizim kompaniya emailiga **bir martalik invite URL** yuboradi (48 soat amal qiladi)
+7. Admin `status: "invite_sent"` ga o'tadi
+
+### 11.2 Kompaniya ro'yxatdan o'tishi (Invite URL)
+
+Kompaniya invite URL'ni ochganda:
+```
+Ro'yxatdan o'tish formasi:
+  Kompaniya ma'lumotlari:
+    - Kompaniya to'liq nomi *
+    - Yuridik shakl (YaTT / MChJ / AJ) *
+    - STIR *
+    - Yuridik manzil *
+    - Faoliyat turi *
+    - Ro'yxatdan o'tish sanasi *
+    - Bank rekvizitlari (bank, hisob raqam)
+    - Telefon *
+    - Email *
+    - Web-sayt (ixtiyoriy)
+    - Xodimlar soni *
+    - Oylik aylanma (taxminan, ixtiyoriy)
+  
+  Company Admin ma'lumotlari:
+    - To'liq ism *
+    - Lavozim *
+    - Telefon *
+    - Email (invite yuborilgan email — o'zgartirib bo'lmaydi)
+    - Parol (min 8 belgi, katta+kichik harf+raqam) *
+    - Parolni tasdiqlash *
+```
+
+**Ro'yxatdan o'tgandan keyin:**
+1. Account `status: "pending_approval"` bilan yaratiladi
+2. Kompaniyaga tizimda xabar: "Accountingiz muvaffaqiyatli yaratildi. Tasdiqlash uchun kutilmoqda. Biz siz bilan bog'lanamiz yoki [telefon] raqamiga qo'ng'iroq qiling."
+3. super_admin/sub_admin ga email + tizim bildirishnomasi: "Yangi kompaniya ro'yxatdan o'tdi: [Kompaniya nomi]. Tasdiqlash kerak."
+4. Admin `/admin/companies` da `pending_approval` kompaniyalarni ko'radi
+5. Admin kompaniya ma'lumotlarini tekshirib → "Tasdiqlash" yoki "Rad etish"
+6. Tasdiqlanganda: kompaniyaga email "Accountingiz tasdiqlandi! Kiring: [URL]"
+7. Rad etilganda: kompaniyaga email + sabab ko'rsatiladi
+
+### 11.3 Account holatlari (Company)
+
+```
+contact_request → invite_sent → pending_registration → pending_approval → active
+                                                                          ↓
+                                                                       blocked
+                                                                       suspended
+```
+
+| Holat | Ma'no |
+|---|---|
+| `contact_request` | Murojaat formasi yuborildi, admin hali bog'lanmagan |
+| `invite_sent` | Admin invite URL yubordi, kompaniya hali ro'yxatdan o'tmagan |
+| `pending_registration` | URL ochildi lekin forma to'ldirilmadi (24 soatdan keyin expire) |
+| `pending_approval` | Ro'yxatdan o'tdi, admin tasdiqlashini kutmoqda |
+| `active` | Faol, to'liq kirish |
+| `suspended` | To'lov o'tmagan, vaqtincha to'xtatilgan (3 kun grace) |
+| `blocked` | Admin tomonidan bloklangan |
+
+---
+
+## 12. XODIM ACCOUNT YARATISH JARAYONI
+
+### 12.1 HR tomonidan account yaratish
+
+HR `/app/employees/new` sahifasida xodim uchun account yaratadi:
+```
+Yangi xodim formasi (HR to'ldiradi):
+  Shaxsiy ma'lumotlar:
+    - To'liq ism (familiya, ism, otasining ismi) *
+    - Tug'ilgan sana *
+    - Jins *
+    - Fuqarolik *
+    - Pasport/ID raqami *
+    - JSHSHIR (INN) *
+    - Telefon raqami *
+    - Email manzili * (parol yuboriladi shu yerga)
+    - Yashash manzili *
+  
+  Mehnat ma'lumotlari:
+    - Lavozim *
+    - Bo'lim *
+    - Rol (hr / accountant / manager / employee) *
+    - Ishga qabul sanasi *
+    - Ish vaqti (to'liq / yarim kunlik) *
+    - Oylik maosh *
+    - Band ish turi (asosiy / yarim stavka / shartnoma)
+    - Ishlash joyi (ofis / masofaviy / gibrid)
+  
+  Qo'shimcha:
+    - Qon guruhi (ixtiyoriy)
+    - Favqulodda aloqa: ism, telefon, munosabat
+    - Izoh (ixtiyoriy)
+```
+
+### 12.2 Account yaratilgandan keyin avtomatik jarayon
+
+```
+1. HR forma yuboradi
+2. Tizim xodim accountini yaratadi (status: "password_pending")
+3. Tizim xodimning emailiga parol o'rnatish URL yuboradi (24 soat amal qiladi)
+4. DARHOL: HR ga tizim ogohlantirishi:
+   ┌────────────────────────────────────────────────────────┐
+   │ ✅ [Ism Familiya] accounti yaratildi                   │
+   │ 📧 Parol o'rnatish URL: [email]@... ga yuborildi       │
+   │ ⚠️  MUHIM: Darhol xodimga qo'ng'iroq qiling va        │
+   │    emailni tekshirishini, URL ni bosishini aytib qo'ying│
+   │    📞 Telefon: [xodim telefoni]                        │
+   └────────────────────────────────────────────────────────┘
+5. Xodim URL ni bosib parol o'rnatish sahifasiga o'tadi
+6. Xodim login (email) va parolni o'zi yaratadi
+7. Parol o'rnatilgandan keyin:
+   - Xodimga: "Parolingiz muvaffaqiyatli o'rnatildi. HR tasdiqlashini kuting."
+   - HR ga DARHOL tizim ogohlantirishi:
+     ┌─────────────────────────────────────────────────────┐
+     │ 🔔 [Ism Familiya] parolini o'rnatdi                 │
+     │ ✅ Account tasdiqlashingizni kutmoqda               │
+     │ → Tasdiqlash uchun: /app/employees/[id]/confirm    │
+     └─────────────────────────────────────────────────────┘
+8. HR xodim ma'lumotlarini tekshirib → "Tasdiqlash" bosadi
+9. Xodimga email: "Accountingiz tasdiqlandi! Tizimga kirishingiz mumkin: [URL]"
+10. Xodim login/parol bilan tizimga kiradi
+```
+
+### 12.3 Xodim account holatlari
+
+```
+created → password_pending → password_set → active
+                                             ↓
+                                         blocked
+```
+
+| Holat | Ma'no |
+|---|---|
+| `password_pending` | HR yaratdi, email yuborildi, xodim hali parol o'rnatmagan |
+| `password_set` | Xodim parol o'rnatdi, HR tasdiqlashini kutmoqda |
+| `active` | HR tasdiqladi, xodim to'liq kirish huquqiga ega |
+| `blocked` | HR yoki company_admin tomonidan bloklangan |
+
+### 12.4 URL va token xavfsizligi
+
+- Invite URL: `JWT` token, 24 soat TTL (xodim) / 48 soat (kompaniya)
+- Bir martalik: token ishlatilgandan keyin invalid
+- Resend: agar expire bo'lsa HR qayta yuborishi mumkin (yangi token)
+- Hammasi HTTPS orqali
+
+---
+
+## 13. LOGIN VA AUTH SAHIFALARI
+
+### 13.1 Login sahifasi (`/login`)
+
+```
+Login sahifasi:
+  - Email va parol bilan kirish
+  - "Parolni unutdim" havolasi
+  - Status xabarlari:
+    * "Accountingiz tasdiqlash kutilmoqda — administrator bilan bog'laning"  (pending)
+    * "Accountingiz vaqtincha to'xtatildi — [telefon]"                       (suspended)
+    * "Accountingiz bloklandi — [telefon]"                                   (blocked)
+  - "Kompaniyangizni ro'yxatdan o'tkazmadingizmi?" → murojaat formasi
+  - Til tanlash (uz/ru/en/ja)
+```
+
+### 13.2 Parolni tiklash
+
+```
+1. /login → "Parolni unutdim" havolasi
+2. /forgot-password → Email kiritish
+3. Emailga tiklash URL (15 daqiqa amal qiladi)
+4. /reset-password?token=... → Yangi parol kiritish
+5. Muvaffaqiyat → /login ga yo'naltirish + "Parolingiz yangilandi, kiring"
+```
+
+### 13.3 Murojaat sahifasi (`/contact`)
+
+Landing page dagi alohida sahifa yoki modal:
+```
+Kim ko'radi: public (hamma)
+Maqsad: Kompaniyalar tizimni sinab ko'rishni istasa birinchi qadam
+
+Sahifada:
+  1. Qisqa tushuntirish: "Biz siz bilan bog'lanib, tizimni ko'rsatib, kelishuvga erishgandan
+     keyin accountingizni ochamiz"
+  2. Murojaat formasi (Section 11.1 dagi maydonlar)
+  3. Kutish vaqti: "Odatda 1 ish kuni ichida javob beramiz"
+  4. To'g'ridan-to'g'ri aloqa: Telegram, Telefon
+
+Yuborilgandan keyin:
+  "Murojaatingiz qabul qilindi! Siz bilan 24 soat ichida bog'lanamiz.
+   Telefon: +998 XX XXX-XX-XX | Telegram: @username"
+```
+
+---
+
+## 14. SUPER ADMIN AI TIZIMI
+
+### 14.1 Admin AI Yordamchisi
+
+`/admin/ai-chat` — super_admin/sub_admin uchun maxsus AI chat:
+
+**Standart savollar:**
+- "Bugungi tizim holati qanday?"
+- "Oxirgi 7 kunda qaysi kompaniyalar ko'p xato berdi?"
+- "Knowledge Base dagi eng ko'p so'raladigan savol nima?"
+- "Qaysi kompaniyalar obunadan chiqib ketish xavfida?"
+
+**Maxsus Agentlar:**
+```
+1. KB Agent (Knowledge Base Agent)
+   - KB bo'shliqlari: "Qaysi savollar javobsiz qoldi?"
+   - Yangi kontent taklif: "Bu savolga qo'shish kerak"
+   - KB sifat tahlili: "Qaysi javoblar outdated?"
+
+2. Support Agent
+   - Kompaniya muammolarini tahlil qilish
+   - "Nima uchun [kompaniya] ko'p xato bermoqda?"
+   - Tezkor yechim taklif
+
+3. Analytics Agent
+   - MRR o'zgarishi sabablarini tushuntirish
+   - Churn ehtimoli yuqori kompaniyalarni aniqlash
+   - Foydalanish statistikasini tahlil
+
+4. Health Agent
+   - Tizim holati real vaqt monitoring
+   - Anomaliyalarni aniqlash
+   - "Oxirgi 1 soatda nimalar noto'g'ri bo'ldi?"
+```
+
+### 14.2 Tizim Health Monitoring (`/admin/health`)
+
+```
+Real vaqt tekshiruvlar:
+  🟢/🔴 Supabase DB (latency, connections)
+  🟢/🔴 Supabase Auth (response time)
+  🟢/🔴 Anthropic API (ping, quota)
+  🟢/🔴 OpenAI API (embedding endpoint)
+  🟢/🔴 Telegram Bot (webhook status)
+  🟢/🔴 Resend Email (delivery rate)
+  🟢/🔴 Netlify (build status)
+
+Metrikalar (oxirgi 24 soat):
+  - Jami so'rovlar: X
+  - Xatolik darajasi: X%
+  - O'rtacha javob vaqti: Xms
+  - AI sarflagan kredit: $X
+  - Faol kompaniyalar: X
+```
+
+---
+
+*SPEC.md — AI Business Concierge v3.0*
+*Yangilandi: 2026-05-06 — Rol arxitekturasi, kompaniya onboarding, xodim onboarding, admin AI tizimi*
+*Avvalgi: v2.0 (2026-04-16) — Raqobat tahlili + kuchli pozitsiyalash*
