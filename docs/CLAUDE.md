@@ -102,6 +102,48 @@ ai-business-concierge/
 
 ---
 
+## ARXITEKTURA (2026-05-05 dan boshlab)
+
+> To'liq qoida va pattern: `docs/ARCHITECTURE.md`
+
+### Asosiy prinsiplar (qisqacha)
+
+**Frontend — Feature Slice + Clean Architecture:**
+```
+features/{domain}/
+  types.ts          ← To'liq entity + value objects (bo'sh emas!)
+  api/*.ts          ← Typed (no 'any'), snake_case↔camelCase normalizatsiya
+  hooks/use{D}.ts   ← Barcha state + logika (ViewModel)
+  components/       ← Pure UI (dumb)
+  pages/*Page.tsx   ← Thin: faqat hook + render (max ~100 qator)
+  __tests__/        ← Kamida 3 test (domain + api + hook)
+```
+
+**Backend — Layered Hono:**
+```
+server/
+  middleware/auth.ts, tenant.ts   ← Inline tekshirish emas!
+  presentation/routes/            ← Thin handlers (max 20 qator)
+  application/services/{domain}/  ← hr-candidate ETALON
+  domain/types.ts
+```
+
+**Unit testing stack:** Vitest + @testing-library/react + @testing-library/jest-dom
+- `npm run test` — watch mode
+- `npm run test:run` — CI mode
+- `npm run test:coverage` — coverage report
+
+**Etalon implementation:** `features/tasks/` — bu pattern bo'yicha yozish kerak
+
+### Anti-patternlar (QILMANG)
+- `task: any` → `CreateTaskInput` typed interface
+- `export type X = { id: string }` placeholder → to'liq entity
+- `return []` hooks → to'liq ViewModel
+- 500+ qator sahifalar → logikani hookga, UI ni componentga
+- Route handlerda 50+ qator logika → middleware + service
+
+---
+
 ## MUHIM QOIDALAR
 
 ### Umumiy

@@ -1,89 +1,37 @@
-import React, { useState } from 'react';
-import { 
-  Mail, 
-  Send, 
-  MessageCircle, 
-  FileText, 
-  CheckSquare, 
-  Clock, 
-  Star, 
-  Trash2, 
-  MoreHorizontal,
-  CornerUpLeft,
-  Paperclip,
-  User,
-  Tag,
-  Search,
-  Filter
+import React from 'react';
+import {
+  Mail, Send, MessageCircle, FileText, CheckSquare,
+  Clock, Star, Trash2, MoreHorizontal, CornerUpLeft,
+  Paperclip, User, Tag, Search, Filter
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
-import { getInboxItems } from "../api/inboxApi";
-import { useRealtimeInbox } from "../hooks/useRealtimeInbox";
+import { useInbox } from "../hooks/useInbox";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { ErrorState } from "../../../shared/components/ErrorState";
 import { normalizeError, getTraceIdFromError } from "../../../shared/lib/errorHandling";
+import type { InboxFilter } from "../types";
 
-type Tenant = {
-  id: string;
-  name: string;
-};
-
-// Mock Data Types
-type InboxItem = {
-  id: string;
-  source: 'email' | 'telegram' | 'amocrm';
-  sender: {
-    name: string;
-    avatar?: string;
-    email?: string;
-  };
-  subject: string; // or first line of message
-  preview: string;
-  timestamp: string;
-  isRead: boolean;
-  category: 'Sales' | 'HR' | 'Support' | 'Billing' | 'General';
-  priority: 'High' | 'Medium' | 'Low';
-  tags: string[];
-};
-
-export function InboxPage({ tenant }: { tenant: Tenant }) {
+export function InboxPage({ tenant }: { tenant: { id: string; name: string } }) {
   const { translate } = useI18n();
-  const [items, setItems] = useState<InboxItem[]>([]);
-  const [selectedItem, setSelectedItem] = useState<InboxItem | null>(null);
-  const [filter, setFilter] = useState<'all' | 'HR' | 'Sales' | 'Support'>('all');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<unknown>(null);
+  const {
+    filteredItems, filter, setFilter,
+    selectedItem, setSelectedItem,
+    loading, error,
+  } = useInbox(tenant.id);
 
-  React.useEffect(() => {
-    loadInbox();
-  }, [tenant.id]);
-
-  useRealtimeInbox(tenant.id, loadInbox);
-
-  async function loadInbox() {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getInboxItems(tenant.id);
-      setItems(data);
-      setSelectedItem(data[0] ?? null);
-    } catch (err) {
-      console.error("Failed to load inbox", err);
-      setError(err ?? translate("inbox.loadError"));
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const filteredItems = filter === "all" ? items : items.filter((item) => item.category === filter);
+  const filterTabs: { id: InboxFilter; label: string }[] = [
+    { id: 'all', label: translate("inbox.filterAll") },
+    { id: 'HR', label: translate("inbox.filterHR") },
+    { id: 'Sales', label: translate("inbox.filterSales") },
+    { id: 'Support', label: translate("inbox.filterSupport") },
+  ];
 
   return (
     <div className="flex h-[calc(100vh-8rem)] bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-      
-      {/* LEFT: List View */}
+
+      {/* LEFT: List */}
       <div className="w-full md:w-1/3 border-r border-slate-200 flex flex-col bg-slate-50">
-        {/* Toolbar */}
         <div className="p-3 border-b border-slate-200 flex items-center justify-between bg-white">
           <div className="flex items-center gap-2">
             <h2 className="font-semibold text-slate-700 px-2">{translate("inbox.title")}</h2>
@@ -96,22 +44,14 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
           </button>
         </div>
 
-        {/* Filter Tabs */}
         <div className="flex gap-2 p-2 overflow-x-auto border-b border-slate-200 bg-white">
-          {[
-            { id: "all", label: translate("inbox.filterAll") },
-            { id: "HR", label: translate("inbox.filterHR") },
-            { id: "Sales", label: translate("inbox.filterSales") },
-            { id: "Support", label: translate("inbox.filterSupport") },
-          ].map((f) => (
+          {filterTabs.map((f) => (
             <button
               key={f.id}
-              onClick={() => setFilter(f.id as typeof filter)}
+              onClick={() => setFilter(f.id)}
               className={clsx(
                 "px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-colors",
-                filter === f.id 
-                  ? "bg-indigo-600 text-white" 
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                filter === f.id ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               )}
             >
               {f.label}
@@ -119,102 +59,82 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
           ))}
         </div>
 
-        {/* List */}
         <div className="flex-1 overflow-y-auto">
-          {loading && (
-            <div className="p-6 text-sm text-slate-400">{translate("common.loading")}</div>
-          )}
-          {!loading && error && (
-            <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />
-          )}
+          {loading && <div className="p-6 text-sm text-slate-400">{translate("common.loading")}</div>}
+          {!loading && error && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
           {!loading && !error && filteredItems.length === 0 && (
             <div className="p-6 text-sm text-slate-400">{translate("inbox.empty")}</div>
           )}
-          {!loading &&
-            !error &&
-            filteredItems.map((item) => (
-              <div 
-                key={item.id}
-                onClick={() => setSelectedItem(item)}
-                className={clsx(
-                  "p-4 border-b border-slate-100 cursor-pointer hover:bg-white transition-colors group relative",
-                  selectedItem?.id === item.id ? "bg-white shadow-sm border-l-4 border-l-indigo-600" : "bg-transparent border-l-4 border-l-transparent",
-                  !item.isRead && "bg-indigo-50/40"
-                )}
-              >
-                <div className="flex justify-between items-start mb-1">
-                  <div className="flex items-center gap-2">
-                    {item.source === 'telegram' && <MessageCircle size={14} className="text-blue-500" />}
-                    {item.source === 'email' && <Mail size={14} className="text-amber-500" />}
-                    {item.source === 'amocrm' && <User size={14} className="text-indigo-500" />}
-                    <span className={clsx("text-xs font-medium", !item.isRead ? "text-slate-900 font-bold" : "text-slate-600")}>
-                      {item.sender.name}
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-slate-400 whitespace-nowrap">
-                    {format(new Date(item.timestamp), 'HH:mm')}
+          {!loading && !error && filteredItems.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => setSelectedItem(item)}
+              className={clsx(
+                "p-4 border-b border-slate-100 cursor-pointer hover:bg-white transition-colors group relative",
+                selectedItem?.id === item.id ? "bg-white shadow-sm border-l-4 border-l-indigo-600" : "bg-transparent border-l-4 border-l-transparent",
+                !item.isRead && "bg-indigo-50/40"
+              )}
+            >
+              <div className="flex justify-between items-start mb-1">
+                <div className="flex items-center gap-2">
+                  {item.source === 'telegram' && <MessageCircle size={14} className="text-blue-500" />}
+                  {item.source === 'email' && <Mail size={14} className="text-amber-500" />}
+                  {item.source === 'amocrm' && <User size={14} className="text-indigo-500" />}
+                  <span className={clsx("text-xs font-medium", !item.isRead ? "text-slate-900 font-bold" : "text-slate-600")}>
+                    {item.sender.name}
                   </span>
                 </div>
-                
-                <h4 className={clsx("text-sm mb-1 truncate", !item.isRead ? "font-bold text-slate-900" : "font-medium text-slate-700")}>
-                  {item.subject}
-                </h4>
-                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                  {item.preview}
-                </p>
-
-                <div className="flex gap-2 mt-2">
-                  <span className={clsx(
-                    "text-[10px] px-1.5 py-0.5 rounded font-medium border",
-                    item.category === 'HR' && "bg-pink-50 text-pink-700 border-pink-200",
-                    item.category === 'Sales' && "bg-emerald-50 text-emerald-700 border-emerald-200",
-                    item.category === 'Billing' && "bg-amber-50 text-amber-700 border-amber-200",
-                    item.category === 'Support' && "bg-blue-50 text-blue-700 border-blue-200"
-                  )}>
-                    {item.category}
-                  </span>
-                  {item.tags.map(tag => (
-                     <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
-                       #{tag}
-                     </span>
-                  ))}
-                </div>
+                <span className="text-[10px] text-slate-400 whitespace-nowrap">
+                  {format(new Date(item.timestamp), 'HH:mm')}
+                </span>
               </div>
-            ))}
+              <h4 className={clsx("text-sm mb-1 truncate", !item.isRead ? "font-bold text-slate-900" : "font-medium text-slate-700")}>
+                {item.subject}
+              </h4>
+              <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{item.preview}</p>
+              <div className="flex gap-2 mt-2">
+                <span className={clsx(
+                  "text-[10px] px-1.5 py-0.5 rounded font-medium border",
+                  item.category === 'HR' && "bg-pink-50 text-pink-700 border-pink-200",
+                  item.category === 'Sales' && "bg-emerald-50 text-emerald-700 border-emerald-200",
+                  item.category === 'Billing' && "bg-amber-50 text-amber-700 border-amber-200",
+                  item.category === 'Support' && "bg-blue-50 text-blue-700 border-blue-200",
+                )}>
+                  {item.category}
+                </span>
+                {item.tags.map((tag) => (
+                  <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* RIGHT: Detail View */}
+      {/* RIGHT: Detail */}
       <div className="hidden md:flex flex-1 flex-col bg-white">
         {selectedItem ? (
           <>
-            {/* Action Header */}
             <div className="h-14 border-b border-slate-200 flex items-center justify-between px-6 bg-white">
               <div className="flex items-center gap-2 text-slate-500">
-                <button className="p-2 hover:bg-slate-100 rounded-lg" title="Archive">
-                  <CheckSquare size={18} />
-                </button>
-                <button className="p-2 hover:bg-slate-100 rounded-lg" title="Snooze">
-                  <Clock size={18} />
-                </button>
-                <button className="p-2 hover:bg-slate-100 rounded-lg" title="Delete">
-                  <Trash2 size={18} />
-                </button>
+                <button className="p-2 hover:bg-slate-100 rounded-lg"><CheckSquare size={18} /></button>
+                <button className="p-2 hover:bg-slate-100 rounded-lg"><Clock size={18} /></button>
+                <button className="p-2 hover:bg-slate-100 rounded-lg"><Trash2 size={18} /></button>
               </div>
               <div className="flex items-center gap-2">
-                 <button className="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-lg hover:bg-indigo-100 flex items-center gap-2">
-                   <Tag size={14} /> {translate("inbox.aiActions")}
-                 </button>
-                 <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400">
+                <button className="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-lg hover:bg-indigo-100 flex items-center gap-2">
+                  <Tag size={14} /> {translate("inbox.aiActions")}
+                </button>
+                <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400">
                   <MoreHorizontal size={18} />
                 </button>
               </div>
             </div>
 
-            {/* Content */}
             <div className="flex-1 overflow-y-auto p-8">
               <div className="max-w-3xl mx-auto">
-                {/* Subject & Meta */}
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-4">
                     <h1 className="text-xl font-bold text-slate-900">{selectedItem.subject}</h1>
@@ -222,7 +142,6 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
                       ID: {selectedItem.id}
                     </span>
                   </div>
-                  
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg">
                       {selectedItem.sender.name.charAt(0)}
@@ -230,7 +149,9 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
                     <div>
                       <p className="font-medium text-slate-900">
                         {selectedItem.sender.name}
-                        <span className="text-slate-400 font-normal ml-2 text-sm">&lt;{selectedItem.sender.email || 'via ' + selectedItem.source}&gt;</span>
+                        <span className="text-slate-400 font-normal ml-2 text-sm">
+                          &lt;{selectedItem.sender.email ?? `via ${selectedItem.source}`}&gt;
+                        </span>
                       </p>
                       <p className="text-xs text-slate-500">
                         {format(new Date(selectedItem.timestamp), 'dd MMM yyyy, HH:mm')}
@@ -239,18 +160,10 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
                   </div>
                 </div>
 
-                {/* Body */}
                 <div className="prose prose-slate max-w-none mb-8">
-                  <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
-                    {selectedItem.preview}
-                    <br/><br/>
-                    {/* Fake extra content for visual balance */}
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                  </p>
+                  <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{selectedItem.preview}</p>
                 </div>
 
-                {/* AI Suggested Actions Block */}
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-8">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-5 h-5 bg-indigo-600 rounded flex items-center justify-center">
@@ -258,66 +171,63 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
                     </div>
                     <h3 className="text-sm font-semibold text-slate-800">{translate("inbox.aiSuggestions")}</h3>
                   </div>
-                  
                   <div className="grid gap-2">
                     {selectedItem.category === 'HR' && (
-                       <button className="w-full text-left p-3 bg-white border border-slate-200 hover:border-indigo-300 rounded-lg shadow-sm transition-all flex items-center justify-between group">
+                      <button className="w-full text-left p-3 bg-white border border-slate-200 hover:border-indigo-300 rounded-lg shadow-sm transition-all flex items-center justify-between group">
                         <div className="flex items-center gap-3">
-                           <FileText size={16} className="text-indigo-500" />
-                           <div>
-                             <p className="text-sm font-medium text-slate-700">{translate("inbox.approveJobDesc")}</p>
-                             <p className="text-xs text-slate-400">{translate("inbox.workflow")}</p>
-                           </div>
+                          <FileText size={16} className="text-indigo-500" />
+                          <div>
+                            <p className="text-sm font-medium text-slate-700">{translate("inbox.approveJobDesc")}</p>
+                            <p className="text-xs text-slate-400">{translate("inbox.workflow")}</p>
+                          </div>
                         </div>
                         <ArrowRightIcon className="text-slate-300 group-hover:text-indigo-500" />
                       </button>
                     )}
-                     <button className="w-full text-left p-3 bg-white border border-slate-200 hover:border-indigo-300 rounded-lg shadow-sm transition-all flex items-center justify-between group">
-                        <div className="flex items-center gap-3">
-                           <CheckSquare size={16} className="text-emerald-500" />
-                           <div>
-                             <p className="text-sm font-medium text-slate-700">{translate("inbox.createTask")}</p>
-                             <p className="text-xs text-slate-400">{translate("inbox.dueTomorrow")}</p>
-                           </div>
+                    <button className="w-full text-left p-3 bg-white border border-slate-200 hover:border-indigo-300 rounded-lg shadow-sm transition-all flex items-center justify-between group">
+                      <div className="flex items-center gap-3">
+                        <CheckSquare size={16} className="text-emerald-500" />
+                        <div>
+                          <p className="text-sm font-medium text-slate-700">{translate("inbox.createTask")}</p>
+                          <p className="text-xs text-slate-400">{translate("inbox.dueTomorrow")}</p>
                         </div>
-                        <ArrowRightIcon className="text-slate-300 group-hover:text-emerald-500" />
-                      </button>
+                      </div>
+                      <ArrowRightIcon className="text-slate-300 group-hover:text-emerald-500" />
+                    </button>
                   </div>
                 </div>
-
               </div>
             </div>
 
-            {/* Reply Area */}
             <div className="p-4 border-t border-slate-200 bg-slate-50">
-               <div className="flex gap-2 mb-2">
-                 <button className="text-xs bg-white border border-slate-200 px-3 py-1 rounded-full text-slate-600 hover:border-indigo-300">
-                    {translate("inbox.draftProfessional")}
-                 </button>
-                  <button className="text-xs bg-white border border-slate-200 px-3 py-1 rounded-full text-slate-600 hover:border-indigo-300">
-                    {translate("inbox.draftFriendly")}
-                 </button>
-               </div>
-               <div className="relative">
-                 <textarea 
+              <div className="flex gap-2 mb-2">
+                <button className="text-xs bg-white border border-slate-200 px-3 py-1 rounded-full text-slate-600 hover:border-indigo-300">
+                  {translate("inbox.draftProfessional")}
+                </button>
+                <button className="text-xs bg-white border border-slate-200 px-3 py-1 rounded-full text-slate-600 hover:border-indigo-300">
+                  {translate("inbox.draftFriendly")}
+                </button>
+              </div>
+              <div className="relative">
+                <textarea
                   className="w-full border border-slate-300 rounded-lg p-3 pr-12 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none h-24"
                   placeholder={translate("inbox.replyPlaceholder")}
-                 />
-                 <div className="absolute bottom-2 right-2 flex gap-1">
-                   <button className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded">
-                     <Paperclip size={16} />
-                   </button>
-                   <button className="p-1.5 bg-indigo-600 text-white rounded hover:bg-indigo-700 shadow-sm">
-                     <Send size={16} />
-                   </button>
-                 </div>
-               </div>
+                />
+                <div className="absolute bottom-2 right-2 flex gap-1">
+                  <button className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded">
+                    <Paperclip size={16} />
+                  </button>
+                  <button className="p-1.5 bg-indigo-600 text-white rounded hover:bg-indigo-700 shadow-sm">
+                    <Send size={16} />
+                  </button>
+                </div>
+              </div>
             </div>
           </>
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-slate-400">
-             <Mail size={48} className="mb-4 opacity-20" />
-             <p>{translate("inbox.selectMessage")}</p>
+            <Mail size={48} className="mb-4 opacity-20" />
+            <p>{translate("inbox.selectMessage")}</p>
           </div>
         )}
       </div>
@@ -328,8 +238,7 @@ export function InboxPage({ tenant }: { tenant: Tenant }) {
 function ArrowRightIcon({ className }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
+      <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
     </svg>
   );
 }

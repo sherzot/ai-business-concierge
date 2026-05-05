@@ -2,64 +2,38 @@ import React from "react";
 import { formatDistanceToNow } from "date-fns";
 import { uz } from "date-fns/locale";
 import { Mail, CheckSquare, FileText, Zap, AlertTriangle, TrendingUp, Lightbulb, Clock } from "lucide-react";
-import { getDashboardStats } from "../api/reportsApi";
-import { getInboxItems } from "../../inbox/api/inboxApi";
-import { getTasks } from "../../tasks/api/tasksApi";
-import { getDocs } from "../../docs/api/docsApi";
+import { useDashboard } from "../hooks/useDashboard";
 import { useI18n } from "../../../app/providers/I18nProvider";
-import { useAuthContext } from "../../auth/context/AuthContext";
-
-type Tenant = { id: string; name: string };
+import { healthScoreColor } from "../types";
+import type { Insight, InsightType } from "../types";
 
 interface DashboardPageProps {
-  tenant: Tenant;
+  tenant: { id: string; name: string };
   onNavigate?: (module: string) => void;
 }
 
 export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
   const { translate } = useI18n();
-  const [stats, setStats] = React.useState<any>(null);
-  const [inbox, setInbox] = React.useState<any[]>([]);
-  const [tasks, setTasks] = React.useState<any[]>([]);
-  const [docs, setDocs] = React.useState<any[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const { data, loading } = useDashboard(tenant.id);
 
-  React.useEffect(() => {
-    Promise.all([
-      getDashboardStats(tenant.id).then(setStats).catch(() => setStats(null)),
-      getInboxItems(tenant.id).then(setInbox).catch(() => setInbox([])),
-      getTasks(tenant.id).then(setTasks).catch(() => setTasks([])),
-      getDocs(tenant.id).then(setDocs).catch(() => setDocs([])),
-    ]).finally(() => setLoading(false));
-  }, [tenant.id]);
-
-  const inboxCount = inbox.length;
-  const unreadInbox = inbox.filter((i) => !i.isRead).length;
-  const activeTasks = tasks.filter((t) => t.status !== "done").length;
-  const today = new Date();
-  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const overdueTasks = tasks.filter((t) => {
-    if (t.status === "done" || !t.dueDate) return false;
-    const dueDate = parseDateOnly(t.dueDate);
-    return dueDate ? dueDate < todayStart : false;
-  }).length;
-  const docsReviewCount = docs.filter((d) => (d as { status?: string }).status === "review").length;
-  const aiHandledCount = tasks.filter((t) => t.status === "done").length;
-  const insights = stats?.insights ?? [
-    { type: "danger" as const, title: translate("reports.insight.hrBurnout"), desc: translate("reports.insight.hrBurnoutDesc") },
-    { type: "info" as const, title: translate("reports.insight.cashRisk"), desc: translate("reports.insight.cashRiskDesc") },
-    { type: "info" as const, title: translate("reports.insight.contract"), desc: translate("reports.insight.contractDesc") },
-  ];
-  const healthScore = stats?.healthScore ?? 78;
-  const deptScores = { hr: 72, tasks: 85, docs: 90, sales: 68 };
-
-  if (loading) {
+  if (loading || !data) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full" />
       </div>
     );
   }
+
+  const { stats, inboxCount, unreadInbox, activeTasks, overdueTasks, docsReviewCount, aiHandledCount, recentInbox, recentTasks } = data;
+
+  const healthScore = stats?.healthScore ?? 78;
+  const deptScores = stats?.deptScores ?? { hr: 72, tasks: 85, docs: 90, sales: 68 };
+  const scoreColor = healthScoreColor(healthScore);
+  const insights: Insight[] = stats?.insights ?? [
+    { type: 'danger', title: translate("reports.insight.hrBurnout"), desc: translate("reports.insight.hrBurnoutDesc") },
+    { type: 'info', title: translate("reports.insight.cashRisk"), desc: translate("reports.insight.cashRiskDesc") },
+    { type: 'info', title: translate("reports.insight.contract"), desc: translate("reports.insight.contractDesc") },
+  ];
 
   return (
     <div className="space-y-6">
@@ -90,7 +64,7 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
         <KpiCard
           icon={<Zap size={20} className="text-emerald-600" />}
           title={translate("dashboard.kpi.aiTasks")}
-          value={aiHandledCount || 0}
+          value={aiHandledCount}
           trend="↑ 25% kecha nisbatan"
           trendUp
           onClick={() => onNavigate?.("reports")}
@@ -108,19 +82,14 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
                   {translate("dashboard.newCount", { count: String(unreadInbox) })}
                 </span>
               )}
-              <button
-                onClick={() => onNavigate?.("inbox")}
-                className="text-sm text-indigo-600 font-medium hover:underline"
-              >
+              <button onClick={() => onNavigate?.("inbox")} className="text-sm text-indigo-600 font-medium hover:underline">
                 {translate("dashboard.all")} →
               </button>
             </div>
           </div>
           <div className="max-h-[320px] overflow-y-auto divide-y divide-slate-100">
-            {inbox.slice(0, 8).map((item) => (
-              <InboxRow key={item.id} item={item} />
-            ))}
-            {inbox.length === 0 && (
+            {(recentInbox as any[]).map((item) => <InboxRow key={item.id} item={item} />)}
+            {recentInbox.length === 0 && (
               <div className="p-8 text-center text-slate-500 text-sm">{translate("inbox.empty")}</div>
             )}
           </div>
@@ -130,15 +99,12 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-4 border-b border-slate-100 flex items-center justify-between">
             <h3 className="font-semibold text-slate-800">{translate("dashboard.aiAnalysis")}</h3>
-            <button
-              onClick={() => onNavigate?.("reports")}
-              className="text-sm text-indigo-600 font-medium hover:underline"
-            >
+            <button onClick={() => onNavigate?.("reports")} className="text-sm text-indigo-600 font-medium hover:underline">
               {translate("dashboard.all")} →
             </button>
           </div>
           <div className="p-4 space-y-4 max-h-[320px] overflow-y-auto">
-            {insights.slice(0, 3).map((ins: any, i: number) => (
+            {insights.slice(0, 3).map((ins, i) => (
               <InsightCard key={i} type={ins.type} title={ins.title} desc={ins.desc} />
             ))}
           </div>
@@ -156,19 +122,14 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
                   {translate("dashboard.overdueCount", { count: String(overdueTasks) })}
                 </span>
               )}
-              <button
-                onClick={() => onNavigate?.("tasks")}
-                className="text-sm text-indigo-600 font-medium hover:underline"
-              >
+              <button onClick={() => onNavigate?.("tasks")} className="text-sm text-indigo-600 font-medium hover:underline">
                 {translate("dashboard.all")} →
               </button>
             </div>
           </div>
           <div className="max-h-[280px] overflow-y-auto divide-y divide-slate-100">
-            {tasks.filter((t) => t.status !== "done").slice(0, 6).map((task) => (
-              <TaskRow key={task.id} task={task} />
-            ))}
-            {activeTasks === 0 && (
+            {(recentTasks as any[]).map((task) => <TaskRow key={task.id} task={task} />)}
+            {recentTasks.length === 0 && (
               <div className="p-8 text-center text-slate-500 text-sm">{translate("tasks.empty")}</div>
             )}
           </div>
@@ -181,24 +142,11 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
           <div className="flex flex-col items-center mb-6">
             <div className="relative w-28 h-28">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                <path
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="#e2e8f0"
-                  strokeWidth="2.5"
-                />
-                <path
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="#22c55e"
-                  strokeWidth="2.5"
-                  strokeDasharray={`${healthScore}, 100`}
-                  strokeLinecap="round"
-                  className="transition-all duration-500"
-                />
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e2e8f0" strokeWidth="2.5" />
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeDasharray={`${healthScore}, 100`} strokeLinecap="round" className="transition-all duration-500" />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl font-bold text-emerald-600">{healthScore}</span>
+                <span className={`text-2xl font-bold text-${scoreColor}-600`}>{healthScore}</span>
                 <span className="text-xs text-slate-500">{translate("dashboard.good")}</span>
               </div>
             </div>
@@ -222,20 +170,9 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
   );
 }
 
-function KpiCard({
-  icon,
-  title,
-  value,
-  trend,
-  trendUp,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  value: number;
-  trend?: string;
-  trendUp?: boolean;
-  onClick?: () => void;
+function KpiCard({ icon, title, value, trend, trendUp, onClick }: {
+  icon: React.ReactNode; title: string; value: number;
+  trend?: string; trendUp?: boolean; onClick?: () => void;
 }) {
   return (
     <div
@@ -253,9 +190,7 @@ function KpiCard({
         <div className="p-2 rounded-lg bg-slate-100">{icon}</div>
       </div>
       {trend && (
-        <p className={`text-sm mt-3 font-medium ${trendUp ? "text-emerald-600" : "text-rose-600"}`}>
-          {trend}
-        </p>
+        <p className={`text-sm mt-3 font-medium ${trendUp ? "text-emerald-600" : "text-rose-600"}`}>{trend}</p>
       )}
     </div>
   );
@@ -264,13 +199,13 @@ function KpiCard({
 function InboxRow({ item }: { item: any }) {
   const { translate } = useI18n();
   const sender = item.sender?.name ?? item.sender?.email ?? "—";
-  const category = item.category ?? "Other";
+  const category = item.category ?? "General";
   const categoryColors: Record<string, string> = {
     HR: "bg-purple-100 text-purple-700",
     Docs: "bg-emerald-100 text-emerald-700",
     Sales: "bg-blue-100 text-blue-700",
     Support: "bg-amber-100 text-amber-700",
-    Other: "bg-slate-100 text-slate-600",
+    General: "bg-slate-100 text-slate-600",
   };
   return (
     <div className="p-4 hover:bg-slate-50/50 transition-colors">
@@ -281,11 +216,9 @@ function InboxRow({ item }: { item: any }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-slate-800">{sender}</span>
-            {item.category && (
-              <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${categoryColors[category] ?? categoryColors.Other}`}>
-                {category}
-              </span>
-            )}
+            <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${categoryColors[category] ?? categoryColors.General}`}>
+              {category}
+            </span>
           </div>
           <p className="text-sm text-slate-600 line-clamp-2 mt-0.5">{item.subject ?? item.preview}</p>
           <p className="text-xs text-slate-400 mt-1">
@@ -298,12 +231,10 @@ function InboxRow({ item }: { item: any }) {
 }
 
 function TaskRow({ task }: { task: any }) {
-  const { translate } = useI18n();
   const today = new Date();
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const dueDate = task.dueDate ? parseDateOnly(task.dueDate) : null;
-  const isOverdue = !!(dueDate && dueDate < todayStart);
-  const assignee = task.assignee?.name ?? "Barcha";
+  const overdue = !!(dueDate && dueDate < todayStart);
   const dueLabel = dueDate
     ? (() => {
         const diff = Math.ceil((dueDate.getTime() - todayStart.getTime()) / (1000 * 60 * 60 * 24));
@@ -315,20 +246,14 @@ function TaskRow({ task }: { task: any }) {
     : "—";
   return (
     <div className="p-4 hover:bg-slate-50/50 transition-colors flex items-center gap-3">
-      {isOverdue ? (
-        <AlertTriangle size={18} className="text-rose-500 shrink-0" />
-      ) : (
-        <Clock size={18} className="text-blue-500 shrink-0" />
-      )}
+      {overdue
+        ? <AlertTriangle size={18} className="text-rose-500 shrink-0" />
+        : <Clock size={18} className="text-blue-500 shrink-0" />}
       <div className="flex-1 min-w-0">
         <p className="font-medium text-slate-800 truncate">{task.title}</p>
-        <p className="text-xs text-slate-500">{assignee}</p>
+        <p className="text-xs text-slate-500">{task.assignee?.name ?? "Barcha"}</p>
       </div>
-      <span
-        className={`px-2 py-0.5 text-xs font-medium rounded ${
-          isOverdue ? "bg-rose-100 text-rose-700" : "bg-blue-100 text-blue-700"
-        }`}
-      >
+      <span className={`px-2 py-0.5 text-xs font-medium rounded ${overdue ? "bg-rose-100 text-rose-700" : "bg-blue-100 text-blue-700"}`}>
         {dueLabel}
       </span>
     </div>
@@ -336,7 +261,6 @@ function TaskRow({ task }: { task: any }) {
 }
 
 function parseDateOnly(value: string): Date | null {
-  if (!value) return null;
   const datePart = value.split("T")[0];
   const [year, month, day] = datePart.split("-").map(Number);
   if (!year || !month || !day) {
@@ -346,21 +270,21 @@ function parseDateOnly(value: string): Date | null {
   return new Date(year, month - 1, day);
 }
 
-function InsightCard({ type, title, desc }: { type: string; title: string; desc: string }) {
-  const styles: Record<string, string> = {
+function InsightCard({ type, title, desc }: { type: InsightType; title: string; desc: string }) {
+  const styles: Record<InsightType, string> = {
     danger: "bg-rose-50 border-rose-100",
     warning: "bg-amber-50 border-amber-100",
     info: "bg-blue-50 border-blue-100",
   };
-  const icons: Record<string, React.ReactNode> = {
+  const icons: Record<InsightType, React.ReactNode> = {
     danger: <AlertTriangle size={18} className="text-rose-600" />,
     warning: <TrendingUp size={18} className="text-amber-600" />,
     info: <Lightbulb size={18} className="text-blue-600" />,
   };
   return (
-    <div className={`p-3 rounded-lg border ${styles[type] ?? styles.info}`}>
+    <div className={`p-3 rounded-lg border ${styles[type]}`}>
       <div className="flex items-start gap-2">
-        {icons[type] ?? icons.info}
+        {icons[type]}
         <div>
           <h4 className="text-sm font-semibold text-slate-800">{title}</h4>
           <p className="text-xs text-slate-600 mt-1">{desc}</p>
