@@ -4,6 +4,25 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-06 — Phase 1.5 (2): Matn Tuzatishlar + Language Selector
+
+### Qilingan o'zgarishlar
+
+**Matn va tarjima tuzatishlari (4 ta tilda — uz/ru/en/ja):**
+- `landing/i18n.ts` — "ChatGPT bu bilmaydi." iborasi olib tashlandi — O'zbekiston qonunlari tavsifidan keraksiz taqqoslash
+- `landing/i18n.ts` — "4 tilda" tavsifi to'g'irlandi: "O'zbekistondagi yapon, xitoy, turk kompaniyalari o'z tilida foydalana oladi." → "O'zbekistondagi xalqaro kompaniyalar istalgan tilda foydalana oladi." (barcha 4 tilda analogik)
+
+**Login sahifasi — tarjima tuzatildi:**
+- `app/i18n.ts` — `auth.platformSubtitle` kaliti 4 tilda qo'shildi (ilgari hardcoded o'zbek tilida edi)
+- `LoginPage.tsx` — hardcoded o'zbek matni `translate("auth.platformSubtitle")` ga almashtirildi
+
+**Til tanlash — button → selector:**
+- `LandingNavbar.tsx` — button group → `<select>` dropdown ga o'zgartirildi
+- `LoginPage.tsx` — button group → `<select>` dropdown ga o'zgartirildi
+- `LanguageSwitcher.tsx` (Settings) — button group → `<select>` dropdown ga o'zgartirildi
+
+---
+
 ## 2026-05-05 10:00 — Phase 1: Telegram Bot
 
 ### Qilingan ishlar

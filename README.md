@@ -5,7 +5,7 @@
 **O'zbekistondagi kichik biznes egalari uchun kundalik operatsion AI yordamchisi**
 
 [![Stack](https://img.shields.io/badge/stack-Supabase%20%2B%20React%20%2B%20Hono-4f46e5)](#technical-stack)
-[![Status](https://img.shields.io/badge/status-Phase%201%20Telegram%20MVP-f59e0b)](docs/PLAN.md)
+[![Status](https://img.shields.io/badge/status-Phase%201.5%20Company%20Onboarding-f59e0b)](docs/PLAN.md)
 [![License](https://img.shields.io/badge/license-Proprietary-64748b)](#license)
 
 🇺🇿 [O'zbekcha](#-ozbekcha) · 🇷🇺 [Русский](#-русский) · 🇬🇧 [English](#-english) · 🇯🇵 [日本語](#-日本語)
@@ -28,7 +28,7 @@ AI Business Concierge — O'zbekistondagi **allaqachon ishlayotgan** kichik bizn
 | 📄 **AI Hujjatchi** | Shartnoma, ariza, buyruq generatsiya (PDF/DOCX) | Telegram + Web |
 | 🛒 **AI Sotuvchi** | Telegram savdo bot yaratish va boshqarish | Telegram |
 
-### Mavjud modullar (Phase 0 + Phase 1)
+### Mavjud modullar (Phase 0 + Phase 1 + Phase 1.5)
 
 - **Manager Reports** — KPI, health score, trend grafiklar, AI Audit
 - **Unified Inbox** — Email/Telegram/CRM tarzidagi kategoriyali inbox
@@ -39,6 +39,9 @@ AI Business Concierge — O'zbekistondagi **allaqachon ishlayotgan** kichik bizn
 - **AI Concierge** — Chat + tool: vazifa yaratish, hujjat qidirish, inbox tasniflash
 - **Settings** — Profil, til (uz / ru / en / ja)
 - 🆕 **AI Maslahatchi Bot** — Telegram bot (grammY), 4 til, KB + Claude, rate limit
+- 🆕 **Kompaniya Onboarding** — Murojaat → Invite → Ro'yxat → Tasdiqlash oqimi
+- 🆕 **Admin Contacts** — Kompaniya murojaatlarini CRM tarzida boshqarish
+- 🆕 **Login redesign** — 4 tilda to'liq tarjima, selector-based til tanlash
 
 ### Hujjatlar
 
@@ -87,7 +90,7 @@ AI Business Concierge — это AI-ассистент для **повседне
 | 📄 **AI-Документовод** | Договоры, заявления, приказы (PDF/DOCX) | Telegram + Web |
 | 🛒 **AI-Продавец** | Создание и управление Telegram-ботами продаж | Telegram |
 
-### Существующие модули (Phase 0 + Phase 1)
+### Существующие модули (Phase 0 + Phase 1 + Phase 1.5)
 
 - **Manager Reports** — KPI, health score, тренды, AI Audit
 - **Unified Inbox** — единый ящик с категориями (Email/Telegram/CRM)
@@ -98,6 +101,9 @@ AI Business Concierge — это AI-ассистент для **повседне
 - **AI Concierge** — чат с инструментами
 - **Settings** — профиль, язык (uz / ru / en / ja)
 - 🆕 **AI-Консультант Бот** — Telegram-бот (grammY), 4 языка, KB + Claude, лимиты
+- 🆕 **Онбординг компании** — Заявка → Инвайт → Регистрация → Подтверждение
+- 🆕 **Admin Contacts** — CRM-управление заявками компаний
+- 🆕 **Редизайн логина** — полный перевод на 4 языка, выбор языка через selector
 
 ### Документация
 
@@ -133,7 +139,7 @@ AI Business Concierge — a daily operational AI assistant for **already-running
 | 📄 **AI Doc Generator** | Contracts, applications, orders (PDF/DOCX) | Telegram + Web |
 | 🛒 **AI Salesperson** | Build and manage Telegram sales bots | Telegram |
 
-### Existing modules (Phase 0 + Phase 1)
+### Existing modules (Phase 0 + Phase 1 + Phase 1.5)
 
 - **Manager Reports** — KPIs, health score, trends, AI Audit
 - **Unified Inbox** — categorised inbox across Email/Telegram/CRM
@@ -144,6 +150,9 @@ AI Business Concierge — a daily operational AI assistant for **already-running
 - **AI Concierge** — chat with tools (create task, search docs, classify inbox)
 - **Settings** — profile, language (uz / ru / en / ja)
 - 🆕 **AI Maslahatchi Bot** — Telegram bot (grammY), 4 languages, KB + Claude, rate limiting
+- 🆕 **Company Onboarding** — Request → Invite → Registration → Approval flow
+- 🆕 **Admin Contacts** — CRM-style management of company requests
+- 🆕 **Login redesign** — fully translated in 4 languages, selector-based language switching
 
 ### Documentation
 
@@ -180,7 +189,7 @@ AI Business Concierge は、ウズベキスタンの**既に運営中**の中小
 | 📄 **AI 文書ジェネレーター** | 契約書・申請書・命令書（PDF/DOCX） | Telegram + Web |
 | 🛒 **AI セールスエージェント** | Telegram 販売ボットの作成と運用 | Telegram |
 
-### 既存モジュール（Phase 0 + Phase 1）
+### 既存モジュール（Phase 0 + Phase 1 + Phase 1.5）
 
 - **Manager Reports** — KPI、ヘルススコア、トレンド、AI 監査
 - **Unified Inbox** — Email/Telegram/CRM 統合受信箱
@@ -191,6 +200,9 @@ AI Business Concierge は、ウズベキスタンの**既に運営中**の中小
 - **AI Concierge** — ツール付きチャット
 - **Settings** — プロフィール、言語（uz / ru / en / ja）
 - 🆕 **AI コンサルタント Bot** — Telegram ボット（grammY）、4言語、KB + Claude、利用制限
+- 🆕 **企業オンボーディング** — 申請 → 招待 → 登録 → 承認フロー
+- 🆕 **Admin Contacts** — 企業申請の CRM 管理
+- 🆕 **ログインページ刷新** — 4言語完全対応、セレクター式言語切替
 
 ### ドキュメント
 
@@ -351,19 +363,25 @@ Standard response envelope:
 }
 ```
 
-## Status (2026-05-05)
+## Status (2026-05-06)
 
 ✅ **Phase 0 complete** — DB schema (12 new tables), RLS policies, security hardening, LLM Router (Claude Haiku/Sonnet), Knowledge Base (pgvector + RAG), AI feedback, Indigo + Slate theme tokens.
 
 ✅ **Architecture upgrade** — DDD/Clean Architecture: full domain types, proper ViewModel hooks, 34 unit tests (Vitest), `docs/ARCHITECTURE.md` as canonical guide.
 
-🚀 **Phase 1 in progress** — Telegram MVP:
-- `supabase/functions/telegram-bot/` — grammY bot, 4 languages (uz/ru/en/ja), AI Maslahatchi pipeline
-- Session management via `ai_conversations` (one tenant per Telegram user)
-- Rate limiting: 5 requests/day (free plan)
-- KB semantic search → Claude Haiku/Sonnet → `ai_messages` persistence
+✅ **Phase 1 complete (code)** — Telegram bot (grammY), 4 languages, AI Maslahatchi pipeline, rate limiting, session management, beta monitoring. Blocked on API credits.
 
-⏳ **Phase 1 remaining** — Knowledge Base seeding (50+ Q&A), webhook deployment, 50 beta users.
+🚀 **Phase 1.5 in progress** — Company Auth & Management:
+- Landing page Company Onboarding section (4 languages)
+- Login redesign — fully translated (4 langs), selector-based language switcher
+- DB migrations: `contact_requests`, `employee_invites`, tenant status, role system
+- Company invite → registration flow (`/register`)
+- Admin contacts panel (`/admin/contacts`)
+- i18n fixes: text corrections across all 4 languages
+
+⏳ **Phase 1.5 remaining** — per [docs/PLAN.md](docs/PLAN.md): employee onboarding, billing integration.
+
+⏸ **Phase 1 Telegram** — blocked on Anthropic + OpenAI API credits. Bot code ready; resume after credits added.
 
 See [docs/PLAN.md](docs/PLAN.md) for the full roadmap.
 
