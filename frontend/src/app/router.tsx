@@ -4,17 +4,21 @@ import { ProtectedLayout } from "../features/auth/components/ProtectedLayout";
 import { RequireAuth } from "../features/auth/components/RequireAuth";
 import { LoginPage } from "../features/auth/pages/LoginPage";
 import { SetupAccountPage } from "../features/auth/pages/SetupAccountPage";
+import { ForgotPasswordPage } from "../features/auth/pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "../features/auth/pages/ResetPasswordPage";
 import { LandingPage } from "../features/landing/pages/LandingPage";
 import { ContactPage } from "../features/landing/pages/ContactPage";
 import { RegisterCompanyPage } from "../features/landing/pages/RegisterCompanyPage";
 import { AdminContactsPage } from "../features/admin/pages/AdminContactsPage";
 
 export const router = createBrowserRouter([
-  { path: "/",              element: <LandingPage /> },
-  { path: "/contact",       element: <ContactPage /> },
-  { path: "/register",      element: <RegisterCompanyPage /> },
-  { path: "/login",         element: <LoginPage /> },
-  { path: "/setup-account", element: <SetupAccountPage /> },
+  { path: "/",               element: <LandingPage /> },
+  { path: "/contact",        element: <ContactPage /> },
+  { path: "/register",       element: <RegisterCompanyPage /> },
+  { path: "/login",          element: <LoginPage /> },
+  { path: "/forgot-password", element: <ForgotPasswordPage /> },
+  { path: "/reset-password",  element: <ResetPasswordPage /> },
+  { path: "/setup-account",  element: <SetupAccountPage /> },
   { path: "/app",           element: <ProtectedLayout /> },
   {
     path: "/admin/contacts",

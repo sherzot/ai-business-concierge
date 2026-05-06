@@ -20,11 +20,11 @@ import { useAuthContext } from "../context/AuthContext";
 import { supabase } from "../../../shared/lib/supabase";
 import type { Locale } from "../../../app/i18n";
 
-const LOCALE_OPTIONS: { id: Locale; label: string }[] = [
-  { id: "uz", label: "O'zbek" },
-  { id: "ru", label: "Русский" },
-  { id: "en", label: "English" },
-  { id: "ja", label: "日本語" },
+const LOCALE_OPTIONS: { id: Locale; flag: string; label: string }[] = [
+  { id: "uz", flag: "🇺🇿", label: "O'zbek" },
+  { id: "ru", flag: "🇷🇺", label: "Русский" },
+  { id: "en", flag: "🇬🇧", label: "English" },
+  { id: "ja", flag: "🇯🇵", label: "日本語" },
 ];
 
 export function SetupAccountPage() {
@@ -109,20 +109,18 @@ export function SetupAccountPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 relative px-4">
       {/* Til selektor */}
-      <div className="absolute top-4 right-4 flex gap-1 rounded-full bg-white/10 backdrop-blur p-1 border border-white/20">
-        {LOCALE_OPTIONS.map((opt) => (
-          <button
-            key={opt.id}
-            onClick={() => setLocale(opt.id)}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-              locale === opt.id
-                ? "bg-white text-indigo-700"
-                : "text-white/70 hover:text-white hover:bg-white/10"
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
+      <div className="absolute top-4 right-4">
+        <select
+          value={locale}
+          onChange={(e) => setLocale(e.target.value as Locale)}
+          className="rounded-lg bg-white/10 backdrop-blur border border-white/20 text-white/80 text-xs px-2.5 py-1.5 focus:outline-none focus:border-white/40 cursor-pointer transition-colors"
+        >
+          {LOCALE_OPTIONS.map((opt) => (
+            <option key={opt.id} value={opt.id} className="bg-slate-900 text-white">
+              {opt.flag} {opt.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="w-full max-w-md">
