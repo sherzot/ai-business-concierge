@@ -11,6 +11,7 @@ import { ContactPage } from "../features/landing/pages/ContactPage";
 import { RegisterCompanyPage } from "../features/landing/pages/RegisterCompanyPage";
 import { AdminContactsPage } from "../features/admin/pages/AdminContactsPage";
 import { AdminHealthPage } from "../features/admin/pages/AdminHealthPage";
+import { AdminAIChatPage } from "../features/admin/pages/AdminAIChatPage";
 
 export const router = createBrowserRouter([
   { path: "/",               element: <LandingPage /> },
@@ -34,6 +35,14 @@ export const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <AdminHealthPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/admin/ai-chat",
+    element: (
+      <RequireAuth>
+        <AdminAIChatPage />
       </RequireAuth>
     ),
   },

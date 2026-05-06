@@ -13,3 +13,10 @@ export type HealthStats = {
 export async function getAdminHealth(): Promise<HealthStats> {
   return apiRequest<HealthStats>("/admin/health");
 }
+
+export async function sendAdminAIMessage(message: string, locale = "uz"): Promise<{ reply: string }> {
+  return apiRequest<{ reply: string }>("/admin/ai/chat", {
+    method: "POST",
+    body: JSON.stringify({ message, locale }),
+  });
+}

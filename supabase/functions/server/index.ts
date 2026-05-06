@@ -2769,6 +2769,92 @@ const registerRoutes = (prefix: string) => {
     });
   });
 
+  // ─── POST /v1/admin/ai/chat — admin AI yordamchisi (super_admin) ────────────
+  app.post(`${prefix}/admin/ai/chat`, async (c) => {
+    const auth = c.req.header("authorization");
+    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    const { data: ut } = await supabase
+      .from("user_tenants").select("role").eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
+    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+
+    const body = await c.req.json().catch(() => ({}));
+    const { message, locale: reqLocale = "uz" } = body as { message?: string; locale?: string };
+    if (!message || typeof message !== "string" || !message.trim()) {
+      return failure(c, 422, "VALIDATION_ERROR", "message majburiy.");
+    }
+
+    // Platforma statistikasini kontekst sifatida olish
+    let platformContext = "";
+    try {
+      const [{ count: tenants }, { count: users }, { count: pendingTenants }, { count: pendingUsers }] =
+        await Promise.all([
+          supabase.from("tenants").select("*", { count: "exact", head: true }),
+          supabase.from("user_tenants").select("*", { count: "exact", head: true }).eq("status", "active"),
+          supabase.from("tenants").select("*", { count: "exact", head: true }).eq("status", "pending_approval"),
+          supabase.from("user_tenants").select("*", { count: "exact", head: true }).eq("status", "password_pending"),
+        ]);
+      platformContext = `Platform stats: ${tenants} tenants total, ${users} active users, ${pendingTenants} tenants pending approval, ${pendingUsers} users pending setup.`;
+    } catch {
+      // Kontekst yuklanmasa ham ishlayveradi
+    }
+
+    const adminSystemPrompt = `You are the AI assistant for AI Business Concierge platform administrators (super admins).
+You help monitor the platform, analyze issues, answer questions about companies, users, and system health.
+You have access to platform statistics. Current platform context: ${platformContext}
+Respond in ${reqLocale === "ru" ? "Russian" : reqLocale === "en" ? "English" : "Uzbek"}.
+Be concise, professional, and data-driven. You can help with: user management, company onboarding, system monitoring, and platform strategy.`;
+
+    let reply = "Kechirasiz, hozir javob bera olmayapman.";
+
+    if (ANTHROPIC_API_KEY) {
+      try {
+        const claudeRes = await callClaude(ANTHROPIC_API_KEY, {
+          message,
+          systemPrompt: adminSystemPrompt,
+          context: undefined,
+          locale: reqLocale,
+          complexity: "analysis",
+        });
+        if (claudeRes.text) reply = claudeRes.text;
+      } catch {
+        if (OPENAI_API_KEY) {
+          try {
+            const oaiRes = await callOpenAI({
+              model: OPENAI_MODEL,
+              input: [
+                { role: "system", content: adminSystemPrompt },
+                { role: "user", content: message },
+              ],
+            });
+            const text = Array.isArray(oaiRes.output)
+              ? oaiRes.output.flatMap((i: any) => i.content || []).map((p: any) => p.text).filter(Boolean).join("\n")
+              : "";
+            if (text) reply = text;
+          } catch { /* fallback */ }
+        }
+      }
+    } else if (OPENAI_API_KEY) {
+      try {
+        const oaiRes = await callOpenAI({
+          model: OPENAI_MODEL,
+          input: [
+            { role: "system", content: adminSystemPrompt },
+            { role: "user", content: message },
+          ],
+        });
+        const text = Array.isArray(oaiRes.output)
+          ? oaiRes.output.flatMap((i: any) => i.content || []).map((p: any) => p.text).filter(Boolean).join("\n")
+          : "";
+        if (text) reply = text;
+      } catch { /* fallback */ }
+    }
+
+    return success(c, { reply });
+  });
+
   // ─── PATCH /v1/admin/contacts/:id/status ─────────────────────────────────
   app.patch(`${prefix}/admin/contacts/:id/status`, async (c) => {
     const auth = c.req.header("authorization");
