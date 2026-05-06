@@ -4,6 +4,27 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-06 — Phase 1.5 (4): B-027/B-028/B-029
+
+### Qilingan o'zgarishlar
+
+**B-027 — In-app Notifications for HR (Realtime):**
+- `createHrSetupCompleteNotification` — xodim setup tugaganda HR/leader larga bildirishnoma yuboradi
+- `createEmployeeConfirmedNotification` — HR xodimni tasdiqlaganda xodimga bildirishnoma
+- `useRealtimeNotifications` hook — Supabase realtime orqali `notifications` jadvalga subscribe
+- `NotificationsDropdown` — `userId` prop qabul qiladi, yangi bildirishnoma kelganda avtomatik yangilanadi (polling emas)
+
+**B-028 — /admin/health (System Monitoring):**
+- Backend: `GET /admin/health` — super_admin only; DB latency + tenants/users/contacts/notifications statistikasi
+- Frontend: `AdminHealthPage` — stat cards, DB latency banner (green/amber), refresh button; route: `/admin/health`
+
+**B-029 — /admin/ai-chat (Admin AI Chat):**
+- Backend: `POST /admin/ai/chat` — super_admin only; Claude + OpenAI fallback; live platform stats as context
+- Frontend: `AdminAIChatPage` — chat UI, typing indicator, suggestion chips, locale-aware; route: `/admin/ai-chat`
+- `adminApi.ts` — `getAdminHealth()` + `sendAdminAIMessage()` API helpers
+
+---
+
 ## 2026-05-06 — Phase 1.5 (3): B-026 Email Templates (7 ta)
 
 ### Qilingan o'zgarishlar

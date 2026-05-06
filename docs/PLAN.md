@@ -657,16 +657,16 @@ Xodim uchun:
 |---|---|---|---|---|
 | B-018 | Contact requests (murojaat forma + admin CRM) | Phase 1.5 | M | TODO |
 | B-019 | Company registration flow (invite → register → approve) | Phase 1.5 | L | TODO |
-| B-020 | Employee onboarding (HR creates → email → password → HR confirms) | Phase 1.5 | L | TODO |
-| B-021 | Login page UX (status xabarlari, murojaat havolasi) | Phase 1.5 | S | TODO |
-| B-022 | Forgot/Reset password pages | Phase 1.5 | S | TODO |
-| B-023 | Role system update (super_admin/sub_admin/company_admin/hr/accountant/manager/employee) | Phase 1.5 | M | TODO |
-| B-024 | Admin company management (/admin/companies, /admin/contacts) | Phase 1.5 | M | TODO |
-| B-025 | Employee management UI (/app/employees — full CRUD + onboarding) | Phase 1.5 | M | TODO |
-| B-026 | Email templates (7 ta: invite, approved, rejected, employee onboarding) | Phase 1.5 | S | TODO |
-| B-027 | In-app notifications for HR (real-time: qo'ng'iroq qiling ogohlantirishlari) | Phase 1.5 | S | TODO |
-| B-028 | /admin/health — tizim holati monitoring | Phase 1.5 | M | TODO |
-| B-029 | Admin AI chat (/admin/ai-chat — basic) | Phase 1.5 | M | TODO |
+| B-020 | Employee onboarding (HR creates → email → password → HR confirms) | Phase 1.5 | L | DONE |
+| B-021 | Login page UX (status xabarlari, murojaat havolasi) | Phase 1.5 | S | DONE |
+| B-022 | Forgot/Reset password pages | Phase 1.5 | S | DONE |
+| B-023 | Role system update (super_admin/sub_admin/company_admin/hr/accountant/manager/employee) | Phase 1.5 | M | DONE |
+| B-024 | Admin company management (/admin/companies, /admin/contacts) | Phase 1.5 | M | DONE |
+| B-025 | Employee management UI (/app/employees — full CRUD + onboarding) | Phase 1.5 | M | DONE |
+| B-026 | Email templates (7 ta: invite, approved, rejected, employee onboarding) | Phase 1.5 | S | DONE |
+| B-027 | In-app notifications for HR (real-time: qo'ng'iroq qiling ogohlantirishlari) | Phase 1.5 | S | DONE |
+| B-028 | /admin/health — tizim holati monitoring | Phase 1.5 | M | DONE |
+| B-029 | Admin AI chat (/admin/ai-chat — basic) | Phase 1.5 | M | DONE |
 | B-030 | Admin AI Agents (KB, Support, Analytics, Health) | Phase 4 | L | TODO |
 | B-001 | Unit tests (Vitest) | Phase 2 | M | TODO |
 | B-002 | E2E tests (Playwright) | Phase 4 | L | TODO |
