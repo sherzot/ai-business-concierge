@@ -402,7 +402,9 @@ export default function App() {
               <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-500" size={16} />
             </div>
             <LocaleSelect variant="light" />
-            {currentTenant && <NotificationsDropdown tenantId={currentTenant.id} />}
+            {currentTenant && (
+              <NotificationsDropdown tenantId={currentTenant.id} userId={profile?.user.id} />
+            )}
             <button
               onClick={() => setIsAIChatOpen(true)}
               className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors"

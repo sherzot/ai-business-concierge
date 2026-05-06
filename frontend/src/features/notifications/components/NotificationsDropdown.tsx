@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { clsx } from "clsx";
 import { Bell, CheckSquare } from "lucide-react";
 import {
@@ -8,21 +8,27 @@ import {
   DropdownMenuTrigger,
 } from "../../../shared/ui/dropdown-menu";
 import { getNotifications, markNotificationRead, type Notification } from "../api/notificationsApi";
+import { useRealtimeNotifications } from "../hooks/useRealtimeNotifications";
 import { formatDistanceToNow } from "date-fns";
 
 type Props = {
   tenantId: string;
+  userId?: string;
 };
 
-export function NotificationsDropdown({ tenantId }: Props) {
+export function NotificationsDropdown({ tenantId, userId }: Props) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
+  const refresh = useCallback(() => {
     if (tenantId) {
       getNotifications(tenantId).then(setNotifications).catch(() => setNotifications([]));
     }
-  }, [tenantId, open]);
+  }, [tenantId]);
+
+  useEffect(() => { refresh(); }, [refresh, open]);
+
+  useRealtimeNotifications(userId, tenantId, refresh);
 
   const unreadCount = notifications.filter((n) => !n.read_at).length;
 

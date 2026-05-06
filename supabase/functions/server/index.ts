@@ -419,6 +419,46 @@ const createDocAssignmentNotification = async (
   }
 };
 
+// HR/leader larni xabardor qilish: xodim akkauntini sozladi
+const createHrSetupCompleteNotification = async (tenantId: string, employeeName: string) => {
+  try {
+    const { data: hrUsers } = await supabase
+      .from("user_tenants")
+      .select("user_id")
+      .eq("tenant_id", tenantId)
+      .in("role", ["leader", "hr"])
+      .eq("status", "active");
+
+    if (!hrUsers?.length) return;
+
+    const rows = hrUsers.map((u) => ({
+      tenant_id: tenantId,
+      user_id: u.user_id,
+      type: "employee_setup_complete",
+      title: "Xodim ro'yxatdan o'tdi",
+      message: `${employeeName} akkauntini sozladi va tasdiqlashni kutmoqda.`,
+    }));
+    await supabase.from("notifications").insert(rows);
+  } catch (e) {
+    console.error("createHrSetupCompleteNotification error:", e);
+  }
+};
+
+// Xodimni xabardor qilish: HR tasdiqladi
+const createEmployeeConfirmedNotification = async (tenantId: string, userId: string) => {
+  try {
+    await supabase.from("notifications").insert({
+      tenant_id: tenantId,
+      user_id: userId,
+      type: "employee_confirmed",
+      title: "Hisobingiz tasdiqlandi",
+      message: "HR xodimi siz tasdiqladi. Endi platformaning barcha imkoniyatlaridan foydalanishingiz mumkin.",
+    });
+  } catch (e) {
+    console.error("createEmployeeConfirmedNotification error:", e);
+  }
+};
+
 type AiInteractionEntry = {
   role: string;
   prompt_name: string;
@@ -1775,16 +1815,19 @@ const registerRoutes = (prefix: string) => {
       console.warn("[setup-complete] DB update error:", error.message);
     }
 
-    // Send welcome email (non-blocking)
+    // Send welcome email + HR notification (non-blocking)
     if (user.email) {
       const { data: utRow } = await supabase
         .from("user_tenants")
-        .select("full_name, tenants(name)")
+        .select("full_name, tenant_id, tenants(name)")
         .eq("user_id", userId)
         .limit(1).single();
       const name = (utRow?.full_name ?? user.user_metadata?.full_name ?? user.email) as string;
       const companyName = ((utRow as any)?.tenants?.name ?? "Kompaniya") as string;
       sendEmployeeWelcomeEmail(user.email, name, companyName);
+      if (utRow?.tenant_id) {
+        createHrSetupCompleteNotification(utRow.tenant_id, name);
+      }
     }
 
     return success(c, { updated: !error });
@@ -1849,6 +1892,10 @@ const registerRoutes = (prefix: string) => {
       .in("status", ["password_set", "password_pending"]);
 
     if (error) return failure(c, 500, "DB_ERROR", `Tasdiqlashda xato: ${error.message}`);
+
+    // Non-blocking in-app notification to the confirmed employee
+    createEmployeeConfirmedNotification(tenantId, targetUserId);
+
     return success(c, { confirmed: true, user_id: targetUserId });
   });
 
