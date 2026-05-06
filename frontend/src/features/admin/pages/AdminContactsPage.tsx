@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Search, Phone, Mail, Building2, RefreshCw, ChevronDown } from "lucide-react";
+import { Search, Phone, Mail, Building2, RefreshCw, ChevronDown, Copy, Check, Send } from "lucide-react";
 import { apiRequest } from "../../../shared/lib/apiClient";
 
 type ContactStatus = "new" | "contacted" | "invite_sent" | "registered" | "rejected";
@@ -16,6 +16,8 @@ type ContactRequest = {
   source: string | null;
   status: ContactStatus;
   admin_note: string | null;
+  invite_token: string | null;
+  invite_expires_at: string | null;
   created_at: string;
 };
 
@@ -53,6 +55,7 @@ export function AdminContactsPage() {
   const [search, setSearch]     = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [copied, setCopied]     = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -69,15 +72,23 @@ export function AdminContactsPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  const copyInviteLink = (token: string, id: string) => {
+    const link = `${window.location.origin}/register?token=${token}`;
+    navigator.clipboard.writeText(link).then(() => {
+      setCopied(id);
+      setTimeout(() => setCopied(null), 2000);
+    });
+  };
+
   const updateStatus = async (id: string, status: ContactStatus, note?: string) => {
     setUpdating(id);
     try {
-      await apiRequest(`/admin/contacts/${id}/status`, {
+      const updated = await apiRequest<ContactRequest>(`/admin/contacts/${id}/status`, {
         method: "PATCH",
         body: JSON.stringify({ status, admin_note: note }),
       });
-      setContacts((prev) => prev.map((c) => c.id === id ? { ...c, status, admin_note: note ?? c.admin_note } : c));
-      setExpanded(null);
+      setContacts((prev) => prev.map((c) => c.id === id ? { ...c, ...updated } : c));
+      if (status !== "invite_sent") setExpanded(null);
     } catch (e) {
       alert(e instanceof Error ? e.message : "Xatolik");
     } finally {
@@ -229,25 +240,58 @@ export function AdminContactsPage() {
                     </div>
                   )}
 
-                  {/* Actions */}
-                  {NEXT_STATUS[c.status] && (
-                    <div className="flex flex-wrap gap-2">
-                      {NEXT_STATUS[c.status]!.map((action) => (
+                  {/* Invite link (when invite_sent) */}
+                  {c.status === "invite_sent" && c.invite_token && (
+                    <div className="mb-5 rounded-xl bg-indigo-500/10 border border-indigo-500/25 px-4 py-3">
+                      <div className="text-xs text-indigo-400 font-medium mb-2">Ro'yxatdan o'tish havolasi:</div>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 text-xs text-slate-300 bg-slate-900/60 rounded-lg px-3 py-2 truncate">
+                          {`${window.location.origin}/register?token=${c.invite_token}`}
+                        </code>
                         <button
-                          key={action.value}
-                          disabled={updating === c.id}
-                          onClick={() => updateStatus(c.id, action.value)}
-                          className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 ${
-                            action.value === "rejected"
-                              ? "bg-red-500/15 text-red-300 border border-red-500/30 hover:bg-red-500/25"
-                              : "bg-indigo-500 text-white hover:bg-indigo-400"
-                          }`}
+                          onClick={() => copyInviteLink(c.invite_token!, c.id)}
+                          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 text-xs font-medium transition-colors"
                         >
-                          {updating === c.id ? "..." : action.label}
+                          {copied === c.id ? <Check size={13} /> : <Copy size={13} />}
+                          {copied === c.id ? "Nusxalandi!" : "Nusxalash"}
                         </button>
-                      ))}
+                      </div>
+                      {c.invite_expires_at && (
+                        <div className="text-xs text-slate-500 mt-1.5">
+                          Muddat: {formatDate(c.invite_expires_at)}
+                        </div>
+                      )}
                     </div>
                   )}
+
+                  {/* Actions */}
+                  <div className="flex flex-wrap gap-2">
+                    {NEXT_STATUS[c.status]?.map((action) => (
+                      <button
+                        key={action.value}
+                        disabled={updating === c.id}
+                        onClick={() => updateStatus(c.id, action.value)}
+                        className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 ${
+                          action.value === "rejected"
+                            ? "bg-red-500/15 text-red-300 border border-red-500/30 hover:bg-red-500/25"
+                            : "bg-indigo-500 text-white hover:bg-indigo-400"
+                        }`}
+                      >
+                        {updating === c.id ? "..." : action.label}
+                      </button>
+                    ))}
+                    {/* Invite qayta yuborish */}
+                    {c.status === "invite_sent" && (
+                      <button
+                        disabled={updating === c.id}
+                        onClick={() => updateStatus(c.id, "invite_sent")}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-slate-700 text-slate-200 hover:bg-slate-600 transition-all disabled:opacity-50"
+                      >
+                        <Send size={12} />
+                        {updating === c.id ? "..." : "Qayta yuborish"}
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

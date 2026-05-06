@@ -47,6 +47,9 @@ const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY") ?? "";
 const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") ?? "gpt-4o-mini";
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
 const RESEND_WEBHOOK_SECRET = Deno.env.get("RESEND_WEBHOOK_SECRET") ?? "";
+const RESEND_API_KEY        = Deno.env.get("RESEND_API_KEY") ?? "";
+const RESEND_FROM_EMAIL     = Deno.env.get("RESEND_FROM_EMAIL") ?? "noreply@aibizconcierge.uz";
+const APP_URL               = Deno.env.get("APP_URL") ?? "https://ai-business-concierge1.netlify.app";
 
 const supabase = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
@@ -675,6 +678,46 @@ function checkContactRateLimit(ip: string): boolean {
   if (entry.count >= CONTACT_LIMIT) return false;
   entry.count += 1;
   return true;
+}
+
+// ─── Email helpers ────────────────────────────────────────────────────────────
+async function sendCompanyInviteEmail(to: string, name: string, token: string): Promise<void> {
+  if (!RESEND_API_KEY) {
+    console.warn("[invite] RESEND_API_KEY yo'q, email yuborilmadi. Link:", `${APP_URL}/register?token=${token}`);
+    return;
+  }
+  const link = `${APP_URL}/register?token=${token}`;
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: `AI Business Concierge <${RESEND_FROM_EMAIL}>`,
+        to: [to],
+        subject: "AI Business Concierge — Kompaniya ro'yxatdan o'tish taklifi",
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;background:#0f172a;color:#e2e8f0;border-radius:16px">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+    <div style="width:44px;height:44px;border-radius:12px;background:#6366f1;display:flex;align-items:center;justify-content:center;font-size:22px">✦</div>
+    <span style="font-size:18px;font-weight:700;color:#fff">AI Business Concierge</span>
+  </div>
+  <h2 style="color:#fff;margin-bottom:8px">Assalomu alaykum, ${name}!</h2>
+  <p style="color:#94a3b8;line-height:1.6">Sizning kompaniya murojaatingiz ko'rib chiqildi. Sizni platformamizga qo'shishdan mamnunmiz!</p>
+  <p style="color:#94a3b8;line-height:1.6">Kompaniyangizni ro'yxatdan o'tkazish uchun quyidagi tugmani bosing:</p>
+  <a href="${link}" style="display:inline-block;padding:14px 28px;background:#6366f1;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;margin:20px 0;font-size:15px">
+    Ro'yxatdan o'tish →
+  </a>
+  <p style="color:#64748b;font-size:13px;margin-top:24px;padding-top:16px;border-top:1px solid #1e293b">
+    Havolaning amal qilish muddati: <strong>48 soat</strong>.<br>
+    Agar siz bu so'rovni yubormagan bo'lsangiz, ushbu emailni e'tiborsiz qoldiring.
+  </p>
+</div>`,
+      }),
+    });
+    if (!res.ok) console.warn("[invite] Resend error:", await res.text());
+    else console.info(`[invite] Email sent to ${to}`);
+  } catch (e) {
+    console.warn("[invite] Email yuborishda xatolik:", e);
+  }
 }
 
 const registerRoutes = (prefix: string) => {
@@ -2399,7 +2442,7 @@ const registerRoutes = (prefix: string) => {
 
     const status = c.req.query("status");
     let q = supabase.from("contact_requests")
-      .select("id,full_name,company_name,phone,email,business_type,employee_count,message,source,status,admin_note,created_at")
+      .select("id,full_name,company_name,phone,email,business_type,employee_count,message,source,status,admin_note,invite_token,invite_expires_at,created_at")
       .order("created_at", { ascending: false })
       .limit(200);
     if (status && status !== "all") q = q.eq("status", status);
@@ -2435,10 +2478,155 @@ const registerRoutes = (prefix: string) => {
     };
     if (body.admin_note !== undefined) update.admin_note = body.admin_note;
 
+    let inviteToken: string | null = null;
+    if (body.status === "invite_sent") {
+      const { data: existing } = await supabase
+        .from("contact_requests")
+        .select("email,full_name,invite_token")
+        .eq("id", id).single();
+
+      // Yangi token (yoki qayta yuborish uchun eskisini saqlab qolish)
+      inviteToken = existing?.invite_token ?? (
+        crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "")
+      );
+      const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
+      update.invite_token      = inviteToken;
+      update.invite_expires_at = expiresAt;
+
+      if (existing?.email) {
+        // Non-blocking email send
+        sendCompanyInviteEmail(existing.email, existing.full_name ?? "Hurmatli mijoz", inviteToken);
+      }
+    }
+
     const { data, error } = await supabase
       .from("contact_requests").update(update).eq("id", id).select().single();
     if (error) return failure(c, 500, "DB_ERROR", error.message);
     return success(c, data);
+  });
+
+  // ─── GET /v1/register/validate-token?token=... — public ──────────────────
+  app.get(`${prefix}/register/validate-token`, async (c) => {
+    const token = c.req.query("token");
+    if (!token) return failure(c, 400, "VALIDATION_ERROR", "token parametri kerak.");
+
+    const { data: contact, error } = await supabase
+      .from("contact_requests")
+      .select("id,full_name,company_name,email,phone,business_type,employee_count,status,invite_expires_at")
+      .eq("invite_token", token)
+      .single();
+
+    if (error || !contact) return failure(c, 404, "NOT_FOUND", "Token topilmadi yoki yaroqsiz.");
+    if (contact.status === "registered") return failure(c, 410, "ALREADY_USED", "Bu havola allaqachon ishlatilgan.");
+    if (contact.status !== "invite_sent") return failure(c, 400, "INVALID_TOKEN", "Token noto'g'ri holatda.");
+    if (new Date(contact.invite_expires_at) < new Date()) {
+      return failure(c, 410, "TOKEN_EXPIRED", "Token muddati o'tgan. Admin bilan bog'laning.");
+    }
+
+    return success(c, {
+      contact_request_id: contact.id,
+      full_name:     contact.full_name,
+      company_name:  contact.company_name,
+      email:         contact.email,
+      phone:         contact.phone,
+      business_type: contact.business_type,
+      employee_count:contact.employee_count,
+    });
+  });
+
+  // ─── POST /v1/register/company — public ──────────────────────────────────
+  app.post(`${prefix}/register/company`, async (c) => {
+    let body: Record<string, unknown>;
+    try { body = await c.req.json(); }
+    catch { return failure(c, 400, "INVALID_JSON", "JSON format xato."); }
+
+    const token    = String(body.token    ?? "").trim();
+    const password = String(body.password ?? "").trim();
+    if (!token || !password) {
+      return failure(c, 400, "VALIDATION_ERROR", "token va password majburiy.");
+    }
+    if (password.length < 8) {
+      return failure(c, 400, "VALIDATION_ERROR", "Parol kamida 8 belgi bo'lishi kerak.");
+    }
+
+    // Token tekshirish
+    const { data: contact, error: ctErr } = await supabase
+      .from("contact_requests")
+      .select("id,full_name,email,status,invite_expires_at")
+      .eq("invite_token", token)
+      .single();
+
+    if (ctErr || !contact) return failure(c, 404, "NOT_FOUND", "Token topilmadi.");
+    if (contact.status === "registered") return failure(c, 410, "ALREADY_USED", "Bu havola allaqachon ishlatilgan.");
+    if (contact.status !== "invite_sent") return failure(c, 400, "INVALID_TOKEN", "Token noto'g'ri holatda.");
+    if (new Date(contact.invite_expires_at) < new Date()) {
+      return failure(c, 410, "TOKEN_EXPIRED", "Token muddati o'tgan.");
+    }
+
+    // Auth user yaratish
+    const { data: authData, error: authErr } = await supabase.auth.admin.createUser({
+      email: contact.email,
+      password,
+      email_confirm: true,
+      user_metadata: { full_name: contact.full_name },
+    });
+    if (authErr) {
+      if (authErr.message?.includes("already")) {
+        return failure(c, 409, "EMAIL_EXISTS", "Bu email allaqachon ro'yxatdan o'tgan. Login sahifasiga o'ting.");
+      }
+      return failure(c, 500, "AUTH_ERROR", authErr.message);
+    }
+    const userId = authData.user.id;
+
+    // Kompaniya nomi
+    const companyName  = String(body.company_name  ?? contact.full_name).trim();
+    const legalForm    = String(body.legal_form    ?? "").trim() || null;
+    const stir         = String(body.stir          ?? "").trim() || null;
+    const legalAddress = String(body.legal_address ?? "").trim() || null;
+
+    // Tenant yaratish
+    const tenantId = crypto.randomUUID();
+    const { error: tenantErr } = await supabase.from("tenants").insert({
+      id:                 tenantId,
+      name:               companyName,
+      plan:               "Pro",
+      status:             "pending_approval",
+      legal_form:         legalForm,
+      stir,
+      legal_address:      legalAddress,
+      contact_email:      contact.email,
+      contact_request_id: contact.id,
+    });
+    if (tenantErr) {
+      await supabase.auth.admin.deleteUser(userId);
+      return failure(c, 500, "DB_ERROR", tenantErr.message);
+    }
+
+    // company_admin sifatida bog'lash
+    const { error: utErr } = await supabase.from("user_tenants").insert({
+      user_id:   userId,
+      tenant_id: tenantId,
+      role:      "company_admin",
+      full_name: contact.full_name,
+      status:    "active",
+    });
+    if (utErr) {
+      await supabase.auth.admin.deleteUser(userId);
+      await supabase.from("tenants").delete().eq("id", tenantId);
+      return failure(c, 500, "DB_ERROR", utErr.message);
+    }
+
+    // Contact request → registered
+    await supabase.from("contact_requests").update({
+      status:    "registered",
+      tenant_id: tenantId,
+    }).eq("id", contact.id);
+
+    console.info(`[register] company=${companyName} tenant=${tenantId} user=${userId}`);
+    return c.json({ data: {
+      tenant_id: tenantId,
+      message:   "Ro'yxatdan o'tish muvaffaqiyatli. Admin tasdiqlashini kuting.",
+    }}, 201);
   });
 };
 

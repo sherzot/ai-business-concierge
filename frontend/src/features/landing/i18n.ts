@@ -64,6 +64,22 @@ type LandingDict = {
     successTitle: string; successDesc: string; successNote: string;
     backToHome: string; required: string;
   };
+  register: {
+    title: string; subtitle: string;
+    loading: string;
+    invalidToken: string; tokenExpired: string; alreadyUsed: string;
+    companyName: string; companyNamePlaceholder: string;
+    legalForm: string; legalFormPlaceholder: string;
+    legalForms: { yatt: string; llc: string; jsc: string; other: string };
+    stir: string; stirPlaceholder: string;
+    legalAddress: string; legalAddressPlaceholder: string;
+    password: string; passwordPlaceholder: string;
+    confirmPassword: string; confirmPasswordPlaceholder: string;
+    passwordMismatch: string;
+    submit: string; submitting: string;
+    successTitle: string; successDesc: string;
+    backToHome: string; goToLogin: string;
+  };
   pricing: {
     title: string; subtitle: string;
     free: { name: string; price: string; period: string; cta: string; features: string[] };
@@ -314,6 +330,34 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
       successNote: "To'g'ridan-to'g'ri aloqa:",
       backToHome: "Bosh sahifaga qaytish",
       required: "* — majburiy maydonlar",
+    },
+    register: {
+      title: "Kompaniyangizni ro'yxatdan o'tkaz",
+      subtitle: "Admin taklifi asosida kompaniyangizni tizimga qo'shing",
+      loading: "Yuklanmoqda...",
+      invalidToken: "Havola yaroqsiz yoki noto'g'ri. Iltimos admin bilan bog'laning.",
+      tokenExpired: "Havolaning muddati o'tgan (48 soat). Admin bilan bog'laning.",
+      alreadyUsed: "Bu havola allaqachon ishlatilgan. Login sahifasiga o'ting.",
+      companyName: "Kompaniya nomi",
+      companyNamePlaceholder: "Rasmiy kompaniya nomi",
+      legalForm: "Yuridik shakl",
+      legalFormPlaceholder: "Tanlang",
+      legalForms: { yatt: "YATT", llc: "MChJ", jsc: "AJ", other: "Boshqa" },
+      stir: "STIR",
+      stirPlaceholder: "9 raqamli STIR",
+      legalAddress: "Yuridik manzil",
+      legalAddressPlaceholder: "Ro'yxatdan o'tish manzili",
+      password: "Parol",
+      passwordPlaceholder: "Kamida 8 belgi",
+      confirmPassword: "Parolni tasdiqlang",
+      confirmPasswordPlaceholder: "Parolni qayta kiriting",
+      passwordMismatch: "Parollar mos emas.",
+      submit: "Ro'yxatdan o'tish",
+      submitting: "Saqlanmoqda...",
+      successTitle: "Muvaffaqiyatli ro'yxatdan o'tdingi!",
+      successDesc: "Kompaniyangiz tizimga qo'shildi. Admin tasdiqlagach kirish imkoniyatiga ega bo'lasiz.",
+      backToHome: "Bosh sahifaga qaytish",
+      goToLogin: "Login sahifasiga o'tish",
     },
     pricing: {
       title: "Narxlar",
@@ -594,6 +638,34 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
       backToHome: "Вернуться на главную",
       required: "* — обязательные поля",
     },
+    register: {
+      title: "Зарегистрируйте компанию",
+      subtitle: "Добавьте вашу компанию в систему по приглашению администратора",
+      loading: "Загрузка...",
+      invalidToken: "Ссылка недействительна или некорректна. Обратитесь к администратору.",
+      tokenExpired: "Срок действия ссылки истёк (48 часов). Обратитесь к администратору.",
+      alreadyUsed: "Эта ссылка уже использована. Перейдите на страницу входа.",
+      companyName: "Название компании",
+      companyNamePlaceholder: "Официальное название компании",
+      legalForm: "Правовая форма",
+      legalFormPlaceholder: "Выберите",
+      legalForms: { yatt: "ИП", llc: "ООО", jsc: "АО", other: "Другое" },
+      stir: "ИНН",
+      stirPlaceholder: "9-значный ИНН",
+      legalAddress: "Юридический адрес",
+      legalAddressPlaceholder: "Адрес регистрации",
+      password: "Пароль",
+      passwordPlaceholder: "Минимум 8 символов",
+      confirmPassword: "Подтвердите пароль",
+      confirmPasswordPlaceholder: "Повторите пароль",
+      passwordMismatch: "Пароли не совпадают.",
+      submit: "Зарегистрироваться",
+      submitting: "Сохранение...",
+      successTitle: "Регистрация прошла успешно!",
+      successDesc: "Компания добавлена в систему. После подтверждения администратора вы получите доступ.",
+      backToHome: "Вернуться на главную",
+      goToLogin: "Перейти на страницу входа",
+    },
     pricing: {
       title: "Тарифы",
       subtitle: "Бесплатно в период бета. Pro план скоро.",
@@ -873,6 +945,34 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
       backToHome: "Back to home",
       required: "* — required fields",
     },
+    register: {
+      title: "Register Your Company",
+      subtitle: "Add your company to the system using an admin invitation",
+      loading: "Loading...",
+      invalidToken: "This link is invalid or incorrect. Please contact the administrator.",
+      tokenExpired: "This link has expired (48 hours). Please contact the administrator.",
+      alreadyUsed: "This link has already been used. Go to the login page.",
+      companyName: "Company name",
+      companyNamePlaceholder: "Official company name",
+      legalForm: "Legal form",
+      legalFormPlaceholder: "Select",
+      legalForms: { yatt: "Sole proprietor", llc: "LLC", jsc: "JSC", other: "Other" },
+      stir: "Tax ID (STIR)",
+      stirPlaceholder: "9-digit tax ID",
+      legalAddress: "Legal address",
+      legalAddressPlaceholder: "Registered address",
+      password: "Password",
+      passwordPlaceholder: "At least 8 characters",
+      confirmPassword: "Confirm password",
+      confirmPasswordPlaceholder: "Repeat password",
+      passwordMismatch: "Passwords do not match.",
+      submit: "Register",
+      submitting: "Saving...",
+      successTitle: "Successfully registered!",
+      successDesc: "Your company has been added to the system. You will get access once the admin approves it.",
+      backToHome: "Back to home",
+      goToLogin: "Go to login",
+    },
     pricing: {
       title: "Pricing",
       subtitle: "Free during beta. Pro plan coming soon.",
@@ -1151,6 +1251,34 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
       successNote: "直接お問い合わせ:",
       backToHome: "ホームへ戻る",
       required: "* — 必須項目",
+    },
+    register: {
+      title: "会社を登録する",
+      subtitle: "管理者の招待を使用してシステムに会社を追加してください",
+      loading: "読み込み中...",
+      invalidToken: "このリンクは無効または不正です。管理者にお問い合わせください。",
+      tokenExpired: "このリンクの有効期限が切れました（48時間）。管理者にお問い合わせください。",
+      alreadyUsed: "このリンクはすでに使用されています。ログインページへ移動してください。",
+      companyName: "会社名",
+      companyNamePlaceholder: "正式な会社名",
+      legalForm: "法人形態",
+      legalFormPlaceholder: "選択してください",
+      legalForms: { yatt: "個人事業主", llc: "合同会社", jsc: "株式会社", other: "その他" },
+      stir: "税務番号",
+      stirPlaceholder: "9桁の税務番号",
+      legalAddress: "法人住所",
+      legalAddressPlaceholder: "登記住所",
+      password: "パスワード",
+      passwordPlaceholder: "8文字以上",
+      confirmPassword: "パスワードの確認",
+      confirmPasswordPlaceholder: "パスワードを再入力",
+      passwordMismatch: "パスワードが一致しません。",
+      submit: "登録する",
+      submitting: "保存中...",
+      successTitle: "登録が完了しました！",
+      successDesc: "会社がシステムに追加されました。管理者が承認すると、アクセスできるようになります。",
+      backToHome: "ホームへ戻る",
+      goToLogin: "ログインページへ",
     },
     pricing: {
       title: "料金プラン",

@@ -6,11 +6,13 @@ import { LoginPage } from "../features/auth/pages/LoginPage";
 import { SetupAccountPage } from "../features/auth/pages/SetupAccountPage";
 import { LandingPage } from "../features/landing/pages/LandingPage";
 import { ContactPage } from "../features/landing/pages/ContactPage";
+import { RegisterCompanyPage } from "../features/landing/pages/RegisterCompanyPage";
 import { AdminContactsPage } from "../features/admin/pages/AdminContactsPage";
 
 export const router = createBrowserRouter([
   { path: "/",              element: <LandingPage /> },
   { path: "/contact",       element: <ContactPage /> },
+  { path: "/register",      element: <RegisterCompanyPage /> },
   { path: "/login",         element: <LoginPage /> },
   { path: "/setup-account", element: <SetupAccountPage /> },
   { path: "/app",           element: <ProtectedLayout /> },
