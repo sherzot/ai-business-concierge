@@ -4,6 +4,30 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-06 — Phase 1.5 (3): B-026 Email Templates (7 ta)
+
+### Qilingan o'zgarishlar
+
+**Backend — 7 ta email template (Resend API, dark indigo theme):**
+1. `company_invite` — mavjud (admin contact → invite_sent)
+2. `company_registered_pending` — POST /register/company → leader emailiga "Admin tasdiqlashini kuting"
+3. `company_rejected` — PATCH /admin/contacts/:id/status → status=rejected → contact emailiga
+4. `company_approved` — yangi PATCH /admin/tenants/:id/status → status=active → leader emailiga
+5. `employee_invite` — POST /members → mode=invite → xodimga branded email (Supabase ga qo'shimcha)
+6. `employee_welcome` — POST /auth/setup-complete → "Xush kelibsiz, akkauntingiz tayyor"
+7. `admin_new_registration` — POST /register/company → ADMIN_NOTIFY_EMAIL ga bildirishnoma
+
+**Yangi env var:** `ADMIN_NOTIFY_EMAIL` — yangi company ro'yxatdan o'tganda admin xabardor bo'lishi uchun
+
+**Yangi endpoint:** `PATCH /admin/tenants/:id/status` — super_admin/sub_admin kompaniyani active/suspended/blocked qila oladi; tasdiqlanganda company_approved email ketadi
+
+**Arxitektura:**
+- `sendResendEmail(to, subject, html, tag)` — generic Resend wrapper
+- `emailLayout(content)` + `emailBtn(href, label)` — reusable HTML builder helpers
+- Barcha email sendlar non-blocking (await qilinmaydi — asosiy request sekinlamaydi)
+
+---
+
 ## 2026-05-06 — Phase 1.5 (2): Matn Tuzatishlar + Language Selector
 
 ### Qilingan o'zgarishlar

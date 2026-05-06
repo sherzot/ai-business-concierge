@@ -50,6 +50,7 @@ const RESEND_WEBHOOK_SECRET = Deno.env.get("RESEND_WEBHOOK_SECRET") ?? "";
 const RESEND_API_KEY        = Deno.env.get("RESEND_API_KEY") ?? "";
 const RESEND_FROM_EMAIL     = Deno.env.get("RESEND_FROM_EMAIL") ?? "noreply@aibizconcierge.uz";
 const APP_URL               = Deno.env.get("APP_URL") ?? "https://ai-business-concierge1.netlify.app";
+const ADMIN_NOTIFY_EMAIL    = Deno.env.get("ADMIN_NOTIFY_EMAIL") ?? "";
 
 const supabase = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
@@ -718,6 +719,122 @@ async function sendCompanyInviteEmail(to: string, name: string, token: string): 
   } catch (e) {
     console.warn("[invite] Email yuborishda xatolik:", e);
   }
+}
+
+// ─── Generic Resend sender ────────────────────────────────────────────────────
+async function sendResendEmail(to: string, subject: string, html: string, tag: string): Promise<void> {
+  if (!RESEND_API_KEY) { console.warn(`[${tag}] RESEND_API_KEY yo'q, email yuborilmadi.`); return; }
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: `AI Business Concierge <${RESEND_FROM_EMAIL}>`, to: [to], subject, html }),
+    });
+    if (!res.ok) console.warn(`[${tag}] Resend error:`, await res.text());
+    else console.info(`[${tag}] Email sent to ${to}`);
+  } catch (e) { console.warn(`[${tag}] Email yuborishda xatolik:`, e); }
+}
+
+function emailLayout(content: string): string {
+  return `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;background:#0f172a;color:#e2e8f0;border-radius:16px">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px">
+    <div style="width:44px;height:44px;border-radius:12px;background:#6366f1;display:flex;align-items:center;justify-content:center;font-size:22px">✦</div>
+    <span style="font-size:18px;font-weight:700;color:#fff">AI Business Concierge</span>
+  </div>
+  ${content}
+  <div style="margin-top:32px;padding-top:20px;border-top:1px solid #1e293b;font-size:12px;color:#475569">
+    © 2026 AI Business Concierge · <a href="${APP_URL}" style="color:#6366f1;text-decoration:none">aibizconcierge.uz</a>
+  </div>
+</div>`;
+}
+
+function emailBtn(href: string, label: string): string {
+  return `<a href="${href}" style="display:inline-block;padding:14px 28px;background:#6366f1;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;margin:20px 0;font-size:15px">${label} →</a>`;
+}
+
+// 2. Company registered (pending approval)
+async function sendCompanyRegisteredEmail(to: string, name: string, companyName: string): Promise<void> {
+  const html = emailLayout(`
+    <h2 style="color:#fff;margin-bottom:8px">Tabriklaymiz, ${name}!</h2>
+    <p style="color:#94a3b8;line-height:1.6"><strong style="color:#a5b4fc">${companyName}</strong> kompaniyangiz muvaffaqiyatli ro'yxatdan o'tdi.</p>
+    <div style="background:#1e293b;border-radius:12px;padding:20px;margin:20px 0">
+      <p style="color:#cbd5e1;margin:0;font-size:14px">⏳ <strong>Holat:</strong> Admin ko'rib chiqmoqda</p>
+      <p style="color:#64748b;margin:8px 0 0;font-size:13px">Odatda 1–2 ish kuni ichida javob beramiz. Tasdiqlangach email orqali xabardor qilinasiz.</p>
+    </div>
+    <p style="color:#64748b;font-size:13px">Savol bo'lsa: <a href="mailto:support@aibizconcierge.uz" style="color:#6366f1">support@aibizconcierge.uz</a></p>
+  `);
+  await sendResendEmail(to, "Ro'yxatdan o'tish qabul qilindi — AI Business Concierge", html, "company_registered");
+}
+
+// 3. Company rejected
+async function sendCompanyRejectedEmail(to: string, name: string, reason?: string): Promise<void> {
+  const html = emailLayout(`
+    <h2 style="color:#fff;margin-bottom:8px">Hurmatli ${name},</h2>
+    <p style="color:#94a3b8;line-height:1.6">Afsuski, murojaatingiz ko'rib chiqildi va hozircha qabul qilinmadi.</p>
+    ${reason ? `<div style="background:#1e293b;border-radius:12px;padding:16px;margin:16px 0"><p style="color:#94a3b8;margin:0;font-size:14px"><strong>Sabab:</strong> ${reason}</p></div>` : ""}
+    <p style="color:#94a3b8;line-height:1.6">Agar savol yoki murojaat bo'lsa, biz bilan bog'laning:</p>
+    ${emailBtn(`${APP_URL}/contact`, "Qayta murojaat qilish")}
+    <p style="color:#64748b;font-size:13px">Yoki: <a href="mailto:support@aibizconcierge.uz" style="color:#6366f1">support@aibizconcierge.uz</a></p>
+  `);
+  await sendResendEmail(to, "Murojaat holati — AI Business Concierge", html, "company_rejected");
+}
+
+// 4. Company approved (tenant active)
+async function sendCompanyApprovedEmail(to: string, name: string, companyName: string): Promise<void> {
+  const html = emailLayout(`
+    <h2 style="color:#fff;margin-bottom:8px">🎉 Kompaniya tasdiqlandi!</h2>
+    <p style="color:#94a3b8;line-height:1.6">Hurmatli <strong style="color:#fff">${name}</strong>, <strong style="color:#a5b4fc">${companyName}</strong> kompaniyangiz admin tomonidan tasdiqlandi.</p>
+    <p style="color:#94a3b8;line-height:1.6">Endi platforma imkoniyatlaridan to'liq foydalanishingiz mumkin: xodimlar qo'shish, vazifalar, AI yordamchi va boshqalar.</p>
+    ${emailBtn(`${APP_URL}/app`, "Dashboardga kirish")}
+  `);
+  await sendResendEmail(to, "Kompaniya tasdiqlandi — AI Business Concierge", html, "company_approved");
+}
+
+// 5. Employee invite (supplemental branded)
+async function sendEmployeeInviteEmail(to: string, name: string, companyName: string, setupLink: string): Promise<void> {
+  const html = emailLayout(`
+    <h2 style="color:#fff;margin-bottom:8px">Assalomu alaykum, ${name}!</h2>
+    <p style="color:#94a3b8;line-height:1.6"><strong style="color:#a5b4fc">${companyName}</strong> kompaniyasi sizni AI Business Concierge platformasiga qo'shdi.</p>
+    <p style="color:#94a3b8;line-height:1.6">Akkauntingizni sozlash uchun quyidagi tugmani bosing va parol o'rnating:</p>
+    ${emailBtn(setupLink, "Akkauntni sozlash")}
+    <p style="color:#64748b;font-size:13px;margin-top:8px">Havola <strong>48 soat</strong> davomida amal qiladi.<br>Agar siz bu taklifni kutmagan bo'lsangiz, ushbu emailni e'tiborsiz qoldiring.</p>
+  `);
+  await sendResendEmail(to, `${companyName} — Platformaga taklif`, html, "employee_invite");
+}
+
+// 6. Employee welcome (after setup-complete)
+async function sendEmployeeWelcomeEmail(to: string, name: string, companyName: string): Promise<void> {
+  const html = emailLayout(`
+    <h2 style="color:#fff;margin-bottom:8px">Xush kelibsiz, ${name}! 👋</h2>
+    <p style="color:#94a3b8;line-height:1.6">Akkauntingiz muvaffaqiyatli sozlandi. Siz <strong style="color:#a5b4fc">${companyName}</strong> platformasining to'liq a'zosisiz.</p>
+    <div style="background:#1e293b;border-radius:12px;padding:20px;margin:20px 0">
+      <p style="color:#a5b4fc;margin:0 0 12px;font-weight:600;font-size:14px">Nima qila olasiz:</p>
+      <ul style="color:#94a3b8;font-size:14px;line-height:1.8;margin:0;padding-left:20px">
+        <li>Vazifalar va loyihalar boshqaruvi</li>
+        <li>AI yordamchi bilan ishlash</li>
+        <li>Xabarlar va bildirishnomalar</li>
+      </ul>
+    </div>
+    ${emailBtn(`${APP_URL}/app`, "Dashboardga kirish")}
+  `);
+  await sendResendEmail(to, "Xush kelibsiz — AI Business Concierge", html, "employee_welcome");
+}
+
+// 7. Admin notification: new company registration
+async function sendAdminNewRegistrationEmail(companyName: string, leaderName: string, leaderEmail: string, tenantId: string): Promise<void> {
+  if (!ADMIN_NOTIFY_EMAIL) return;
+  const html = emailLayout(`
+    <h2 style="color:#fff;margin-bottom:8px">Yangi kompaniya ro'yxatdan o'tdi</h2>
+    <div style="background:#1e293b;border-radius:12px;padding:20px;margin:20px 0">
+      <p style="color:#cbd5e1;margin:0 0 8px;font-size:14px"><strong>Kompaniya:</strong> ${companyName}</p>
+      <p style="color:#cbd5e1;margin:0 0 8px;font-size:14px"><strong>Rahbar:</strong> ${leaderName}</p>
+      <p style="color:#cbd5e1;margin:0 0 8px;font-size:14px"><strong>Email:</strong> ${leaderEmail}</p>
+      <p style="color:#64748b;margin:0;font-size:13px">Tenant ID: ${tenantId}</p>
+    </div>
+    <p style="color:#94a3b8;line-height:1.6">Admin panelida ko'rib chiqing va tasdiqlang yoki rad eting.</p>
+    ${emailBtn(`${APP_URL}/app`, "Admin panelga kirish")}
+  `);
+  await sendResendEmail(ADMIN_NOTIFY_EMAIL, `Yangi ro'yxatdan o'tish: ${companyName}`, html, "admin_new_reg");
 }
 
 const registerRoutes = (prefix: string) => {
@@ -1624,6 +1741,13 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 500, "DB_ERROR", `Tenantga bog'lashda xato: ${linkError.message}`);
     }
 
+    // Supplemental branded invite email (non-blocking, alongside Supabase's native email)
+    if (mode === "invite") {
+      const { data: tenantRow } = await supabase.from("tenants").select("name").eq("id", tenantId).single();
+      const setupLink = `${appUrl}/setup-account`;
+      sendEmployeeInviteEmail(email, full_name.trim(), tenantRow?.name ?? "Kompaniya", setupLink);
+    }
+
     return success(c, {
       user_id: userId,
       tenant_id: tenantId,
@@ -1650,6 +1774,19 @@ const registerRoutes = (prefix: string) => {
     if (error) {
       console.warn("[setup-complete] DB update error:", error.message);
     }
+
+    // Send welcome email (non-blocking)
+    if (user.email) {
+      const { data: utRow } = await supabase
+        .from("user_tenants")
+        .select("full_name, tenants(name)")
+        .eq("user_id", userId)
+        .limit(1).single();
+      const name = (utRow?.full_name ?? user.user_metadata?.full_name ?? user.email) as string;
+      const companyName = ((utRow as any)?.tenants?.name ?? "Kompaniya") as string;
+      sendEmployeeWelcomeEmail(user.email, name, companyName);
+    }
+
     return success(c, { updated: !error });
   });
 
@@ -2582,6 +2719,14 @@ const registerRoutes = (prefix: string) => {
       }
     }
 
+    if (body.status === "rejected") {
+      const { data: contact } = await supabase
+        .from("contact_requests").select("email,full_name").eq("id", id).single();
+      if (contact?.email) {
+        sendCompanyRejectedEmail(contact.email, contact.full_name ?? "Hurmatli mijoz", body.admin_note as string | undefined);
+      }
+    }
+
     const { data, error } = await supabase
       .from("contact_requests").update(update).eq("id", id).select().single();
     if (error) return failure(c, 500, "DB_ERROR", error.message);
@@ -2706,10 +2851,57 @@ const registerRoutes = (prefix: string) => {
     }).eq("id", contact.id);
 
     console.info(`[register] company=${companyName} tenant=${tenantId} user=${userId}`);
+
+    // Non-blocking emails
+    sendCompanyRegisteredEmail(contact.email, contact.full_name ?? "Hurmatli rahbar", companyName);
+    sendAdminNewRegistrationEmail(companyName, contact.full_name ?? "—", contact.email, tenantId);
+
     return c.json({ data: {
       tenant_id: tenantId,
       message:   "Ro'yxatdan o'tish muvaffaqiyatli. Admin tasdiqlashini kuting.",
     }}, 201);
+  });
+
+  // ─── PATCH /v1/admin/tenants/:id/status — kompaniyani tasdiqlash/bloklash ──
+  app.patch(`${prefix}/admin/tenants/:id/status`, async (c) => {
+    const auth = c.req.header("authorization");
+    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+
+    const { data: ut } = await supabase
+      .from("user_tenants").select("role").eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
+    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+
+    const tenantId = c.req.param("id");
+    const body = await c.req.json().catch(() => ({}));
+    const allowed = ["active", "suspended", "blocked"];
+    if (!allowed.includes(body.status)) {
+      return failure(c, 400, "VALIDATION_ERROR", "Status: active | suspended | blocked.");
+    }
+
+    const { data: tenantRow, error: fetchErr } = await supabase
+      .from("tenants").select("name, contact_email").eq("id", tenantId).single();
+    if (fetchErr || !tenantRow) return failure(c, 404, "NOT_FOUND", "Tenant topilmadi.");
+
+    const { error } = await supabase
+      .from("tenants").update({ status: body.status }).eq("id", tenantId);
+    if (error) return failure(c, 500, "DB_ERROR", error.message);
+
+    // company_approved email
+    if (body.status === "active" && tenantRow.contact_email) {
+      const { data: leaderRow } = await supabase
+        .from("user_tenants")
+        .select("full_name")
+        .eq("tenant_id", tenantId)
+        .in("role", ["leader", "company_admin"])
+        .limit(1).single();
+      const leaderName = leaderRow?.full_name ?? "Hurmatli rahbar";
+      sendCompanyApprovedEmail(tenantRow.contact_email, leaderName, tenantRow.name);
+    }
+
+    return success(c, { tenant_id: tenantId, status: body.status });
   });
 };
 
