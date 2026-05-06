@@ -78,7 +78,7 @@ export function LoginPage() {
             {translate("auth.loginSubtitle")}
           </h2>
           <p className="text-slate-400 mb-8 leading-relaxed">
-            O'zbekiston biznes uchun yagona AI yordamchi platformasi.
+            {translate("auth.platformSubtitle")}
           </p>
           <ul className="space-y-4">
             {(["auth.benefit1", "auth.benefit2", "auth.benefit3"] as const).map((k) => (
@@ -107,24 +107,17 @@ export function LoginPage() {
           </Link>
 
           {/* Locale switcher */}
-          <div className="flex gap-1 rounded-full bg-white/5 p-1 border border-white/10">
+          <select
+            value={locale}
+            onChange={(e) => setLocale(e.target.value as Locale)}
+            className="rounded-lg bg-white/5 border border-white/10 text-white/70 text-xs px-2.5 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer hover:border-white/20 transition-colors"
+          >
             {LOCALE_OPTIONS.map((opt) => (
-              <button
-                key={opt.id}
-                onClick={() => setLocale(opt.id)}
-                aria-label={opt.label}
-                aria-pressed={locale === opt.id}
-                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
-                  locale === opt.id
-                    ? "bg-indigo-500 text-white shadow-sm"
-                    : "text-white/50 hover:text-white hover:bg-white/10"
-                }`}
-              >
-                <span className="hidden sm:inline">{opt.flag} {opt.label}</span>
-                <span className="sm:hidden">{opt.flag}</span>
-              </button>
+              <option key={opt.id} value={opt.id} className="bg-slate-900 text-white">
+                {opt.flag} {opt.label}
+              </option>
             ))}
-          </div>
+          </select>
         </div>
 
         {/* Form area */}

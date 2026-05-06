@@ -14,9 +14,6 @@ const LOCALE_FLAGS: Record<LandingLocale, string> = {
   ja: "🇯🇵 日本語",
 };
 
-const LOCALE_FLAGS_SHORT: Record<LandingLocale, string> = {
-  uz: "🇺🇿", ru: "🇷🇺", en: "🇬🇧", ja: "🇯🇵",
-};
 
 type Props = {
   locale: LandingLocale;
@@ -41,24 +38,17 @@ export function LandingNavbar({ locale, onLocaleChange, t }: Props) {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex gap-1 rounded-full bg-white/10 p-1 border border-white/10">
+          <select
+            value={locale}
+            onChange={(e) => onLocaleChange(e.target.value as LandingLocale)}
+            className="rounded-lg bg-white/10 border border-white/10 text-white/80 text-xs px-2.5 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer hover:border-white/20 transition-colors"
+          >
             {SUPPORTED_LOCALES.map((l) => (
-              <button
-                key={l}
-                onClick={() => onLocaleChange(l)}
-                aria-label={LOCALE_FLAGS[l]}
-                aria-pressed={locale === l}
-                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
-                  locale === l
-                    ? "bg-indigo-500 text-white shadow-sm"
-                    : "text-white/60 hover:text-white hover:bg-white/10"
-                }`}
-              >
-                <span className="hidden sm:inline">{LOCALE_FLAGS[l]}</span>
-                <span className="sm:hidden">{LOCALE_FLAGS_SHORT[l]}</span>
-              </button>
+              <option key={l} value={l} className="bg-slate-900 text-white">
+                {LOCALE_FLAGS[l]}
+              </option>
             ))}
-          </div>
+          </select>
           <a
             href="#company-onboarding"
             className="hidden sm:inline-flex px-4 py-2 rounded-lg text-sm font-medium border border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 transition-colors"

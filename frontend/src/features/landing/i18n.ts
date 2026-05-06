@@ -154,7 +154,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
         {
           icon: "🇺🇿",
           title: "O'zbekiston qonunlari — 2026",
-          desc: "Soliq kodeksi, Mehnat kodeksi, litsenziya qoidalari — barcha yangi o'zgarishlar bilan. ChatGPT bu bilmaydi.",
+          desc: "Soliq kodeksi, Mehnat kodeksi, litsenziya qoidalari — barcha yangi o'zgarishlar bilan.",
         },
         {
           icon: "⚡",
@@ -169,7 +169,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
         {
           icon: "🌐",
           title: "4 tilda — xalqaro kompaniyalar uchun",
-          desc: "O'zbek, rus, ingliz, yapon tili. O'zbekistondagi yapon, xitoy, turk kompaniyalari o'z tilida foydalana oladi.",
+          desc: "O'zbek, rus, ingliz, yapon tili. O'zbekistondagi xalqaro kompaniyalar istalgan tilda foydalana oladi.",
         },
         {
           icon: "📱",
@@ -461,7 +461,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
         {
           icon: "🇺🇿",
           title: "Законодательство Узбекистана — 2026",
-          desc: "Налоговый кодекс, Трудовой кодекс, правила лицензирования — со всеми последними изменениями. ChatGPT этого не знает.",
+          desc: "Налоговый кодекс, Трудовой кодекс, правила лицензирования — со всеми последними изменениями.",
         },
         {
           icon: "⚡",
@@ -476,7 +476,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
         {
           icon: "🌐",
           title: "4 языка — для международных компаний",
-          desc: "Узбекский, русский, английский, японский. Японские, китайские, турецкие компании в Узбекистане получают ответы на родном языке.",
+          desc: "Узбекский, русский, английский, японский. Международные компании в Узбекистане работают на удобном языке.",
         },
         {
           icon: "📱",
@@ -768,7 +768,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
         {
           icon: "🇺🇿",
           title: "Uzbekistan Law — 2026",
-          desc: "Tax Code, Labor Code, licensing rules — with all recent changes. ChatGPT doesn't know this.",
+          desc: "Tax Code, Labor Code, licensing rules — with all recent changes.",
         },
         {
           icon: "⚡",
@@ -783,7 +783,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
         {
           icon: "🌐",
           title: "4 languages — for international companies",
-          desc: "Uzbek, Russian, English, Japanese. Japanese, Chinese, Turkish companies in Uzbekistan get answers in their language.",
+          desc: "Uzbek, Russian, English, Japanese. International companies in Uzbekistan work in their preferred language.",
         },
         {
           icon: "📱",
@@ -1075,7 +1075,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
         {
           icon: "🇺🇿",
           title: "ウズベキスタン法律 — 2026年版",
-          desc: "税法・労働法・ライセンス規則 — 最新の変更点を含む。ChatGPTにはわからない情報。",
+          desc: "税法・労働法・ライセンス規則 — 最新の変更点を含む。",
         },
         {
           icon: "⚡",
@@ -1090,7 +1090,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
         {
           icon: "🌐",
           title: "4言語 — 外資企業向け",
-          desc: "ウズベク語・ロシア語・英語・日本語。ウズベキスタンの日本・中国・トルコ企業が母国語で回答を得られる。",
+          desc: "ウズベク語・ロシア語・英語・日本語。ウズベキスタンの外資企業が希望言語でご利用いただけます。",
         },
         {
           icon: "📱",
