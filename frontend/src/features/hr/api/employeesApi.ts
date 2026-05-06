@@ -131,6 +131,22 @@ export type HardDeleteResult = {
   auth_user_deleted: boolean;
 };
 
+export async function resendInvite(tenantId: string, userId: string): Promise<void> {
+  await apiRequest(`/tenants/${tenantId}/members/${userId}/resend-invite`, {
+    method: "POST",
+    body: JSON.stringify({}),
+    tenantId,
+  });
+}
+
+export async function confirmEmployee(tenantId: string, userId: string): Promise<void> {
+  await apiRequest(`/tenants/${tenantId}/members/${userId}/confirm`, {
+    method: "POST",
+    body: JSON.stringify({}),
+    tenantId,
+  });
+}
+
 export async function hardDeleteEmployee(
   tenantId: string,
   userId: string,

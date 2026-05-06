@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { useAuthContext } from "../context/AuthContext";
 import { supabase } from "../../../shared/lib/supabase";
+import { notifySetupComplete } from "../api/authApi";
 import { LocaleSelect } from "../../../shared/components/LocaleSelect";
 
 export function SetupAccountPage() {
@@ -90,7 +91,11 @@ export function SetupAccountPage() {
       });
       if (updateError) throw updateError;
 
-      // Muvaffaqiyat — dashboard'ga
+      // Backend ga xabar berish: xodim setup tugadi → status = password_set
+      await notifySetupComplete().catch(() => {
+        // Non-blocking: backend miss bo'lsa ham login ishlayveradi
+      });
+
       navigate("/app", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : translate("setup.errorGeneric"));

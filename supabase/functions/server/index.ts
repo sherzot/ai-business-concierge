@@ -1611,6 +1611,7 @@ const registerRoutes = (prefix: string) => {
         tenant_id: tenantId,
         role,
         full_name: full_name.trim(),
+        status: mode === "invite" ? "password_pending" : "active",
       });
 
     if (linkError) {
@@ -1630,6 +1631,88 @@ const registerRoutes = (prefix: string) => {
       full_name: full_name.trim(),
       status: actionMessage,
     });
+  });
+
+  // POST /auth/setup-complete — xodim parol va ma'lumotlarini to'ldirdi → password_set
+  app.post(`${prefix}/auth/setup-complete`, async (c) => {
+    const auth = c.req.header("authorization") ?? "";
+    if (!auth.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token yaroqsiz.");
+    const userId = user.id;
+
+    const { error } = await supabase
+      .from("user_tenants")
+      .update({ status: "password_set" })
+      .eq("user_id", userId)
+      .in("status", ["password_pending"]);
+
+    if (error) {
+      console.warn("[setup-complete] DB update error:", error.message);
+    }
+    return success(c, { updated: !error });
+  });
+
+  // POST /tenants/:id/members/:userId/resend-invite — taklifni qayta yuborish
+  app.post(`${prefix}/tenants/:id/members/:userId/resend-invite`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const tenantId = c.req.param("id");
+    const targetUserId = c.req.param("userId");
+    if (tenantId !== ctx.tenantId) return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
+
+    const { data: callerRow } = await supabase
+      .from("user_tenants").select("role")
+      .eq("user_id", (ctx as any).userId).eq("tenant_id", tenantId).maybeSingle();
+    const callerRole = callerRow?.role ?? "";
+    if (!["leader", "hr", "super_admin"].includes(callerRole)) {
+      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat HR yoki Rahbar taklif yuboroladi.");
+    }
+
+    const { data: userRes, error: userErr } = await supabase.auth.admin.getUserById(targetUserId);
+    if (userErr || !userRes?.user) return failure(c, 404, "NOT_FOUND", "Foydalanuvchi topilmadi.");
+
+    const email = userRes.user.email;
+    if (!email) return failure(c, 422, "NO_EMAIL", "Foydalanuvchi emaili yo'q.");
+
+    const appUrl = Deno.env.get("APP_URL") ?? c.req.header("origin") ?? "https://ai-business-concierge1.netlify.app";
+
+    const { error: inviteErr } = await supabase.auth.admin.inviteUserByEmail(email, {
+      data: userRes.user.user_metadata ?? {},
+      redirectTo: `${appUrl}/setup-account`,
+    });
+    if (inviteErr) return failure(c, 500, "INVITE_ERROR", `Taklif yuborib bo'lmadi: ${inviteErr.message}`);
+
+    return success(c, { status: "invite_resent", email });
+  });
+
+  // POST /tenants/:id/members/:userId/confirm — HR xodimni tasdiqlaydi → active
+  app.post(`${prefix}/tenants/:id/members/:userId/confirm`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const tenantId = c.req.param("id");
+    const targetUserId = c.req.param("userId");
+    if (tenantId !== ctx.tenantId) return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
+
+    const { data: callerRow } = await supabase
+      .from("user_tenants").select("role")
+      .eq("user_id", (ctx as any).userId).eq("tenant_id", tenantId).maybeSingle();
+    const callerRole = callerRow?.role ?? "";
+    if (!["leader", "hr", "super_admin"].includes(callerRole)) {
+      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat HR yoki Rahbar tasdiqlashga ruxsatga ega.");
+    }
+
+    const { error } = await supabase
+      .from("user_tenants")
+      .update({ status: "active" })
+      .eq("user_id", targetUserId)
+      .eq("tenant_id", tenantId)
+      .in("status", ["password_set", "password_pending"]);
+
+    if (error) return failure(c, 500, "DB_ERROR", `Tasdiqlashda xato: ${error.message}`);
+    return success(c, { confirmed: true, user_id: targetUserId });
   });
 
   app.get(`${prefix}/tasks`, async (c) => {

@@ -14,7 +14,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { Pencil, UserMinus, RotateCcw, Trash2, X, AlertTriangle, UserPlus, KeyRound } from "lucide-react";
+import { Pencil, UserMinus, RotateCcw, Trash2, X, AlertTriangle, UserPlus, KeyRound, SendHorizonal, CheckCircle2 } from "lucide-react";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { useAuthContext } from "../../auth/context/AuthContext";
 import {
@@ -24,6 +24,8 @@ import {
   restoreEmployee,
   hardDeleteEmployee,
   resetEmployeePassword,
+  resendInvite,
+  confirmEmployee,
   type Employee,
   type EmployeeRole,
   type EmployeeStatus,
@@ -202,6 +204,40 @@ export function EmployeesPage({ tenant, onAddEmployee }: Props) {
                             <div className="inline-flex gap-1 flex-wrap justify-end">
                               {tab === "active" && (
                                 <>
+                                  {/* password_pending: taklif kutilmoqda */}
+                                  {emp.status === "password_pending" && (
+                                    <button
+                                      disabled={busyId === emp.id}
+                                      onClick={async () => {
+                                        setBusyId(emp.id);
+                                        try { await resendInvite(tenant.id, emp.id); }
+                                        catch (e) { setError(e instanceof Error ? e.message : "Xato"); }
+                                        finally { setBusyId(null); }
+                                      }}
+                                      className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-sky-700 hover:bg-sky-50 disabled:opacity-50"
+                                      title={translate("employees.list.resendInvite")}
+                                    >
+                                      <SendHorizonal size={14} />
+                                      {translate("employees.list.resendInvite")}
+                                    </button>
+                                  )}
+                                  {/* password_set: xodim parol qo'ydi, HR tasdiqlash kerak */}
+                                  {emp.status === "password_set" && (
+                                    <button
+                                      disabled={busyId === emp.id}
+                                      onClick={async () => {
+                                        setBusyId(emp.id);
+                                        try { await confirmEmployee(tenant.id, emp.id); await reload(); }
+                                        catch (e) { setError(e instanceof Error ? e.message : "Xato"); }
+                                        finally { setBusyId(null); }
+                                      }}
+                                      className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+                                      title={translate("employees.list.confirm")}
+                                    >
+                                      <CheckCircle2 size={14} />
+                                      {translate("employees.list.confirm")}
+                                    </button>
+                                  )}
                                   <button
                                     onClick={() => setEditing(emp)}
                                     className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50"
@@ -343,6 +379,7 @@ function StatusBadge({
     active:           { bg: "bg-emerald-50", text: "text-emerald-700", key: "employees.list.statusActive" },
     terminated:       { bg: "bg-slate-100",  text: "text-slate-600",   key: "employees.list.statusTerminated" },
     password_pending: { bg: "bg-amber-50",   text: "text-amber-700",   key: "employees.list.statusPending" },
+    password_set:     { bg: "bg-sky-50",     text: "text-sky-700",     key: "employees.list.statusPasswordSet" },
     blocked:          { bg: "bg-rose-50",    text: "text-rose-700",    key: "employees.list.statusBlocked" },
   };
   const c = cfg[status] ?? cfg.active;
