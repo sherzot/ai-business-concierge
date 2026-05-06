@@ -14,7 +14,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { Pencil, UserMinus, RotateCcw, Trash2, X, AlertTriangle } from "lucide-react";
+import { Pencil, UserMinus, RotateCcw, Trash2, X, AlertTriangle, UserPlus, KeyRound } from "lucide-react";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { useAuthContext } from "../../auth/context/AuthContext";
 import {
@@ -23,13 +23,14 @@ import {
   terminateEmployee,
   restoreEmployee,
   hardDeleteEmployee,
+  resetEmployeePassword,
   type Employee,
   type EmployeeRole,
   type EmployeeStatus,
 } from "../api/employeesApi";
 
 type Tenant = { id: string; name: string };
-type Props = { tenant: Tenant };
+type Props = { tenant: Tenant; onAddEmployee?: () => void };
 
 const ROLE_OPTIONS: EmployeeRole[] = [
   "leader",
@@ -39,7 +40,7 @@ const ROLE_OPTIONS: EmployeeRole[] = [
   "employee",
 ];
 
-export function EmployeesPage({ tenant }: Props) {
+export function EmployeesPage({ tenant, onAddEmployee }: Props) {
   const { translate } = useI18n();
   const { currentTenant, profile } = useAuthContext();
   const callerRole = currentTenant?.role;
@@ -55,12 +56,10 @@ export function EmployeesPage({ tenant }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  // Edit state
-  const [editing, setEditing] = useState<Employee | null>(null);
-  // Termination state
+  const [editing, setEditing]       = useState<Employee | null>(null);
   const [terminating, setTerminating] = useState<Employee | null>(null);
-  // Hard delete state (tizimdan butunlay)
   const [hardDeleting, setHardDeleting] = useState<Employee | null>(null);
+  const [resettingPwd, setResettingPwd] = useState<Employee | null>(null);
 
   async function reload(forStatus: EmployeeStatus = tab) {
     setLoading(true);
@@ -94,11 +93,22 @@ export function EmployeesPage({ tenant }: Props) {
             {translate("employees.list.subtitle")}
           </p>
         </div>
-        {!canManage && (
-          <span className="text-xs rounded-full bg-amber-50 text-amber-700 px-3 py-1">
-            {translate("employees.list.readOnlyBadge")}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {!canManage && (
+            <span className="text-xs rounded-full bg-amber-50 text-amber-700 px-3 py-1">
+              {translate("employees.list.readOnlyBadge")}
+            </span>
+          )}
+          {canManage && onAddEmployee && (
+            <button
+              onClick={onAddEmployee}
+              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors shadow-sm"
+            >
+              <UserPlus size={16} />
+              {translate("employees.title")}
+            </button>
+          )}
+        </div>
       </header>
 
       {/* Tabs */}
@@ -138,6 +148,7 @@ export function EmployeesPage({ tenant }: Props) {
                   <th className="px-4 py-3 text-left font-semibold">{translate("employees.list.colName")}</th>
                   <th className="px-4 py-3 text-left font-semibold">{translate("employees.list.colEmail")}</th>
                   <th className="px-4 py-3 text-left font-semibold">{translate("employees.list.colRole")}</th>
+                  <th className="px-4 py-3 text-left font-semibold">{translate("employees.list.colStatus")}</th>
                   {tab === "terminated" && (
                     <>
                       <th className="px-4 py-3 text-left font-semibold">{translate("employees.list.colTerminatedAt")}</th>
@@ -167,6 +178,9 @@ export function EmployeesPage({ tenant }: Props) {
                         <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
                           {translate(`auth.role.${emp.role}`)}
                         </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={emp.status} translate={translate} />
                       </td>
                       {tab === "terminated" && (
                         <>
@@ -203,6 +217,13 @@ export function EmployeesPage({ tenant }: Props) {
                                   >
                                     <UserMinus size={14} />
                                     {translate("employees.list.terminate")}
+                                  </button>
+                                  <button
+                                    onClick={() => setResettingPwd(emp)}
+                                    className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100"
+                                    title={translate("employees.list.resetPassword")}
+                                  >
+                                    <KeyRound size={14} />
                                   </button>
                                 </>
                               )}
@@ -279,6 +300,17 @@ export function EmployeesPage({ tenant }: Props) {
         />
       )}
 
+      {/* Reset password modal */}
+      {resettingPwd && (
+        <ResetPwdModal
+          employee={resettingPwd}
+          onClose={() => setResettingPwd(null)}
+          onDone={() => setResettingPwd(null)}
+          tenantId={tenant.id}
+          translate={translate}
+        />
+      )}
+
       {/* Hard delete modal — adashib kiritilgan ma'lumot uchun */}
       {hardDeleting && (
         <HardDeleteModal
@@ -299,6 +331,104 @@ export function EmployeesPage({ tenant }: Props) {
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
+
+function StatusBadge({
+  status,
+  translate,
+}: {
+  status: EmployeeStatus;
+  translate: (k: string) => string;
+}) {
+  const cfg: Record<string, { bg: string; text: string; key: string }> = {
+    active:           { bg: "bg-emerald-50", text: "text-emerald-700", key: "employees.list.statusActive" },
+    terminated:       { bg: "bg-slate-100",  text: "text-slate-600",   key: "employees.list.statusTerminated" },
+    password_pending: { bg: "bg-amber-50",   text: "text-amber-700",   key: "employees.list.statusPending" },
+    blocked:          { bg: "bg-rose-50",    text: "text-rose-700",    key: "employees.list.statusBlocked" },
+  };
+  const c = cfg[status] ?? cfg.active;
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${c.bg} ${c.text}`}>
+      {translate(c.key)}
+    </span>
+  );
+}
+
+function ResetPwdModal({
+  employee,
+  onClose,
+  onDone,
+  tenantId,
+  translate,
+}: {
+  employee: Employee;
+  onClose: () => void;
+  onDone: () => void;
+  tenantId: string;
+  translate: (k: string) => string;
+}) {
+  const [pending, setPending] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function sendLink() {
+    setPending(true);
+    setError(null);
+    try {
+      await resetEmployeePassword(tenantId, employee.id, "link");
+      setSuccess(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : translate("employees.errorGeneric"));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <ModalShell title={translate("employees.list.resetPassword")} onClose={onClose}>
+      {success ? (
+        <div className="space-y-4">
+          <p className="text-sm text-emerald-700 bg-emerald-50 rounded-lg px-4 py-3">
+            {translate("employees.list.resetPasswordSent")} {employee.email}
+          </p>
+          <div className="flex justify-end">
+            <button
+              onClick={onDone}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+            >
+              {translate("common.save").replace("Saqlash", "OK").replace("Сохранить", "OK").replace("Save", "OK").replace("保存", "OK")}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <p className="text-sm text-slate-700">
+            {translate("employees.list.resetPasswordConfirm")}{" "}
+            <span className="font-medium">{employee.email}</span>
+          </p>
+          {error && (
+            <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>
+          )}
+          <div className="flex justify-end gap-2 pt-2">
+            <button
+              onClick={onClose}
+              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+            >
+              {translate("employees.edit.cancel")}
+            </button>
+            <button
+              disabled={pending}
+              onClick={sendLink}
+              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:bg-slate-300"
+            >
+              <KeyRound size={14} />
+              {pending ? translate("employees.submitting") : translate("employees.list.resetPasswordSend")}
+            </button>
+          </div>
+        </div>
+      )}
+    </ModalShell>
+  );
+}
 
 function TabButton({
   active,

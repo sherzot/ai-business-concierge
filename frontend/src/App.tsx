@@ -56,8 +56,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./shared/ui/dropdown-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "./shared/ui/popover";
-import type { Locale } from "./app/i18n";
+import { LocaleSelect } from "./shared/components/LocaleSelect";
 import { getMembers } from "./features/tasks/api/tasksApi";
 import { getTasks } from "./features/tasks/api/tasksApi";
 import { getNotifications } from "./features/notifications/api/notificationsApi";
@@ -185,7 +184,7 @@ export default function App() {
       case "tasks":
         return <TasksPage tenant={tenant} />;
       case "hr":
-        return <EmployeesPage tenant={tenant} />;
+        return <EmployeesPage tenant={tenant} onAddEmployee={() => setActiveModule("hr-add-employee")} />;
       case "hr-cases":
         return <HrCasesPage tenant={tenant} />;
       case "hr-surveys":
@@ -402,34 +401,7 @@ export default function App() {
               />
               <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-500" size={16} />
             </div>
-            <Popover>
-              <PopoverTrigger asChild>
-                <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors" title="Til">
-                  <Globe size={20} />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-56">
-                <p className="text-sm font-medium text-slate-800 mb-3">{translate("common.language")}</p>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { id: "uz" as Locale, label: "O'zbek" },
-                    { id: "ru" as Locale, label: "Русский" },
-                    { id: "en" as Locale, label: "English" },
-                    { id: "ja" as Locale, label: "日本語" },
-                  ].map((opt) => (
-                    <button
-                      key={opt.id}
-                      onClick={() => setLocale(opt.id)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                        locale === opt.id ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
+            <LocaleSelect variant="light" />
             {currentTenant && <NotificationsDropdown tenantId={currentTenant.id} />}
             <button
               onClick={() => setIsAIChatOpen(true)}

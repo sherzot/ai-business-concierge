@@ -3,17 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { Sparkles, ArrowLeft, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { supabase } from "../../../shared/lib/supabase";
-import type { Locale } from "../../../app/i18n";
-
-const LOCALE_OPTIONS: { id: Locale; flag: string; label: string }[] = [
-  { id: "uz", flag: "🇺🇿", label: "O'zbek" },
-  { id: "ru", flag: "🇷🇺", label: "Русский" },
-  { id: "en", flag: "🇬🇧", label: "English" },
-  { id: "ja", flag: "🇯🇵", label: "日本語" },
-];
+import { LocaleSelect } from "../../../shared/components/LocaleSelect";
 
 export function ResetPasswordPage() {
-  const { translate, locale, setLocale } = useI18n();
+  const { translate } = useI18n();
   const navigate = useNavigate();
 
   const [password, setPassword]     = useState("");
@@ -79,17 +72,7 @@ export function ResetPasswordPage() {
           <ArrowLeft size={16} />
           {translate("auth.backToLogin")}
         </Link>
-        <select
-          value={locale}
-          onChange={(e) => setLocale(e.target.value as Locale)}
-          className="rounded-lg bg-white/5 border border-white/10 text-white/70 text-xs px-2.5 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer hover:border-white/20 transition-colors"
-        >
-          {LOCALE_OPTIONS.map((opt) => (
-            <option key={opt.id} value={opt.id} className="bg-slate-900 text-white">
-              {opt.flag} {opt.label}
-            </option>
-          ))}
-        </select>
+        <LocaleSelect variant="dark" />
       </div>
 
       {/* Content */}

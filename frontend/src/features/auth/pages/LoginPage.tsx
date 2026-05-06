@@ -4,14 +4,7 @@ import { Sparkles, CheckCircle2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useAuthContext } from "../context/AuthContext";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { useEffect } from "react";
-import type { Locale } from "../../../app/i18n";
-
-const LOCALE_OPTIONS: { id: Locale; flag: string; label: string }[] = [
-  { id: "uz", flag: "🇺🇿", label: "O'zbek" },
-  { id: "ru", flag: "🇷🇺", label: "Русский" },
-  { id: "en", flag: "🇬🇧", label: "English" },
-  { id: "ja", flag: "🇯🇵", label: "日本語" },
-];
+import { LocaleSelect } from "../../../shared/components/LocaleSelect";
 
 function accountStatusMessage(
   error: string | null,
@@ -29,7 +22,7 @@ function accountStatusMessage(
 }
 
 export function LoginPage() {
-  const { translate, locale, setLocale } = useI18n();
+  const { translate } = useI18n();
   const { session, loading, login, error } = useAuthContext();
   const navigate = useNavigate();
 
@@ -106,18 +99,7 @@ export function LoginPage() {
             {translate("auth.backToHome")}
           </Link>
 
-          {/* Locale switcher */}
-          <select
-            value={locale}
-            onChange={(e) => setLocale(e.target.value as Locale)}
-            className="rounded-lg bg-white/5 border border-white/10 text-white/70 text-xs px-2.5 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer hover:border-white/20 transition-colors"
-          >
-            {LOCALE_OPTIONS.map((opt) => (
-              <option key={opt.id} value={opt.id} className="bg-slate-900 text-white">
-                {opt.flag} {opt.label}
-              </option>
-            ))}
-          </select>
+          <LocaleSelect variant="dark" />
         </div>
 
         {/* Form area */}
