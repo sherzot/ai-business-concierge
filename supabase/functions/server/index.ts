@@ -2719,6 +2719,56 @@ const registerRoutes = (prefix: string) => {
     return success(c, data ?? []);
   });
 
+  // ─── GET /v1/admin/health — tizim holati (super_admin) ──────────────────────
+  app.get(`${prefix}/admin/health`, async (c) => {
+    const auth = c.req.header("authorization");
+    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    const { data: ut } = await supabase
+      .from("user_tenants").select("role").eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
+    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+
+    const t0 = Date.now();
+
+    const [
+      { count: totalTenants },
+      { count: activeTenants },
+      { count: pendingTenants },
+      { count: totalUsers },
+      { count: activeUsers },
+      { count: pendingUsers },
+      { count: totalContacts },
+      { count: pendingContacts },
+      { count: totalNotifications },
+      { count: unreadNotifications },
+    ] = await Promise.all([
+      supabase.from("tenants").select("*", { count: "exact", head: true }),
+      supabase.from("tenants").select("*", { count: "exact", head: true }).eq("status", "active"),
+      supabase.from("tenants").select("*", { count: "exact", head: true }).eq("status", "pending_approval"),
+      supabase.from("user_tenants").select("*", { count: "exact", head: true }),
+      supabase.from("user_tenants").select("*", { count: "exact", head: true }).eq("status", "active"),
+      supabase.from("user_tenants").select("*", { count: "exact", head: true }).eq("status", "password_pending"),
+      supabase.from("contact_requests").select("*", { count: "exact", head: true }),
+      supabase.from("contact_requests").select("*", { count: "exact", head: true }).in("status", ["new", "contacted"]),
+      supabase.from("notifications").select("*", { count: "exact", head: true }),
+      supabase.from("notifications").select("*", { count: "exact", head: true }).is("read_at", null),
+    ]);
+
+    const dbLatencyMs = Date.now() - t0;
+
+    return success(c, {
+      status: "ok",
+      checked_at: new Date().toISOString(),
+      db_latency_ms: dbLatencyMs,
+      tenants: { total: totalTenants ?? 0, active: activeTenants ?? 0, pending_approval: pendingTenants ?? 0 },
+      users: { total: totalUsers ?? 0, active: activeUsers ?? 0, pending_setup: pendingUsers ?? 0 },
+      contacts: { total: totalContacts ?? 0, needs_action: pendingContacts ?? 0 },
+      notifications: { total: totalNotifications ?? 0, unread: unreadNotifications ?? 0 },
+    });
+  });
+
   // ─── PATCH /v1/admin/contacts/:id/status ─────────────────────────────────
   app.patch(`${prefix}/admin/contacts/:id/status`, async (c) => {
     const auth = c.req.header("authorization");

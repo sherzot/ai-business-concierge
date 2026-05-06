@@ -10,6 +10,7 @@ import { LandingPage } from "../features/landing/pages/LandingPage";
 import { ContactPage } from "../features/landing/pages/ContactPage";
 import { RegisterCompanyPage } from "../features/landing/pages/RegisterCompanyPage";
 import { AdminContactsPage } from "../features/admin/pages/AdminContactsPage";
+import { AdminHealthPage } from "../features/admin/pages/AdminHealthPage";
 
 export const router = createBrowserRouter([
   { path: "/",               element: <LandingPage /> },
@@ -25,6 +26,14 @@ export const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <AdminContactsPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/admin/health",
+    element: (
+      <RequireAuth>
+        <AdminHealthPage />
       </RequireAuth>
     ),
   },
