@@ -75,6 +75,7 @@ CREATE TRIGGER employee_profiles_updated_at
 ALTER TABLE employee_profiles ENABLE ROW LEVEL SECURITY;
 
 -- super_admin / sub_admin — barcha kompaniyalar
+DROP POLICY IF EXISTS "employee_profiles_admin_all" ON employee_profiles;
 CREATE POLICY "employee_profiles_admin_all"
   ON employee_profiles FOR ALL
   USING (
@@ -91,6 +92,7 @@ CREATE POLICY "employee_profiles_admin_all"
   );
 
 -- company_admin / hr — o'z tenantlari
+DROP POLICY IF EXISTS "employee_profiles_hr_all" ON employee_profiles;
 CREATE POLICY "employee_profiles_hr_all"
   ON employee_profiles FOR ALL
   USING (
@@ -109,11 +111,13 @@ CREATE POLICY "employee_profiles_hr_all"
   );
 
 -- Xodim o'z profilini ko'radi (o'zgartira olmaydi)
+DROP POLICY IF EXISTS "employee_profiles_self_all" ON employee_profiles;
 CREATE POLICY "employee_profiles_self_select"
   ON employee_profiles FOR SELECT
   USING (user_id = auth.uid());
 
 -- Manager o'z bo'limining xodimlarini ko'radi
+DROP POLICY IF EXISTS "employee_profiles_manager_all" ON employee_profiles;
 CREATE POLICY "employee_profiles_manager_select"
   ON employee_profiles FOR SELECT
   USING (
