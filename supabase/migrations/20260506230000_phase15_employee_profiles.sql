@@ -111,13 +111,13 @@ CREATE POLICY "employee_profiles_hr_all"
   );
 
 -- Xodim o'z profilini ko'radi (o'zgartira olmaydi)
-DROP POLICY IF EXISTS "employee_profiles_self_all" ON employee_profiles;
+DROP POLICY IF EXISTS "employee_profiles_self_select" ON employee_profiles;
 CREATE POLICY "employee_profiles_self_select"
   ON employee_profiles FOR SELECT
   USING (user_id = auth.uid());
 
 -- Manager o'z bo'limining xodimlarini ko'radi
-DROP POLICY IF EXISTS "employee_profiles_manager_all" ON employee_profiles;
+DROP POLICY IF EXISTS "employee_profiles_manager_select" ON employee_profiles;
 CREATE POLICY "employee_profiles_manager_select"
   ON employee_profiles FOR SELECT
   USING (
