@@ -2,6 +2,59 @@
 
 Project development history, completed work, encountered errors, and their solutions.
 
+> **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek translation](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
+>
+> **Protocol (CLAUDE.md §...):** Every change is logged here and across the 4 translations.
+
+---
+
+## 2026-05-14 — Scale foundation: AI cost tracking + doc_chunks RAG + R-016..R-020
+
+### Context
+
+Implemented the urgent items from `docs/ai-business-concierge-scale-prompt.md` (2026-05-11). Audited the Phase 1.5 state and closed the remaining urgent gaps.
+
+### Done
+
+**1. DB migration `20260514000000_ai_usage_and_doc_vector.sql`:**
+- `ai_usage_logs` table — per AI call: tenant, user, endpoint, model, provider, complexity, prompt/completion tokens, cost_usd, cached, latency, trace_id. Generated `total_tokens` column. 3 indexes. RLS with tenant isolation + super_admin/sub_admin see everything.
+- `v_ai_usage_summary` view — daily tenant aggregate (for Admin dashboard).
+- `doc_chunks.embedding vector(1536)` column — for pgvector RAG.
+- `doc_chunks_embedding_idx` HNSW index (m=16, ef_construction=64).
+- `match_documents(query_embedding, threshold, count, tenant_id)` function — RAG search, security definer, search_path locked, execute granted only to authenticated/service_role.
+- Document_id and tenant_id indexes on `doc_chunks`.
+
+**2. REQUIREMENTS.md updated:**
+- R-016 HR Candidate Analysis (skeleton exists, full impl in Phase 2).
+- R-017 AI Rate Limiting (partial — in-memory `contactRateMap` + Telegram daily limit).
+- R-018 AI Cost Tracking (migration done — backend wiring next session).
+- R-019 Vector Search RAG (migration done — backend integration next session).
+- R-020 Admin Dashboard (super_admin/sub_admin: health, contacts, AI chat — Phase 4 expansion).
+
+**3. Verified existing state:**
+- Phase 1.5 — 5 migrations applied: contact_requests, tenant_company_info, roles_update (sub_admin/company_admin/accountant/manager), employee_profiles, employee_invites.
+- Backend admin endpoints in place: `/admin/contacts`, `/admin/health`, `/admin/ai/chat`, `/admin/contacts/:id/status`, `/admin/tenants/:id/status`.
+- Frontend admin pages with real implementations: `AdminContactsPage`, `AdminHealthPage`, `AdminAIChatPage` + `adminApi.ts`.
+- docs/ structure correct: `English/`, `Russian/`, `Uzbek/`, `日本語/` — each with DEVLOG.md and other translations.
+
+### Deferred (future)
+
+- Prompt caching middleware (scale-prompt Task 1.2) — Phase 1.5 wrap-up.
+- HR Candidate Analysis full impl — Phase 2 (per PLAN.md v3.0).
+- Backend wiring: insert into `ai_usage_logs` from `/v1/ai/chat` endpoint — next session (extract token usage from services/llm-router.ts).
+- Wire `match_documents()` into `POST /v1/docs/search` — next session.
+- Full admin debug/log UI (real-time Sentry, query EXPLAIN) — Phase 4.
+
+### Files
+- `supabase/migrations/20260514000000_ai_usage_and_doc_vector.sql` (new)
+- `docs/REQUIREMENTS.md` (R-016..R-020 added)
+- `docs/DEVLOG.md` (this entry)
+- `docs/{English,Russian,Uzbek,日本語}/DEVLOG.md` (sync translations)
+
+### Rationale
+
+Without `ai_usage_logs`, billing (Phase 2) cannot work — we can't allocate cost per tenant without per-call token attribution. Without `match_documents()`, the AI Concierge "search in my docs" tool falls back to `ILIKE` — low-quality results.
+
 ---
 
 ## 2026-05-06 — Phase 1.5 (4): B-027/B-028/B-029

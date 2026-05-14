@@ -2,6 +2,59 @@
 
 Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari.
 
+> **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [Uzbek](Uzbek/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
+>
+> **Protokol (CLAUDE.md §...):** Har bir o'zgarish bu faylga va 4 til tarjimaga yoziladi.
+
+---
+
+## 2026-05-14 — Scale fundament: AI cost tracking + doc_chunks RAG + R-016..R-020
+
+### Kontekst
+
+`docs/ai-business-concierge-scale-prompt.md` (2026-05-11) talablari bo'yicha "darhol" qilinishi kerak bo'lganlari amalga oshirildi. Phase 1.5 holatini tekshirish va etib bormagan urgent ishlarni yopish.
+
+### Bajarildi
+
+**1. DB migration `20260514000000_ai_usage_and_doc_vector.sql`:**
+- `ai_usage_logs` jadvali — har AI chaqiruv: tenant, user, endpoint, model, provider, complexity, prompt/completion tokens, cost_usd, cached, latency, trace_id. Generated column `total_tokens`. 3 ta index. RLS bilan tenant izolyatsiya + super_admin/sub_admin barchasini ko'radi
+- `v_ai_usage_summary` view — kunlik tenant agregat (Admin dashboard uchun)
+- `doc_chunks.embedding vector(1536)` ustun — pgvector RAG uchun
+- `doc_chunks_embedding_idx` HNSW index (m=16, ef_construction=64)
+- `match_documents(query_embedding, threshold, count, tenant_id)` funksiyasi — RAG search, security definer, search_path locked, faqat authenticated/service_role uchun execute
+- `doc_chunks` uchun document_id va tenant_id indekslari
+
+**2. REQUIREMENTS.md yangilandi:**
+- R-016 HR Candidate Analysis (skeleton mavjud, full impl Phase 2'da)
+- R-017 AI Rate Limiting (qisman done — in-memory `contactRateMap` + Telegram daily limit)
+- R-018 AI Cost Tracking (migration done — backend wiring keyingi sessiyada `/v1/ai/chat` endpoint'dan)
+- R-019 Vector Search RAG (migration done — backend integration keyingi sessiyada)
+- R-020 Admin Dashboard (super_admin/sub_admin uchun health, contacts, AI chat — Phase 4'da to'liq monitoring)
+
+**3. Hozirgi holat tekshirildi:**
+- Phase 1.5 5 ta migration applied: contact_requests, tenant_company_info, roles_update (sub_admin/company_admin/accountant/manager qo'shildi), employee_profiles, employee_invites
+- Backend admin endpoints mavjud: `/admin/contacts`, `/admin/health`, `/admin/ai/chat`, `/admin/contacts/:id/status`, `/admin/tenants/:id/status`
+- Frontend admin pages real impl: `AdminContactsPage`, `AdminHealthPage`, `AdminAIChatPage` + `adminApi.ts`
+- docs/ tuzilishi to'g'ri: `English/`, `Russian/`, `Uzbek/`, `日本語/` har birida DEVLOG.md + boshqa tarjimalar
+
+### Defer qilingan (kelajak)
+
+- Prompt caching middleware (`scale-prompt` Vazifa 1.2) — Phase 1.5 yakuni
+- HR Candidate Analysis full impl — Phase 2 (PLAN.md v3.0 bo'yicha)
+- Backend wiring: `/v1/ai/chat` endpoint'da `ai_usage_logs` ga INSERT — keyingi sessiya (services/llm-router.ts dan token usage olish)
+- `match_documents()` ni `POST /v1/docs/search` endpoint'iga ulash — keyingi sessiya
+- Full admin debug/log UI (real-time Sentry, query EXPLAIN) — Phase 4
+
+### Fayllar
+- `supabase/migrations/20260514000000_ai_usage_and_doc_vector.sql` (yangi)
+- `docs/REQUIREMENTS.md` (R-016..R-020 qo'shildi)
+- `docs/DEVLOG.md` (bu entry)
+- `docs/{English,Russian,Uzbek,日本語}/DEVLOG.md` (sinxron tarjima)
+
+### Sabab — nima uchun shu vazifalar darhol
+
+`ai_usage_logs` bo'lmasa billing (Phase 2) ishlay olmaydi — har AI chaqiruv qaysi tenantga tegishli ekanligini bilmasak, cost share qila olmaymiz. `match_documents()` bo'lmasa AI Concierge "Hujjatlarim ichidan top" tool'i `ILIKE` ishlatadi — natija sifati past.
+
 ---
 
 ## 2026-05-06 — Phase 1.5 (4): B-027/B-028/B-029

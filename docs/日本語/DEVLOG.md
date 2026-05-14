@@ -2,6 +2,59 @@
 
 プロジェクト開発履歴、完了した作業、遭遇したエラーとその解決策。
 
+> **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md)
+>
+> **プロトコル（CLAUDE.md §...）：** すべての変更はここおよび 4 言語の翻訳に記録される。
+
+---
+
+## 2026-05-14 — スケール基盤：AI コスト追跡 + doc_chunks RAG + R-016..R-020
+
+### コンテキスト
+
+`docs/ai-business-concierge-scale-prompt.md`（2026-05-11）の「至急」項目を実装。Phase 1.5 の状態を監査し、残った急務を解消。
+
+### 実施内容
+
+**1. DB マイグレーション `20260514000000_ai_usage_and_doc_vector.sql`：**
+- `ai_usage_logs` テーブル — 各 AI 呼び出し：tenant, user, endpoint, model, provider, complexity, prompt/completion トークン, cost_usd, cached, latency, trace_id。Generated カラム `total_tokens`。3 つのインデックス。テナント分離 RLS + super_admin/sub_admin はすべて閲覧可。
+- `v_ai_usage_summary` ビュー — テナント別日次集計（Admin ダッシュボード用）。
+- `doc_chunks.embedding vector(1536)` カラム — pgvector RAG 用。
+- HNSW インデックス `doc_chunks_embedding_idx`（m=16, ef_construction=64）。
+- `match_documents(query_embedding, threshold, count, tenant_id)` 関数 — RAG 検索、security definer、search_path 固定、authenticated/service_role のみ実行可。
+- `doc_chunks` に document_id と tenant_id インデックス追加。
+
+**2. REQUIREMENTS.md 更新：**
+- R-016 HR 候補者分析（スケルトンあり、Phase 2 で本格実装）。
+- R-017 AI レート制限（部分的 — in-memory `contactRateMap` + Telegram の日次制限）。
+- R-018 AI コスト追跡（マイグレーション完了 — バックエンド連携は次セッション）。
+- R-019 ベクトル検索 RAG（マイグレーション完了 — バックエンド統合は次セッション）。
+- R-020 Admin Dashboard（super_admin/sub_admin：health, contacts, AI chat — Phase 4 拡張）。
+
+**3. 既存状態の確認：**
+- Phase 1.5 — 5 つのマイグレーション適用済み：contact_requests, tenant_company_info, roles_update (sub_admin/company_admin/accountant/manager), employee_profiles, employee_invites。
+- バックエンド admin エンドポイント完備：`/admin/contacts`, `/admin/health`, `/admin/ai/chat`, `/admin/contacts/:id/status`, `/admin/tenants/:id/status`。
+- フロントエンド admin ページ実装済み：`AdminContactsPage`, `AdminHealthPage`, `AdminAIChatPage` + `adminApi.ts`。
+- docs/ 構成正常：`English/`, `Russian/`, `Uzbek/`, `日本語/` — 各フォルダに DEVLOG.md と他翻訳。
+
+### 延期
+
+- Prompt caching ミドルウェア（scale-prompt タスク 1.2）— Phase 1.5 仕上げ。
+- HR Candidate Analysis 本格実装 — Phase 2（PLAN.md v3.0 通り）。
+- バックエンド連携：`/v1/ai/chat` から `ai_usage_logs` への INSERT — 次セッション（services/llm-router.ts から使用量取得）。
+- `match_documents()` を `POST /v1/docs/search` に接続 — 次セッション。
+- 完全な admin debug/log UI（Sentry リアルタイム、クエリ EXPLAIN）— Phase 4。
+
+### ファイル
+- `supabase/migrations/20260514000000_ai_usage_and_doc_vector.sql`（新規）
+- `docs/REQUIREMENTS.md`（R-016..R-020 追加）
+- `docs/DEVLOG.md`（このエントリ）
+- `docs/{English,Russian,Uzbek,日本語}/DEVLOG.md`（同期翻訳）
+
+### 理由
+
+`ai_usage_logs` がないと請求（Phase 2）が機能しない — テナント単位でコストを配分できない。`match_documents()` がないと AI Concierge の「自分のドキュメントを検索」ツールが `ILIKE` フォールバック — 結果品質が低い。
+
 ---
 
 ## 2026-05-06 — Phase 1.5 (4): B-027/B-028/B-029

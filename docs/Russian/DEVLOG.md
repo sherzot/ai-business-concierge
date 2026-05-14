@@ -2,6 +2,59 @@
 
 История развития проекта, выполненные работы, обнаруженные ошибки и их решения.
 
+> **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
+>
+> **Протокол (CLAUDE.md §...):** Каждое изменение фиксируется здесь и во всех 4 переводах.
+
+---
+
+## 2026-05-14 — Фундамент масштабирования: учёт стоимости AI + RAG для doc_chunks + R-016..R-020
+
+### Контекст
+
+Реализованы срочные пункты из `docs/ai-business-concierge-scale-prompt.md` (2026-05-11). Проверено состояние Phase 1.5 и закрыты оставшиеся срочные пробелы.
+
+### Сделано
+
+**1. DB миграция `20260514000000_ai_usage_and_doc_vector.sql`:**
+- Таблица `ai_usage_logs` — для каждого AI-вызова: tenant, user, endpoint, model, provider, complexity, prompt/completion токены, cost_usd, cached, latency, trace_id. Generated-колонка `total_tokens`. 3 индекса. RLS с tenant-изоляцией + super_admin/sub_admin видят всё.
+- View `v_ai_usage_summary` — дневной агрегат по тенантам (для Admin dashboard).
+- `doc_chunks.embedding vector(1536)` — для pgvector RAG.
+- HNSW индекс `doc_chunks_embedding_idx` (m=16, ef_construction=64).
+- Функция `match_documents(query_embedding, threshold, count, tenant_id)` — RAG-поиск, security definer, search_path зафиксирован, execute только для authenticated/service_role.
+- Индексы document_id и tenant_id на `doc_chunks`.
+
+**2. REQUIREMENTS.md обновлён:**
+- R-016 HR Candidate Analysis (скелет есть, полная реализация в Phase 2).
+- R-017 AI Rate Limiting (частично — in-memory `contactRateMap` + дневной лимит Telegram).
+- R-018 AI Cost Tracking (миграция готова — backend-связка в следующей сессии).
+- R-019 Vector Search RAG (миграция готова — backend-интеграция в следующей сессии).
+- R-020 Admin Dashboard (super_admin/sub_admin: health, contacts, AI chat — расширение в Phase 4).
+
+**3. Проверено текущее состояние:**
+- Phase 1.5 — 5 миграций применены: contact_requests, tenant_company_info, roles_update (sub_admin/company_admin/accountant/manager), employee_profiles, employee_invites.
+- Backend admin endpoints на месте: `/admin/contacts`, `/admin/health`, `/admin/ai/chat`, `/admin/contacts/:id/status`, `/admin/tenants/:id/status`.
+- Frontend admin страницы реализованы: `AdminContactsPage`, `AdminHealthPage`, `AdminAIChatPage` + `adminApi.ts`.
+- Структура docs/ верна: `English/`, `Russian/`, `Uzbek/`, `日本語/` — каждая папка содержит DEVLOG.md и остальные переводы.
+
+### Отложено
+
+- Prompt caching middleware (scale-prompt Задача 1.2) — завершение Phase 1.5.
+- HR Candidate Analysis — полная реализация в Phase 2 (по PLAN.md v3.0).
+- Backend-связка: запись в `ai_usage_logs` из `/v1/ai/chat` — следующая сессия (извлечь usage из services/llm-router.ts).
+- Подключить `match_documents()` к `POST /v1/docs/search` — следующая сессия.
+- Полный admin debug/log UI (Sentry real-time, query EXPLAIN) — Phase 4.
+
+### Файлы
+- `supabase/migrations/20260514000000_ai_usage_and_doc_vector.sql` (новый)
+- `docs/REQUIREMENTS.md` (добавлены R-016..R-020)
+- `docs/DEVLOG.md` (эта запись)
+- `docs/{English,Russian,Uzbek,日本語}/DEVLOG.md` (синхронные переводы)
+
+### Обоснование
+
+Без `ai_usage_logs` биллинг (Phase 2) невозможен — нельзя распределить стоимость по тенантам без атрибуции токенов на каждый вызов. Без `match_documents()` инструмент AI Concierge "поиск по моим документам" работает на `ILIKE` — низкое качество результатов.
+
 ---
 
 ## 2026-05-06 — Phase 1.5 (4): B-027/B-028/B-029

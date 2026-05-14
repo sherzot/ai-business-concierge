@@ -39,6 +39,11 @@ Bu hujjat loyiha talablarini va kelajakdagi yo‘nalishlarni belgilaydi. Yangi f
 | R-001 | Real inbox integratsiyasi | Email (Resend) webhook – qisman ✅ | Inbox |
 | R-002 | Real-time yangilanishlar | Supabase Realtime – inbox, tasks ✅ | Inbox, Tasks |
 | R-015 | Vazifa biriktirish bildirishnomalari | Rahbar biriktirganda mas'ulga alert, tasdiqlash, status shaffofligi ✅ | Tasks |
+| R-016 | HR Candidate Analysis | GitHub profil + CV tahlil, AI scoring, intervyu savollari (skeleton ✅, impl Phase 2) | HR |
+| R-017 | AI Rate Limiting | Tenant/user bo'yicha AI chaqiruv limiti (in-memory + DB tracking) ✅ qisman | Backend |
+| R-018 | AI Cost Tracking | Token usage log per tenant, billing zamini (`ai_usage_logs`) ✅ migration | Backend |
+| R-019 | Vector Search (RAG) | `pgvector` doc_chunks, `match_documents()` semantic search ✅ migration | Docs |
+| R-020 | Admin Dashboard | super_admin/sub_admin: contacts, health, AI chat — Phase 4'da to'liq | Admin |
 | R-003 | Billing/To‘lovlar | Subscription, planlar, to‘lov tarixi | Yangi |
 | R-004 | Audit log ko‘rinishi | Admin uchun audit loglar sahifasi | Settings |
 | R-005 | Export/Import | Excel, CSV export; bulk import | Reports, Tasks |

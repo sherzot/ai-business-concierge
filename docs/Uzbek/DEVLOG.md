@@ -2,6 +2,50 @@
 
 Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari.
 
+> **Tarjimalar (sinxron yangilanadi):** [O'zbekcha (asosiy)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
+>
+> **Protokol (CLAUDE.md §...):** Har bir o'zgarish bu faylga va 4 til tarjimaga yoziladi.
+
+---
+
+## 2026-05-14 — Scale fundament: AI cost tracking + doc_chunks RAG + R-016..R-020
+
+### Kontekst
+
+`docs/ai-business-concierge-scale-prompt.md` (2026-05-11) talablari bo'yicha "darhol" qilinishi kerak bo'lganlari amalga oshirildi. Phase 1.5 holatini tekshirish va etib bormagan urgent ishlarni yopish.
+
+### Bajarildi
+
+**1. DB migration `20260514000000_ai_usage_and_doc_vector.sql`:**
+- `ai_usage_logs` jadvali — har AI chaqiruv: tenant, user, endpoint, model, provider, complexity, prompt/completion tokens, cost_usd, cached, latency, trace_id. Generated `total_tokens`. 3 ta index. RLS + super_admin/sub_admin barchasini ko'radi.
+- `v_ai_usage_summary` view — kunlik tenant agregat.
+- `doc_chunks.embedding vector(1536)` ustun.
+- HNSW index `doc_chunks_embedding_idx` (m=16, ef_construction=64).
+- `match_documents()` funksiyasi — RAG search, security definer.
+
+**2. REQUIREMENTS.md yangilandi:**
+- R-016 HR Candidate Analysis
+- R-017 AI Rate Limiting
+- R-018 AI Cost Tracking (migration done)
+- R-019 Vector Search RAG (migration done)
+- R-020 Admin Dashboard
+
+**3. Hozirgi holat tekshirildi:**
+- Phase 1.5 — 5 ta migration applied
+- Backend admin endpoints va frontend admin pages — to'liq
+
+### Defer
+
+- Prompt caching → Phase 1.5 yakuni
+- HR Candidate Analysis full impl → Phase 2
+- Backend wiring `ai_usage_logs` → keyingi sessiya
+- `match_documents()` → search endpoint → keyingi sessiya
+- Admin debug/log UI → Phase 4
+
+### Sabab
+
+Billing (Phase 2) ishlay olishi uchun `ai_usage_logs` shart. RAG search uchun `match_documents()` zarur.
+
 ---
 
 ## 2026-05-06 — Phase 1.5 (4): B-027/B-028/B-029
