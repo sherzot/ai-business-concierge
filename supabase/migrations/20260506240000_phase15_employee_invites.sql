@@ -43,6 +43,7 @@ $$;
 ALTER TABLE employee_invites ENABLE ROW LEVEL SECURITY;
 
 -- super_admin / sub_admin — hammasi
+DROP POLICY IF EXISTS "employee_invites_admin_all" ON employee_invites;
 CREATE POLICY "employee_invites_admin_all"
   ON employee_invites FOR ALL
   USING (
@@ -59,6 +60,7 @@ CREATE POLICY "employee_invites_admin_all"
   );
 
 -- HR / company_admin — o'z tenantlari
+DROP POLICY IF EXISTS "employee_invites_hr_all" ON employee_invites;
 CREATE POLICY "employee_invites_hr_all"
   ON employee_invites FOR ALL
   USING (
