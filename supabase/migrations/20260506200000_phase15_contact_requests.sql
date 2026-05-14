@@ -50,20 +50,22 @@ CREATE TRIGGER contact_requests_updated_at
 ALTER TABLE contact_requests ENABLE ROW LEVEL SECURITY;
 
 -- Faqat super_admin / sub_admin ko'radi va o'zgartiradi
+DROP POLICY IF EXISTS "contact_requests_admin_all" ON contact_requests;
+
 CREATE POLICY "contact_requests_admin_all"
   ON contact_requests
   FOR ALL
   USING (
     EXISTS (
       SELECT 1 FROM user_tenants
-      WHERE user_id  = auth.uid()
+      WHERE user_id = auth.uid()
         AND role IN ('super_admin', 'sub_admin')
     )
   )
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM user_tenants
-      WHERE user_id  = auth.uid()
+      WHERE user_id = auth.uid()
         AND role IN ('super_admin', 'sub_admin')
     )
   );
