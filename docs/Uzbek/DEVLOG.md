@@ -8,6 +8,28 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-14 — security: 5 view SECURITY INVOKER ga o'tkazildi
+
+### Kontekst
+
+Supabase Security Advisor 5 ta "Security Definer View" xatosi: `employee_invite_stats`, `v_beta_stats`, `v_beta_daily_activity`, `v_beta_model_usage`, `v_beta_feedback`.
+
+SECURITY DEFINER view yaratuvchi nuqtai nazaridan ishlaydi — RLS ni chetlab o'tishi mumkin.
+
+### Bajarildi
+
+**Migration `20260514120000_views_security_invoker.sql`:** 5 ta view qaytadan yaratildi `with (security_invoker = true)`. `v_beta_*` — `service_role` uchun. `employee_invite_stats` — `authenticated` + `service_role`.
+
+### Tasdiq
+
+Dashboard → Advisors → Security → Refresh → 0 errors.
+
+### Fayllar
+- `supabase/migrations/20260514120000_views_security_invoker.sql`
+- 5 ta DEVLOG sinxron yangilandi
+
+---
+
 ## 2026-05-14 — Scale fundament: AI cost tracking + doc_chunks RAG + R-016..R-020
 
 ### Kontekst

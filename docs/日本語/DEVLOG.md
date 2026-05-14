@@ -8,6 +8,37 @@
 
 ---
 
+## 2026-05-14 — security: 5 ビューを SECURITY INVOKER に変更
+
+### コンテキスト
+
+Supabase Security Advisor が 5 件の "Security Definer View" エラーを報告：
+`employee_invite_stats`、`v_beta_stats`、`v_beta_daily_activity`、`v_beta_model_usage`、`v_beta_feedback`。
+
+SECURITY DEFINER ビューは作成者の権限で実行されるため、RLS を回避しテナント分離を破る可能性がある。
+
+### 実施内容
+
+**マイグレーション `20260514120000_views_security_invoker.sql`：**
+- 5 つのビューすべてを `with (security_invoker = true)`（PG15+）で再作成。
+- `v_beta_*` ビュー — `service_role` のみ SELECT 可（バックエンド経由の admin dashboard 用）。
+- `employee_invite_stats` — `authenticated` と `service_role` に付与（HR は自テナント内のみ閲覧、RLS が処理）。
+- 各ビューにコメント：「SECURITY INVOKER — 呼び出し側の RLS ルールが適用される」。
+
+### 理由
+
+同じパターンを以前にも適用済み（`20260304_fix_tenant_daily_stats_security.sql`、`20260429120000_security_hardening.sql`）。マルチテナント SaaS では SECURITY DEFINER ビューは深刻なセキュリティリスク。
+
+### 確認
+
+push 後：Dashboard → Advisors → Security → **Refresh** → 5 errors → 0。
+
+### ファイル
+- `supabase/migrations/20260514120000_views_security_invoker.sql`（新規）
+- `docs/{DEVLOG,English/DEVLOG,Russian/DEVLOG,Uzbek/DEVLOG,日本語/DEVLOG}.md`（同期）
+
+---
+
 ## 2026-05-14 — スケール基盤：AI コスト追跡 + doc_chunks RAG + R-016..R-020
 
 ### コンテキスト

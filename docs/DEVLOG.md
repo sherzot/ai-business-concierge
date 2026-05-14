@@ -8,6 +8,37 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-14 — security: 5 view SECURITY INVOKER ga o'tkazildi
+
+### Kontekst
+
+Supabase Security Advisor 5 ta "Security Definer View" xatosini ko'rsatdi:
+`employee_invite_stats`, `v_beta_stats`, `v_beta_daily_activity`, `v_beta_model_usage`, `v_beta_feedback`.
+
+SECURITY DEFINER view yaratuvchi nuqtai nazaridan ishlaydi — RLS ni chetlab o'tishi va tenant izolyatsiyasini buzishi mumkin.
+
+### Bajarildi
+
+**Migration `20260514120000_views_security_invoker.sql`:**
+- 5 ta view qaytadan yaratildi `with (security_invoker = true)` (PG15+)
+- `v_beta_*` views — faqat `service_role` uchun SELECT (admin dashboard backend orqali)
+- `employee_invite_stats` — `authenticated` va `service_role` uchun (HR tenant ichida ko'radi, RLS o'zi cheklaydi)
+- Comment har birida: "SECURITY INVOKER — caller RLS qoidalariga rioya qiladi"
+
+### Sabab
+
+Bu pattern avval qo'llanilgan (`20260304_fix_tenant_daily_stats_security.sql`, `20260429120000_security_hardening.sql`). Multi-tenant SaaS uchun SECURITY DEFINER view jiddiy xavfsizlik risk.
+
+### Tasdiq
+
+Push'dan keyin: Dashboard → Advisors → Security → **Refresh** → 5 errors → 0.
+
+### Fayllar
+- `supabase/migrations/20260514120000_views_security_invoker.sql` (yangi)
+- `docs/{DEVLOG,English/DEVLOG,Russian/DEVLOG,Uzbek/DEVLOG,日本語/DEVLOG}.md` (sinxron)
+
+---
+
 ## 2026-05-14 — Scale fundament: AI cost tracking + doc_chunks RAG + R-016..R-020
 
 ### Kontekst

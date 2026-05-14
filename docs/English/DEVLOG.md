@@ -8,6 +8,37 @@ Project development history, completed work, encountered errors, and their solut
 
 ---
 
+## 2026-05-14 — security: 5 views switched to SECURITY INVOKER
+
+### Context
+
+Supabase Security Advisor reported 5 "Security Definer View" errors:
+`employee_invite_stats`, `v_beta_stats`, `v_beta_daily_activity`, `v_beta_model_usage`, `v_beta_feedback`.
+
+SECURITY DEFINER views run with the creator's privileges — bypassing RLS and potentially breaking tenant isolation.
+
+### Done
+
+**Migration `20260514120000_views_security_invoker.sql`:**
+- Recreated all 5 views with `with (security_invoker = true)` (PG15+).
+- `v_beta_*` views — SELECT only for `service_role` (admin dashboard via backend).
+- `employee_invite_stats` — granted to `authenticated` and `service_role` (HR sees within their tenant, RLS handles it).
+- Every view has a comment: "SECURITY INVOKER — caller RLS rules apply".
+
+### Reason
+
+Same pattern was used before (`20260304_fix_tenant_daily_stats_security.sql`, `20260429120000_security_hardening.sql`). For multi-tenant SaaS, SECURITY DEFINER view is a serious security risk.
+
+### Verification
+
+After push: Dashboard → Advisors → Security → **Refresh** → 5 errors → 0.
+
+### Files
+- `supabase/migrations/20260514120000_views_security_invoker.sql` (new)
+- `docs/{DEVLOG,English/DEVLOG,Russian/DEVLOG,Uzbek/DEVLOG,日本語/DEVLOG}.md` (synced)
+
+---
+
 ## 2026-05-14 — Scale foundation: AI cost tracking + doc_chunks RAG + R-016..R-020
 
 ### Context

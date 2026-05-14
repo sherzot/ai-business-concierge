@@ -8,6 +8,37 @@
 
 ---
 
+## 2026-05-14 — security: 5 view переведены на SECURITY INVOKER
+
+### Контекст
+
+Supabase Security Advisor сообщил о 5 ошибках "Security Definer View":
+`employee_invite_stats`, `v_beta_stats`, `v_beta_daily_activity`, `v_beta_model_usage`, `v_beta_feedback`.
+
+SECURITY DEFINER view выполняется с правами создателя — может обойти RLS и нарушить изоляцию тенантов.
+
+### Сделано
+
+**Миграция `20260514120000_views_security_invoker.sql`:**
+- Все 5 view пересозданы с `with (security_invoker = true)` (PG15+).
+- `v_beta_*` view — SELECT только для `service_role` (admin dashboard через backend).
+- `employee_invite_stats` — для `authenticated` и `service_role` (HR видит внутри своего тенанта, RLS управляет доступом).
+- В каждом view комментарий: "SECURITY INVOKER — применяются RLS-правила вызывающего".
+
+### Причина
+
+Тот же паттерн уже применялся (`20260304_fix_tenant_daily_stats_security.sql`, `20260429120000_security_hardening.sql`). Для multi-tenant SaaS SECURITY DEFINER view — серьёзный риск безопасности.
+
+### Проверка
+
+После push: Dashboard → Advisors → Security → **Refresh** → 5 errors → 0.
+
+### Файлы
+- `supabase/migrations/20260514120000_views_security_invoker.sql` (новый)
+- `docs/{DEVLOG,English/DEVLOG,Russian/DEVLOG,Uzbek/DEVLOG,日本語/DEVLOG}.md` (синхронизированы)
+
+---
+
 ## 2026-05-14 — Фундамент масштабирования: учёт стоимости AI + RAG для doc_chunks + R-016..R-020
 
 ### Контекст
