@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Users, Building2, Activity, MessageSquare,
   Zap, LogOut, Menu, X, ChevronRight,
 } from "lucide-react";
 import { useAuthContext } from "../../auth/context/AuthContext";
+import { apiRequest } from "../../../shared/lib/apiClient";
 
 const NAV = [
   { to: "/admin",          label: "Dashboard",     icon: LayoutDashboard, exact: true },
@@ -18,8 +19,21 @@ export function AdminLayout() {
   const { logout, profile } = useAuthContext();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [contactBadge, setContactBadge] = useState(0);
 
   const userName = profile?.user?.email?.split("@")[0] ?? "Admin";
+
+  useEffect(() => {
+    async function fetchBadge() {
+      try {
+        const contacts = await apiRequest<{ status: string }[]>("/admin/contacts?status=new");
+        setContactBadge(Array.isArray(contacts) ? contacts.filter((c) => c.status === "new").length : 0);
+      } catch { /* silent */ }
+    }
+    fetchBadge();
+    const interval = setInterval(fetchBadge, 60_000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="flex h-screen bg-slate-950 text-white overflow-hidden">
@@ -60,7 +74,12 @@ export function AdminLayout() {
               }
             >
               <Icon size={18} className="shrink-0" />
-              {sidebarOpen && <span className="truncate">{label}</span>}
+              {sidebarOpen && <span className="truncate flex-1">{label}</span>}
+              {sidebarOpen && to === "/admin/contacts" && contactBadge > 0 && (
+                <span className="bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[18px] text-center leading-none shrink-0">
+                  {contactBadge}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>

@@ -8,6 +8,53 @@
 
 ---
 
+## 2026-05-15 — Web改善（完了）：8つの主要UI/UX変更
+
+### コンテキスト
+
+AIクレジットを待つ間、8つのWeb改善タスクを順番に完了しました。
+
+### 実施内容
+
+**1. ProfileForm — 実際の認証データに接続:**
+- `useUserSettings`フックを書き直し — AuthContextから実際の`fullName`と`email`を読み取る
+- `PATCH /v1/settings/profile`バックエンドエンドポイント作成
+- 保存後に`refetchProfile()`を呼び出し — サイドバーが即座に更新される
+
+**2. EmployeeDetailPage — 編集モード追加:**
+- 23フィールドすべてをフォームとして表示
+- 5セクション：個人情報、雇用、連絡先、緊急連絡先、メモ
+
+**3. ユニットテスト（B-001）:**
+- 合計76テスト、すべてパス
+- 新規3ファイル + LandingPage.test.tsx修正（I18nProviderラッパー追加）
+
+**4. EmployeesPage — フィルター + 検索 + ブロック/解除:**
+- ステータスフィルターチップ、検索フィールド、各行にBlock/Unblockボタン
+
+**5. Docsページ — テンプレートライブラリ:**
+- 15テンプレート、カテゴリーフィルター + 検索、「近日公開」バッジ
+
+**6. Admin dashboard — 30秒自動更新 + サイドバーバッジ:**
+- `setInterval(30_000)`、新規お問い合わせの赤いバッジ
+
+**7. Reportsページ — AIオーディット無効化:**
+- 「AIオーディット」ボタンをdisabled状態に変更
+
+**8. 通知ページ — 全通知履歴:**
+- `NotificationsPage.tsx` — フィルター（all/unread/read）、一括既読
+- `NotificationsDropdown`に「すべて見る」リンク追加
+- App.tsxに`case "notifications"`を接続
+
+### ファイル
+
+- `frontend/src/features/notifications/pages/NotificationsPage.tsx`（新規）
+- `frontend/src/features/notifications/components/NotificationsDropdown.tsx`（変更）
+- `frontend/src/App.tsx`（変更）
+- その他15ファイル（変更・新規）
+
+---
+
 ## 2026-05-15 — Web改善（続き）：TenantSettings、EmployeeDetail、パスワード変更、Landing nav/footer
 
 ### コンテキスト

@@ -4,14 +4,18 @@ import { DocCreateModal } from "../components/DocCreateModal";
 import { DocEditModal } from "../components/DocEditModal";
 import { DocList, DocItem } from "../components/DocList";
 import { DocSearchBar } from "../components/DocSearchBar";
+import { TemplatesLibrary } from "../components/TemplatesLibrary";
 import { deleteDoc, getDocs } from "../api/docsApi";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { Button } from "../../../shared/ui/button";
 import { ErrorState } from "../../../shared/components/ErrorState";
 import { normalizeError, getTraceIdFromError } from "../../../shared/lib/errorHandling";
 
+type DocsTab = "my-docs" | "templates";
+
 export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
   const { translate } = useI18n();
+  const [activeTab, setActiveTab] = React.useState<DocsTab>("my-docs");
   const [query, setQuery] = React.useState("");
   const [docs, setDocs] = React.useState<DocItem[]>([]);
   const [selected, setSelected] = React.useState<DocItem | undefined>(undefined);
@@ -21,8 +25,8 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
   const [editOpen, setEditOpen] = React.useState(false);
 
   React.useEffect(() => {
-    loadDocs();
-  }, [tenant.id, query]);
+    if (activeTab === "my-docs") loadDocs();
+  }, [tenant.id, query, activeTab]);
 
   async function loadDocs() {
     setLoading(true);
@@ -56,47 +60,70 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-      <div className="w-full md:w-1/3 border-r border-slate-200 flex flex-col bg-slate-50">
-        <div className="p-4 border-b border-slate-200 bg-white">
-          <div className="flex items-center gap-3">
-            <DocSearchBar value={query} onChange={setQuery} onClear={() => setQuery("")} />
-            <Button onClick={() => setCreateOpen(true)} className="shrink-0">
-              {translate("docs.createAction")}
-            </Button>
+    <div className="space-y-4">
+      {/* Tab switcher */}
+      <div className="flex w-fit rounded-lg border border-slate-200 bg-white p-1">
+        {(["my-docs", "templates"] as DocsTab[]).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              activeTab === tab
+                ? "bg-indigo-600 text-white shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            {tab === "my-docs" ? "Mening hujjatlarim" : "Shablonlar kutubxonasi"}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "templates" ? (
+        <TemplatesLibrary />
+      ) : (
+        <div className="flex h-[calc(100vh-12rem)] bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <div className="w-full md:w-1/3 border-r border-slate-200 flex flex-col bg-slate-50">
+            <div className="p-4 border-b border-slate-200 bg-white">
+              <div className="flex items-center gap-3">
+                <DocSearchBar value={query} onChange={setQuery} onClear={() => setQuery("")} />
+                <Button onClick={() => setCreateOpen(true)} className="shrink-0">
+                  {translate("docs.createAction")}
+                </Button>
+              </div>
+              <p className="text-xs text-slate-400 mt-2">
+                {translate("common.tenant")}: {tenant.name}
+              </p>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {loading && <div className="p-6 text-sm text-slate-400">{translate("common.loading")}</div>}
+              {!loading && error && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
+              {!loading && !error && (
+                <DocList docs={docs} selectedId={selected?.id} onSelect={setSelected} />
+              )}
+            </div>
           </div>
-          <p className="text-xs text-slate-400 mt-2">
-            {translate("common.tenant")}: {tenant.name}
-          </p>
+          <div className="hidden md:flex flex-1 flex-col bg-white">
+            <DocDetail
+              doc={selected}
+              onEdit={() => setEditOpen(true)}
+              onDelete={handleDelete}
+            />
+          </div>
+          <DocCreateModal
+            tenantId={tenant.id}
+            open={createOpen}
+            onClose={() => setCreateOpen(false)}
+            onCreated={loadDocs}
+          />
+          <DocEditModal
+            tenantId={tenant.id}
+            doc={selected}
+            open={editOpen}
+            onClose={() => setEditOpen(false)}
+            onSaved={loadDocs}
+          />
         </div>
-        <div className="flex-1 overflow-y-auto">
-          {loading && <div className="p-6 text-sm text-slate-400">{translate("common.loading")}</div>}
-          {!loading && error && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
-          {!loading && !error && (
-            <DocList docs={docs} selectedId={selected?.id} onSelect={setSelected} />
-          )}
-        </div>
-      </div>
-      <div className="hidden md:flex flex-1 flex-col bg-white">
-        <DocDetail
-          doc={selected}
-          onEdit={() => setEditOpen(true)}
-          onDelete={handleDelete}
-        />
-      </div>
-      <DocCreateModal
-        tenantId={tenant.id}
-        open={createOpen}
-        onClose={() => setCreateOpen(false)}
-        onCreated={loadDocs}
-      />
-      <DocEditModal
-        tenantId={tenant.id}
-        doc={selected}
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        onSaved={loadDocs}
-      />
+      )}
     </div>
   );
 }

@@ -52,6 +52,7 @@ import { TenantSettingsPage } from "./features/tenants/pages/TenantSettingsPage"
 import { EmployeeDetailPage } from "./features/hr/pages/EmployeeDetailPage";
 import { AIChat } from "./shared/components/AIChat";
 import { NotificationsDropdown } from "./features/notifications/components/NotificationsDropdown";
+import { NotificationsPage } from "./features/notifications/pages/NotificationsPage";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -224,6 +225,8 @@ export default function App() {
         return <SettingsPage tenant={tenant} />;
       case "company-profile":
         return <TenantSettingsPage tenant={tenant} />;
+      case "notifications":
+        return <NotificationsPage tenantId={tenant.id} userId={profile?.user.id} />;
       default:
         return <DashboardPage tenant={tenant} />;
     }
@@ -436,7 +439,7 @@ export default function App() {
             </div>
             <LocaleSelect variant="light" />
             {currentTenant && (
-              <NotificationsDropdown tenantId={currentTenant.id} userId={profile?.user.id} />
+              <NotificationsDropdown tenantId={currentTenant.id} userId={profile?.user.id} onViewAll={() => setActiveModule("notifications")} />
             )}
             <button
               onClick={() => setIsAIChatOpen(true)}

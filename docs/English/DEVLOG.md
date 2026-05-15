@@ -8,6 +8,76 @@ Project development history, completed work, encountered errors, and their solut
 
 ---
 
+## 2026-05-15 — Web improvements (completed): 8 major UI/UX changes
+
+### Context
+
+While waiting for API credits, completed 8 web improvements in order.
+
+### Done
+
+**1. ProfileForm — connected to real auth data:**
+- `useUserSettings` hook rewritten — reads real `fullName` and `email` from AuthContext
+- `PATCH /v1/settings/profile` backend endpoint created
+- `refetchProfile()` called after save — sidebar updates immediately
+
+**2. EmployeeDetailPage — edit mode added:**
+- All 23 employee_profiles fields shown as a form
+- 5 sections: Personal, Employment, Contact, Emergency, Notes
+- `PATCH /v1/tenants/:id/members/:userId/profile` — HR upserts employee
+
+**3. Unit tests (B-001):**
+- 9 tests: `adminApi.test.ts`
+- 12 tests: `settingsDomain.test.ts`
+- 7 tests: `useUserSettings.test.ts`
+- LandingPage.test.tsx fixed: I18nProvider wrapper added
+- Total: 76 tests, all passing
+
+**4. EmployeesPage — filter + search + block/unblock:**
+- Status filter chips: all/active/password_pending/password_set/blocked
+- Search field (by name/email)
+- Block/Unblock buttons per row
+
+**5. Docs page — templates library:**
+- 15 templates (contracts, applications, orders)
+- Category filter + search
+- "coming soon" badge — waiting for AI credits
+
+**6. Admin dashboard — 30s auto-refresh + sidebar badge:**
+- `setInterval(30_000)` — AdminDashboardPage auto-refreshes
+- Sidebar "Contacts" nav shows red badge (new contact count)
+
+**7. Reports page — AI audit disabled:**
+- "AI Audit" button set to disabled — "coming soon" label
+
+**8. Notifications page — full notification history:**
+- `NotificationsPage.tsx` — filter (all/unread/read), bulk mark-read
+- `NotificationsDropdown` got "View all" link (`onViewAll` prop)
+- App.tsx wired `case "notifications"`
+
+### Files
+
+- `supabase/functions/server/index.ts` (changed — 4 new endpoints)
+- `frontend/src/features/settings/hooks/useUserSettings.ts` (rewritten)
+- `frontend/src/features/settings/components/ProfileForm.tsx` (rewritten)
+- `frontend/src/features/hr/pages/EmployeeDetailPage.tsx` (rewritten)
+- `frontend/src/features/hr/api/employeesApi.ts` (changed)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (changed)
+- `frontend/src/features/admin/__tests__/adminApi.test.ts` (new)
+- `frontend/src/features/settings/__tests__/settingsDomain.test.ts` (new)
+- `frontend/src/features/settings/__tests__/useUserSettings.test.ts` (new)
+- `frontend/src/features/landing/__tests__/LandingPage.test.tsx` (fixed)
+- `frontend/src/features/docs/components/TemplatesLibrary.tsx` (new)
+- `frontend/src/features/docs/pages/DocsPage.tsx` (rewritten)
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (changed)
+- `frontend/src/features/admin/components/AdminLayout.tsx` (changed)
+- `frontend/src/features/reports/pages/ReportsPage.tsx` (changed)
+- `frontend/src/features/notifications/pages/NotificationsPage.tsx` (new)
+- `frontend/src/features/notifications/components/NotificationsDropdown.tsx` (changed)
+- `frontend/src/App.tsx` (changed)
+
+---
+
 ## 2026-05-15 — Web improvements (continued): TenantSettings, EmployeeDetail, Password, Landing nav/footer
 
 ### Context

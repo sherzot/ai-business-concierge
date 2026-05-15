@@ -76,7 +76,11 @@ export function AdminDashboardPage() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    const interval = setInterval(() => load(true), 30_000);
+    return () => clearInterval(interval);
+  }, []);
 
   const pending   = companies.filter((c) => c.status === "pending_approval").length;
   const active    = companies.filter((c) => c.status === "active").length;

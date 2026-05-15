@@ -14,9 +14,10 @@ import { formatDistanceToNow } from "date-fns";
 type Props = {
   tenantId: string;
   userId?: string;
+  onViewAll?: () => void;
 };
 
-export function NotificationsDropdown({ tenantId, userId }: Props) {
+export function NotificationsDropdown({ tenantId, userId, onViewAll }: Props) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
 
@@ -85,6 +86,16 @@ export function NotificationsDropdown({ tenantId, userId }: Props) {
               </div>
             </DropdownMenuItem>
           ))
+        )}
+        {onViewAll && (
+          <div className="border-t border-slate-100 p-2">
+            <button
+              onClick={() => { setOpen(false); onViewAll(); }}
+              className="w-full text-xs text-indigo-600 font-medium hover:bg-indigo-50 rounded-md py-1.5 transition-colors"
+            >
+              Barchasini ko&apos;rish
+            </button>
+          </div>
         )}
       </DropdownMenuContent>
     </DropdownMenu>

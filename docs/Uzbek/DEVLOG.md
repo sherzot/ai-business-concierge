@@ -8,6 +8,26 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-15 — Web takomillashtirish (tugallandi): 8 ta UI/UX o'zgarish
+
+### Bajarildi
+
+1. ProfileForm — real auth ma'lumotlariga ulandi (`useUserSettings` qayta yozildi)
+2. EmployeeDetailPage — edit mode qo'shildi (23 maydon, 5 bo'lim)
+3. Unit testlar: 76 test, hammasi o'tdi (3 yangi to'plam + LandingPage tuzatildi)
+4. EmployeesPage — status filter + qidiruv + bloklash/yechish
+5. Docs — 15 ta shablon kutubxonasi ("tez orada" badge)
+6. Admin dashboard — 30s auto-refresh + sidebar badge
+7. Reports — AI audit disabled ("tez orada")
+8. Notifications sahifasi — to'liq tarix, filter, "Barchasini ko'rish" link
+
+### Fayllar (asosiy)
+
+- `NotificationsPage.tsx` (yangi), `NotificationsDropdown.tsx` (o'zgargan), `App.tsx` (o'zgargan)
+- 3 yangi test fayl, `TemplatesLibrary.tsx`, `AdminLayout.tsx`, `AdminDashboardPage.tsx`
+
+---
+
 ## 2026-05-15 — Web takomillashtirish (davom): TenantSettings, EmployeeDetail, Parol, Landing
 
 ### Kontekst

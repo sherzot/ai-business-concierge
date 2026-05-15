@@ -14,7 +14,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { Pencil, UserMinus, RotateCcw, Trash2, X, AlertTriangle, UserPlus, KeyRound, SendHorizonal, CheckCircle2 } from "lucide-react";
+import { Pencil, UserMinus, RotateCcw, Trash2, X, AlertTriangle, UserPlus, KeyRound, SendHorizonal, CheckCircle2, Search, Ban, ShieldCheck } from "lucide-react";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { useAuthContext } from "../../auth/context/AuthContext";
 import {
@@ -26,9 +26,11 @@ import {
   resetEmployeePassword,
   resendInvite,
   confirmEmployee,
+  setEmployeeStatus,
   type Employee,
   type EmployeeRole,
   type EmployeeStatus,
+  type EmployeeAccountStatus,
 } from "../api/employeesApi";
 
 type Tenant = { id: string; name: string };
@@ -53,6 +55,8 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
     callerRole === "super_admin";
 
   const [tab, setTab] = useState<EmployeeStatus>("active");
+  const [statusFilter, setStatusFilter] = useState<EmployeeAccountStatus | "all">("all");
+  const [search, setSearch] = useState("");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,7 +85,24 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, tenant.id]);
 
-  const counts = useMemo(() => ({ shown: employees.length }), [employees]);
+  const filtered = useMemo(() => {
+    return employees.filter((emp) => {
+      if (statusFilter !== "all" && emp.status !== statusFilter && emp.account_status !== statusFilter) {
+        // For active tab: filter by account_status (active/password_pending/password_set/blocked)
+        if (tab === "active" && emp.account_status !== statusFilter) return false;
+      }
+      if (search) {
+        const q = search.toLowerCase();
+        return (
+          emp.name.toLowerCase().includes(q) ||
+          (emp.email ?? "").toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+  }, [employees, statusFilter, search, tab]);
+
+  const counts = useMemo(() => ({ shown: filtered.length, total: employees.length }), [filtered, employees]);
 
   return (
     <div className="space-y-6">
@@ -123,6 +144,43 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
         </TabButton>
       </div>
 
+      {/* Search + status filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-48">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Ism yoki email bo'yicha qidirish..."
+            className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+          />
+        </div>
+        {tab === "active" && (
+          <div className="flex items-center gap-1 flex-wrap">
+            {(["all", "active", "password_pending", "password_set", "blocked"] as const).map((s) => {
+              const labels: Record<string, string> = {
+                all: "Barchasi", active: "Faol", password_pending: "Invite kutmoqda",
+                password_set: "Tasdiqlash kerak", blocked: "Bloklangan",
+              };
+              const active = statusFilter === s;
+              return (
+                <button
+                  key={s}
+                  onClick={() => setStatusFilter(s)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                    active
+                      ? "bg-indigo-600 border-indigo-600 text-white"
+                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                  }`}
+                >
+                  {labels[s]}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Status banners */}
       {error && (
         <p className="rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p>
@@ -134,13 +192,11 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
           <div className="p-8 text-center text-sm text-slate-500">
             {translate("common.loading")}
           </div>
-        ) : employees.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="p-8 text-center text-sm text-slate-500">
-            {translate(
-              tab === "active"
-                ? "employees.list.emptyActive"
-                : "employees.list.emptyTerminated",
-            )}
+            {search || statusFilter !== "all"
+              ? "Qidiruv bo'yicha xodim topilmadi"
+              : translate(tab === "active" ? "employees.list.emptyActive" : "employees.list.emptyTerminated")}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -163,7 +219,7 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
                 </tr>
               </thead>
               <tbody>
-                {employees.map((emp) => {
+                {filtered.map((emp) => {
                   const isSelf = emp.id === callerUserId;
                   return (
                     <tr key={emp.id} className="border-t border-slate-100 hover:bg-slate-50/60">
@@ -241,6 +297,36 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
                                       {translate("employees.list.confirm")}
                                     </button>
                                   )}
+                                  {/* Block / Unblock */}
+                                  {emp.status === "active" || emp.account_status === "active" ? (
+                                    <button
+                                      disabled={busyId === emp.id}
+                                      onClick={async () => {
+                                        setBusyId(emp.id);
+                                        try { await setEmployeeStatus(tenant.id, emp.id, "blocked"); await reload(); }
+                                        catch (e) { setError(e instanceof Error ? e.message : "Xato"); }
+                                        finally { setBusyId(null); }
+                                      }}
+                                      className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-orange-700 hover:bg-orange-50 disabled:opacity-50"
+                                      title="Bloklash"
+                                    >
+                                      <Ban size={13} />
+                                    </button>
+                                  ) : emp.account_status === "blocked" ? (
+                                    <button
+                                      disabled={busyId === emp.id}
+                                      onClick={async () => {
+                                        setBusyId(emp.id);
+                                        try { await setEmployeeStatus(tenant.id, emp.id, "active"); await reload(); }
+                                        catch (e) { setError(e instanceof Error ? e.message : "Xato"); }
+                                        finally { setBusyId(null); }
+                                      }}
+                                      className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+                                      title="Blokni ochish"
+                                    >
+                                      <ShieldCheck size={13} />
+                                    </button>
+                                  ) : null}
                                   <button
                                     onClick={() => setEditing(emp)}
                                     className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50"
@@ -307,7 +393,9 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
           </div>
         )}
         <div className="px-4 py-3 border-t border-slate-100 text-xs text-slate-500">
-          {translate("employees.list.shownCount", { count: String(counts.shown) })}
+          {counts.shown === counts.total
+            ? translate("employees.list.shownCount", { count: String(counts.shown) })
+            : `${counts.shown} / ${counts.total} ta xodim ko'rsatilmoqda`}
         </div>
       </div>
 

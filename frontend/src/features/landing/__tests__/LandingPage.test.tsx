@@ -5,6 +5,7 @@ import { MemoryRouter } from "react-router-dom";
 import { LandingPage } from "../pages/LandingPage";
 import { landingI18n } from "../i18n";
 import { DEFAULT_LOCALE } from "../types";
+import { I18nProvider } from "../../../app/providers/I18nProvider";
 
 vi.mock("../hooks/useLandingLocale", () => ({
   useLandingLocale: () => ({ locale: DEFAULT_LOCALE, setLocale: vi.fn() }),
@@ -13,7 +14,9 @@ vi.mock("../hooks/useLandingLocale", () => ({
 function renderLanding() {
   return render(
     <MemoryRouter>
-      <LandingPage />
+      <I18nProvider>
+        <LandingPage />
+      </I18nProvider>
     </MemoryRouter>
   );
 }

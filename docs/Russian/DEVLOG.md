@@ -8,6 +8,76 @@
 
 ---
 
+## 2026-05-15 — Улучшения веб-части (завершено): 8 крупных изменений UI/UX
+
+### Контекст
+
+В ожидании AI-кредитов выполнили 8 задач по улучшению веб-части по порядку.
+
+### Сделано
+
+**1. ProfileForm — подключён к реальным данным авторизации:**
+- Хук `useUserSettings` переписан — читает `fullName` и `email` из AuthContext
+- Создан endpoint `PATCH /v1/settings/profile` (full_name, phone)
+- После сохранения вызывается `refetchProfile()` — сайдбар обновляется сразу
+
+**2. EmployeeDetailPage — добавлен режим редактирования:**
+- Все 23 поля employee_profiles отображаются как форма
+- 5 разделов: Личные, Работа, Контакты, Экстренные, Заметки
+- `PATCH /v1/tenants/:id/members/:userId/profile` — HR делает upsert сотрудника
+
+**3. Unit-тесты (B-001):**
+- 9 тестов: `adminApi.test.ts`
+- 12 тестов: `settingsDomain.test.ts`
+- 7 тестов: `useUserSettings.test.ts`
+- LandingPage.test.tsx исправлен: добавлена обёртка I18nProvider
+- Итого: 76 тестов, все проходят
+
+**4. EmployeesPage — фильтр + поиск + блокировка:**
+- Чипы фильтра по статусу: all/active/password_pending/password_set/blocked
+- Поле поиска (по имени/email)
+- Кнопки Block/Unblock на каждой строке
+
+**5. Страница документов — библиотека шаблонов:**
+- 15 шаблонов (договоры, заявления, приказы)
+- Фильтр по категории + поиск
+- Значок "скоро" — ожидаем AI-кредиты
+
+**6. Admin dashboard — авто-обновление 30с + бейдж в сайдбаре:**
+- `setInterval(30_000)` — AdminDashboardPage обновляется автоматически
+- Навигация "Обращения" в сайдбаре показывает красный бейдж
+
+**7. Страница отчётов — AI-аудит отключён:**
+- Кнопка "AI Audit" переведена в disabled — метка "скоро"
+
+**8. Страница уведомлений — полная история:**
+- `NotificationsPage.tsx` — фильтр (all/unread/read), массовое прочтение
+- В `NotificationsDropdown` добавлена ссылка "Посмотреть все" (prop `onViewAll`)
+- В App.tsx подключён `case "notifications"`
+
+### Файлы
+
+- `supabase/functions/server/index.ts` (изменён — 4 новых endpoint)
+- `frontend/src/features/settings/hooks/useUserSettings.ts` (переписан)
+- `frontend/src/features/settings/components/ProfileForm.tsx` (переписан)
+- `frontend/src/features/hr/pages/EmployeeDetailPage.tsx` (переписан)
+- `frontend/src/features/hr/api/employeesApi.ts` (изменён)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (изменён)
+- `frontend/src/features/admin/__tests__/adminApi.test.ts` (новый)
+- `frontend/src/features/settings/__tests__/settingsDomain.test.ts` (новый)
+- `frontend/src/features/settings/__tests__/useUserSettings.test.ts` (новый)
+- `frontend/src/features/landing/__tests__/LandingPage.test.tsx` (исправлен)
+- `frontend/src/features/docs/components/TemplatesLibrary.tsx` (новый)
+- `frontend/src/features/docs/pages/DocsPage.tsx` (переписан)
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (изменён)
+- `frontend/src/features/admin/components/AdminLayout.tsx` (изменён)
+- `frontend/src/features/reports/pages/ReportsPage.tsx` (изменён)
+- `frontend/src/features/notifications/pages/NotificationsPage.tsx` (новый)
+- `frontend/src/features/notifications/components/NotificationsDropdown.tsx` (изменён)
+- `frontend/src/App.tsx` (изменён)
+
+---
+
 ## 2026-05-15 — Улучшения веб-части (продолжение): TenantSettings, EmployeeDetail, Пароль, Landing nav/footer
 
 ### Контекст

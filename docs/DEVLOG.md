@@ -8,6 +8,77 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-15 — Web takomillashtirish (tugallandi): 8 ta muhim UI/UX o'zgarish
+
+### Kontekst
+
+API kreditlar kutilayotganda 8 ta web takomillashtirish ro'yxatini tartib bilan bajardik.
+
+### Bajarildi
+
+**1. ProfileForm — real ma'lumotlarga ulandi:**
+- `useUserSettings` hook qayta yozildi — AuthContext dan real `fullName` va `email` o'qiydi
+- `PATCH /v1/settings/profile` backend endpoint yaratildi (full_name, phone)
+- `refetchProfile()` save'dan keyin chaqiriladi — sidebar darhol yangilanadi
+
+**2. EmployeeDetailPage — edit mode qo'shildi:**
+- Barcha 23 ta employee_profiles maydoni forma sifatida ko'rsatiladi
+- 5 bo'lim: Shaxsiy, Mehnat, Aloqa, Favqulodda, Izohlar
+- `PATCH /v1/tenants/:id/members/:userId/profile` — HR xodimni upsert qiladi
+
+**3. Unit testlar (B-001):**
+- 9 test: `adminApi.test.ts` — getAdminCompanies, updateCompanyStatus, getAdminHealth
+- 12 test: `settingsDomain.test.ts` — validatePassword, validateFullName
+- 7 test: `useUserSettings.test.ts` — real ma'lumot, snake_case body, refetchProfile
+- LandingPage.test.tsx tuzatildi: I18nProvider wrapper qo'shildi
+- Jami: 76 test, hammasi o'tdi
+
+**4. EmployeesPage — filter + qidiruv + bloklash:**
+- Status filter chips: all/active/password_pending/password_set/blocked
+- Qidiruv maydoni (isim/email bo'yicha)
+- Block/Unblock tugmalar har bir qatorda
+- `PATCH /v1/tenants/:id/members/:userId/status` backend endpoint
+
+**5. Docs sahifasi — shablonlar kutubxonasi:**
+- 15 ta shablon (shartnomalar, arizalar, buyruqlar)
+- Kategoriya filter + qidiruv
+- "tez orada" badge — AI kreditlar kutilmoqda
+
+**6. Admin dashboard — 30s auto-refresh + sidebar badge:**
+- `setInterval(30_000)` — AdminDashboardPage avtomatik yangilanadi
+- Sidebar "Murojaatlar" navida qizil badge (yangi murojaatlar soni)
+
+**7. Reports sahifasi — AI audit o'chirildi:**
+- "AI Audit" tugmasi disabled holatga o'tkazildi — "tez orada" label
+
+**8. Notifications sahifasi — to'liq bildirishnomalar tarixi:**
+- `NotificationsPage.tsx` — filter (all/unread/read), bulk mark-read
+- `NotificationsDropdown` ga "Barchasini ko'rish" link qo'shildi (`onViewAll` prop)
+- App.tsx da `case "notifications"` ulandi
+
+### Fayllar
+
+- `supabase/functions/server/index.ts` (o'zgargan — 4 yangi endpoint)
+- `frontend/src/features/settings/hooks/useUserSettings.ts` (qayta yozildi)
+- `frontend/src/features/settings/components/ProfileForm.tsx` (qayta yozildi)
+- `frontend/src/features/hr/pages/EmployeeDetailPage.tsx` (qayta yozildi)
+- `frontend/src/features/hr/api/employeesApi.ts` (o'zgargan)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (o'zgargan)
+- `frontend/src/features/admin/__tests__/adminApi.test.ts` (yangi)
+- `frontend/src/features/settings/__tests__/settingsDomain.test.ts` (yangi)
+- `frontend/src/features/settings/__tests__/useUserSettings.test.ts` (yangi)
+- `frontend/src/features/landing/__tests__/LandingPage.test.tsx` (tuzatildi)
+- `frontend/src/features/docs/components/TemplatesLibrary.tsx` (yangi)
+- `frontend/src/features/docs/pages/DocsPage.tsx` (qayta yozildi)
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (o'zgargan)
+- `frontend/src/features/admin/components/AdminLayout.tsx` (o'zgargan)
+- `frontend/src/features/reports/pages/ReportsPage.tsx` (o'zgargan)
+- `frontend/src/features/notifications/pages/NotificationsPage.tsx` (yangi)
+- `frontend/src/features/notifications/components/NotificationsDropdown.tsx` (o'zgargan)
+- `frontend/src/App.tsx` (o'zgargan)
+
+---
+
 ## 2026-05-15 — Web takomillashtirish (davom): TenantSettings, EmployeeDetail, Parol, Landing nav/footer
 
 ### Kontekst

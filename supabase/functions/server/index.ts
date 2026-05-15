@@ -1265,6 +1265,65 @@ const registerRoutes = (prefix: string) => {
     return c.json({ received: true }, 200);
   });
 
+  // ─── GET /v1/settings/profile — joriy foydalanuvchi profili ──────────────
+  app.get(`${prefix}/settings/profile`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+    const userId   = (ctx as any).userId as string;
+    const tenantId = (ctx as any).tenantId as string;
+
+    const { data, error } = await supabase
+      .from("user_tenants")
+      .select("full_name, role, position, phone")
+      .eq("user_id", userId)
+      .eq("tenant_id", tenantId)
+      .single();
+    if (error || !data) return failure(c, 404, "NOT_FOUND", "Profil topilmadi.");
+
+    const { data: { user }, error: authErr } = await supabase.auth.admin.getUserById(userId);
+    if (authErr || !user) return failure(c, 500, "AUTH_ERROR", "Auth foydalanuvchi topilmadi.");
+
+    return success(c, {
+      full_name: data.full_name,
+      email: user.email ?? null,
+      role: data.role,
+      position: data.position ?? null,
+      phone: data.phone ?? null,
+    });
+  });
+
+  // ─── PATCH /v1/settings/profile — o'z profilini yangilash ───────────────
+  app.patch(`${prefix}/settings/profile`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+    const userId   = (ctx as any).userId as string;
+    const tenantId = (ctx as any).tenantId as string;
+
+    const body = await c.req.json().catch(() => ({}));
+    const { full_name, phone } = body as { full_name?: string; phone?: string };
+
+    const updates: Record<string, unknown> = {};
+    if (full_name !== undefined) {
+      if (typeof full_name !== "string" || full_name.trim().length < 2)
+        return failure(c, 422, "VALIDATION_ERROR", "Ism kamida 2 belgi bo'lishi kerak.");
+      updates.full_name = full_name.trim();
+    }
+    if (phone !== undefined) {
+      updates.phone = typeof phone === "string" ? phone.trim() || null : null;
+    }
+    if (Object.keys(updates).length === 0)
+      return failure(c, 422, "VALIDATION_ERROR", "Hech narsa o'zgartirilmagan.");
+
+    const { error } = await supabase
+      .from("user_tenants")
+      .update(updates)
+      .eq("user_id", userId)
+      .eq("tenant_id", tenantId);
+    if (error) return failure(c, 500, "DB_ERROR", error.message);
+
+    return success(c, { ...updates });
+  });
+
   // ─── GET /v1/tenants/:id/profile — kompaniya profili ─────────────────────
   app.get(`${prefix}/tenants/:id/profile`, async (c) => {
     const ctx = await requireTenant(c);
@@ -1323,6 +1382,45 @@ const registerRoutes = (prefix: string) => {
 
     if (!ut) return failure(c, 404, "NOT_FOUND", "Xodim topilmadi.");
     return success(c, { user_tenant: ut, profile: ep ?? null });
+  });
+
+  // ─── PATCH /v1/tenants/:id/members/:userId/profile — HR profil upsert ──
+  app.patch(`${prefix}/tenants/:id/members/:userId/profile`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+    const tenantId    = c.req.param("id");
+    const targetId    = c.req.param("userId");
+    const callerUserId = (ctx as any).userId as string;
+    if (tenantId !== ctx.tenantId) return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
+
+    const { data: callerRow } = await supabase.from("user_tenants")
+      .select("role").eq("user_id", callerUserId).eq("tenant_id", tenantId).single();
+    const role = callerRow?.role ?? "";
+    const allowed = ["leader", "hr", "super_admin", "sub_admin", "company_admin"];
+    if (!allowed.includes(role)) return failure(c, 403, "FORBIDDEN_ROLE", "Faqat HR yoki rahbar tahrir qila oladi.");
+
+    const body = await c.req.json().catch(() => ({}));
+    const ALLOWED_FIELDS = [
+      "last_name","first_name","middle_name","birth_date","gender","citizenship",
+      "passport_number","jshshir","address","position","department","hire_date",
+      "work_type","work_schedule","salary","salary_currency","phone","email",
+      "blood_group","notes","emergency_name","emergency_phone","emergency_rel",
+    ];
+    const data: Record<string, unknown> = {};
+    for (const f of ALLOWED_FIELDS) {
+      if (f in body) data[f] = body[f] === "" ? null : body[f];
+    }
+    if (Object.keys(data).length === 0)
+      return failure(c, 422, "VALIDATION_ERROR", "Hech narsa o'zgartirilmagan.");
+    if (!data.last_name || !data.first_name || !data.position)
+      if ("last_name" in data || "first_name" in data || "position" in data)
+        return failure(c, 422, "VALIDATION_ERROR", "Familiya, ism va lavozim majburiy.");
+
+    const { data: result, error } = await supabase.from("employee_profiles")
+      .upsert({ ...data, user_id: targetId, tenant_id: tenantId }, { onConflict: "user_id,tenant_id" })
+      .select().single();
+    if (error) return failure(c, 500, "DB_ERROR", error.message);
+    return success(c, result);
   });
 
   app.get(`${prefix}/tenants/:id/members`, async (c) => {
@@ -1509,6 +1607,37 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 500, "DB_ERROR", `Ishdan ketkazishda xato: ${error.message}`);
     }
     return success(c, { user_id: targetUserId, status: "terminated" });
+  });
+
+  // ---------------------------------------------------------------------------
+  // PATCH /tenants/:id/members/:userId/status — block / unblock xodim
+  // ---------------------------------------------------------------------------
+  app.patch(`${prefix}/tenants/:id/members/:userId/status`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+    const tenantId     = c.req.param("id");
+    const targetUserId = c.req.param("userId");
+    const callerUserId = (ctx as any).userId as string;
+    if (tenantId !== ctx.tenantId) return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
+    if (callerUserId === targetUserId) return failure(c, 403, "SELF_EDIT_FORBIDDEN", "O'zingizni bloklab bo'lmaydi.");
+
+    const { data: callerRow } = await supabase.from("user_tenants")
+      .select("role").eq("user_id", callerUserId).eq("tenant_id", tenantId).single();
+    const role = callerRow?.role ?? "";
+    if (!["leader", "hr", "super_admin", "sub_admin", "company_admin"].includes(role))
+      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat HR yoki rahbar o'zgartira oladi.");
+
+    const body = await c.req.json().catch(() => ({}));
+    const { status } = body as { status?: string };
+    if (!status || !["blocked", "active"].includes(status))
+      return failure(c, 422, "VALIDATION_ERROR", "status: 'blocked' yoki 'active' bo'lishi kerak.");
+
+    const { error } = await supabase.from("user_tenants")
+      .update({ status })
+      .eq("user_id", targetUserId)
+      .eq("tenant_id", tenantId);
+    if (error) return failure(c, 500, "DB_ERROR", error.message);
+    return success(c, { user_id: targetUserId, status });
   });
 
   // ---------------------------------------------------------------------------

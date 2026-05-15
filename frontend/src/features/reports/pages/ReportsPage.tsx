@@ -164,12 +164,11 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
             {translate("reports.download")}
           </button>
           <button
-            onClick={runAIAudit}
-            disabled={loading}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            disabled
+            title="AI kreditlar kelgandan keyin faollashadi"
+            className="px-4 py-2 bg-slate-100 text-slate-400 rounded-lg text-sm font-medium cursor-not-allowed flex items-center gap-2 border border-slate-200"
           >
-            {auditLoading ? <Loader2 size={18} className="animate-spin" /> : null}
-            {translate("reports.audit")}
+            {translate("reports.audit")} (tez orada)
           </button>
         </div>
       </div>

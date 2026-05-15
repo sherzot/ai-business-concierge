@@ -19,6 +19,7 @@ export type EmployeeRole =
   | "employee";
 
 export type EmployeeStatus = "active" | "terminated";
+export type EmployeeAccountStatus = "active" | "password_pending" | "password_set" | "blocked";
 
 export type Employee = {
   id: string;             // user_id
@@ -26,6 +27,7 @@ export type Employee = {
   email: string | null;
   role: EmployeeRole;
   status: EmployeeStatus;
+  account_status?: EmployeeAccountStatus;
   terminated_at: string | null;
   termination_reason: string | null;
 };
@@ -143,6 +145,18 @@ export async function confirmEmployee(tenantId: string, userId: string): Promise
   await apiRequest(`/tenants/${tenantId}/members/${userId}/confirm`, {
     method: "POST",
     body: JSON.stringify({}),
+    tenantId,
+  });
+}
+
+export async function setEmployeeStatus(
+  tenantId: string,
+  userId: string,
+  status: "blocked" | "active",
+): Promise<void> {
+  await apiRequest(`/tenants/${tenantId}/members/${userId}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
     tenantId,
   });
 }
