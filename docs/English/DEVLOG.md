@@ -8,6 +8,59 @@ Project development history, completed work, encountered errors, and their solut
 
 ---
 
+## 2026-05-15 — Phase 1.5 completion + Phase 2.3 start: AdminCompaniesPage, FAQ, SEO
+
+### Context
+
+While waiting for API credits (Anthropic/OpenAI), the web side was improved. The missing `/admin/companies` page from Phase 1.5 was built, and the Landing page received a FAQ section and SEO meta tags from Phase 2.3.
+
+### Done
+
+**1. Backend — `GET /v1/admin/companies` endpoint (new):**
+- Returns all tenants with full fields: id, name, status, legal_form, stir, contact info, bank, blocked_reason, timestamps
+- `member_count` per tenant (from user_tenants, excluding terminated)
+- Status filter: `?status=pending_approval|active|suspended|blocked`
+- Super_admin / sub_admin only
+
+**2. Frontend — `adminApi.ts` extended:**
+- `Company` type + `CompanyStatus` type
+- `getAdminCompanies(status?)` function
+- `updateCompanyStatus(id, status, blocked_reason?)` → `PATCH /admin/tenants/:id/status`
+
+**3. Frontend — `AdminCompaniesPage.tsx` (new):**
+- 4 status summary cards (pending/active/suspended/blocked)
+- Filter tabs + search (name, STIR, email, phone)
+- Expandable rows: legal info, bank details, blocked reason
+- Actions: Approve, Suspend, Unblock, Block (with reason modal)
+- Route: `/admin/companies` with `RequireAuth` wrapper
+
+**4. Frontend — Landing FAQ section:**
+- `FaqSection.tsx` — accordion, accessible (aria-expanded), animation
+- 6 FAQ items in 4 languages (uz/ru/en/ja) added to `i18n.ts`
+- `LandingDict` type extended with `faq: { title, items: FaqItem[] }`
+- Page order: PricingSection → FaqSection → LandingCtaBanner
+
+**5. SEO — `index.html` updated:**
+- `<title>` with product name + description
+- `<meta name="description">`, keywords, author, robots
+- Open Graph meta tags
+- Twitter Card meta tags
+- `<link rel="canonical">`
+- `<meta name="theme-color" content="#0f172a">`
+- `<html lang="uz">`
+
+### Files
+- `supabase/functions/server/index.ts` (GET /admin/companies added)
+- `frontend/src/features/admin/api/adminApi.ts`
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (new)
+- `frontend/src/app/router.tsx` (/admin/companies route)
+- `frontend/src/features/landing/i18n.ts` (FAQ in 4 locales)
+- `frontend/src/features/landing/components/FaqSection.tsx` (new)
+- `frontend/src/features/landing/pages/LandingPage.tsx`
+- `frontend/index.html` (SEO meta tags)
+
+---
+
 ## 2026-05-14 — security: 5 views switched to SECURITY INVOKER
 
 ### Context

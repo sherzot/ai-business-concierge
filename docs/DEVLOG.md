@@ -8,6 +8,66 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-15 — Phase 1.5 tugallash + Phase 2.3 boshlash: AdminCompaniesPage, FAQ, SEO
+
+### Kontekst
+
+API kreditlar (Anthropic/OpenAI) kutilayotgan paytda web qismi takomillashtirildi. Phase 1.5 da yetishmayotgan `/admin/companies` sahifasi yaratildi, Phase 2.3 dan Landing page ga FAQ bo'limi va SEO meta tags qo'shildi.
+
+### Bajarildi
+
+**1. Backend — `GET /v1/admin/companies` endpoint (yangi):**
+- `tenants` jadvalidan barcha maydonlar: id, name, status, legal_form, stir, legal_address, activity_type, contact_phone, contact_email, website, employee_count_range, bank_name, bank_account, blocked_reason, blocked_at, approved_at, created_at
+- Har tenant uchun `member_count` (user_tenants dan, terminated emas)
+- Status filtrlash: `?status=pending_approval|active|suspended|blocked`
+- Faqat super_admin / sub_admin uchun
+
+**2. Frontend — `adminApi.ts` kengaytirildi:**
+- `Company` type (barcha tenant maydonlari + member_count)
+- `CompanyStatus` type
+- `getAdminCompanies(status?)` funksiyasi
+- `updateCompanyStatus(id, status, blocked_reason?)` funksiyasi → `PATCH /admin/tenants/:id/status` ga yuboradi
+
+**3. Frontend — `AdminCompaniesPage.tsx` (yangi):**
+- 4 ta status summary karta (pending/active/suspended/blocked)
+- Filter tabs + qidiruv (nom, STIR, email, telefon)
+- Kengaytiriladigan qatorlar: yuridik ma'lumotlar, bank, bloklash sababi
+- Amallar: Tasdiqlash, To'xtatish, Blokdan chiqarish, Bloklash (sabab modal bilan)
+- Route: `/admin/companies` → `RequireAuth` wrapper
+
+**4. Frontend — Landing FAQ bo'limi:**
+- `FaqSection.tsx` — accordion, accessible (aria-expanded), animatsiya
+- 6 ta savol-javob 4 tilda (uz/ru/en/ja) `i18n.ts` ga qo'shildi
+- `LandingDict` tipiga `faq: { title, items: FaqItem[] }` qo'shildi
+- `LandingPage.tsx` da PricingSection → FaqSection → LandingCtaBanner tartibida
+
+**5. SEO — `index.html` yangilandi:**
+- `<title>` o'zgartirildi (mahsulot nomi + tavsif)
+- `<meta name="description">`, keywords, author, robots
+- Open Graph meta tags (og:title, og:description, og:type, og:locale)
+- Twitter Card meta tags
+- `<link rel="canonical">`
+- `<meta name="theme-color" content="#0f172a">`
+- `<html lang="uz">` qo'shildi
+
+### PLAN.md holati yangilanishi
+
+- B-019: Company registration flow → **DONE** (AdminCompaniesPage qo'shildi, Phase 1.5 tugallandi)
+- Phase 2.3 Landing page: **BOSHLANDI** (FAQ + SEO done; qoldi: hujjat generatsiya kredit kerak)
+
+### Fayllar
+- `supabase/functions/server/index.ts` (GET /admin/companies qo'shildi)
+- `frontend/src/features/admin/api/adminApi.ts` (Company type + getAdminCompanies + updateCompanyStatus)
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (yangi)
+- `frontend/src/app/router.tsx` (/admin/companies route qo'shildi)
+- `frontend/src/features/landing/i18n.ts` (FaqItem type + faq 4 tilda)
+- `frontend/src/features/landing/components/FaqSection.tsx` (yangi)
+- `frontend/src/features/landing/pages/LandingPage.tsx` (FaqSection import + render)
+- `frontend/index.html` (SEO meta tags)
+- `docs/{DEVLOG,English/DEVLOG,Russian/DEVLOG,Uzbek/DEVLOG,日本語/DEVLOG}.md` (sinxron)
+
+---
+
 ## 2026-05-14 — security: 5 view SECURITY INVOKER ga o'tkazildi
 
 ### Kontekst

@@ -8,6 +8,24 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-15 — Phase 1.5 tugallash + Phase 2.3: AdminCompaniesPage, FAQ, SEO
+
+### Bajarildi
+
+- Backend: `GET /v1/admin/companies` (yangi endpoint, super_admin/sub_admin)
+- `adminApi.ts`: `Company` type, `getAdminCompanies`, `updateCompanyStatus`
+- `AdminCompaniesPage.tsx` (yangi): status kartalar, filter, qidiruv, expand, amallar, bloklash modal
+- Router: `/admin/companies` route qo'shildi
+- `FaqSection.tsx` (yangi): 6 savol-javob, accordion, 4 tilda
+- `i18n.ts`: `faq` bo'limi 4 tilda qo'shildi
+- `LandingPage.tsx`: FaqSection PricingSection dan keyin
+- `index.html`: SEO meta tags, OG, Twitter Card, canonical
+
+### Fayllar
+- `supabase/functions/server/index.ts`, `frontend/src/features/admin/*`, `frontend/src/features/landing/*`, `frontend/index.html`
+
+---
+
 ## 2026-05-14 — security: 5 view SECURITY INVOKER ga o'tkazildi
 
 ### Kontekst

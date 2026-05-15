@@ -8,6 +8,59 @@
 
 ---
 
+## 2026-05-15 — Завершение Phase 1.5 + начало Phase 2.3: AdminCompaniesPage, FAQ, SEO
+
+### Контекст
+
+Пока ожидаются API-кредиты (Anthropic/OpenAI), улучшена веб-часть. Добавлена недостающая страница `/admin/companies` из Phase 1.5, а лендинг получил раздел FAQ и SEO-мета-теги из Phase 2.3.
+
+### Сделано
+
+**1. Backend — эндпоинт `GET /v1/admin/companies` (новый):**
+- Возвращает все тенанты с полным набором полей: id, name, status, legal_form, stir, контактная информация, банк, blocked_reason, временны́е метки
+- `member_count` на тенант (из user_tenants, без terminated)
+- Фильтр по статусу: `?status=pending_approval|active|suspended|blocked`
+- Только для super_admin / sub_admin
+
+**2. Frontend — `adminApi.ts` расширен:**
+- Тип `Company` + тип `CompanyStatus`
+- Функция `getAdminCompanies(status?)`
+- Функция `updateCompanyStatus(id, status, blocked_reason?)` → `PATCH /admin/tenants/:id/status`
+
+**3. Frontend — `AdminCompaniesPage.tsx` (новый):**
+- 4 карточки статусов (pending/active/suspended/blocked)
+- Вкладки фильтрации + поиск (название, ИНН/СТИР, email, телефон)
+- Раскрываемые строки: юридические данные, банк, причина блокировки
+- Действия: Подтвердить, Приостановить, Разблокировать, Заблокировать (с модальным окном причины)
+- Маршрут `/admin/companies` с `RequireAuth`
+
+**4. Frontend — раздел FAQ на лендинге:**
+- `FaqSection.tsx` — аккордеон, доступный (aria-expanded), анимация
+- 6 вопросов на 4 языках (uz/ru/en/ja) добавлены в `i18n.ts`
+- Тип `LandingDict` расширен: `faq: { title, items: FaqItem[] }`
+- Порядок на странице: PricingSection → FaqSection → LandingCtaBanner
+
+**5. SEO — обновлён `index.html`:**
+- `<title>` с названием и описанием продукта
+- `<meta name="description">`, keywords, author, robots
+- Мета-теги Open Graph
+- Мета-теги Twitter Card
+- `<link rel="canonical">`
+- `<meta name="theme-color" content="#0f172a">`
+- `<html lang="uz">`
+
+### Файлы
+- `supabase/functions/server/index.ts`
+- `frontend/src/features/admin/api/adminApi.ts`
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (новый)
+- `frontend/src/app/router.tsx`
+- `frontend/src/features/landing/i18n.ts`
+- `frontend/src/features/landing/components/FaqSection.tsx` (новый)
+- `frontend/src/features/landing/pages/LandingPage.tsx`
+- `frontend/index.html`
+
+---
+
 ## 2026-05-14 — security: 5 view переведены на SECURITY INVOKER
 
 ### Контекст

@@ -10,6 +10,7 @@ import { LandingPage } from "../features/landing/pages/LandingPage";
 import { ContactPage } from "../features/landing/pages/ContactPage";
 import { RegisterCompanyPage } from "../features/landing/pages/RegisterCompanyPage";
 import { AdminContactsPage } from "../features/admin/pages/AdminContactsPage";
+import { AdminCompaniesPage } from "../features/admin/pages/AdminCompaniesPage";
 import { AdminHealthPage } from "../features/admin/pages/AdminHealthPage";
 import { AdminAIChatPage } from "../features/admin/pages/AdminAIChatPage";
 
@@ -27,6 +28,14 @@ export const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <AdminContactsPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/admin/companies",
+    element: (
+      <RequireAuth>
+        <AdminCompaniesPage />
       </RequireAuth>
     ),
   },

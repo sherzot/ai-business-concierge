@@ -254,6 +254,34 @@ OPENAI_API_KEY=        # Embedding uchun (text-embedding-3-small)
 
 ---
 
+## DEVLOG PROTOKOLI (§DEVLOG)
+
+**Qoida:** Har qanday muhim o'zgarish (yangi feature, bug fix, migration, arxitektura qarori, deployment xatosi) **5 ta faylga bir vaqtda** yozilishi SHART:
+
+1. `docs/DEVLOG.md` — asosiy (o'zbek, batafsil)
+2. `docs/English/DEVLOG.md` — inglizcha tarjima
+3. `docs/Russian/DEVLOG.md` — ruscha tarjima
+4. `docs/Uzbek/DEVLOG.md` — o'zbek (qisqa variant)
+5. `docs/日本語/DEVLOG.md` — yaponcha tarjima
+
+**Format:**
+```
+## YYYY-MM-DD — qisqa tavsif
+
+### Kontekst / Context / Контекст / コンテキスト
+Nima muammo bor edi yoki nima kerak edi.
+
+### Bajarildi / Done / Сделано / 実施内容
+- Konkret o'zgarishlar ro'yxati
+
+### Fayllar / Files / Файлы / ファイル
+- `path/to/file` (yangi/o'zgargan)
+```
+
+**Sinxronizatsiya tekshiruvi:** Har sessiya oxirida barcha 5 ta DEVLOG.md dagi so'nggi yozuv bir xil sanali bo'lishi kerak. Agar farq bo'lsa — tarjimani darhol qo'shing.
+
+---
+
 ## DOIMIY ESLATMALAR
 
 - **Migration** — DB o'zgarish faqat migration fayl orqali
@@ -261,4 +289,5 @@ OPENAI_API_KEY=        # Embedding uchun (text-embedding-3-small)
 - **i18n** — yangi UI string = uz + ru tarjima
 - **Mobile** — har bir UI o'zgarish mobile da tekshiriladi
 - **AI test** — AI prompt o'zgarish = 10 ta test savol bilan tekshirish
+- **DEVLOG** — har muhim o'zgarish 5 ta DEVLOG.md ga yoziladi (§DEVLOG qarang)
 - **Raqobat** — SQB raqib emas, funnel. Biz kundalik ops, ular startup bosqich.

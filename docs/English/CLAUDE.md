@@ -136,10 +136,39 @@ OPENAI_API_KEY=
 
 ---
 
+## DEVLOG PROTOCOL (§DEVLOG)
+
+**Rule:** Every significant change (new feature, bug fix, migration, architectural decision, deployment error) MUST be written to **5 files simultaneously**:
+
+1. `docs/DEVLOG.md` — primary (Uzbek, detailed)
+2. `docs/English/DEVLOG.md` — English translation
+3. `docs/Russian/DEVLOG.md` — Russian translation
+4. `docs/Uzbek/DEVLOG.md` — Uzbek (short variant)
+5. `docs/日本語/DEVLOG.md` — Japanese translation
+
+**Format:**
+```
+## YYYY-MM-DD — short description
+
+### Context
+What problem existed or what was needed.
+
+### Done
+- List of concrete changes
+
+### Files
+- `path/to/file` (new/changed)
+```
+
+**Sync check:** At the end of each session, the latest entry in all 5 DEVLOG.md files must have the same date. If there's a discrepancy — add the translation immediately.
+
+---
+
 ## CONSTANT REMINDERS
 
 - **Migration** — DB changes only through migration files
 - **Test** — new API endpoint = new test
 - **i18n** — new UI string = uz + ru translation
 - **Mobile** — every UI change checked on mobile
+- **DEVLOG** — every significant change goes into all 5 DEVLOG.md files (see §DEVLOG)
 - **Competition** — SQB is not a competitor, it's a funnel. We handle daily ops, they handle the startup phase.

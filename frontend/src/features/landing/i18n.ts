@@ -11,6 +11,8 @@ type OnboardingFeature = { icon: string; text: string };
 type ContactSources = { ads: string; referral: string; search: string; telegram: string; other: string };
 type BusinessTypes = { yatt: string; llc: string; jsc: string; other: string };
 
+type FaqItem = { q: string; a: string };
+
 type LandingDict = {
   nav: { login: string; contact: string };
   hero: { badge: string; title: string; subtitle: string; ctaTelegram: string; ctaLogin: string };
@@ -85,6 +87,7 @@ type LandingDict = {
     free: { name: string; price: string; period: string; cta: string; features: string[] };
     pro: { name: string; price: string; period: string; cta: string; features: string[]; badge: string };
   };
+  faq: { title: string; items: FaqItem[] };
   footer: { tagline: string; rights: string };
 };
 
@@ -389,6 +392,35 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
           "Ustuvor qo'llab-quvvatlash",
         ],
       },
+    },
+    faq: {
+      title: "Ko'p so'raladigan savollar",
+      items: [
+        {
+          q: "AI Maslahatchi noto'g'ri javob bersachi?",
+          a: "Har bir javobda ishonch darajasi ko'rsatiladi va 'Bu AI maslahat, mutaxassis bilan maslahatlashing' eslatmasi qo'yiladi. Kritik qarorlar uchun professional maslahat olishni tavsiya qilamiz.",
+        },
+        {
+          q: "Bepul rejada necha savol bersa bo'ladi?",
+          a: "Bepul rejada 5 ta savol/kun. Telegram bot orqali istalgan vaqt savollaringizni yuboring — limitdan ortiqchasi avtomatik keyingi kunga o'tkazilmaydi.",
+        },
+        {
+          q: "Ma'lumotlarim xavfsizmi?",
+          a: "Ha. Har bir kompaniya ma'lumotlari to'liq ajratilgan (multi-tenant arxitektura). Supabase PostgreSQL + Row Level Security — boshqa kompaniya ma'lumotlaringizni ko'ra olmaydi.",
+        },
+        {
+          q: "O'zbek tilida qanchalik yaxshi javob beradi?",
+          a: "AI O'zbekiston 2026-yil soliq qonunlari, Mehnat kodeksi va biznes qoidalari asosida javob beradi. Javoblar o'zbek, rus, ingliz va yapon tillarida — foydalanuvchi tilida.",
+        },
+        {
+          q: "Telegram bot bilan web dashboard farqi nima?",
+          a: "Telegram bot — tez savol-javob uchun (maslahat, hujjat so'rash). Web dashboard — keng funksionallik: xodimlar boshqaruvi, vazifalar, hisobotlar, AI sozlamalari.",
+        },
+        {
+          q: "To'lov tizimi qachon ishga tushadi?",
+          a: "Pro tarif Click va Payme orqali to'lov 2026 Q3 da ishga tushadi. Hozir beta davri — barcha funksiyalar bepul.",
+        },
+      ],
     },
     footer: {
       tagline: "O'zbekiston biznes uchun AI yordamchi — mahalliy va xalqaro",
@@ -697,6 +729,35 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
         ],
       },
     },
+    faq: {
+      title: "Часто задаваемые вопросы",
+      items: [
+        {
+          q: "Что если AI Консультант даст неверный ответ?",
+          a: "Каждый ответ сопровождается уровнем уверенности и пометкой «Это AI-консультация, обратитесь к специалисту». Для критических решений рекомендуем консультацию с профессионалом.",
+        },
+        {
+          q: "Сколько вопросов можно задать на бесплатном тарифе?",
+          a: "На бесплатном тарифе — 5 вопросов/день. Через Telegram бот в любое время. Лимит не переносится на следующий день автоматически.",
+        },
+        {
+          q: "Мои данные в безопасности?",
+          a: "Да. Данные каждой компании полностью изолированы (мультитенантная архитектура). Supabase PostgreSQL + Row Level Security — другая компания не увидит ваши данные.",
+        },
+        {
+          q: "Насколько хорошо система знает законодательство Узбекистана?",
+          a: "AI отвечает на основе налогового законодательства Узбекистана 2026 года, Трудового кодекса и бизнес-правил. Ответы доступны на узбекском, русском, английском и японском языках.",
+        },
+        {
+          q: "Чем Telegram бот отличается от веб-дашборда?",
+          a: "Telegram бот — для быстрых вопросов (консультации, запрос документов). Веб-дашборд — расширенный функционал: управление сотрудниками, задачи, отчёты, настройки AI.",
+        },
+        {
+          q: "Когда заработает платёжная система?",
+          a: "Оплата Pro-тарифа через Click и Payme появится в Q3 2026. Сейчас бета-период — все функции бесплатны.",
+        },
+      ],
+    },
     footer: {
       tagline: "AI-помощник для бизнеса в Узбекистане — местного и международного",
       rights: "© 2026 AI Business Concierge. Все права защищены.",
@@ -1004,6 +1065,35 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
         ],
       },
     },
+    faq: {
+      title: "Frequently Asked Questions",
+      items: [
+        {
+          q: "What if the AI Advisor gives a wrong answer?",
+          a: "Every response includes a confidence score and a disclaimer: 'This is AI advice — consult a professional for critical decisions.' We recommend professional consultation for high-stakes matters.",
+        },
+        {
+          q: "How many questions can I ask on the free plan?",
+          a: "5 questions per day on the free plan, via Telegram bot anytime. The limit resets daily and does not roll over.",
+        },
+        {
+          q: "Is my data secure?",
+          a: "Yes. Each company's data is fully isolated (multi-tenant architecture). Supabase PostgreSQL + Row Level Security — no other company can see your data.",
+        },
+        {
+          q: "How well does the AI know Uzbekistan law?",
+          a: "The AI answers based on Uzbekistan's 2026 tax legislation, Labour Code, and business regulations. Responses are available in Uzbek, Russian, English, and Japanese.",
+        },
+        {
+          q: "What's the difference between the Telegram bot and the web dashboard?",
+          a: "Telegram bot — for quick questions (advice, document requests). Web dashboard — full functionality: employee management, tasks, reports, AI settings.",
+        },
+        {
+          q: "When will payments go live?",
+          a: "Pro plan payments via Click and Payme launch in Q3 2026. Currently in beta — all features are free.",
+        },
+      ],
+    },
     footer: {
       tagline: "AI assistant for business in Uzbekistan — local and international",
       rights: "© 2026 AI Business Concierge. All rights reserved.",
@@ -1310,6 +1400,35 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
           "優先サポート",
         ],
       },
+    },
+    faq: {
+      title: "よくある質問",
+      items: [
+        {
+          q: "AIアドバイザーが誤った回答をした場合は？",
+          a: "すべての回答には信頼スコアと「これはAIアドバイスです — 重要な決定には専門家にご相談ください」という免責事項が含まれます。",
+        },
+        {
+          q: "無料プランでは何問まで質問できますか？",
+          a: "無料プランはTelegramボット経由で1日5問まで。制限は毎日リセットされ、翌日への繰り越しはありません。",
+        },
+        {
+          q: "データは安全ですか？",
+          a: "はい。各企業のデータは完全に分離されています（マルチテナントアーキテクチャ）。Supabase PostgreSQL + Row Level Security — 他社があなたのデータを見ることはできません。",
+        },
+        {
+          q: "ウズベキスタンの法律にどれほど精通していますか？",
+          a: "AIは2026年のウズベキスタン税法、労働法典、ビジネス規制に基づいて回答します。ウズベク語、ロシア語、英語、日本語で対応しています。",
+        },
+        {
+          q: "TelegramボットとWebダッシュボードの違いは？",
+          a: "Telegramボット — 迅速な質問向け（アドバイス、書類リクエスト）。Webダッシュボード — 全機能：従業員管理、タスク、レポート、AI設定。",
+        },
+        {
+          q: "決済機能はいつ開始しますか？",
+          a: "ClickとPaymeによるProプランの支払いは2026年Q3に開始予定です。現在はベータ期間 — すべての機能が無料です。",
+        },
+      ],
     },
     footer: {
       tagline: "ウズベキスタンのビジネス向けAIアシスタント — 国内・外資企業向け",

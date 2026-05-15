@@ -2694,6 +2694,58 @@ const registerRoutes = (prefix: string) => {
     });
   });
 
+  // ─── GET /v1/admin/companies — kompaniyalar ro'yxati (super_admin / sub_admin) ──
+  app.get(`${prefix}/admin/companies`, async (c) => {
+    const auth = c.req.header("authorization");
+    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+
+    const { data: ut } = await supabase
+      .from("user_tenants").select("role").eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
+    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+
+    const statusFilter = c.req.query("status");
+    let q = supabase
+      .from("tenants")
+      .select(`
+        id, name, status, legal_form, stir, legal_address,
+        activity_type, contact_phone, contact_email, website,
+        employee_count_range, bank_name, bank_account,
+        blocked_reason, blocked_at, approved_at, created_at, updated_at,
+        contact_request_id
+      `)
+      .order("created_at", { ascending: false })
+      .limit(300);
+    if (statusFilter && statusFilter !== "all") q = q.eq("status", statusFilter);
+
+    const { data: tenants, error } = await q;
+    if (error) return failure(c, 500, "DB_ERROR", error.message);
+
+    // Har tenant uchun member count
+    const ids = (tenants ?? []).map((t: any) => t.id);
+    let memberCounts: Record<string, number> = {};
+    if (ids.length > 0) {
+      const { data: counts } = await supabase
+        .from("user_tenants")
+        .select("tenant_id")
+        .in("tenant_id", ids)
+        .neq("status", "terminated");
+      (counts ?? []).forEach((row: any) => {
+        memberCounts[row.tenant_id] = (memberCounts[row.tenant_id] ?? 0) + 1;
+      });
+    }
+
+    const result = (tenants ?? []).map((t: any) => ({
+      ...t,
+      member_count: memberCounts[t.id] ?? 0,
+    }));
+
+    return success(c, result);
+  });
+
   // ─── GET /v1/admin/contacts — super_admin / sub_admin ─────────────────────
   app.get(`${prefix}/admin/contacts`, async (c) => {
     const auth = c.req.header("authorization");

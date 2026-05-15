@@ -656,7 +656,7 @@ Xodim uchun:
 | ID | Vazifa | Phase | Effort | Status |
 |---|---|---|---|---|
 | B-018 | Contact requests (murojaat forma + admin CRM) | Phase 1.5 | M | TODO |
-| B-019 | Company registration flow (invite → register → approve) | Phase 1.5 | L | TODO |
+| B-019 | Company registration flow (invite → register → approve) | Phase 1.5 | L | DONE |
 | B-020 | Employee onboarding (HR creates → email → password → HR confirms) | Phase 1.5 | L | DONE |
 | B-021 | Login page UX (status xabarlari, murojaat havolasi) | Phase 1.5 | S | DONE |
 | B-022 | Forgot/Reset password pages | Phase 1.5 | S | DONE |

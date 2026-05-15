@@ -12,6 +12,7 @@ import { ForWhoSection } from "../components/ForWhoSection";
 import { HowItWorksSection } from "../components/HowItWorksSection";
 import { PricingSection } from "../components/PricingSection";
 import { CompanyOnboardingSection } from "../components/CompanyOnboardingSection";
+import { FaqSection } from "../components/FaqSection";
 import { LandingCtaBanner } from "../components/LandingCtaBanner";
 import { LandingFooter } from "../components/LandingFooter";
 
@@ -33,6 +34,7 @@ export function LandingPage() {
         <HowItWorksSection t={t.howItWorks} />
         <CompanyOnboardingSection t={t.companyOnboarding} tNav={t.nav} />
         <PricingSection t={t.pricing} />
+        <FaqSection t={t.faq} />
         <LandingCtaBanner t={t.hero} />
       </main>
       <LandingFooter t={t.footer} />

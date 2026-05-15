@@ -8,6 +8,59 @@
 
 ---
 
+## 2026-05-15 — Phase 1.5 完了 + Phase 2.3 開始：AdminCompaniesPage、FAQ、SEO
+
+### コンテキスト
+
+APIクレジット（Anthropic/OpenAI）の待機中にWeb側を改善。Phase 1.5 で不足していた `/admin/companies` ページを作成し、Phase 2.3 からランディングページに FAQ セクションと SEO メタタグを追加。
+
+### 実施内容
+
+**1. バックエンド — `GET /v1/admin/companies` エンドポイント（新規）:**
+- テナントの全フィールドを返す：id、name、status、legal_form、stir、連絡先、銀行情報、blocked_reason、タイムスタンプ
+- テナントごとの `member_count`（user_tenants から、terminated 除く）
+- ステータスフィルター：`?status=pending_approval|active|suspended|blocked`
+- super_admin / sub_admin のみ
+
+**2. フロントエンド — `adminApi.ts` 拡張:**
+- `Company` 型 + `CompanyStatus` 型
+- `getAdminCompanies(status?)` 関数
+- `updateCompanyStatus(id, status, blocked_reason?)` 関数
+
+**3. フロントエンド — `AdminCompaniesPage.tsx`（新規）:**
+- 4 つのステータスサマリーカード
+- フィルタータブ + 検索（名前、STIR、メール、電話）
+- 展開可能な行：法人情報、銀行、ブロック理由
+- アクション：承認、一時停止、ブロック解除、ブロック（理由モーダル付き）
+- ルート：`/admin/companies`（RequireAuth ラッパー）
+
+**4. フロントエンド — ランディング FAQ セクション:**
+- `FaqSection.tsx` — アコーディオン、アクセシブル（aria-expanded）、アニメーション
+- 6 件の FAQ を 4 言語（uz/ru/en/ja）で `i18n.ts` に追加
+- `LandingDict` 型に `faq: { title, items: FaqItem[] }` を追加
+- ページ順：PricingSection → FaqSection → LandingCtaBanner
+
+**5. SEO — `index.html` 更新:**
+- `<title>` に製品名と説明を追加
+- `<meta name="description">`、keywords、author、robots
+- Open Graph メタタグ
+- Twitter Card メタタグ
+- `<link rel="canonical">`
+- `<meta name="theme-color" content="#0f172a">`
+- `<html lang="uz">`
+
+### ファイル
+- `supabase/functions/server/index.ts`
+- `frontend/src/features/admin/api/adminApi.ts`
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx`（新規）
+- `frontend/src/app/router.tsx`
+- `frontend/src/features/landing/i18n.ts`
+- `frontend/src/features/landing/components/FaqSection.tsx`（新規）
+- `frontend/src/features/landing/pages/LandingPage.tsx`
+- `frontend/index.html`
+
+---
+
 ## 2026-05-14 — security: 5 ビューを SECURITY INVOKER に変更
 
 ### コンテキスト

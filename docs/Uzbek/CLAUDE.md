@@ -136,10 +136,25 @@ OPENAI_API_KEY=
 
 ---
 
+## DEVLOG PROTOKOLI (§DEVLOG)
+
+**Qoida:** Har qanday muhim o'zgarish (yangi feature, bug fix, migration, arxitektura qarori, deployment xatosi) **5 ta faylga bir vaqtda** yozilishi SHART:
+
+1. `docs/DEVLOG.md` — asosiy (o'zbek, batafsil)
+2. `docs/English/DEVLOG.md` — inglizcha tarjima
+3. `docs/Russian/DEVLOG.md` — ruscha tarjima
+4. `docs/Uzbek/DEVLOG.md` — o'zbek (qisqa variant)
+5. `docs/日本語/DEVLOG.md` — yaponcha tarjima
+
+**Sinxronizatsiya tekshiruvi:** Har sessiya oxirida barcha 5 ta DEVLOG.md dagi so'nggi yozuv bir xil sanali bo'lishi kerak. Agar farq bo'lsa — tarjimani darhol qo'shing.
+
+---
+
 ## DOIMIY ESLATMALAR
 
 - **Migration** — DB o'zgarish faqat migration fayl orqali
 - **Test** — yangi API endpoint = yangi test
 - **i18n** — yangi UI string = uz + ru tarjima
 - **Mobile** — har bir UI o'zgarish mobile da tekshiriladi
+- **DEVLOG** — har muhim o'zgarish 5 ta DEVLOG.md ga yoziladi (§DEVLOG qarang)
 - **Raqobat** — SQB raqib emas, funnel. Biz kundalik ops, ular startup bosqich.
