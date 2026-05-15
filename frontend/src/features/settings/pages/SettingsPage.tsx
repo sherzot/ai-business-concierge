@@ -1,6 +1,7 @@
 import React from "react";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { ProfileForm } from "../components/ProfileForm";
+import { PasswordChangeForm } from "../components/PasswordChangeForm";
 import { useI18n } from "../../../app/providers/I18nProvider";
 
 export function SettingsPage({ tenant }: { tenant: { id: string; name: string } }) {
@@ -16,6 +17,9 @@ export function SettingsPage({ tenant }: { tenant: { id: string; name: string } 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ProfileForm />
         <LanguageSwitcher />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <PasswordChangeForm />
       </div>
     </div>
   );

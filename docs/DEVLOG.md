@@ -8,6 +8,53 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-15 — Web takomillashtirish (davom): TenantSettings, EmployeeDetail, Parol, Landing nav/footer
+
+### Kontekst
+
+API kreditlar kutilayotganda web qismini davom ettirish — 6 ta web takomillashtirish ro'yxatining 3-6 bandlari.
+
+### Bajarildi
+
+**3. TenantSettingsPage (to'liq qayta yozildi):**
+- `GET /v1/tenants/:id/profile` va `PATCH /v1/tenants/:id/profile` backendi
+- Form: name, legal_form, stir, employee_count_range, activity_type, reg_date, legal_address, website, description, contact_phone, contact_email, bank_name, bank_account
+- Stub `<div>Tenant settings</div>` o'rnini oldi
+
+**4. EmployeeDetailPage (yangi):**
+- `GET /v1/tenants/:id/members/:userId` endpoint — user_tenant + employee_profiles JOIN
+- `EmployeeDetailPage` komponenti: 5 bo'lim (Shaxsiy, Mehnat, Aloqa, Favqulodda, Izohlar)
+- EmployeesPage ga `onViewEmployee` callback qo'shildi
+- App.tsx ga `selectedEmployeeId` state va "Kompaniya profili" nav elementi qo'shildi
+
+**5. PasswordChangeForm (yangi):**
+- `supabase.auth.updateUser({ password })` orqali parol o'zgartirish
+- Eye/EyeOff toggle, validatsiya (min 8 belgi, mos kelishi), success/error holatlari
+- SettingsPage ga qo'shildi
+
+**6. Landing nav + footer (yangilab):**
+- LandingNavbar: `features`, `pricing`, `faq` anchor link label qo'shildi; markdown hamburgersiz chiroyli anchor nav (md+ da ko'rinadi); smooth scroll
+- LandingFooter: navigatsiya havolalar qatori (Funksiyalar, Narxlar, Savollar, Murojaat) qo'shildi
+- FeaturesSection ga `id="features"`, PricingSection ga `id="pricing"` qo'shildi
+- i18n 4 ta lokalizatsiya yangilandi: nav (features/pricing/faq), footer.links (4 ta link)
+
+### Fayllar
+
+- `supabase/functions/server/index.ts` (o'zgargan: yangi endpointlar)
+- `frontend/src/features/tenants/pages/TenantSettingsPage.tsx` (qayta yozildi)
+- `frontend/src/features/hr/pages/EmployeeDetailPage.tsx` (yangi)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (o'zgargan: onViewEmployee)
+- `frontend/src/features/settings/components/PasswordChangeForm.tsx` (yangi)
+- `frontend/src/features/settings/pages/SettingsPage.tsx` (o'zgargan)
+- `frontend/src/features/landing/components/LandingNavbar.tsx` (o'zgargan)
+- `frontend/src/features/landing/components/LandingFooter.tsx` (o'zgargan)
+- `frontend/src/features/landing/components/FeaturesSection.tsx` (id qo'shildi)
+- `frontend/src/features/landing/components/PricingSection.tsx` (id qo'shildi)
+- `frontend/src/features/landing/i18n.ts` (o'zgargan: nav + footer.links)
+- `frontend/src/App.tsx` (o'zgargan: EmployeeDetail, TenantSettings, navigate helper)
+
+---
+
 ## 2026-05-15 — Phase 1.5 tugallash + Phase 2.3 boshlash: AdminCompaniesPage, FAQ, SEO
 
 ### Kontekst

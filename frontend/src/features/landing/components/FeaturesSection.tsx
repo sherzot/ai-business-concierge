@@ -9,7 +9,7 @@ type Props = { t: FeaturesT };
 
 export function FeaturesSection({ t }: Props) {
   return (
-    <section className="py-20 sm:py-24 bg-slate-950">
+    <section className="py-20 sm:py-24 bg-slate-950" id="features">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-14">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">{t.title}</h2>

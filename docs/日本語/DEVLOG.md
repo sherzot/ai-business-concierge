@@ -8,6 +8,43 @@
 
 ---
 
+## 2026-05-15 — Web改善（続き）：TenantSettings、EmployeeDetail、パスワード変更、Landing nav/footer
+
+### コンテキスト
+
+APIクレジット待機中にWeb改善を継続 — 6タスクリストの3〜6番目を実装。
+
+### 実施内容
+
+**3. TenantSettingsPage（全面書き直し）:**
+- `GET /v1/tenants/:id/profile` と `PATCH /v1/tenants/:id/profile` エンドポイント
+- フォーム：name、legal_form、stir、employee_count_range、activity_type、reg_date、legal_address、website、description、contact_phone、contact_email、bank_name、bank_account
+
+**4. EmployeeDetailPage（新規）:**
+- `GET /v1/tenants/:id/members/:userId` エンドポイント — user_tenant + employee_profiles JOIN
+- 5セクション（個人情報、雇用情報、連絡先、緊急連絡先、メモ）
+
+**5. PasswordChangeForm（新規）:**
+- `supabase.auth.updateUser({ password })` によるパスワード変更
+- Eye/EyeOff切替、バリデーション（最低8文字、一致確認）、成功/エラー状態
+
+**6. Landing nav + footer（更新）:**
+- LandingNavbar：features/pricing/faqのアンカーリンク（md+で表示）、スムーススクロール
+- LandingFooter：ナビリンク行（機能、料金、FAQ、お問い合わせ）
+- FeaturesSection に `id="features"`、PricingSection に `id="pricing"` 追加
+- i18n全4ロケール更新：nav（features/pricing/faq）、footer.links（4リンク）
+
+### ファイル
+
+- `supabase/functions/server/index.ts`（変更）
+- `frontend/src/features/tenants/pages/TenantSettingsPage.tsx`（書き直し）
+- `frontend/src/features/hr/pages/EmployeeDetailPage.tsx`（新規）
+- `frontend/src/features/settings/components/PasswordChangeForm.tsx`（新規）
+- `frontend/src/features/landing/components/LandingNavbar.tsx`、`LandingFooter.tsx`（変更）
+- `frontend/src/features/landing/i18n.ts`、`frontend/src/App.tsx`（変更）
+
+---
+
 ## 2026-05-15 — Phase 1.5 完了 + Phase 2.3 開始：AdminCompaniesPage、FAQ、SEO
 
 ### コンテキスト

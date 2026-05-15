@@ -14,7 +14,7 @@ type BusinessTypes = { yatt: string; llc: string; jsc: string; other: string };
 type FaqItem = { q: string; a: string };
 
 type LandingDict = {
-  nav: { login: string; contact: string };
+  nav: { login: string; contact: string; features: string; pricing: string; faq: string };
   hero: { badge: string; title: string; subtitle: string; ctaTelegram: string; ctaLogin: string };
   stats: { items: StatItem[] };
   features: {
@@ -88,13 +88,13 @@ type LandingDict = {
     pro: { name: string; price: string; period: string; cta: string; features: string[]; badge: string };
   };
   faq: { title: string; items: FaqItem[] };
-  footer: { tagline: string; rights: string };
+  footer: { tagline: string; rights: string; links: { features: string; pricing: string; faq: string; contact: string } };
 };
 
 export const landingI18n: Record<LandingLocale, LandingDict> = {
   // ─────────────────────────────── UZ ───────────────────────────────
   uz: {
-    nav: { login: "Kirish", contact: "Murojaat" },
+    nav: { login: "Kirish", contact: "Murojaat", features: "Funksiyalar", pricing: "Narxlar", faq: "Savollar" },
     hero: {
       badge: "Beta — Hozir bepul kirish",
       title: "O'zbekistondagi mahalliy va xalqaro kichik bizneslar uchun AI yordamchi",
@@ -425,12 +425,13 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
     footer: {
       tagline: "O'zbekiston biznes uchun AI yordamchi — mahalliy va xalqaro",
       rights: "© 2026 AI Business Concierge. Barcha huquqlar himoyalangan.",
+      links: { features: "Funksiyalar", pricing: "Narxlar", faq: "Savollar", contact: "Murojaat" },
     },
   },
 
   // ─────────────────────────────── RU ───────────────────────────────
   ru: {
-    nav: { login: "Войти", contact: "Связаться" },
+    nav: { login: "Войти", contact: "Связаться", features: "Функции", pricing: "Цены", faq: "FAQ" },
     hero: {
       badge: "Бета — Бесплатный доступ",
       title: "AI-помощник для местного и международного малого бизнеса в Узбекистане",
@@ -761,12 +762,13 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
     footer: {
       tagline: "AI-помощник для бизнеса в Узбекистане — местного и международного",
       rights: "© 2026 AI Business Concierge. Все права защищены.",
+      links: { features: "Функции", pricing: "Цены", faq: "FAQ", contact: "Связаться" },
     },
   },
 
   // ─────────────────────────────── EN ───────────────────────────────
   en: {
-    nav: { login: "Sign In", contact: "Contact Us" },
+    nav: { login: "Sign In", contact: "Contact Us", features: "Features", pricing: "Pricing", faq: "FAQ" },
     hero: {
       badge: "Beta — Free access now",
       title: "AI Assistant for Local and International Small Businesses in Uzbekistan",
@@ -1097,12 +1099,13 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
     footer: {
       tagline: "AI assistant for business in Uzbekistan — local and international",
       rights: "© 2026 AI Business Concierge. All rights reserved.",
+      links: { features: "Features", pricing: "Pricing", faq: "FAQ", contact: "Contact" },
     },
   },
 
   // ─────────────────────────────── JA ───────────────────────────────
   ja: {
-    nav: { login: "ログイン", contact: "お問い合わせ" },
+    nav: { login: "ログイン", contact: "お問い合わせ", features: "機能", pricing: "料金", faq: "よくある質問" },
     hero: {
       badge: "ベータ版 — 無料アクセス中",
       title: "ウズベキスタンの国内・外資中小企業向けAIアシスタント",
@@ -1433,6 +1436,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
     footer: {
       tagline: "ウズベキスタンのビジネス向けAIアシスタント — 国内・外資企業向け",
       rights: "© 2026 AI Business Concierge. All rights reserved.",
+      links: { features: "機能", pricing: "料金", faq: "よくある質問", contact: "お問い合わせ" },
     },
   },
 };

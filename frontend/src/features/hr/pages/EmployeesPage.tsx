@@ -32,7 +32,7 @@ import {
 } from "../api/employeesApi";
 
 type Tenant = { id: string; name: string };
-type Props = { tenant: Tenant; onAddEmployee?: () => void };
+type Props = { tenant: Tenant; onAddEmployee?: () => void; onViewEmployee?: (userId: string) => void };
 
 const ROLE_OPTIONS: EmployeeRole[] = [
   "leader",
@@ -42,7 +42,7 @@ const ROLE_OPTIONS: EmployeeRole[] = [
   "employee",
 ];
 
-export function EmployeesPage({ tenant, onAddEmployee }: Props) {
+export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) {
   const { translate } = useI18n();
   const { currentTenant, profile } = useAuthContext();
   const callerRole = currentTenant?.role;
@@ -167,7 +167,10 @@ export function EmployeesPage({ tenant, onAddEmployee }: Props) {
                   const isSelf = emp.id === callerUserId;
                   return (
                     <tr key={emp.id} className="border-t border-slate-100 hover:bg-slate-50/60">
-                      <td className="px-4 py-3 font-medium text-slate-900">
+                      <td
+                        className="px-4 py-3 font-medium text-slate-900 cursor-pointer hover:text-indigo-600 transition-colors"
+                        onClick={() => onViewEmployee?.(emp.id)}
+                      >
                         {emp.name}
                         {isSelf && (
                           <span className="ml-2 rounded-full bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-700">

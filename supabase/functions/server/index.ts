@@ -1265,6 +1265,66 @@ const registerRoutes = (prefix: string) => {
     return c.json({ received: true }, 200);
   });
 
+  // ─── GET /v1/tenants/:id/profile — kompaniya profili ─────────────────────
+  app.get(`${prefix}/tenants/:id/profile`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+    const tenantId = c.req.param("id");
+    if (tenantId !== ctx.tenantId) return failure(c, 403, "FORBIDDEN", "Boshqa tenant profiliga kirish mumkin emas.");
+    const { data, error } = await supabase
+      .from("tenants")
+      .select("id,name,status,legal_form,stir,legal_address,activity_type,reg_date,website,description,contact_phone,contact_email,bank_name,bank_account,employee_count_range,created_at,updated_at")
+      .eq("id", tenantId).single();
+    if (error || !data) return failure(c, 404, "NOT_FOUND", "Tenant topilmadi.");
+    return success(c, data);
+  });
+
+  // ─── PATCH /v1/tenants/:id/profile — kompaniya profilini tahrirlash ───────
+  app.patch(`${prefix}/tenants/:id/profile`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+    const tenantId = c.req.param("id");
+    if (tenantId !== ctx.tenantId) return failure(c, 403, "FORBIDDEN", "Boshqa tenant profilini o'zgartira olmaysiz.");
+
+    const role = (ctx as any).role as string;
+    if (!["company_admin", "leader", "super_admin", "sub_admin"].includes(role)) {
+      return failure(c, 403, "FORBIDDEN", "Faqat company_admin kompaniya profilini o'zgartira oladi.");
+    }
+
+    const body = await c.req.json().catch(() => ({}));
+    const allowed = ["name","legal_form","stir","legal_address","activity_type","reg_date","website","description","contact_phone","contact_email","bank_name","bank_account","employee_count_range"];
+    const update: Record<string, unknown> = {};
+    for (const key of allowed) {
+      if (key in body) update[key] = body[key] === "" ? null : body[key];
+    }
+    if (Object.keys(update).length === 0) return failure(c, 400, "VALIDATION_ERROR", "Hech narsa o'zgarmadi.");
+
+    const { data, error } = await supabase.from("tenants").update(update).eq("id", tenantId).select().single();
+    if (error) return failure(c, 500, "DB_ERROR", error.message);
+    return success(c, data);
+  });
+
+  // ─── GET /v1/tenants/:id/members/:userId — xodim tafsiloti ──────────────
+  app.get(`${prefix}/tenants/:id/members/:userId`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+    const tenantId = c.req.param("id");
+    const targetId = c.req.param("userId");
+    if (tenantId !== ctx.tenantId) return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
+
+    const [{ data: ut }, { data: ep }] = await Promise.all([
+      supabase.from("user_tenants")
+        .select("full_name,role,status,position,phone,created_at")
+        .eq("tenant_id", tenantId).eq("user_id", targetId).single(),
+      supabase.from("employee_profiles")
+        .select("*")
+        .eq("tenant_id", tenantId).eq("user_id", targetId).maybeSingle(),
+    ]);
+
+    if (!ut) return failure(c, 404, "NOT_FOUND", "Xodim topilmadi.");
+    return success(c, { user_tenant: ut, profile: ep ?? null });
+  });
+
   app.get(`${prefix}/tenants/:id/members`, async (c) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;

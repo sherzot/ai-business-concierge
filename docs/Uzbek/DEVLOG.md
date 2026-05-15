@@ -8,6 +8,32 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-15 — Web takomillashtirish (davom): TenantSettings, EmployeeDetail, Parol, Landing
+
+### Kontekst
+
+6 ta web takomillashtirish ro'yxatining 3-6 bandlari amalga oshirildi.
+
+### Bajarildi
+
+- TenantSettingsPage to'liq yozildi + backend (GET/PATCH profile)
+- EmployeeDetailPage yangi: user_tenant + employee_profiles JOIN
+- PasswordChangeForm: `supabase.auth.updateUser` orqali
+- Landing navbar: features/pricing/faq anchor havolalar (smooth scroll)
+- Landing footer: navigatsiya havolalar qatori
+- FeaturesSection `id="features"`, PricingSection `id="pricing"`
+- i18n 4 ta lokalizatsiya yangilandi (nav + footer.links)
+
+### Fayllar
+
+- `supabase/functions/server/index.ts`, `frontend/src/features/tenants/pages/TenantSettingsPage.tsx`
+- `frontend/src/features/hr/pages/EmployeeDetailPage.tsx` (yangi)
+- `frontend/src/features/settings/components/PasswordChangeForm.tsx` (yangi)
+- `frontend/src/features/landing/components/LandingNavbar.tsx`, `LandingFooter.tsx`
+- `frontend/src/features/landing/i18n.ts`, `frontend/src/App.tsx`
+
+---
+
 ## 2026-05-15 — Phase 1.5 tugallash + Phase 2.3: AdminCompaniesPage, FAQ, SEO
 
 ### Bajarildi

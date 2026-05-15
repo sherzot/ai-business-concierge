@@ -8,6 +8,53 @@
 
 ---
 
+## 2026-05-15 — Улучшения веб-части (продолжение): TenantSettings, EmployeeDetail, Пароль, Landing nav/footer
+
+### Контекст
+
+Продолжение веб-улучшений в ожидании API-кредитов — пункты 3–6 из 6 запланированных улучшений.
+
+### Сделано
+
+**3. TenantSettingsPage (полная перезапись):**
+- Эндпоинты `GET /v1/tenants/:id/profile` и `PATCH /v1/tenants/:id/profile`
+- Форма: name, legal_form, stir, employee_count_range, activity_type, reg_date, legal_address, website, description, contact_phone, contact_email, bank_name, bank_account
+- Заменил заглушку `<div>Tenant settings</div>`
+
+**4. EmployeeDetailPage (новый):**
+- Эндпоинт `GET /v1/tenants/:id/members/:userId` — JOIN user_tenant + employee_profiles
+- Компонент `EmployeeDetailPage`: 5 разделов (Личные, Трудовые, Контакты, Экстренные, Заметки)
+- Добавлен коллбэк `onViewEmployee` в EmployeesPage
+- В App.tsx добавлен state `selectedEmployeeId` и пункт навигации "Профиль компании"
+
+**5. PasswordChangeForm (новый):**
+- Смена пароля через `supabase.auth.updateUser({ password })`
+- Eye/EyeOff-переключатель, валидация (мин. 8 символов, совпадение), состояния успех/ошибка
+- Добавлен в SettingsPage
+
+**6. Landing nav + footer (обновлены):**
+- LandingNavbar: якорные ссылки features/pricing/faq (видны на md+), плавная прокрутка
+- LandingFooter: строка ссылок навигации (Функции, Цены, FAQ, Связаться)
+- `id="features"` на FeaturesSection, `id="pricing"` на PricingSection
+- i18n обновлён для всех 4 локалей: nav (features/pricing/faq), footer.links (4 ссылки)
+
+### Файлы
+
+- `supabase/functions/server/index.ts` (изменён: новые эндпоинты)
+- `frontend/src/features/tenants/pages/TenantSettingsPage.tsx` (перезаписан)
+- `frontend/src/features/hr/pages/EmployeeDetailPage.tsx` (новый)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (изменён: onViewEmployee)
+- `frontend/src/features/settings/components/PasswordChangeForm.tsx` (новый)
+- `frontend/src/features/settings/pages/SettingsPage.tsx` (изменён)
+- `frontend/src/features/landing/components/LandingNavbar.tsx` (изменён)
+- `frontend/src/features/landing/components/LandingFooter.tsx` (изменён)
+- `frontend/src/features/landing/components/FeaturesSection.tsx` (добавлен id)
+- `frontend/src/features/landing/components/PricingSection.tsx` (добавлен id)
+- `frontend/src/features/landing/i18n.ts` (изменён: nav + footer.links)
+- `frontend/src/App.tsx` (изменён: EmployeeDetail, TenantSettings, navigate helper)
+
+---
+
 ## 2026-05-15 — Завершение Phase 1.5 + начало Phase 2.3: AdminCompaniesPage, FAQ, SEO
 
 ### Контекст

@@ -48,6 +48,8 @@ import { EmployeesPage } from "./features/hr/pages/EmployeesPage";
 import { DocsPage } from "./features/docs/pages/DocsPage";
 import { IntegrationsPage } from "./features/integrations/pages/IntegrationsPage";
 import { SettingsPage } from "./features/settings/pages/SettingsPage";
+import { TenantSettingsPage } from "./features/tenants/pages/TenantSettingsPage";
+import { EmployeeDetailPage } from "./features/hr/pages/EmployeeDetailPage";
 import { AIChat } from "./shared/components/AIChat";
 import { NotificationsDropdown } from "./features/notifications/components/NotificationsDropdown";
 import {
@@ -98,6 +100,12 @@ export default function App() {
     logout,
   } = useAuthContext();
   const [activeModule, setActiveModule] = useState<string>("dashboard");
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
+
+  function navigate(module: string) {
+    setActiveModule(module);
+    setSelectedEmployeeId(null);
+  }
   const [tenantDropdownOpen, setTenantDropdownOpen] = useState(false);
   const [hrExpanded, setHrExpanded] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -184,7 +192,22 @@ export default function App() {
       case "tasks":
         return <TasksPage tenant={tenant} />;
       case "hr":
-        return <EmployeesPage tenant={tenant} onAddEmployee={() => setActiveModule("hr-add-employee")} />;
+        if (selectedEmployeeId) {
+          return (
+            <EmployeeDetailPage
+              tenantId={tenant.id}
+              userId={selectedEmployeeId}
+              onBack={() => setSelectedEmployeeId(null)}
+            />
+          );
+        }
+        return (
+          <EmployeesPage
+            tenant={tenant}
+            onAddEmployee={() => setActiveModule("hr-add-employee")}
+            onViewEmployee={(id) => setSelectedEmployeeId(id)}
+          />
+        );
       case "hr-cases":
         return <HrCasesPage tenant={tenant} />;
       case "hr-surveys":
@@ -199,6 +222,8 @@ export default function App() {
         return <IntegrationsPage tenant={tenant} />;
       case "settings":
         return <SettingsPage tenant={tenant} />;
+      case "company-profile":
+        return <TenantSettingsPage tenant={tenant} />;
       default:
         return <DashboardPage tenant={tenant} />;
     }
@@ -339,6 +364,14 @@ export default function App() {
 
         {/* Bottom: Settings + AI Status */}
         <div className="p-4 border-t border-slate-800/80 space-y-2">
+          {(currentTenant.role === "company_admin" || currentTenant.role === "leader") && (
+            <NavItem
+              icon={<Building2 size={20} />}
+              label="Kompaniya profili"
+              active={activeModule === "company-profile"}
+              onClick={() => setActiveModule("company-profile")}
+            />
+          )}
           <NavItem
             icon={<Settings size={20} />}
             label={translate("nav.settings")}
