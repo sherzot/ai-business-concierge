@@ -8,6 +8,20 @@
 
 ---
 
+## 2026-05-27 — UI/UX #9: キーボードショートカット（⌘K検索、⌘N従業員追加）
+
+### 実施内容
+
+- `App.tsx`に`keydown`リスナー: `Cmd/Ctrl+K` → 検索inputにフォーカス+選択; `Cmd/Ctrl+N` → `hr-add-employee`へナビゲート（HR権限がある場合のみ）
+- `navigator.platform`でMac/Windowsモッドキー判定
+- 検索プレースホルダー更新: `"... (⌘K)"`ヒント追加
+
+### ファイル
+
+- `frontend/src/App.tsx` (変更)
+
+---
+
 ## 2026-05-27 — UI/UX #8: テーブルページネーション（EmployeesPage、AdminCompaniesPage）
 
 ### 実施内容

@@ -8,6 +8,18 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #9: Klaviatura shortcutlar
+
+### Bajarildi
+
+- ⌘K: qidiruv ga focus; ⌘N: xodim qo'shish sahifasi; placeholder hint
+
+### Fayllar
+
+- `frontend/src/App.tsx` (o'zgargan)
+
+---
+
 ## 2026-05-27 — UI/UX #8: Jadval paginatsiyasi
 
 ### Bajarildi

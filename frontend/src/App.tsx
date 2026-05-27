@@ -131,6 +131,30 @@ export default function App() {
     }
   }, [tenantDropdownOpen]);
 
+  // ── Keyboard shortcuts ───────────────────────────────────────────────────────
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const isMac = navigator.platform.toUpperCase().includes("MAC");
+      const mod = isMac ? e.metaKey : e.ctrlKey;
+      if (!mod) return;
+
+      // Cmd/Ctrl+K — focus search
+      if (e.key === "k") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
+      }
+
+      // Cmd/Ctrl+N — navigate to add-employee (HR section)
+      if (e.key === "n" && canAccess("hr")) {
+        e.preventDefault();
+        setActiveModule("hr-add-employee");
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [canAccess]);
+
   const allowedMain = NAV_MAIN.filter((m) => canAccess(m.permission));
   const allowedHr = NAV_HR.filter((m) => canAccess(m.permission));
   const canAccessHr = canAccess("hr");
@@ -433,7 +457,7 @@ export default function App() {
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder={translate("nav.searchPlaceholder")}
+                placeholder={`${translate("nav.searchPlaceholder")} (⌘K)`}
                 className="pl-10 pr-10 py-2 w-72 bg-slate-100 border-none rounded-full text-sm focus:ring-2 focus:ring-indigo-500/30 focus:bg-white transition-all"
               />
               <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-500" size={16} />

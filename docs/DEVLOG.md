@@ -8,6 +8,20 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #9: Klaviatura shortcutlar (⌘K qidiruv, ⌘N xodim)
+
+### Bajarildi
+
+- `App.tsx` da `keydown` listener: `Cmd/Ctrl+K` → search input ga focus + select; `Cmd/Ctrl+N` → `hr-add-employee` sahifasiga o'tish (faqat HR ruxsati bor bo'lsa)
+- Mac/Windows mod key detection (`navigator.platform`)
+- Qidiruv input placeholder: `"... (⌘K)"` hint qo'shildi
+
+### Fayllar
+
+- `frontend/src/App.tsx` (o'zgargan)
+
+---
+
 ## 2026-05-27 — UI/UX #8: Jadval paginatsiyasi (EmployeesPage, AdminCompaniesPage)
 
 ### Bajarildi

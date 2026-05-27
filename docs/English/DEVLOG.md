@@ -8,6 +8,20 @@ Project development history, completed work, encountered errors, and their solut
 
 ---
 
+## 2026-05-27 — UI/UX #9: Keyboard shortcuts (⌘K search, ⌘N new employee)
+
+### Done
+
+- `keydown` listener in `App.tsx`: `Cmd/Ctrl+K` → focuses + selects search input; `Cmd/Ctrl+N` → navigates to `hr-add-employee` (only when HR permission granted)
+- Mac/Windows mod key detection via `navigator.platform`
+- Search input placeholder updated: `"... (⌘K)"` hint added
+
+### Files
+
+- `frontend/src/App.tsx` (changed)
+
+---
+
 ## 2026-05-27 — UI/UX #8: Table pagination (EmployeesPage, AdminCompaniesPage)
 
 ### Done
