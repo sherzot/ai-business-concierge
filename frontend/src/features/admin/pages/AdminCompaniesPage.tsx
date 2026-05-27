@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import {
   Search, RefreshCw, ChevronDown, Building2, Phone, Mail,
   Users, CheckCircle, PauseCircle, XCircle, Clock,
 } from "lucide-react";
+import { staggerContainer, staggerItem } from "../../../shared/lib/motionVariants";
 import { Pagination, paginateArray } from "../../../shared/components/Pagination";
 import { getAdminCompanies, updateCompanyStatus, Company, CompanyStatus } from "../api/adminApi";
 
@@ -252,11 +254,18 @@ export function AdminCompaniesPage() {
           )}
         </div>
       ) : (
-        <div className="space-y-2">
+        <motion.div
+          className="space-y-2"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+        >
           {paginateArray(filtered, page, PAGE_SIZE).map((c) => (
-            <div
+            <motion.div
               key={c.id}
+              variants={staggerItem}
               className="rounded-xl bg-slate-800/50 border border-white/8 overflow-hidden"
+              whileHover={{ borderColor: "rgba(99,102,241,0.35)", transition: { duration: 0.15 } }}
             >
               {/* Row */}
               <div
@@ -398,9 +407,9 @@ export function AdminCompaniesPage() {
                   </div>
                 </div>
               )}
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {/* Pagination */}

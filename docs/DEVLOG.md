@@ -4,6 +4,33 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [Uzbek](Uzbek/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-05-27 — #3 Framer-motion micro-animatsiyalar
+
+### Kontekst
+Framer-motion kutubxonasi allaqachon o'rnatilgan edi, lekin faqat page transition da ishlatilayotgan edi. KPI kartochkalar, employee jadval qatorlari, kompaniya kartochkalarida hover/stagger animatsiyalar kerak edi.
+
+### Bajarildi
+- `shared/lib/motionVariants.ts` yangi fayl — umumiy variantlar:
+  - `fadeInUp` — sahifa section entrance
+  - `staggerContainer` + `staggerItem` — ro'yxat stagger (55ms oralig'i)
+  - `cardHover` — scale 1.02 + indigo box-shadow hover
+  - `rowHover` — jadval qator hover (subtil)
+- `DashboardPage.tsx` o'zgarishlari:
+  - KPI grid → `motion.div` (staggerContainer)
+  - Har bir `KpiCard` → `motion.div` (staggerItem + cardHover)
+- `EmployeesPage.tsx` o'zgarishlari:
+  - `<tbody>` → `<motion.tbody>` (staggerContainer)
+  - Har bir `<tr>` → `<motion.tr>` (staggerItem) — 55ms stagger
+- `AdminCompaniesPage.tsx` o'zgarishlari:
+  - Kartochkalar wrapper → `motion.div` (staggerContainer)
+  - Har bir kartochka → `motion.div` (staggerItem + border hover indigo)
+
+### Fayllar
+- `frontend/src/shared/lib/motionVariants.ts` (yangi)
+- `frontend/src/features/reports/pages/DashboardPage.tsx` (o'zgargan)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (o'zgargan)
+
 ## 2026-05-27 — #2 CommandPalette: ⌘K global modal qidiruvi
 
 ### Kontekst

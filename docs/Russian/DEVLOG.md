@@ -4,6 +4,27 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #3 Framer-motion микро-анимации
+
+### Контекст
+Framer-motion был уже установлен, но использовался только для page transition. KPI-карточки, строки таблицы сотрудников и карточки компаний нуждались в hover/stagger-анимациях.
+
+### Сделано
+- `shared/lib/motionVariants.ts` — новый файл с переиспользуемыми вариантами:
+  - `fadeInUp` — плавное появление секции страницы
+  - `staggerContainer` + `staggerItem` — stagger-анимация списка (интервал 55ms)
+  - `cardHover` — scale 1.02 + indigo box-shadow при наведении
+  - `rowHover` — тонкий hover для строк таблицы
+- `DashboardPage.tsx`: KPI-сетка → `motion.div` (staggerContainer); каждый `KpiCard` → `motion.div` (staggerItem + cardHover)
+- `EmployeesPage.tsx`: `<tbody>` → `<motion.tbody>` (staggerContainer); каждый `<tr>` → `<motion.tr>` (staggerItem, stagger 55ms)
+- `AdminCompaniesPage.tsx`: обёртка карточек → `motion.div` (staggerContainer); каждая карточка → `motion.div` (staggerItem + hover с indigo-рамкой)
+
+### Файлы
+- `frontend/src/shared/lib/motionVariants.ts` (новый)
+- `frontend/src/features/reports/pages/DashboardPage.tsx` (изменён)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (изменён)
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (изменён)
+
 ## 2026-05-27 — #2 CommandPalette: глобальный модальный поиск ⌘K
 
 ### Контекст

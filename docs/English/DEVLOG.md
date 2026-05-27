@@ -4,6 +4,27 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek translation](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #3 Framer-motion micro-animations
+
+### Context
+Framer-motion was already installed but only used for page transitions. KPI cards, employee table rows, and company cards needed hover/stagger animations.
+
+### Done
+- `shared/lib/motionVariants.ts` new file — shared variants:
+  - `fadeInUp` — page section entrance
+  - `staggerContainer` + `staggerItem` — list stagger (55ms interval)
+  - `cardHover` — scale 1.02 + indigo box-shadow on hover
+  - `rowHover` — subtle table row hover
+- `DashboardPage.tsx`: KPI grid → `motion.div` (staggerContainer); each `KpiCard` → `motion.div` (staggerItem + cardHover)
+- `EmployeesPage.tsx`: `<tbody>` → `<motion.tbody>` (staggerContainer); each `<tr>` → `<motion.tr>` (staggerItem, 55ms stagger)
+- `AdminCompaniesPage.tsx`: cards wrapper → `motion.div` (staggerContainer); each card → `motion.div` (staggerItem + indigo border hover)
+
+### Files
+- `frontend/src/shared/lib/motionVariants.ts` (new)
+- `frontend/src/features/reports/pages/DashboardPage.tsx` (changed)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (changed)
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (changed)
+
 ## 2026-05-27 — #2 CommandPalette: ⌘K global modal search
 
 ### Context

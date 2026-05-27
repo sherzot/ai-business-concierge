@@ -4,6 +4,18 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [O'zbekcha (asosiy)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #3 Framer-motion micro-animatsiyalar
+
+### Bajarildi
+- `shared/lib/motionVariants.ts` yaratildi: staggerContainer, staggerItem, cardHover, fadeInUp
+- DashboardPage: KPI grid stagger + KpiCard hover (scale + indigo shadow)
+- EmployeesPage: `<motion.tbody>` + `<motion.tr>` stagger (55ms)
+- AdminCompaniesPage: kartochkalar stagger + border hover indigo
+
+### Fayllar
+- `frontend/src/shared/lib/motionVariants.ts` (yangi)
+- DashboardPage, EmployeesPage, AdminCompaniesPage (o'zgargan)
+
 ## 2026-05-27 — #2 CommandPalette: ⌘K global modal qidiruv
 
 ### Bajarildi

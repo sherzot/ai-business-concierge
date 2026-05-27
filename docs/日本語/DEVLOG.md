@@ -4,6 +4,25 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md)
 
+## 2026-05-27 — #3 Framer-motionマイクロアニメーション
+
+### コンテキスト
+Framer-motionはインストール済みだったが、ページトランジションにしか使われていなかった。KPIカード、従業員テーブル行、会社カードにhover/staggerアニメーションが必要だった。
+
+### 実施内容
+- `shared/lib/motionVariants.ts` 新規作成 — 共有バリアント:
+  - `fadeInUp` — ページセクションの入場アニメーション
+  - `staggerContainer` + `staggerItem` — リストのstagger（55ms間隔）
+  - `cardHover` — scale 1.02 + indigoボックスシャドウ（hover時）
+  - `rowHover` — テーブル行の繊細なhover
+- `DashboardPage.tsx`: KPIグリッド → `motion.div`（staggerContainer）; 各`KpiCard` → `motion.div`（staggerItem + cardHover）
+- `EmployeesPage.tsx`: `<tbody>` → `<motion.tbody>`（staggerContainer）; 各`<tr>` → `<motion.tr>`（staggerItem、55ms stagger）
+- `AdminCompaniesPage.tsx`: カードラッパー → `motion.div`（staggerContainer）; 各カード → `motion.div`（staggerItem + indigo枠hover）
+
+### ファイル
+- `frontend/src/shared/lib/motionVariants.ts`（新規）
+- `DashboardPage.tsx`、`EmployeesPage.tsx`、`AdminCompaniesPage.tsx`（変更）
+
 ## 2026-05-27 — #2 CommandPalette: ⌘Kグローバルモーダル検索
 
 ### コンテキスト

@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { uz } from "date-fns/locale";
 import { Mail, CheckSquare, FileText, Zap, AlertTriangle, TrendingUp, Lightbulb, Clock } from "lucide-react";
@@ -6,6 +7,7 @@ import { useDashboard } from "../hooks/useDashboard";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { healthScoreColor } from "../types";
 import type { Insight, InsightType } from "../types";
+import { staggerContainer, staggerItem, cardHover } from "../../../shared/lib/motionVariants";
 
 interface DashboardPageProps {
   tenant: { id: string; name: string };
@@ -38,7 +40,12 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
   return (
     <div className="space-y-6">
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
         <KpiCard
           icon={<Mail size={20} className="text-blue-600" />}
           title={translate("dashboard.kpi.inbox")}
@@ -69,7 +76,7 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
           trendUp
           onClick={() => onNavigate?.("reports")}
         />
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Unified Inbox */}
@@ -175,13 +182,19 @@ function KpiCard({ icon, title, value, trend, trendUp, onClick }: {
   trend?: string; trendUp?: boolean; onClick?: () => void;
 }) {
   return (
-    <div
+    <motion.div
+      variants={staggerItem}
+      initial="rest"
+      whileHover="hover"
+      animate="rest"
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
       onClick={onClick}
       onKeyDown={onClick ? (e) => e.key === "Enter" && onClick() : undefined}
-      className={`bg-white p-5 rounded-xl border border-slate-200 shadow-sm transition-shadow ${onClick ? "cursor-pointer hover:shadow-md hover:border-indigo-200" : ""}`}
+      className={`bg-white p-5 rounded-xl border border-slate-200 shadow-sm ${onClick ? "cursor-pointer" : ""}`}
+      style={{ transformOrigin: "center" }}
     >
+      <motion.div variants={cardHover}>
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm text-slate-500">{title}</p>
@@ -192,7 +205,8 @@ function KpiCard({ icon, title, value, trend, trendUp, onClick }: {
       {trend && (
         <p className={`text-sm mt-3 font-medium ${trendUp ? "text-emerald-600" : "text-rose-600"}`}>{trend}</p>
       )}
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

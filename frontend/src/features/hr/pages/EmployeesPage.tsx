@@ -14,7 +14,9 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { Pencil, UserMinus, RotateCcw, Trash2, X, AlertTriangle, UserPlus, KeyRound, SendHorizonal, CheckCircle2, Search, Ban, ShieldCheck } from "lucide-react";
+import { staggerContainer, staggerItem } from "../../../shared/lib/motionVariants";
 import { Pagination, paginateArray } from "../../../shared/components/Pagination";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { useAuthContext } from "../../auth/context/AuthContext";
@@ -252,11 +254,15 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
                   )}
                 </tr>
               </thead>
-              <tbody>
+              <motion.tbody
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+              >
                 {paginateArray(filtered, page, PAGE_SIZE).map((emp) => {
                   const isSelf = emp.id === callerUserId;
                   return (
-                    <tr key={emp.id} className="border-t border-slate-100 hover:bg-slate-50/60">
+                    <motion.tr key={emp.id} variants={staggerItem} className="border-t border-slate-100 hover:bg-indigo-50/40 transition-colors">
                       <td
                         className="px-4 py-3 font-medium text-slate-900 cursor-pointer hover:text-indigo-600 transition-colors"
                         onClick={() => onViewEmployee?.(emp.id)}
@@ -419,10 +425,10 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
                           )}
                         </td>
                       )}
-                    </tr>
+                    </motion.tr>
                   );
                 })}
-              </tbody>
+              </motion.tbody>
             </table>
           </div>
         )}
