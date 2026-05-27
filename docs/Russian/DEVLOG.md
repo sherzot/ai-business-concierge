@@ -4,6 +4,23 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #8 B-013 OpenAPI/Scalar docs — `GET /docs/api` + `GET /docs`
+
+### Контекст
+API не был задокументирован. Нужна была интерактивная документация для внешних интеграций и frontend-разработчиков.
+
+### Сделано
+- `supabase/functions/server/openapi.ts` (новый): полная спецификация OpenAPI 3.1 (`OPENAPI_SPEC` const) — все ключевые эндпоинты (health, contact, tasks, inbox, employees, KB, audit, analytics) + компоненты схем (Error, Task, InboxItem, Employee, KbArticle, AuditLog, AnalyticsData)
+- `renderScalarHtml(apiJsonUrl)` — возвращает HTML-страницу Scalar CDN (тема purple/modern)
+- `server/index.ts`: добавлен импорт `openapi.ts`; внутри `registerRoutes(prefix)` 2 маршрута:
+  - `GET ${prefix}/docs/api` → `c.json(OPENAPI_SPEC)` — raw JSON спецификация
+  - `GET ${prefix}/docs` → Scalar HTML UI (динамический URL, замена pathname)
+- Работает во всех 4 зарегистрированных префиксах
+
+### Файлы
+- `supabase/functions/server/openapi.ts` (новый)
+- `supabase/functions/server/index.ts` (изменён — импорт + 2 маршрута)
+
 ## 2026-05-27 — #7 Аналитика и графики — реальные данные из БД
 
 ### Контекст

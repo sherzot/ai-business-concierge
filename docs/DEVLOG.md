@@ -4,6 +4,23 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [Uzbek](Uzbek/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-05-27 — #8 B-013 OpenAPI/Scalar docs — `GET /docs/api` + `GET /docs`
+
+### Kontekst
+API hujjatlanmagan edi. Tashqi integratsiyalar va frontend developerlar uchun interaktiv API dokumentatsiya kerak edi.
+
+### Bajarildi
+- `supabase/functions/server/openapi.ts` (yangi): to'liq OpenAPI 3.1 spec (`OPENAPI_SPEC` const) — barcha asosiy endpointlar (health, contact, tasks, inbox, employees, KB, audit, analytics) va komponentlar (Error, Task, InboxItem, Employee, KbArticle, AuditLog, AnalyticsData)
+- `renderScalarHtml(apiJsonUrl)` funksiyasi — Scalar CDN orqali interaktiv UI (purple/modern tema)
+- `server/index.ts`: `openapi.ts` import qo'shildi; `registerRoutes(prefix)` ichiga 2 ta route:
+  - `GET ${prefix}/docs/api` → `c.json(OPENAPI_SPEC)` — OpenAPI 3.1 JSON spec
+  - `GET ${prefix}/docs` → Scalar HTML UI (URL dinamik, `apiUrl.pathname` replace)
+- 4 ta prefixda ham ishlaydi (`BASE_PATH`, `V1_PATH`, `GATEWAY_PREFIX` kombinatsiyalari)
+
+### Fayllar
+- `supabase/functions/server/openapi.ts` (yangi)
+- `supabase/functions/server/index.ts` (o'zgargan — import + 2 route)
+
 ## 2026-05-27 — #7 Reports/Analytics charts — real DB data
 
 ### Kontekst

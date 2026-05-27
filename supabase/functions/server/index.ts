@@ -3,6 +3,7 @@ import { cors } from "npm:hono/cors";
 import { createClient } from "npm:@supabase/supabase-js@2.49.8";
 import { Webhook } from "npm:svix@1.17.0";
 import { logRequest, logAudit, logAI, truncate } from "../_shared/logging.ts";
+import { OPENAPI_SPEC, renderScalarHtml } from "./openapi.ts";
 import { callClaude, classifyComplexity } from "./services/llm-router.ts";
 import { searchKnowledgeBase, addDisclaimerIfNeeded } from "./services/knowledge-base.ts";
 import { checkAiSafety, wrapUserMessage } from "./services/ai-safety.ts";
@@ -3677,6 +3678,14 @@ Be concise, professional, and data-driven. You can help with: user management, c
     const { error } = await supabase.from("knowledge_base").delete().eq("id", id);
     if (error) return failure(c, 500, "DB_ERROR", error.message);
     return success(c, { deleted: id });
+  });
+
+  // B-013: OpenAPI spec + Scalar docs UI
+  app.get(`${prefix}/docs/api`, (c) => c.json(OPENAPI_SPEC));
+  app.get(`${prefix}/docs`, (c) => {
+    const apiUrl = new URL(c.req.url);
+    apiUrl.pathname = apiUrl.pathname.replace(/\/docs$/, "/docs/api");
+    return c.html(renderScalarHtml(apiUrl.toString()));
   });
 };
 

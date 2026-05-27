@@ -4,6 +4,23 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md)
 
+## 2026-05-27 — #8 B-013 OpenAPI/Scalar docs — `GET /docs/api` + `GET /docs`
+
+### コンテキスト
+APIにドキュメントがなかった。外部インテグレーションとフロントエンド開発者向けのインタラクティブなAPIドキュメントが必要だった。
+
+### 実施内容
+- `supabase/functions/server/openapi.ts`（新規）: 完全なOpenAPI 3.1仕様（`OPENAPI_SPEC` const）— 全主要エンドポイント（health、contact、tasks、inbox、employees、KB、audit、analytics）とコンポーネントスキーマ（Error、Task、InboxItem、Employee、KbArticle、AuditLog、AnalyticsData）
+- `renderScalarHtml(apiJsonUrl)` — Scalar CDN HTMLページ（purple/modernテーマ）を返す
+- `server/index.ts`: `openapi.ts`インポート追加；`registerRoutes(prefix)`内に2ルート:
+  - `GET ${prefix}/docs/api` → `c.json(OPENAPI_SPEC)` — OpenAPI 3.1 JSON仕様
+  - `GET ${prefix}/docs` → Scalar HTML UI（動的URL、pathnameリプレース）
+- 4つの全登録プレフィックスで動作
+
+### ファイル
+- `supabase/functions/server/openapi.ts`（新規）
+- `supabase/functions/server/index.ts`（変更 — インポート + 2ルート）
+
 ## 2026-05-27 — #7 レポート/分析チャート — 実際のDBデータ
 
 ### コンテキスト

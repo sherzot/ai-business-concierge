@@ -4,6 +4,17 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [O'zbekcha (asosiy)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #8 B-013 OpenAPI/Scalar docs
+
+### Bajarildi
+- `openapi.ts` (yangi): OpenAPI 3.1 spec + `renderScalarHtml()` Scalar CDN UI
+- `server/index.ts`: import + `GET /docs/api` (JSON spec) va `GET /docs` (Scalar HTML) routes
+- 4 ta prefixda ishlaydi
+
+### Fayllar
+- `supabase/functions/server/openapi.ts` (yangi)
+- `supabase/functions/server/index.ts` (o'zgargan)
+
 ## 2026-05-27 — #7 Reports/Analytics charts — real DB data
 
 ### Bajarildi

@@ -4,6 +4,23 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek translation](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #8 B-013 OpenAPI/Scalar docs — `GET /docs/api` + `GET /docs`
+
+### Context
+The API had no documentation. Interactive API docs were needed for external integrations and frontend developers.
+
+### Done
+- `supabase/functions/server/openapi.ts` (new): full OpenAPI 3.1 spec (`OPENAPI_SPEC` const) covering all key endpoints (health, contact, tasks, inbox, employees, KB, audit, analytics) with component schemas (Error, Task, InboxItem, Employee, KbArticle, AuditLog, AnalyticsData)
+- `renderScalarHtml(apiJsonUrl)` — returns Scalar CDN HTML page (purple/modern theme)
+- `server/index.ts`: added `openapi.ts` import; two routes inside `registerRoutes(prefix)`:
+  - `GET ${prefix}/docs/api` → `c.json(OPENAPI_SPEC)` — raw OpenAPI 3.1 JSON
+  - `GET ${prefix}/docs` → Scalar HTML UI (dynamic URL, pathname replace)
+- Works across all 4 registered prefixes (`BASE_PATH`, `V1_PATH`, `GATEWAY_PREFIX` combinations)
+
+### Files
+- `supabase/functions/server/openapi.ts` (new)
+- `supabase/functions/server/index.ts` (changed — import + 2 routes)
+
 ## 2026-05-27 — #7 Reports/Analytics charts — real DB data
 
 ### Context
