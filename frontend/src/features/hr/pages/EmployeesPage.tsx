@@ -189,14 +189,40 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
       {/* Table */}
       <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-sm text-slate-500">
-            {translate("common.loading")}
+          <div className="animate-pulse">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
+                <tr>
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <th key={i} className="px-4 py-3">
+                      <div className="h-3 w-20 bg-slate-200 rounded" />
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <tr key={i} className="border-t border-slate-100">
+                    <td className="px-4 py-3"><div className="h-4 w-32 bg-slate-200 rounded" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-44 bg-slate-200 rounded" /></td>
+                    <td className="px-4 py-3"><div className="h-5 w-16 bg-slate-200 rounded-full" /></td>
+                    <td className="px-4 py-3"><div className="h-5 w-16 bg-slate-200 rounded-full" /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="p-8 text-center text-sm text-slate-500">
-            {search || statusFilter !== "all"
-              ? "Qidiruv bo'yicha xodim topilmadi"
-              : translate(tab === "active" ? "employees.list.emptyActive" : "employees.list.emptyTerminated")}
+          <div className="flex flex-col items-center justify-center py-16 gap-3 text-slate-400">
+            <UserPlus size={40} className="opacity-30" />
+            <p className="text-sm font-medium text-slate-500">
+              {search || statusFilter !== "all"
+                ? "Qidiruv bo'yicha xodim topilmadi"
+                : translate(tab === "active" ? "employees.list.emptyActive" : "employees.list.emptyTerminated")}
+            </p>
+            {(search || statusFilter !== "all") && (
+              <p className="text-xs text-slate-400">Filtrlarni tozalang yoki boshqa so'z kiriting</p>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">

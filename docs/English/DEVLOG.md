@@ -8,6 +8,24 @@ Project development history, completed work, encountered errors, and their solut
 
 ---
 
+## 2026-05-27 — UI/UX #3: Skeleton loaders + Empty states (4 pages)
+
+### Done
+
+- **AdminCompaniesPage**: spinner → 5 card skeletons (`animate-pulse`); empty state → `Building2` icon + contextual message (hint to clear filters when active)
+- **AdminContactsPage**: spinner → 5 card skeletons; empty state → `Users` icon + contextual message; added `Users` to imports
+- **AdminHealthPage**: single text line → header + banner + 4 stat card skeletons
+- **EmployeesPage**: plain text → table skeleton (thead + 6 rows); empty state → `UserPlus` icon + contextual message
+
+### Files
+
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (changed)
+- `frontend/src/features/admin/pages/AdminContactsPage.tsx` (changed)
+- `frontend/src/features/admin/pages/AdminHealthPage.tsx` (changed)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (changed)
+
+---
+
 ## 2026-05-27 — UI/UX #1-2: AdminLayout sidebar + AdminDashboard SVG charts
 
 ### Done

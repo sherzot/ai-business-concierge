@@ -8,6 +8,24 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #3: Skeleton loaderlar + Empty states (4 sahifa)
+
+### Bajarildi
+
+- **AdminCompaniesPage**: spinner → 5 ta karta skeleton (`animate-pulse`); empty state → `Building2` ikonka + kontekstual xabar (filter aktiv bo'lganda "Filtrlarni tozalang")
+- **AdminContactsPage**: spinner → 5 ta karta skeleton; empty state → `Users` ikonka + kontekstual xabar; import ga `Users` qo'shildi
+- **AdminHealthPage**: bitta qator matn → header + banner + 4 ta stat kartasi skeleton
+- **EmployeesPage**: oddiy matn → jadval skeleton (thead + 6 ta qator); empty state → `UserPlus` ikonka + kontekstual xabar
+
+### Fayllar
+
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminContactsPage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminHealthPage.tsx` (o'zgargan)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (o'zgargan)
+
+---
+
 ## 2026-05-27 — UI/UX #1-2: AdminLayout sidebar + AdminDashboard SVG grafiklari
 
 ### Bajarildi

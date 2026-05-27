@@ -8,6 +8,24 @@
 
 ---
 
+## 2026-05-27 — UI/UX #3: Скелетон-лоадеры + Пустые состояния (4 страницы)
+
+### Сделано
+
+- **AdminCompaniesPage**: спиннер → 5 скелетон-карточек (`animate-pulse`); пустое состояние → иконка `Building2` + контекстное сообщение (подсказка очистить фильтры)
+- **AdminContactsPage**: спиннер → 5 скелетон-карточек; пустое состояние → иконка `Users` + контекстное сообщение; добавлен импорт `Users`
+- **AdminHealthPage**: одна строка текста → скелетон шапки + баннера + 4 карточек статистики
+- **EmployeesPage**: обычный текст → скелетон таблицы (thead + 6 строк); пустое состояние → иконка `UserPlus` + контекстное сообщение
+
+### Файлы
+
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (изменён)
+- `frontend/src/features/admin/pages/AdminContactsPage.tsx` (изменён)
+- `frontend/src/features/admin/pages/AdminHealthPage.tsx` (изменён)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (изменён)
+
+---
+
 ## 2026-05-27 — UI/UX #1-2: Сайдбар AdminLayout + SVG-графики AdminDashboard
 
 ### Сделано

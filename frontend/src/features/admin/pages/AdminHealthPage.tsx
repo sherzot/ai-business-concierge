@@ -46,7 +46,24 @@ export function AdminHealthPage() {
 
   if (loading) {
     return (
-      <div className="p-6 text-center text-slate-500 animate-pulse">Yuklanmoqda…</div>
+      <div className="p-6 max-w-4xl mx-auto space-y-6 animate-pulse">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-slate-200" />
+          <div className="space-y-1.5">
+            <div className="h-5 w-32 bg-slate-200 rounded" />
+            <div className="h-3 w-48 bg-slate-200 rounded" />
+          </div>
+        </div>
+        <div className="h-16 rounded-xl bg-slate-200" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-slate-200 p-4 space-y-2">
+              <div className="h-3 w-20 bg-slate-200 rounded" />
+              <div className="h-8 w-16 bg-slate-200 rounded" />
+            </div>
+          ))}
+        </div>
+      </div>
     );
   }
 

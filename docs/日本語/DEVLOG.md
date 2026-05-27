@@ -8,6 +8,22 @@
 
 ---
 
+## 2026-05-27 — UI/UX #3: スケルトンローダー + 空状態（4ページ）
+
+### 実施内容
+
+- **AdminCompaniesPage**: スピナー → 5件のカードスケルトン (`animate-pulse`)；空状態 → `Building2`アイコン + コンテキストメッセージ
+- **AdminContactsPage**: スピナー → 5件のカードスケルトン；空状態 → `Users`アイコン + コンテキストメッセージ；`Users`インポート追加
+- **AdminHealthPage**: テキスト1行 → ヘッダー + バナー + 統計カード4件のスケルトン
+- **EmployeesPage**: テキスト → テーブルスケルトン（thead + 6行）；空状態 → `UserPlus`アイコン
+
+### ファイル
+
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx`, `AdminContactsPage.tsx`, `AdminHealthPage.tsx` (変更)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (変更)
+
+---
+
 ## 2026-05-27 — UI/UX #1-2: AdminLayoutサイドバー + AdminDashboard SVGチャート
 
 ### 実施内容
