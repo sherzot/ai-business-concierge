@@ -8,6 +8,39 @@ Project development history, completed work, encountered errors, and their solut
 
 ---
 
+## 2026-05-27 — Task 3: B-007 Prompt injection protection + input sanitization
+
+### Context
+
+AI chat endpoints were passing user input directly to Claude/OpenAI without any safety checks. This creates injection risk: users could attempt to override system prompts or manipulate the AI. Per B-007, `services/ai-safety.ts` was created and wired into `/v1/ai/chat`.
+
+### Done
+
+**`services/ai-safety.ts` (new file):**
+- `checkAiSafety(rawInput, userId)` — main function:
+  - 25 injection patterns (EN/RU/UZ/JA + system markers: `<system>`, `[INST]`, `<|user|>`, etc.)
+  - HTML/script tag stripping (DoS-safe: `{0,200}` regex)
+  - Max 16,000 chars (~4,000 tokens) limit
+  - Per-user rate limit: 10 messages/minute (in-memory sliding window)
+  - `SafetyResult` type: `{ safe: true, sanitized }` or `{ safe: false, code, message, messageRu }`
+- `wrapUserMessage(sanitized)` — prompt layering helper:
+  - Wraps user message in `"User message:\n..."` block
+  - Clearly separates user input from system context → reduces injection effectiveness
+
+**`/v1/ai/chat` endpoint updated:**
+- `checkAiSafety()` — runs before KB search and AI calls
+- 422 → `INJECTION_DETECTED` or `INPUT_TOO_LONG`
+- 429 → `RATE_LIMITED` (locale-aware message: uz or ru)
+- `safeMessage` — sanitized message used throughout the handler
+- `wrapUserMessage()` — applied in Claude + OpenAI fallback calls
+
+### Files
+
+- `supabase/functions/server/services/ai-safety.ts` (new)
+- `supabase/functions/server/index.ts` (changed: import + `/v1/ai/chat` handler)
+
+---
+
 ## 2026-05-27 — Task 1: ai_usage_logs wiring (billing cost tracking)
 
 ### Context

@@ -8,6 +8,39 @@
 
 ---
 
+## 2026-05-27 — Задача 3: B-007 Защита от prompt injection + санитизация ввода
+
+### Контекст
+
+Эндпоинты AI чата передавали пользовательский ввод напрямую в Claude/OpenAI без какой-либо проверки безопасности. Это создаёт риск инъекций: пользователи могут пытаться переопределить системный промпт или манипулировать AI. Согласно B-007, создан `services/ai-safety.ts` и подключён к `/v1/ai/chat`.
+
+### Сделано
+
+**`services/ai-safety.ts` (новый файл):**
+- `checkAiSafety(rawInput, userId)` — основная функция:
+  - 25 паттернов инъекций (EN/RU/UZ/JA + системные маркеры: `<system>`, `[INST]`, `<|user|>` и др.)
+  - Удаление HTML/script тегов (DoS-безопасно: regex `{0,200}`)
+  - Ограничение: макс. 16 000 символов (~4 000 токенов)
+  - Rate limit на пользователя: 10 сообщений/минуту (in-memory скользящее окно)
+  - Тип `SafetyResult`: `{ safe: true, sanitized }` или `{ safe: false, code, message, messageRu }`
+- `wrapUserMessage(sanitized)` — helper для prompt layering:
+  - Оборачивает сообщение в блок `"User message:\n..."`
+  - Чётко отделяет ввод от системного контекста → снижает эффективность инъекций
+
+**Эндпоинт `/v1/ai/chat` обновлён:**
+- `checkAiSafety()` выполняется до KB-поиска и вызовов AI
+- 422 → `INJECTION_DETECTED` или `INPUT_TOO_LONG`
+- 429 → `RATE_LIMITED` (сообщение на нужном языке: uz или ru)
+- `safeMessage` используется во всём handler вместо сырого ввода
+- `wrapUserMessage()` применяется в вызовах Claude и OpenAI fallback
+
+### Файлы
+
+- `supabase/functions/server/services/ai-safety.ts` (новый)
+- `supabase/functions/server/index.ts` (изменён: import + handler `/v1/ai/chat`)
+
+---
+
 ## 2026-05-27 — Задача 1: подключение ai_usage_logs (отслеживание затрат для биллинга)
 
 ### Контекст

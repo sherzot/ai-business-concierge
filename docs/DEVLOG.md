@@ -8,6 +8,39 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — Vazifa 3: B-007 Prompt injection himoya + input sanitizatsiya
+
+### Kontekst
+
+AI chat endpointlar hech qanday input tekshiruvisiz to'g'ridan-to'g'ri Claude/OpenAI ga yuborilyapti edi. Bu injection xavfini keltirib chiqaradi: foydalanuvchi system prompt ni o'zgartirishga yoki tizimni aldashga urinishi mumkin. B-007 bo'yicha `services/ai-safety.ts` service yaratildi va `/v1/ai/chat` ga ulandi.
+
+### Bajarildi
+
+**`services/ai-safety.ts` (yangi fayl):**
+- `checkAiSafety(rawInput, userId)` — asosiy funksiya:
+  - 25 ta injection pattern (EN/RU/UZ/JA + system markers: `<system>`, `[INST]`, `<|user|>` va h.k.)
+  - HTML/script teg stripping (DoS-xavfsiz: `{0,200}` regex)
+  - Max 16 000 belgi (~4000 token) tekshiruvi
+  - Per-user rate limit: 10 xabar/daqiqa (in-memory sliding window)
+  - `SafetyResult` type: `{ safe: true, sanitized }` yoki `{ safe: false, code, message, messageRu }`
+- `wrapUserMessage(sanitized)` — prompt layering helper:
+  - User xabarini `"User message:\n..."` blokiga o'raydi
+  - System kontekstdan aniq ajratadi → injection samaradorligi kamayadi
+
+**`/v1/ai/chat` endpoint yangilandi:**
+- `checkAiSafety()` — KB va AI chaqirishdan oldin tekshiriladi
+- 422 → `INJECTION_DETECTED` yoki `INPUT_TOO_LONG`
+- 429 → `RATE_LIMITED` (til-mos xabar: uz yoki ru)
+- `safeMessage` — sanitizatsiya qilingan xabar butun handler davomida ishlatiladi
+- `wrapUserMessage()` — Claude + OpenAI fallback chaqiruvlarda qo'llaniladi
+
+### Fayllar
+
+- `supabase/functions/server/services/ai-safety.ts` (yangi)
+- `supabase/functions/server/index.ts` (o'zgargan: import + `/v1/ai/chat` handler)
+
+---
+
 ## 2026-05-27 — Vazifa 1: ai_usage_logs wiring (billing cost tracking)
 
 ### Kontekst

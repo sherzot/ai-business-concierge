@@ -8,6 +8,21 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — Vazifa 3: B-007 Prompt injection himoya
+
+### Bajarildi
+
+- `services/ai-safety.ts` yangi fayl: 25 ta injection pattern (EN/RU/UZ/JA), HTML strip, 16k belgi limit, 10 xabar/daqiqa rate limit
+- `wrapUserMessage()` — prompt layering helper
+- `/v1/ai/chat` — safety check KB va AI chaqirishdan oldin, `safeMessage` butun handlerda
+
+### Fayllar
+
+- `supabase/functions/server/services/ai-safety.ts` (yangi)
+- `supabase/functions/server/index.ts` (o'zgargan)
+
+---
+
 ## 2026-05-27 — Vazifa 1: ai_usage_logs wiring (billing cost tracking)
 
 ### Kontekst

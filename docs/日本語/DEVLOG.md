@@ -8,6 +8,31 @@
 
 ---
 
+## 2026-05-27 — タスク3: B-007 プロンプトインジェクション対策 + 入力サニタイズ
+
+### コンテキスト
+
+AIチャットエンドポイントがユーザー入力をチェックなしでClaude/OpenAIに渡していた。B-007に従い`services/ai-safety.ts`を作成し`/v1/ai/chat`に組み込んだ。
+
+### 実施内容
+
+**`services/ai-safety.ts`（新規）：**
+- `checkAiSafety()` — 25パターン（EN/RU/UZ/JA + システムマーカー）、HTMLストリップ、16,000字制限、10メッセージ/分のレート制限
+- `wrapUserMessage()` — プロンプトレイヤリング（`"User message:\n..."`ブロックでユーザー入力を分離）
+
+**`/v1/ai/chat`更新：**
+- KB検索・LLM呼び出し前に`checkAiSafety()`実行
+- 422 → `INJECTION_DETECTED` / `INPUT_TOO_LONG`
+- 429 → `RATE_LIMITED`（ロケール対応メッセージ）
+- `safeMessage`をハンドラー全体で使用
+
+### ファイル
+
+- `supabase/functions/server/services/ai-safety.ts`（新規）
+- `supabase/functions/server/index.ts`（変更）
+
+---
+
 ## 2026-05-27 — タスク1: ai_usage_logsの接続（ビリング用コスト追跡）
 
 ### コンテキスト
