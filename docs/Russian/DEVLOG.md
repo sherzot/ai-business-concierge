@@ -8,6 +8,25 @@
 
 ---
 
+## 2026-05-27 — UI/UX #7: Переключатель тёмного/светлого режима
+
+### Сделано
+
+- Хук `useTheme`: сохранение в localStorage (`ai-bc-theme`), fallback на OS-предпочтение, добавление/удаление `.dark` на `<html>`
+- Компонент `ThemeToggle`: иконки `Sun`/`Moon`, `aria-label`, `dark:` hover-цвета
+- `<ThemeToggle />` добавлен в топбар App.tsx (слева от LocaleSelect)
+- `<ThemeToggle />` добавлен в топбар AdminLayout
+- CSS-переменные `.dark` в `theme.css` уже были полностью определены
+
+### Файлы
+
+- `frontend/src/shared/hooks/useTheme.ts` (новый)
+- `frontend/src/shared/components/ThemeToggle.tsx` (новый)
+- `frontend/src/App.tsx` (изменён)
+- `frontend/src/features/admin/components/AdminLayout.tsx` (изменён)
+
+---
+
 ## 2026-05-27 — UI/UX #6: Пошаговый визард онбординга сотрудников
 
 ### Сделано

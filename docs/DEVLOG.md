@@ -8,6 +8,25 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #7: Dark/Light mode toggle
+
+### Bajarildi
+
+- `useTheme` hook: localStorage saqlash (`ai-bc-theme`), OS preferense fallback, `<html>` ga `.dark` class qo'shish/olish
+- `ThemeToggle` component: `Sun`/`Moon` ikonka, `aria-label`, `dark:` hover renglari
+- App.tsx topbar ga `<ThemeToggle />` qo'shildi (LocaleSelect chap tomonida)
+- AdminLayout topbar ga ham `<ThemeToggle />` qo'shildi
+- `theme.css` da `.dark` CSS variables allaqachon to'liq tayyor edi
+
+### Fayllar
+
+- `frontend/src/shared/hooks/useTheme.ts` (yangi)
+- `frontend/src/shared/components/ThemeToggle.tsx` (yangi)
+- `frontend/src/App.tsx` (o'zgargan)
+- `frontend/src/features/admin/components/AdminLayout.tsx` (o'zgargan)
+
+---
+
 ## 2026-05-27 — UI/UX #6: Employee onboarding step wizard
 
 ### Bajarildi

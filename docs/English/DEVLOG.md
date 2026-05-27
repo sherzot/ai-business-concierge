@@ -8,6 +8,25 @@ Project development history, completed work, encountered errors, and their solut
 
 ---
 
+## 2026-05-27 — UI/UX #7: Dark/Light mode toggle
+
+### Done
+
+- `useTheme` hook: localStorage persistence (`ai-bc-theme`), OS preference fallback, adds/removes `.dark` class on `<html>`
+- `ThemeToggle` component: `Sun`/`Moon` icons, `aria-label`, `dark:` hover colors
+- Added `<ThemeToggle />` to App.tsx topbar (left of LocaleSelect)
+- Added `<ThemeToggle />` to AdminLayout topbar
+- `.dark` CSS variables in `theme.css` were already fully defined
+
+### Files
+
+- `frontend/src/shared/hooks/useTheme.ts` (new)
+- `frontend/src/shared/components/ThemeToggle.tsx` (new)
+- `frontend/src/App.tsx` (changed)
+- `frontend/src/features/admin/components/AdminLayout.tsx` (changed)
+
+---
+
 ## 2026-05-27 — UI/UX #6: Employee onboarding step wizard
 
 ### Done

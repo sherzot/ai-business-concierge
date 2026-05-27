@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useAuthContext } from "../../auth/context/AuthContext";
 import { apiRequest } from "../../../shared/lib/apiClient";
+import { ThemeToggle } from "../../../shared/components/ThemeToggle";
 
 const NAV = [
   { to: "/admin",           label: "Dashboard",    icon: LayoutDashboard, exact: true },
@@ -303,6 +304,7 @@ export function AdminLayout() {
           </div>
 
           <div className="ml-auto flex items-center gap-2">
+            <ThemeToggle />
             <Avatar name={displayName} size="sm" />
             <span className="hidden sm:block text-xs text-slate-400 truncate max-w-32">{displayName}</span>
           </div>

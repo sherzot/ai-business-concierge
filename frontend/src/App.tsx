@@ -60,6 +60,7 @@ import {
   DropdownMenuTrigger,
 } from "./shared/ui/dropdown-menu";
 import { LocaleSelect } from "./shared/components/LocaleSelect";
+import { ThemeToggle } from "./shared/components/ThemeToggle";
 import { getMembers } from "./features/tasks/api/tasksApi";
 import { getTasks } from "./features/tasks/api/tasksApi";
 import { getNotifications } from "./features/notifications/api/notificationsApi";
@@ -437,6 +438,7 @@ export default function App() {
               />
               <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-500" size={16} />
             </div>
+            <ThemeToggle />
             <LocaleSelect variant="light" />
             {currentTenant && (
               <NotificationsDropdown tenantId={currentTenant.id} userId={profile?.user.id} onViewAll={() => setActiveModule("notifications")} />

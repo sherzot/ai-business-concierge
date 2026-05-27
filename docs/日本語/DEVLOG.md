@@ -8,6 +8,25 @@
 
 ---
 
+## 2026-05-27 — UI/UX #7: ダーク/ライトモードトグル
+
+### 実施内容
+
+- `useTheme`フック: localStorage永続化(`ai-bc-theme`)、OSプリファレンスフォールバック、`<html>`への`.dark`クラス追加/削除
+- `ThemeToggle`コンポーネント: `Sun`/`Moon`アイコン、`aria-label`、`dark:`ホバーカラー
+- App.tsxトップバーに`<ThemeToggle />`追加（LocaleSelectの左）
+- AdminLayoutトップバーにも`<ThemeToggle />`追加
+- `theme.css`の`.dark` CSS変数は既に完全定義済み
+
+### ファイル
+
+- `frontend/src/shared/hooks/useTheme.ts` (新規)
+- `frontend/src/shared/components/ThemeToggle.tsx` (新規)
+- `frontend/src/App.tsx` (変更)
+- `frontend/src/features/admin/components/AdminLayout.tsx` (変更)
+
+---
+
 ## 2026-05-27 — UI/UX #6: 従業員オンボーディングステップウィザード
 
 ### 実施内容
