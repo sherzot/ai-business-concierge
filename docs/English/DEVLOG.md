@@ -8,6 +8,22 @@ Project development history, completed work, encountered errors, and their solut
 
 ---
 
+## 2026-05-27 — UI/UX #8: Table pagination (EmployeesPage, AdminCompaniesPage)
+
+### Done
+
+- `Pagination` component: page buttons with ellipsis, `ChevronLeft/Right`, "N–M / total" info; `paginateArray` helper
+- **EmployeesPage**: `PAGE_SIZE=20`, page resets on tab/search/statusFilter change, `paginateArray(filtered, page, PAGE_SIZE).map(...)`
+- **AdminCompaniesPage**: `PAGE_SIZE=15`, page resets on filter/search change, pagination below list
+
+### Files
+
+- `frontend/src/shared/components/Pagination.tsx` (new)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (changed)
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (changed)
+
+---
+
 ## 2026-05-27 — UI/UX #7: Dark/Light mode toggle
 
 ### Done

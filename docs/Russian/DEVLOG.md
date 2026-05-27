@@ -8,6 +8,22 @@
 
 ---
 
+## 2026-05-27 — UI/UX #8: Пагинация таблиц (EmployeesPage, AdminCompaniesPage)
+
+### Сделано
+
+- Компонент `Pagination`: кнопки страниц с ellipsis, `ChevronLeft/Right`, счётчик "N–M / всего"; хелпер `paginateArray`
+- **EmployeesPage**: `PAGE_SIZE=20`, сброс страницы при смене tab/search/statusFilter, `paginateArray(filtered, page, PAGE_SIZE).map(...)`
+- **AdminCompaniesPage**: `PAGE_SIZE=15`, сброс страницы при смене filter/search, пагинация под списком
+
+### Файлы
+
+- `frontend/src/shared/components/Pagination.tsx` (новый)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (изменён)
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (изменён)
+
+---
+
 ## 2026-05-27 — UI/UX #7: Переключатель тёмного/светлого режима
 
 ### Сделано

@@ -3,6 +3,7 @@ import {
   Search, RefreshCw, ChevronDown, Building2, Phone, Mail,
   Users, CheckCircle, PauseCircle, XCircle, Clock,
 } from "lucide-react";
+import { Pagination, paginateArray } from "../../../shared/components/Pagination";
 import { getAdminCompanies, updateCompanyStatus, Company, CompanyStatus } from "../api/adminApi";
 
 const STATUS_LABELS: Record<CompanyStatus, string> = {
@@ -83,6 +84,8 @@ export function AdminCompaniesPage() {
   const [filter, setFilter]         = useState<CompanyStatus | "all">("all");
   const [search, setSearch]         = useState("");
   const [expanded, setExpanded]     = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 15;
   const [updating, setUpdating]     = useState<string | null>(null);
   const [blockTarget, setBlockTarget] = useState<string | null>(null);
 
@@ -166,7 +169,7 @@ export function AdminCompaniesPage() {
         {(["pending_approval", "active", "suspended", "blocked"] as const).map((s) => (
           <button
             key={s}
-            onClick={() => setFilter(filter === s ? "all" : s)}
+            onClick={() => { setFilter(filter === s ? "all" : s); setPage(1); }}
             className={`rounded-xl border p-3.5 text-left transition-all ${
               filter === s
                 ? STATUS_COLORS[s] + " ring-1 ring-white/20"
@@ -191,7 +194,7 @@ export function AdminCompaniesPage() {
         {FILTER_TABS.map((s) => (
           <button
             key={s}
-            onClick={() => setFilter(s)}
+            onClick={() => { setFilter(s); setPage(1); }}
             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
               filter === s
                 ? "bg-indigo-500 border-indigo-400 text-white"
@@ -211,7 +214,7 @@ export function AdminCompaniesPage() {
         <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
         <input
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           placeholder="Kompaniya nomi, STIR, email yoki telefon..."
           className="w-full rounded-xl bg-slate-800 border border-white/10 text-white placeholder-slate-500 pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
         />
@@ -250,7 +253,7 @@ export function AdminCompaniesPage() {
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map((c) => (
+          {paginateArray(filtered, page, PAGE_SIZE).map((c) => (
             <div
               key={c.id}
               className="rounded-xl bg-slate-800/50 border border-white/8 overflow-hidden"
@@ -398,6 +401,18 @@ export function AdminCompaniesPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Pagination */}
+      {filtered.length > PAGE_SIZE && (
+        <Pagination
+          page={page}
+          totalPages={Math.ceil(filtered.length / PAGE_SIZE)}
+          onPageChange={setPage}
+          pageSize={PAGE_SIZE}
+          totalItems={filtered.length}
+          className="[&_button]:!text-slate-300 [&_button]:!hover:bg-slate-800"
+        />
       )}
 
       {/* Block reason modal */}

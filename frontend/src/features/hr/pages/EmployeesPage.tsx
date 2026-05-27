@@ -15,6 +15,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Pencil, UserMinus, RotateCcw, Trash2, X, AlertTriangle, UserPlus, KeyRound, SendHorizonal, CheckCircle2, Search, Ban, ShieldCheck } from "lucide-react";
+import { Pagination, paginateArray } from "../../../shared/components/Pagination";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { useAuthContext } from "../../auth/context/AuthContext";
 import {
@@ -57,10 +58,17 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
   const [tab, setTab] = useState<EmployeeStatus>("active");
   const [statusFilter, setStatusFilter] = useState<EmployeeAccountStatus | "all">("all");
   const [search, setSearch] = useState("");
+
+  // Reset page on filter changes
+  function setTabAndReset(v: EmployeeStatus) { setTab(v); setPage(1); }
+  function setStatusFilterAndReset(v: EmployeeAccountStatus | "all") { setStatusFilter(v); setPage(1); }
+  function setSearchAndReset(v: string) { setSearch(v); setPage(1); }
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
 
   const [editing, setEditing]       = useState<Employee | null>(null);
   const [terminating, setTerminating] = useState<Employee | null>(null);
@@ -136,10 +144,10 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
 
       {/* Tabs */}
       <div className="flex w-fit rounded-lg border border-slate-300 bg-white p-1">
-        <TabButton active={tab === "active"} onClick={() => setTab("active")}>
+        <TabButton active={tab === "active"} onClick={() => setTabAndReset("active")}>
           {translate("employees.list.tabActive")}
         </TabButton>
-        <TabButton active={tab === "terminated"} onClick={() => setTab("terminated")}>
+        <TabButton active={tab === "terminated"} onClick={() => setTabAndReset("terminated")}>
           {translate("employees.list.tabTerminated")}
         </TabButton>
       </div>
@@ -150,7 +158,7 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => setSearchAndReset(e.target.value)}
             placeholder="Ism yoki email bo'yicha qidirish..."
             className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
           />
@@ -166,7 +174,7 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
               return (
                 <button
                   key={s}
-                  onClick={() => setStatusFilter(s)}
+                  onClick={() => setStatusFilterAndReset(s)}
                   className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
                     active
                       ? "bg-indigo-600 border-indigo-600 text-white"
@@ -245,7 +253,7 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((emp) => {
+                {paginateArray(filtered, page, PAGE_SIZE).map((emp) => {
                   const isSelf = emp.id === callerUserId;
                   return (
                     <tr key={emp.id} className="border-t border-slate-100 hover:bg-slate-50/60">
@@ -418,10 +426,21 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
             </table>
           </div>
         )}
-        <div className="px-4 py-3 border-t border-slate-100 text-xs text-slate-500">
-          {counts.shown === counts.total
-            ? translate("employees.list.shownCount", { count: String(counts.shown) })
-            : `${counts.shown} / ${counts.total} ta xodim ko'rsatilmoqda`}
+        <div className="px-4 py-3 border-t border-slate-100">
+          <Pagination
+            page={page}
+            totalPages={Math.ceil(filtered.length / PAGE_SIZE)}
+            onPageChange={setPage}
+            pageSize={PAGE_SIZE}
+            totalItems={filtered.length}
+          />
+          {Math.ceil(filtered.length / PAGE_SIZE) <= 1 && (
+            <p className="text-xs text-slate-500">
+              {counts.shown === counts.total
+                ? translate("employees.list.shownCount", { count: String(counts.shown) })
+                : `${counts.shown} / ${counts.total} ta xodim ko'rsatilmoqda`}
+            </p>
+          )}
         </div>
       </div>
 

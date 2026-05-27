@@ -8,6 +8,20 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #8: Jadval paginatsiyasi
+
+### Bajarildi
+
+- `Pagination` component + `paginateArray` helper (yangi)
+- EmployeesPage (20 ta/sahifa), AdminCompaniesPage (15 ta/sahifa)
+
+### Fayllar
+
+- `frontend/src/shared/components/Pagination.tsx` (yangi)
+- `EmployeesPage.tsx`, `AdminCompaniesPage.tsx` (o'zgargan)
+
+---
+
 ## 2026-05-27 — UI/UX #7: Dark/Light mode toggle
 
 ### Bajarildi

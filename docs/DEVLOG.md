@@ -8,6 +8,22 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #8: Jadval paginatsiyasi (EmployeesPage, AdminCompaniesPage)
+
+### Bajarildi
+
+- `Pagination` component: ellipsis bilan sahifa tugmalar, `ChevronLeft/Right`, "N–M / total ta" ko'rsatkich; `paginateArray` helper
+- **EmployeesPage**: `PAGE_SIZE=20`, tab/search/statusFilter o'zgarganda page reset, `paginateArray(filtered, page, PAGE_SIZE).map(...)`
+- **AdminCompaniesPage**: `PAGE_SIZE=15`, filter/search o'zgarganda page reset, paginatsiya list ostida
+
+### Fayllar
+
+- `frontend/src/shared/components/Pagination.tsx` (yangi)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (o'zgargan)
+
+---
+
 ## 2026-05-27 — UI/UX #7: Dark/Light mode toggle
 
 ### Bajarildi

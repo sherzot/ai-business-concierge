@@ -8,6 +8,22 @@
 
 ---
 
+## 2026-05-27 — UI/UX #8: テーブルページネーション（EmployeesPage、AdminCompaniesPage）
+
+### 実施内容
+
+- `Pagination`コンポーネント: 省略記号付きページボタン、`ChevronLeft/Right`、"N–M / 合計"表示；`paginateArray`ヘルパー
+- **EmployeesPage**: `PAGE_SIZE=20`、tab/search/statusFilter変更時にページリセット
+- **AdminCompaniesPage**: `PAGE_SIZE=15`、filter/search変更時にページリセット、リスト下にページネーション
+
+### ファイル
+
+- `frontend/src/shared/components/Pagination.tsx` (新規)
+- `frontend/src/features/hr/pages/EmployeesPage.tsx` (変更)
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (変更)
+
+---
+
 ## 2026-05-27 — UI/UX #7: ダーク/ライトモードトグル
 
 ### 実施内容
