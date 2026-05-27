@@ -8,6 +8,40 @@ Project development history, completed work, encountered errors, and their solut
 
 ---
 
+## 2026-05-27 — Task 4: B-001 Unit tests (inbox module)
+
+### Context
+
+Per B-001, additional unit tests were written for the `features/inbox/` module. Total tests grew from 76 to 89 (+13 new tests, 16 test files).
+
+### Done
+
+**`inbox/__tests__/inboxApi.test.ts` (6 new tests):**
+- `snake_case is_read` → `camelCase isRead` normalization
+- Accepting `false` when `is_read` is absent
+- Correct endpoint and `tenantId` usage
+- Empty array → empty list
+- Multi-item `isRead` normalization
+- Throwing exception on API error
+
+**`inbox/__tests__/useInbox.test.ts` (7 new tests):**
+- Items loaded on mount
+- `filter=all` — all items shown
+- `filter=HR` — only HR items filtered
+- `filter=Sales` — only Sales items filtered
+- Tenant isolation — separate API call for different `tenantId`
+- API error → `error` state, `items=[]`
+- `selectedItem` auto-set to first item
+
+### Status: 89 tests, all passing (16 test files)
+
+### Files
+
+- `frontend/src/features/inbox/__tests__/inboxApi.test.ts` (new)
+- `frontend/src/features/inbox/__tests__/useInbox.test.ts` (new)
+
+---
+
 ## 2026-05-27 — Task 3: B-007 Prompt injection protection + input sanitization
 
 ### Context

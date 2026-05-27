@@ -8,6 +8,51 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — Vazifa 4: B-001 Unit testlar (inbox modul)
+
+### Kontekst
+
+B-001 bo'yicha `features/inbox/` moduli uchun qo'shimcha unit testlar yozildi. Mavjud 76 ta test 89 ga ko'paydi (+13 yangi test, 16 test fayl).
+
+### Bajarildi
+
+**`inbox/__tests__/inboxApi.test.ts` (6 ta yangi test):**
+- `snake_case is_read` → `camelCase isRead` normalizatsiyasi
+- `is_read` yo'q bo'lganda `false` deb qabul qilish
+- To'g'ri endpoint va `tenantId` bilan murojaat
+- Bo'sh array → bo'sh list
+- Bir nechta item — isRead to'g'ri normalizatsiya
+- API xato bo'lsa exception tashlash
+
+**`inbox/__tests__/useInbox.test.ts` (7 ta yangi test):**
+- Yuklanganda itemlar olinishi
+- `filter=all` — barcha itemlar ko'rsatilishi
+- `filter=HR` — faqat HR itemlar filtrlash
+- `filter=Sales` — faqat Sales itemlar filtrlash
+- Tenant izolyatsiya — boshqa `tenantId` bilan alohida API so'rovi
+- API xato → `error` holati, `items=[]`
+- `selectedItem` birinchi itemga avtomatik o'rnatilishi
+
+### Holat
+
+| Fayl | Testlar |
+|------|---------|
+| `tasks/tasksDomain.test.ts` | 5 ✅ |
+| `tasks/tasksApi.test.ts` | 6 ✅ |
+| `tasks/useTasks.test.ts` | 6 ✅ |
+| `inbox/inboxDomain.test.ts` | 3 ✅ |
+| `inbox/inboxApi.test.ts` | 6 ✅ **yangi** |
+| `inbox/useInbox.test.ts` | 7 ✅ **yangi** |
+| Boshqa 10 ta fayl | 56 ✅ |
+| **Jami** | **89 ta test, hammasi o'tdi** |
+
+### Fayllar
+
+- `frontend/src/features/inbox/__tests__/inboxApi.test.ts` (yangi)
+- `frontend/src/features/inbox/__tests__/useInbox.test.ts` (yangi)
+
+---
+
 ## 2026-05-27 — Vazifa 3: B-007 Prompt injection himoya + input sanitizatsiya
 
 ### Kontekst

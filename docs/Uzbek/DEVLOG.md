@@ -8,6 +8,21 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — Vazifa 4: B-001 Unit testlar (inbox)
+
+### Bajarildi
+
+- `inboxApi.test.ts` (6 test): is_read normalizatsiya, tenantId, xato
+- `useInbox.test.ts` (7 test): filter all/HR/Sales, tenant izolyatsiya, xato holati
+- Jami: 76 → 89 test, hammasi o'tdi
+
+### Fayllar
+
+- `frontend/src/features/inbox/__tests__/inboxApi.test.ts` (yangi)
+- `frontend/src/features/inbox/__tests__/useInbox.test.ts` (yangi)
+
+---
+
 ## 2026-05-27 — Vazifa 3: B-007 Prompt injection himoya
 
 ### Bajarildi

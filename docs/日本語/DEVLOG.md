@@ -8,6 +8,27 @@
 
 ---
 
+## 2026-05-27 — タスク4: B-001 ユニットテスト（inboxモジュール）
+
+### コンテキスト
+
+B-001に基づき`features/inbox/`モジュールのユニットテストを追加。テスト数76→89（+13件、16ファイル）。
+
+### 実施内容
+
+**`inboxApi.test.ts`（6件）：** `is_read`正規化、tenantId、空配列、複数アイテム、APIエラー
+
+**`useInbox.test.ts`（7件）：** マウント時ロード、filter=all/HR/Sales、テナント分離、APIエラー状態、selectedItem自動設定
+
+### ステータス：89テスト、全件通過
+
+### ファイル
+
+- `frontend/src/features/inbox/__tests__/inboxApi.test.ts`（新規）
+- `frontend/src/features/inbox/__tests__/useInbox.test.ts`（新規）
+
+---
+
 ## 2026-05-27 — タスク3: B-007 プロンプトインジェクション対策 + 入力サニタイズ
 
 ### コンテキスト
