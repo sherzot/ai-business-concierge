@@ -8,6 +8,27 @@
 
 ---
 
+## 2026-05-27 — UI/UX #10: オンボーディングツールチップ（TourProvider、TourOverlay）
+
+### 実施内容
+
+- `OnboardingTour.tsx`: `TourProvider` + `useTour`フック + `TourOverlay`コンポーネント（外部ライブラリなし）
+  - スポットライト: `box-shadow`でターゲット周りにダークオーバーレイ
+  - `requestAnimationFrame`でターゲット位置追跡（スクロールも対応）
+  - `placement`オプション（top/bottom/left/right）、ビューポートクランプ
+  - プログレスバー、ステップカウンター(1/4)、「スキップ」「次へ」ボタン
+  - キーボード: `Escape`→閉じる、`ArrowRight`/`Enter`→次へ
+- `AppProviders.tsx`: `<TourProvider>`追加
+- `App.tsx`: `DASHBOARD_TOUR`(4ステップ) + `HelpCircle`ボタン→`startTour()`
+
+### ファイル
+
+- `frontend/src/shared/components/OnboardingTour.tsx` (新規)
+- `frontend/src/app/providers/AppProviders.tsx` (変更)
+- `frontend/src/App.tsx` (変更)
+
+---
+
 ## 2026-05-27 — UI/UX #9: キーボードショートカット（⌘K検索、⌘N従業員追加）
 
 ### 実施内容

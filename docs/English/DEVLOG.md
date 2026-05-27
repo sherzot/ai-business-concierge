@@ -8,6 +8,28 @@ Project development history, completed work, encountered errors, and their solut
 
 ---
 
+## 2026-05-27 — UI/UX #10: Onboarding tooltips (TourProvider, TourOverlay)
+
+### Done
+
+- `OnboardingTour.tsx`: `TourProvider` + `useTour` hook + `TourOverlay` component (no external library)
+  - Spotlight: dark overlay with `box-shadow` cutout around target element
+  - Target position tracked via `requestAnimationFrame` (works with scroll)
+  - `placement: "top"|"bottom"|"left"|"right"` — viewport clamped
+  - Progress bar, step counter (1/4), "Skip" + "Next" buttons
+  - Keyboard: `Escape` → close, `ArrowRight`/`Enter` → advance
+- `AppProviders.tsx`: added `<TourProvider>`
+- `App.tsx`: `DASHBOARD_TOUR` (4 steps: nav, search, notifications, theme) + `HelpCircle` button → `startTour()`
+- Search input: added `data-tour="search"` attribute
+
+### Files
+
+- `frontend/src/shared/components/OnboardingTour.tsx` (new)
+- `frontend/src/app/providers/AppProviders.tsx` (changed)
+- `frontend/src/App.tsx` (changed)
+
+---
+
 ## 2026-05-27 — UI/UX #9: Keyboard shortcuts (⌘K search, ⌘N new employee)
 
 ### Done

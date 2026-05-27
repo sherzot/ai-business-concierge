@@ -8,6 +8,28 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #10: Onboarding tooltips (TourProvider, TourOverlay)
+
+### Bajarildi
+
+- `OnboardingTour.tsx`: `TourProvider` + `useTour` hook + `TourOverlay` component
+  - Spotlight: `box-shadow` bilan target element atrofida qorong'i overlay
+  - `requestAnimationFrame` orqali target pozitsiyasi kuzatiladi (scroll ham ishlaydi)
+  - `placement: "top"|"bottom"|"left"|"right"` — avtomatik viewport cheklash
+  - Progress bar, step hisobi (1/4), "O'tkazib yuborish" + "Keyingi" tugmalar
+  - Keyboard: `Escape` → yopish, `ArrowRight`/`Enter` → keyingi qadam
+- `AppProviders.tsx`: `<TourProvider>` qo'shildi
+- `App.tsx`: `DASHBOARD_TOUR` (4 qadam: nav, qidiruv, bildirishnomalar, mavzu) + `HelpCircle` tugma → `startTour()`
+- Search input ga `data-tour="search"` attribute qo'shildi
+
+### Fayllar
+
+- `frontend/src/shared/components/OnboardingTour.tsx` (yangi)
+- `frontend/src/app/providers/AppProviders.tsx` (o'zgargan)
+- `frontend/src/App.tsx` (o'zgargan)
+
+---
+
 ## 2026-05-27 — UI/UX #9: Klaviatura shortcutlar (⌘K qidiruv, ⌘N xodim)
 
 ### Bajarildi

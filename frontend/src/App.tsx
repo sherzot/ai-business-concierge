@@ -61,6 +61,7 @@ import {
 } from "./shared/ui/dropdown-menu";
 import { LocaleSelect } from "./shared/components/LocaleSelect";
 import { ThemeToggle } from "./shared/components/ThemeToggle";
+import { useTour, type TourStep } from "./shared/components/OnboardingTour";
 import { getMembers } from "./features/tasks/api/tasksApi";
 import { getTasks } from "./features/tasks/api/tasksApi";
 import { getNotifications } from "./features/notifications/api/notificationsApi";
@@ -101,6 +102,34 @@ export default function App() {
     canAccess,
     logout,
   } = useAuthContext();
+  const { startTour } = useTour();
+
+  const DASHBOARD_TOUR: TourStep[] = [
+    {
+      target: "nav",
+      title: "Asosiy menyu",
+      content: "Bu yerda barcha modullar — Inbox, Vazifalar, Hujjatlar va HR. Navigatsiya tugmalarini bosing.",
+      placement: "right",
+    },
+    {
+      target: "[data-tour='search']",
+      title: "Aqlli qidiruv",
+      content: "Ism, email yoki hujjat bo'yicha qidiring. ⌘K bilan tez oching.",
+      placement: "bottom",
+    },
+    {
+      target: "[aria-label='Bildirishnomalar']",
+      title: "Bildirishnomalar",
+      content: "Yangi vazifalar, xodim o'zgarishlari va tizim xabarlari bu yerda ko'rinadi.",
+      placement: "bottom",
+    },
+    {
+      target: "[aria-label='Yorug\\' rejim'], [aria-label='Qorong\\'i rejim']",
+      title: "Mavzu",
+      content: "Yorug'/qorong'i rejim almashtiruv. Tanlangan holat browserda saqlanadi.",
+      placement: "bottom",
+    },
+  ];
   const [activeModule, setActiveModule] = useState<string>("dashboard");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
 
@@ -457,6 +486,7 @@ export default function App() {
               <input
                 ref={searchInputRef}
                 type="text"
+                data-tour="search"
                 placeholder={`${translate("nav.searchPlaceholder")} (⌘K)`}
                 className="pl-10 pr-10 py-2 w-72 bg-slate-100 border-none rounded-full text-sm focus:ring-2 focus:ring-indigo-500/30 focus:bg-white transition-all"
               />
@@ -468,9 +498,10 @@ export default function App() {
               <NotificationsDropdown tenantId={currentTenant.id} userId={profile?.user.id} onViewAll={() => setActiveModule("notifications")} />
             )}
             <button
-              onClick={() => setIsAIChatOpen(true)}
+              onClick={() => startTour(DASHBOARD_TOUR)}
               className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors"
-              title="Yordam"
+              title="Yo'riqnoma turini boshlash"
+              aria-label="Yo'riqnoma"
             >
               <HelpCircle size={20} />
             </button>

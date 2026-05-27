@@ -8,6 +8,28 @@
 
 ---
 
+## 2026-05-27 — UI/UX #10: Онбординговые тултипы (TourProvider, TourOverlay)
+
+### Сделано
+
+- `OnboardingTour.tsx`: `TourProvider` + хук `useTour` + компонент `TourOverlay` (без внешних библиотек)
+  - Spotlight: тёмный оверлей с вырезом через `box-shadow` вокруг целевого элемента
+  - Позиция цели отслеживается через `requestAnimationFrame` (работает со скроллом)
+  - `placement: "top"|"bottom"|"left"|"right"` — с ограничением по вьюпорту
+  - Прогресс-бар, счётчик шагов (1/4), кнопки «Пропустить» и «Далее»
+  - Клавиатура: `Escape` → закрыть, `ArrowRight`/`Enter` → следующий шаг
+- `AppProviders.tsx`: добавлен `<TourProvider>`
+- `App.tsx`: `DASHBOARD_TOUR` (4 шага: nav, поиск, уведомления, тема) + кнопка `HelpCircle` → `startTour()`
+- Search input: добавлен атрибут `data-tour="search"`
+
+### Файлы
+
+- `frontend/src/shared/components/OnboardingTour.tsx` (новый)
+- `frontend/src/app/providers/AppProviders.tsx` (изменён)
+- `frontend/src/App.tsx` (изменён)
+
+---
+
 ## 2026-05-27 — UI/UX #9: Горячие клавиши (⌘K поиск, ⌘N новый сотрудник)
 
 ### Сделано

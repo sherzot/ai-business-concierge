@@ -4,6 +4,7 @@ import { router } from "../router";
 import { I18nProvider } from "./I18nProvider";
 import { AuthProvider, useAuthContext } from "../../features/auth/context/AuthContext";
 import { RealtimeAuthSync } from "./RealtimeAuthSync";
+import { TourProvider } from "../../shared/components/OnboardingTour";
 
 function AppWithRealtime() {
   const { session } = useAuthContext();
@@ -19,7 +20,9 @@ export function AppProviders() {
   return (
     <I18nProvider>
       <AuthProvider>
-        <AppWithRealtime />
+        <TourProvider>
+          <AppWithRealtime />
+        </TourProvider>
       </AuthProvider>
     </I18nProvider>
   );

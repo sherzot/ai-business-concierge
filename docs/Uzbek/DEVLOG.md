@@ -8,6 +8,19 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #10: Onboarding tooltips
+
+### Bajarildi
+
+- OnboardingTour: TourProvider + useTour hook + TourOverlay (tashqi kutubxonasiz)
+- Spotlight, progress bar, keyboard nav, 4 qadam tur
+
+### Fayllar
+
+- `OnboardingTour.tsx` (yangi), `AppProviders.tsx`, `App.tsx` (o'zgargan)
+
+---
+
 ## 2026-05-27 — UI/UX #9: Klaviatura shortcutlar
 
 ### Bajarildi
