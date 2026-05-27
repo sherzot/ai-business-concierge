@@ -4,6 +4,40 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [Uzbek](Uzbek/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-05-27 — #4 Admin Knowledge Base CRUD UI + backend
+
+### Kontekst
+`knowledge_base` jadvali (pgvector + semantic search) allaqachon mavjud edi, lekin uni boshqarish uchun admin UI yoki CRUD API yo'q edi. Super adminlar maqolalarni qo'shishi, tahrirlashi, o'chirishi va faol/nofaol qilishi kerak edi.
+
+### Bajarildi
+
+**Backend (server/index.ts):**
+- `GET /admin/kb` — ro'yxat (locale, category, is_active filter)
+- `POST /admin/kb` — yangi maqola yaratish (locale+category+question+answer majburiy)
+- `PUT /admin/kb/:id` — maqolani yangilash (allowed fields)
+- `DELETE /admin/kb/:id` — maqolani o'chirish
+- Barcha endpoint super_admin / sub_admin tekshiruvi
+
+**Frontend:**
+- `frontend/src/features/admin/api/kbApi.ts` (yangi) — typed API client
+- `frontend/src/features/admin/pages/AdminKnowledgeBasePage.tsx` (yangi):
+  - Header: maqola soni / faol soni + yangilash + "Yangi maqola" tugmasi
+  - Filtrlar: qidiruv + til select + kategoriya select
+  - Stagger animatsiyali ro'yxat (accordion expand)
+  - Har bir qatorda: til/kategoriya badge, savol truncate, teglar, toggle switch
+  - Kengaytirilganda: to'liq javob + Tahrirlash/O'chirish tugmalar
+  - `FormModal` — 2 col locale+category, question input, answer textarea, tags, is_active toggle
+  - Delete confirm modal
+- `frontend/src/app/router.tsx` — `/admin/knowledge-base` route qo'shildi
+- `frontend/src/features/admin/components/AdminLayout.tsx` — `BookOpen` icon + "Knowledge Base" nav item
+
+### Fayllar
+- `frontend/src/features/admin/api/kbApi.ts` (yangi)
+- `frontend/src/features/admin/pages/AdminKnowledgeBasePage.tsx` (yangi)
+- `frontend/src/app/router.tsx` (o'zgargan)
+- `frontend/src/features/admin/components/AdminLayout.tsx` (o'zgargan)
+- `supabase/functions/server/index.ts` (o'zgargan)
+
 ## 2026-05-27 — #3 Framer-motion micro-animatsiyalar
 
 ### Kontekst

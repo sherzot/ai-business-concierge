@@ -4,6 +4,40 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #4 Admin Knowledge Base CRUD UI + бэкенд
+
+### Контекст
+Таблица `knowledge_base` (pgvector + семантический поиск) уже существовала, но не было ни admin UI, ни CRUD API для управления ею. Супер-администраторам нужно добавлять, редактировать, удалять и переключать статус статей.
+
+### Сделано
+
+**Бэкенд (server/index.ts):**
+- `GET /admin/kb` — список статей (фильтры: locale, category, is_active)
+- `POST /admin/kb` — создание статьи (locale+category+question+answer обязательны)
+- `PUT /admin/kb/:id` — обновление статьи (разрешённые поля)
+- `DELETE /admin/kb/:id` — удаление статьи
+- Все эндпоинты проверяют роль super_admin / sub_admin
+
+**Фронтенд:**
+- `frontend/src/features/admin/api/kbApi.ts` (новый) — типизированный API-клиент
+- `frontend/src/features/admin/pages/AdminKnowledgeBasePage.tsx` (новый):
+  - Заголовок: кол-во статей/активных + обновить + кнопка «Новая статья»
+  - Фильтры: поиск + выбор языка + выбор категории
+  - Список аккордеон с stagger-анимацией
+  - Каждая строка: бейджи locale/category, усечённый вопрос, теги, переключатель
+  - При раскрытии: полный ответ + кнопки редактирования/удаления
+  - `FormModal` — 2-колоночная форма (locale+category), поле вопроса, textarea ответа, теги, toggle is_active
+  - Модал подтверждения удаления
+- `frontend/src/app/router.tsx` — добавлен маршрут `/admin/knowledge-base`
+- `frontend/src/features/admin/components/AdminLayout.tsx` — иконка BookOpen + пункт «Knowledge Base» в nav
+
+### Файлы
+- `frontend/src/features/admin/api/kbApi.ts` (новый)
+- `frontend/src/features/admin/pages/AdminKnowledgeBasePage.tsx` (новый)
+- `frontend/src/app/router.tsx` (изменён)
+- `frontend/src/features/admin/components/AdminLayout.tsx` (изменён)
+- `supabase/functions/server/index.ts` (изменён)
+
 ## 2026-05-27 — #3 Framer-motion микро-анимации
 
 ### Контекст

@@ -15,6 +15,7 @@ import { AdminContactsPage } from "../features/admin/pages/AdminContactsPage";
 import { AdminCompaniesPage } from "../features/admin/pages/AdminCompaniesPage";
 import { AdminHealthPage } from "../features/admin/pages/AdminHealthPage";
 import { AdminAIChatPage } from "../features/admin/pages/AdminAIChatPage";
+import { AdminKnowledgeBasePage } from "../features/admin/pages/AdminKnowledgeBasePage";
 
 export const router = createBrowserRouter([
   { path: "/",                element: <LandingPage /> },
@@ -38,7 +39,8 @@ export const router = createBrowserRouter([
       { path: "contacts",      element: <AdminContactsPage /> },
       { path: "companies",     element: <AdminCompaniesPage /> },
       { path: "health",        element: <AdminHealthPage /> },
-      { path: "ai-chat",       element: <AdminAIChatPage /> },
+      { path: "ai-chat",        element: <AdminAIChatPage /> },
+      { path: "knowledge-base", element: <AdminKnowledgeBasePage /> },
     ],
   },
 

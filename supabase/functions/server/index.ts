@@ -3452,6 +3452,118 @@ Be concise, professional, and data-driven. You can help with: user management, c
 
     return success(c, { tenant_id: tenantId, status: body.status });
   });
+
+  // ─── Knowledge Base CRUD (admin only) ──────────────────────────────────────
+
+  async function requireSuperAdmin(c: ReturnType<typeof app.route extends never ? never : any>) {
+    const auth = c.req.header("authorization");
+    if (!auth?.startsWith("Bearer ")) return null;
+    const { data: { user }, error } = await supabase.auth.getUser(auth.slice(7));
+    if (error || !user) return null;
+    const { data: ut } = await supabase
+      .from("user_tenants").select("role").eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
+    return ut ? user : null;
+  }
+
+  // GET /admin/kb — list articles
+  app.get(`${prefix}/admin/kb`, async (c) => {
+    const auth = c.req.header("authorization");
+    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    const { data: ut } = await supabase
+      .from("user_tenants").select("role").eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
+    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+
+    const locale   = c.req.query("locale");
+    const category = c.req.query("category");
+    const is_active = c.req.query("is_active");
+
+    let q = supabase.from("knowledge_base")
+      .select("id, tenant_id, locale, category, question, answer, tags, version, is_active, created_at, updated_at")
+      .order("created_at", { ascending: false });
+    if (locale)   q = q.eq("locale", locale);
+    if (category) q = q.eq("category", category);
+    if (is_active !== undefined) q = q.eq("is_active", is_active === "true");
+
+    const { data, error } = await q;
+    if (error) return failure(c, 500, "DB_ERROR", error.message);
+    return success(c, data ?? []);
+  });
+
+  // POST /admin/kb — create article
+  app.post(`${prefix}/admin/kb`, async (c) => {
+    const auth = c.req.header("authorization");
+    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    const { data: ut } = await supabase
+      .from("user_tenants").select("role").eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
+    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+
+    const body = await c.req.json().catch(() => ({}));
+    const { locale, category, question, answer, tags, is_active, tenant_id } = body;
+    if (!locale || !category || !question || !answer) {
+      return failure(c, 400, "VALIDATION_ERROR", "locale, category, question, answer majburiy.");
+    }
+
+    const { data, error } = await supabase.from("knowledge_base").insert({
+      locale, category, question, answer,
+      tags: tags ?? [],
+      is_active: is_active ?? true,
+      tenant_id: tenant_id ?? null,
+      version: 1,
+    }).select().single();
+    if (error) return failure(c, 500, "DB_ERROR", error.message);
+    return success(c, data, 201);
+  });
+
+  // PUT /admin/kb/:id — update article
+  app.put(`${prefix}/admin/kb/:id`, async (c) => {
+    const auth = c.req.header("authorization");
+    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    const { data: ut } = await supabase
+      .from("user_tenants").select("role").eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
+    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+
+    const id = c.req.param("id");
+    const body = await c.req.json().catch(() => ({}));
+    const updates: Record<string, unknown> = {};
+    const allowed = ["locale", "category", "question", "answer", "tags", "is_active", "tenant_id"];
+    for (const k of allowed) {
+      if (k in body) updates[k] = body[k];
+    }
+    updates.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase.from("knowledge_base")
+      .update(updates).eq("id", id).select().single();
+    if (error) return failure(c, 500, "DB_ERROR", error.message);
+    if (!data) return failure(c, 404, "NOT_FOUND", "Maqola topilmadi.");
+    return success(c, data);
+  });
+
+  // DELETE /admin/kb/:id — delete article
+  app.delete(`${prefix}/admin/kb/:id`, async (c) => {
+    const auth = c.req.header("authorization");
+    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    const { data: ut } = await supabase
+      .from("user_tenants").select("role").eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
+    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+
+    const id = c.req.param("id");
+    const { error } = await supabase.from("knowledge_base").delete().eq("id", id);
+    if (error) return failure(c, 500, "DB_ERROR", error.message);
+    return success(c, { deleted: id });
+  });
 };
 
 app.get("/", (c) => c.json({ status: "ok" }));

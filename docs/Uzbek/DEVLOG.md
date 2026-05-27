@@ -4,6 +4,19 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [O'zbekcha (asosiy)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #4 Admin Knowledge Base CRUD UI + backend
+
+### Bajarildi
+- Backend: GET/POST/PUT/DELETE `/admin/kb` — super_admin auth tekshiruvi bilan
+- `kbApi.ts` typed API client
+- `AdminKnowledgeBasePage.tsx`: stagger ro'yxat, accordion, FormModal, delete confirm
+- Router + AdminLayout nav yangilandi (`/admin/knowledge-base`, BookOpen icon)
+
+### Fayllar
+- `frontend/src/features/admin/api/kbApi.ts` (yangi)
+- `frontend/src/features/admin/pages/AdminKnowledgeBasePage.tsx` (yangi)
+- `frontend/src/app/router.tsx`, `AdminLayout.tsx`, `server/index.ts` (o'zgargan)
+
 ## 2026-05-27 — #3 Framer-motion micro-animatsiyalar
 
 ### Bajarildi

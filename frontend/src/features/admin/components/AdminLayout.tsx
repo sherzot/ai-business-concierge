@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, Users, Building2, Activity, MessageSquare,
+  LayoutDashboard, Users, Building2, Activity, MessageSquare, BookOpen,
   Zap, LogOut, Menu, X, ChevronRight, PanelLeftClose, PanelLeftOpen,
 } from "lucide-react";
 import { useAuthContext } from "../../auth/context/AuthContext";
@@ -9,11 +9,12 @@ import { apiRequest } from "../../../shared/lib/apiClient";
 import { ThemeToggle } from "../../../shared/components/ThemeToggle";
 
 const NAV = [
-  { to: "/admin",           label: "Dashboard",    icon: LayoutDashboard, exact: true },
-  { to: "/admin/contacts",  label: "Murojaatlar",  icon: Users,           badge: true },
-  { to: "/admin/companies", label: "Kompaniyalar", icon: Building2 },
-  { to: "/admin/health",    label: "Tizim holati", icon: Activity },
-  { to: "/admin/ai-chat",   label: "AI Chat",      icon: MessageSquare },
+  { to: "/admin",                label: "Dashboard",     icon: LayoutDashboard, exact: true },
+  { to: "/admin/contacts",       label: "Murojaatlar",   icon: Users,           badge: true },
+  { to: "/admin/companies",      label: "Kompaniyalar",  icon: Building2 },
+  { to: "/admin/knowledge-base", label: "Knowledge Base",icon: BookOpen },
+  { to: "/admin/health",         label: "Tizim holati",  icon: Activity },
+  { to: "/admin/ai-chat",        label: "AI Chat",       icon: MessageSquare },
 ];
 
 // ---------------------------------------------------------------------------

@@ -4,6 +4,37 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md)
 
+## 2026-05-27 — #4 Admin Knowledge Base CRUD UI + バックエンド
+
+### コンテキスト
+`knowledge_base`テーブル（pgvector + セマンティック検索）は既に存在していたが、管理UIやCRUD APIがなかった。スーパー管理者が記事を追加・編集・削除・有効/無効切り替えできる機能が必要だった。
+
+### 実施内容
+**バックエンド (server/index.ts):**
+- `GET /admin/kb` — 記事一覧（locale、category、is_activeフィルター）
+- `POST /admin/kb` — 記事作成（locale+category+question+answer必須）
+- `PUT /admin/kb/:id` — 記事更新
+- `DELETE /admin/kb/:id` — 記事削除
+- 全エンドポイントでsuper_admin / sub_adminロール確認
+
+**フロントエンド:**
+- `frontend/src/features/admin/api/kbApi.ts`（新規）— 型付きAPIクライアント
+- `frontend/src/features/admin/pages/AdminKnowledgeBasePage.tsx`（新規）:
+  - ヘッダー: 記事数/有効数 + 更新 + 「新規記事」ボタン
+  - フィルター: 検索 + ロケール選択 + カテゴリ選択
+  - staggerアニメーション付きアコーディオンリスト
+  - 各行: locale/categoryバッジ、質問テキスト、タグ、トグルスイッチ
+  - 展開時: 完全な回答 + 編集/削除ボタン
+  - `FormModal` — 2カラムフォーム（locale+category）、質問、回答、タグ、is_activeトグル
+  - 削除確認モーダル
+- `router.tsx` — `/admin/knowledge-base`ルート追加
+- `AdminLayout.tsx` — BookOpenアイコン + "Knowledge Base"ナビ項目
+
+### ファイル
+- `frontend/src/features/admin/api/kbApi.ts`（新規）
+- `frontend/src/features/admin/pages/AdminKnowledgeBasePage.tsx`（新規）
+- `router.tsx`、`AdminLayout.tsx`、`server/index.ts`（変更）
+
 ## 2026-05-27 — #3 Framer-motionマイクロアニメーション
 
 ### コンテキスト

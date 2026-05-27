@@ -4,6 +4,40 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek translation](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #4 Admin Knowledge Base CRUD UI + backend
+
+### Context
+The `knowledge_base` table (pgvector + semantic search) already existed, but there was no admin UI or CRUD API to manage it. Super admins needed to add, edit, delete, and toggle articles.
+
+### Done
+
+**Backend (server/index.ts):**
+- `GET /admin/kb` — list articles (locale, category, is_active filters)
+- `POST /admin/kb` — create article (locale+category+question+answer required)
+- `PUT /admin/kb/:id` — update article (allowed fields)
+- `DELETE /admin/kb/:id` — delete article
+- All endpoints verify super_admin / sub_admin role
+
+**Frontend:**
+- `frontend/src/features/admin/api/kbApi.ts` (new) — typed API client
+- `frontend/src/features/admin/pages/AdminKnowledgeBasePage.tsx` (new):
+  - Header: article/active count + refresh + "New article" button
+  - Filters: search input + locale select + category select
+  - Stagger-animated accordion list
+  - Each row: locale/category badge, truncated question, tags, toggle switch
+  - Expanded: full answer + Edit/Delete buttons
+  - `FormModal` — 2-col locale+category, question input, answer textarea, tags, is_active toggle
+  - Delete confirm modal
+- `frontend/src/app/router.tsx` — added `/admin/knowledge-base` route
+- `frontend/src/features/admin/components/AdminLayout.tsx` — BookOpen icon + "Knowledge Base" nav item
+
+### Files
+- `frontend/src/features/admin/api/kbApi.ts` (new)
+- `frontend/src/features/admin/pages/AdminKnowledgeBasePage.tsx` (new)
+- `frontend/src/app/router.tsx` (changed)
+- `frontend/src/features/admin/components/AdminLayout.tsx` (changed)
+- `supabase/functions/server/index.ts` (changed)
+
 ## 2026-05-27 — #3 Framer-motion micro-animations
 
 ### Context
