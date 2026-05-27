@@ -8,6 +8,19 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #4: Mobile responsive tekshiruv (3 sahifa)
+
+### Bajarildi
+
+- Header larda `flex-wrap` — kichik ekranda to'g'ri ko'rinish
+- EmployeeDetailPage: loading skeleton, error state ikonkasi
+
+### Fayllar
+
+- `AdminCompaniesPage.tsx`, `AdminContactsPage.tsx`, `EmployeeDetailPage.tsx` (o'zgargan)
+
+---
+
 ## 2026-05-27 — UI/UX #3: Skeleton loaderlar + Empty states (4 sahifa)
 
 ### Bajarildi

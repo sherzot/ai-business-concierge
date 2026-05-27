@@ -8,6 +8,22 @@
 
 ---
 
+## 2026-05-27 — UI/UX #4: モバイルレスポンシブ修正（3ページ）
+
+### 実施内容
+
+- **AdminCompaniesPage** ヘッダー: `flex-wrap gap-3 + shrink-0` — 小画面でボタンが次行に折り返し
+- **AdminContactsPage** ヘッダー: 同様の `flex-wrap` 修正
+- **EmployeeDetailPage**: ローディング → 完全なスケルトン（ヘッダー + 5フィールド行）；エラー状態 → アイコン + メッセージ
+
+### ファイル
+
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (変更)
+- `frontend/src/features/admin/pages/AdminContactsPage.tsx` (変更)
+- `frontend/src/features/hr/pages/EmployeeDetailPage.tsx` (変更)
+
+---
+
 ## 2026-05-27 — UI/UX #3: スケルトンローダー + 空状態（4ページ）
 
 ### 実施内容

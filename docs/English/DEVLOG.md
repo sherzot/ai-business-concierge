@@ -8,6 +8,23 @@ Project development history, completed work, encountered errors, and their solut
 
 ---
 
+## 2026-05-27 — UI/UX #4: Mobile responsive fixes (3 pages)
+
+### Done
+
+- **AdminCompaniesPage** header: `flex-wrap gap-3 + shrink-0` — button wraps to next row on small screens
+- **AdminContactsPage** header: same `flex-wrap` fix
+- **EmployeeDetailPage**: loading → full skeleton (header + 5 field rows); error state → icon + message (was plain text before)
+- Summary cards `grid-cols-2 sm:grid-cols-4` — already responsive, preserved
+
+### Files
+
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (changed)
+- `frontend/src/features/admin/pages/AdminContactsPage.tsx` (changed)
+- `frontend/src/features/hr/pages/EmployeeDetailPage.tsx` (changed)
+
+---
+
 ## 2026-05-27 — UI/UX #3: Skeleton loaders + Empty states (4 pages)
 
 ### Done

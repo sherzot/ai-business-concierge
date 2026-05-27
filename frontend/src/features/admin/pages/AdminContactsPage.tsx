@@ -118,7 +118,7 @@ export function AdminContactsPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">Murojaatlar</h1>
           <p className="text-slate-400 text-sm mt-0.5">Landing page orqali kelgan kompaniya murojaatlari</p>
@@ -126,7 +126,7 @@ export function AdminContactsPage() {
         <button
           onClick={load}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-700 text-slate-200 text-sm hover:bg-slate-600 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-700 text-slate-200 text-sm hover:bg-slate-600 transition-colors disabled:opacity-50 shrink-0"
         >
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           Yangilash

@@ -8,6 +8,23 @@
 
 ---
 
+## 2026-05-27 — UI/UX #4: Мобильная адаптивность (3 страницы)
+
+### Сделано
+
+- **AdminCompaniesPage** шапка: `flex-wrap gap-3 + shrink-0` — кнопка переносится на следующую строку на маленьких экранах
+- **AdminContactsPage** шапка: аналогичный `flex-wrap` фикс
+- **EmployeeDetailPage**: загрузка → полный скелетон (шапка + 5 строк полей); состояние ошибки → иконка + сообщение (ранее был просто текст)
+- Карточки-сводки `grid-cols-2 sm:grid-cols-4` — уже были адаптивными, сохранены
+
+### Файлы
+
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (изменён)
+- `frontend/src/features/admin/pages/AdminContactsPage.tsx` (изменён)
+- `frontend/src/features/hr/pages/EmployeeDetailPage.tsx` (изменён)
+
+---
+
 ## 2026-05-27 — UI/UX #3: Скелетон-лоадеры + Пустые состояния (4 страницы)
 
 ### Сделано

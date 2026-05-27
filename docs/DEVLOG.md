@@ -8,6 +8,23 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #4: Mobile responsive tekshiruv (3 sahifa)
+
+### Bajarildi
+
+- **AdminCompaniesPage** header: `flex-wrap gap-3 + shrink-0` — kichik ekranda tugma keyingi qatorga o'tadi
+- **AdminContactsPage** header: xuddi shunday `flex-wrap` tuzatish
+- **EmployeeDetailPage**: loading → to'liq skeleton (header + 5 maydon qatori); error state → ikonka + xabar (avval shunchaki matn edi)
+- Summary cards `grid-cols-2 sm:grid-cols-4` — allaqachon responsiv edi, saqlandi
+
+### Fayllar
+
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminContactsPage.tsx` (o'zgargan)
+- `frontend/src/features/hr/pages/EmployeeDetailPage.tsx` (o'zgargan)
+
+---
+
 ## 2026-05-27 — UI/UX #3: Skeleton loaderlar + Empty states (4 sahifa)
 
 ### Bajarildi

@@ -163,14 +163,33 @@ export function EmployeeDetailPage({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-slate-400">
-        <RefreshCw size={18} className="animate-spin mr-2" /> Yuklanmoqda...
+      <div className="space-y-5 animate-pulse">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-slate-200" />
+          <div className="flex-1 space-y-1.5">
+            <div className="h-5 w-40 bg-slate-200 rounded" />
+            <div className="h-3 w-24 bg-slate-200 rounded" />
+          </div>
+        </div>
+        <div className="rounded-xl border border-slate-200 p-5 space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex gap-4 py-2 border-b border-slate-100">
+              <div className="h-3 w-32 bg-slate-200 rounded shrink-0" />
+              <div className="h-3 w-48 bg-slate-200 rounded" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   if (error || !data) {
-    return <div className="py-10 text-center text-slate-500 text-sm">{error ?? "Xodim topilmadi"}</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-3 text-slate-400">
+        <span className="text-3xl">👤</span>
+        <p className="text-sm font-medium text-slate-500">{error ?? "Xodim topilmadi"}</p>
+      </div>
+    );
   }
 
   const { user_tenant: ut, profile: p } = data;
