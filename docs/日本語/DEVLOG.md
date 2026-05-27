@@ -8,6 +8,33 @@
 
 ---
 
+## 2026-05-27 — UI/UX #1-2: AdminLayoutサイドバー + AdminDashboard SVGチャート
+
+### 実施内容
+
+**#1 — AdminLayoutサイドバー再構築:**
+- デスクトップ: アイコンのみ (w-16) ↔ 展開 (w-56)、`PanelLeftClose/Open`トグル
+- モバイル: ドロワー (`-translate-x-full` → `translate-x-0`) + オーバーレイ
+- `NavItem`: ツールチップ（折り畳み時fixed位置）、左アクティブバー（高さアニメ）、ホバー時アイコンスケール
+- バッジ: 点滅する赤い点（折り畳み）/ 数字（展開）
+- `Avatar`: `[\s@._-]`で分割したイニシャル
+- トップバー: 新着問い合わせ数、右上アバター
+
+**#2 — AdminDashboard SVGチャート（外部ライブラリなし）:**
+- `DonutChart`: 純粋SVG、三角関数による弧パス、中央穴、中央テキスト
+- `MiniBarChart`: SVGバーチャート、companiesのcreated_atから7日間バケット
+- `LatencyGauge`: SVG弧ゲージ、カラーコード（緑≤50ms、黄≤200ms、赤>200ms）
+- `StatCard`: 週次トレンド指標（↑/↓）、hover `scale-[1.01]`
+- スケルトンローダー: ロード中 `animate-pulse` div
+- 30秒自動更新
+
+### ファイル
+
+- `frontend/src/features/admin/components/AdminLayout.tsx` (完全再構築)
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (完全再構築)
+
+---
+
 ## 2026-05-27 — タスク4: B-001 ユニットテスト（inboxモジュール）
 
 ### コンテキスト

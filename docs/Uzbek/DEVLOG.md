@@ -8,6 +8,21 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #1-2: AdminLayout sidebar + AdminDashboard SVG grafiklari
+
+### Bajarildi
+
+- AdminLayout: icon-only (w-16) ↔ kengaytirilgan (w-56), mobile drawer, tooltip, aktiv chiziq, badge
+- AdminDashboard: DonutChart, MiniBarChart, LatencyGauge — sof SVG, tashqi kutubxonasiz
+- StatCard: trend ko'rsatkich, skeleton loaderlar, 30s auto-refresh
+
+### Fayllar
+
+- `frontend/src/features/admin/components/AdminLayout.tsx` (to'liq qayta yozildi)
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (to'liq qayta yozildi)
+
+---
+
 ## 2026-05-27 — Vazifa 4: B-001 Unit testlar (inbox)
 
 ### Bajarildi

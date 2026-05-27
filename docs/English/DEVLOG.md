@@ -8,6 +8,33 @@ Project development history, completed work, encountered errors, and their solut
 
 ---
 
+## 2026-05-27 — UI/UX #1-2: AdminLayout sidebar + AdminDashboard SVG charts
+
+### Done
+
+**#1 — AdminLayout sidebar rewrite:**
+- Desktop: icon-only mode (w-16) ↔ expanded (w-56) via `PanelLeftClose/Open` toggle
+- Mobile: drawer (`-translate-x-full` → `translate-x-0`) + overlay; separate `mobileOpen` state
+- `NavItem`: tooltip (fixed position when collapsed), left active bar (animated height), icon scale on hover
+- Badge: pulsing red dot (collapsed) / count number (expanded) for contacts
+- `Avatar`: initials from name split by `[\s@._-]`
+- Topbar: new contacts count, avatar top-right
+
+**#2 — AdminDashboardPage SVG charts (no external library):**
+- `DonutChart`: pure SVG, arc paths via trigonometry, center hole, center text
+- `MiniBarChart`: SVG bar chart, 7-day buckets from companies `created_at`
+- `LatencyGauge`: SVG arc gauge, color-coded (green ≤50ms, yellow ≤200ms, red >200ms)
+- `StatCard`: weekly trend indicator (↑/↓), hover `scale-[1.01]`
+- Skeleton loaders: `animate-pulse` divs while loading
+- 30s auto-refresh; new `getDashboardStats` type in adminDashboardApi
+
+### Files
+
+- `frontend/src/features/admin/components/AdminLayout.tsx` (complete rewrite)
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (complete rewrite)
+
+---
+
 ## 2026-05-27 — Task 4: B-001 Unit tests (inbox module)
 
 ### Context

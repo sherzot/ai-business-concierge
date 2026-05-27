@@ -8,6 +8,33 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #1-2: AdminLayout sidebar + AdminDashboard SVG grafiklari
+
+### Bajarildi
+
+**#1 — AdminLayout sidebar qayta yozildi:**
+- Desktop: ikonkalar-only rejim (w-16) ↔ kengaytirilgan (w-56) — `PanelLeftClose/Open` tugma
+- Mobile: drawer (`-translate-x-full` → `translate-x-0`) + overlay; alohida `mobileOpen` holati
+- `NavItem`: tooltip (collapsed da `fixed` pozitsiya), chap aktiv chiziq (animatsiyali balandlik), icon scale hover da
+- Badge: contactlar uchun pulsatsion qizil nuqta (collapsed) / raqam (expanded)
+- `Avatar`: ismdan bosh harflar, `[\s@._-]` bo'yicha ajratiladi
+- Topbar: yangi murojaat hisobi, avatar o'ng yuqorida
+
+**#2 — AdminDashboardPage SVG grafiklari (tashqi kutubxonasiz):**
+- `DonutChart`: sof SVG, trigonometriya bilan yoy yo'llar, markaziy teshik, markaziy matn
+- `MiniBarChart`: SVG bar chart, kompaniyalar `created_at` dan 7 kunlik qovushlar
+- `LatencyGauge`: SVG yoy gauge, ranglar bilan kodlangan (yashil ≤50ms, sariq ≤200ms, qizil >200ms)
+- `StatCard`: haftalik trend (↑/↓), hover `scale-[1.01]`
+- Skeleton loaderlar: `animate-pulse` divlar yuklanayotganda
+- 30s auto-refresh; adminDashboardApi ga yangi `getDashboardStats` type
+
+### Fayllar
+
+- `frontend/src/features/admin/components/AdminLayout.tsx` (to'liq qayta yozildi)
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (to'liq qayta yozildi)
+
+---
+
 ## 2026-05-27 — Vazifa 4: B-001 Unit testlar (inbox modul)
 
 ### Kontekst

@@ -8,6 +8,33 @@
 
 ---
 
+## 2026-05-27 — UI/UX #1-2: Сайдбар AdminLayout + SVG-графики AdminDashboard
+
+### Сделано
+
+**#1 — Перепись AdminLayout sidebar:**
+- Desktop: режим только иконок (w-16) ↔ расширенный (w-56) через кнопку `PanelLeftClose/Open`
+- Mobile: drawer (`-translate-x-full` → `translate-x-0`) + overlay; отдельное состояние `mobileOpen`
+- `NavItem`: тултип (fixed-позиция в свёрнутом режиме), левая активная полоска (анимация высоты), scale иконки при hover
+- Бейдж: пульсирующая красная точка (свёрнуто) / число (развёрнуто) для контактов
+- `Avatar`: инициалы из имени, разбитого по `[\s@._-]`
+- Topbar: счётчик новых обращений, аватар справа вверху
+
+**#2 — SVG-графики AdminDashboardPage (без внешних библиотек):**
+- `DonutChart`: чистый SVG, дуги через тригонометрию, центральное отверстие, центральный текст
+- `MiniBarChart`: SVG-барчарт, 7-дневные корзины по `created_at` компаний
+- `LatencyGauge`: SVG-дуговой gauge, цветовая кодировка (зелёный ≤50ms, жёлтый ≤200ms, красный >200ms)
+- `StatCard`: индикатор тренда за неделю (↑/↓), hover `scale-[1.01]`
+- Скелетон-лоадеры: `animate-pulse` divs во время загрузки
+- Авто-обновление каждые 30 секунд; новый тип `getDashboardStats` в adminDashboardApi
+
+### Файлы
+
+- `frontend/src/features/admin/components/AdminLayout.tsx` (полная перепись)
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (полная перепись)
+
+---
+
 ## 2026-05-27 — Задача 4: B-001 Unit-тесты (модуль inbox)
 
 ### Контекст
