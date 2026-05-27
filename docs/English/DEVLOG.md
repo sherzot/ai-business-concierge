@@ -3,6 +3,45 @@
 Project development history, completed work, encountered errors, and their solutions.
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek translation](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
+
+## 2026-05-27 — B-005 + B-006 + B-011: DB indexes, audit triggers, structured logging
+
+### Context
+Business tables had no composite indexes — tenant-scoped queries were slow at scale. Audit log was written manually only (no triggers). Hono's default logger output plain text — poor observability in Supabase log viewer.
+
+### Done
+
+**B-005 — Performance indexes + soft-delete:**
+- Added `deleted_at timestamptz` column to `tasks`, `inbox_items`, `documents`
+- `idx_tasks_tenant_status_del` — `(tenant_id, status, deleted_at)` partial index where deleted_at IS NULL
+- `idx_tasks_tenant_due` — `(tenant_id, due_date)` partial, for overdue detection
+- `idx_inbox_tenant_created_del` — `(tenant_id, created_at desc, deleted_at)` partial
+- `idx_notifications_user_unread` — `(user_id, created_at desc)` where read_at IS NULL
+- `idx_notifications_tenant_created` — `(tenant_id, created_at desc)`
+- `idx_documents_tenant_created_del` — `(tenant_id, created_at desc)` partial
+- `idx_audit_logs_tenant_created` — `(tenant_id, created_at desc)` for audit viewer
+- `idx_audit_logs_entity` — `(entity_type, entity_id, created_at desc)` for entity lookup
+- `idx_request_logs_tenant_created` — `(tenant_id, created_at desc)`
+
+**B-006 — Audit log triggers:**
+- Created `fn_audit_log_change()` PL/pgSQL function (SECURITY DEFINER)
+- INSERT → `event_type = 'table.create'`, payload = NEW row as JSON
+- UPDATE → `event_type = 'table.update'`, payload = `{before: OLD, after: NEW}`
+- DELETE → `event_type = 'table.delete'`, payload = OLD row as JSON
+- Triggers attached: `trg_audit_tasks`, `trg_audit_inbox_items`, `trg_audit_documents` (+ hr_cases if exists)
+
+**B-011 — Structured JSON logging middleware (Hono):**
+- Removed `import { logger } from "npm:hono/logger"` and `app.use('*', logger(console.log))`
+- New `app.use('*', async (c, next) => {...})` middleware:
+  - Reads `X-Trace-Id` header or generates a new UUID
+  - Measures response time with `Date.now()` before/after
+  - Assigns log level: status ≥ 500 → `error`, ≥ 400 → `warn`, duration > 2000ms → `warn`, else `info`
+  - Outputs structured JSON via `logRequest()`: `{level, message, traceId, tenantId, userId, data: {method, path, status, duration_ms}}`
+  - Adds `slow_query: true` flag for requests exceeding 2000ms
+
+### Files
+- `supabase/migrations/20260527000000_b005_b006_optimization.sql` (new)
+- `supabase/functions/server/index.ts` (changed — logger import removed, structured middleware added)
 >
 > **Protocol (CLAUDE.md §...):** Every change is logged here and across the 4 translations.
 

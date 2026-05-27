@@ -3,6 +3,37 @@
 プロジェクト開発履歴、完了した作業、遭遇したエラーとその解決策。
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md)
+
+## 2026-05-27 — B-005 + B-006 + B-011: DBインデックス、監査トリガー、構造化ログ
+
+### コンテキスト
+ビジネステーブルに複合インデックスがなく、テナントスコープのクエリが大規模では遅かった。監査ログは手動書き込みのみ（トリガーなし）。HonoのデフォルトロガーはプレーンテキストでSupabaseの可観測性が低かった。
+
+### 実施内容
+
+**B-005 — パフォーマンスインデックス + ソフトデリート:**
+- `tasks`、`inbox_items`、`documents` に `deleted_at timestamptz` カラムを追加
+- 9つの複合/部分インデックスを作成（tenant_id + status/created_at/due_date + deleted_at）
+- `idx_notifications_user_unread` — `(user_id, created_at desc)` where read_at IS NULL
+- `idx_audit_logs_entity` — `(entity_type, entity_id, created_at desc)`
+
+**B-006 — 監査トリガー:**
+- `fn_audit_log_change()` PL/pgSQL関数を作成（SECURITY DEFINER）
+- INSERT → `event_type = 'table.create'`、UPDATE → `{before, after}` JSON、DELETE → OLD行JSON
+- トリガー: `trg_audit_tasks`、`trg_audit_inbox_items`、`trg_audit_documents`（+ hr_casesが存在する場合）
+
+**B-011 — 構造化JSONログミドルウェア（Hono）:**
+- `hono/logger`インポートを削除
+- 新しい `app.use('*', async (c, next) => {...})` ミドルウェア:
+  - `X-Trace-Id`ヘッダーを読み取るかUUIDを生成
+  - `Date.now()`でレスポンス時間を計測
+  - ログレベル自動判定: status ≥ 500 → `error`、≥ 400 → `warn`、2000ms超 → `warn`
+  - `logRequest()`でJSON出力: `{level, traceId, tenantId, userId, method, path, status, duration_ms}`
+  - 2000ms超リクエストに `slow_query: true` フラグ
+
+### ファイル
+- `supabase/migrations/20260527000000_b005_b006_optimization.sql`（新規）
+- `supabase/functions/server/index.ts`（変更 — loggerインポート削除、構造化ミドルウェア追加）
 >
 > **プロトコル（CLAUDE.md §...）：** すべての変更はここおよび 4 言語の翻訳に記録される。
 

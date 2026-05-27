@@ -3,6 +3,45 @@
 История развития проекта, выполненные работы, обнаруженные ошибки и их решения.
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
+
+## 2026-05-27 — B-005 + B-006 + B-011: индексы БД, audit-триггеры, структурированное логирование
+
+### Контекст
+Бизнес-таблицы не имели составных индексов — тенант-скоупные запросы работали медленно при больших объёмах. Audit-лог записывался только вручную (без триггеров). Стандартный логгер Hono выводил plain text — неудобно для наблюдаемости в Supabase.
+
+### Сделано
+
+**B-005 — Индексы производительности + мягкое удаление:**
+- Добавлен столбец `deleted_at timestamptz` в таблицы `tasks`, `inbox_items`, `documents`
+- `idx_tasks_tenant_status_del` — `(tenant_id, status, deleted_at)` partial-индекс where deleted_at IS NULL
+- `idx_tasks_tenant_due` — `(tenant_id, due_date)` partial, для определения просроченных задач
+- `idx_inbox_tenant_created_del` — `(tenant_id, created_at desc, deleted_at)` partial
+- `idx_notifications_user_unread` — `(user_id, created_at desc)` where read_at IS NULL
+- `idx_notifications_tenant_created` — `(tenant_id, created_at desc)`
+- `idx_documents_tenant_created_del` — `(tenant_id, created_at desc)` partial
+- `idx_audit_logs_tenant_created` — `(tenant_id, created_at desc)` для просмотрщика аудита
+- `idx_audit_logs_entity` — `(entity_type, entity_id, created_at desc)` для поиска по сущности
+- `idx_request_logs_tenant_created` — `(tenant_id, created_at desc)`
+
+**B-006 — Audit-триггеры:**
+- Создана функция `fn_audit_log_change()` на PL/pgSQL (SECURITY DEFINER)
+- INSERT → `event_type = 'table.create'`, payload = NEW строка в JSON
+- UPDATE → `event_type = 'table.update'`, payload = `{before: OLD, after: NEW}`
+- DELETE → `event_type = 'table.delete'`, payload = OLD строка в JSON
+- Триггеры подключены: `trg_audit_tasks`, `trg_audit_inbox_items`, `trg_audit_documents` (+ hr_cases если существует)
+
+**B-011 — Структурированное JSON-логирование (Hono middleware):**
+- Удалены `import { logger } from "npm:hono/logger"` и `app.use('*', logger(console.log))`
+- Новый `app.use('*', async (c, next) => {...})` middleware:
+  - Читает заголовок `X-Trace-Id` или генерирует новый UUID
+  - Измеряет время ответа через `Date.now()` до/после
+  - Присваивает уровень лога: status ≥ 500 → `error`, ≥ 400 → `warn`, duration > 2000ms → `warn`, иначе `info`
+  - Выводит структурированный JSON через `logRequest()`: `{level, message, traceId, tenantId, userId, data: {method, path, status, duration_ms}}`
+  - Добавляет флаг `slow_query: true` для запросов дольше 2000ms
+
+### Файлы
+- `supabase/migrations/20260527000000_b005_b006_optimization.sql` (новый)
+- `supabase/functions/server/index.ts` (изменён — удалён импорт logger, добавлен structured middleware)
 >
 > **Протокол (CLAUDE.md §...):** Каждое изменение фиксируется здесь и во всех 4 переводах.
 

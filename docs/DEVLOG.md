@@ -3,6 +3,45 @@
 Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari.
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [Uzbek](Uzbek/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
+
+## 2026-05-27 — B-005 + B-006 + B-011: DB indekslar, audit triggers, structured logging
+
+### Kontekst
+Saqlash jadvallari indekssiz edi — tenant scope bo'yicha so'rovlar katta hajmda sekin ishlaydi. Audit log faqat manual yozilardi (trigger yo'q). Hono logger oddiy text format chiqarardi — Supabase log observability uchun noqulay.
+
+### Bajarildi
+
+**B-005 — Performance indekslar + soft-delete:**
+- `tasks`, `inbox_items`, `documents` jadvallariga `deleted_at timestamptz` ustun qo'shildi
+- `idx_tasks_tenant_status_del` — `(tenant_id, status, deleted_at)` partial index (deleted_at IS NULL)
+- `idx_tasks_tenant_due` — `(tenant_id, due_date)` partial index (deleted_at IS NULL)
+- `idx_inbox_tenant_created_del` — `(tenant_id, created_at desc, deleted_at)` partial
+- `idx_notifications_user_unread` — `(user_id, created_at desc)` where read_at IS NULL
+- `idx_notifications_tenant_created` — `(tenant_id, created_at desc)`
+- `idx_documents_tenant_created_del` — `(tenant_id, created_at desc)` partial
+- `idx_audit_logs_tenant_created` — `(tenant_id, created_at desc)`
+- `idx_audit_logs_entity` — `(entity_type, entity_id, created_at desc)`
+- `idx_request_logs_tenant_created` — `(tenant_id, created_at desc)`
+
+**B-006 — Audit log triggers:**
+- `fn_audit_log_change()` PL/pgSQL trigger funksiyasi yaratildi (SECURITY DEFINER)
+- INSERT → `event_type = 'table.create'`, payload = NEW row JSON
+- UPDATE → `event_type = 'table.update'`, payload = `{before: OLD, after: NEW}`
+- DELETE → `event_type = 'table.delete'`, payload = OLD row JSON
+- Triggerlar: `trg_audit_tasks`, `trg_audit_inbox_items`, `trg_audit_documents` (tasks/inbox_items/documents/hr_cases)
+
+**B-011 — Structured JSON logging (Hono middleware):**
+- `import { logger } from "npm:hono/logger"` olib tashlandi
+- Yangi `app.use('*', async (c, next) => {...})` middleware:
+  - `X-Trace-Id` headerni oladi yoki yangi UUID yaratadi
+  - Response vaqtini o'lchaydi (`Date.now()` before/after)
+  - status ≥ 500 → `level: "error"`, ≥ 400 → `"warn"`, duration > 2000ms → `"warn"`, boshqa → `"info"`
+  - `logRequest()` orqali JSON formatda chiqaradi: `{level, message, traceId, tenantId, userId, data: {method, path, status, duration_ms}}`
+  - 2000ms dan oshgan so'rovlarda `slow_query: true` flag
+
+### Fayllar
+- `supabase/migrations/20260527000000_b005_b006_optimization.sql` (yangi)
+- `supabase/functions/server/index.ts` (o'zgargan — logger import olib tashlandi, structured middleware qo'shildi)
 >
 > **Protokol (CLAUDE.md §...):** Har bir o'zgarish bu faylga va 4 til tarjimaga yoziladi.
 

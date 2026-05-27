@@ -3,6 +3,19 @@
 Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari.
 
 > **Tarjimalar (sinxron yangilanadi):** [O'zbekcha (asosiy)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
+
+## 2026-05-27 — B-005 + B-006 + B-011: DB indekslar, audit triggers, structured logging
+
+### Bajarildi
+- `tasks`, `inbox_items`, `documents` ga `deleted_at` ustun qo'shildi (soft-delete)
+- 9 ta composite/partial indeks yaratildi (B-005)
+- `fn_audit_log_change()` trigger funksiyasi: INSERT/UPDATE/DELETE → audit_logs (B-006)
+- Hono structured JSON logging middleware: trace_id, duration_ms, slow_query flag (B-011)
+- Migration: `20260527000000_b005_b006_optimization.sql` — Supabase ga apply qilindi
+
+### Fayllar
+- `supabase/migrations/20260527000000_b005_b006_optimization.sql` (yangi)
+- `supabase/functions/server/index.ts` (o'zgargan)
 >
 > **Protokol (CLAUDE.md §...):** Har bir o'zgarish bu faylga va 4 til tarjimaga yoziladi.
 

@@ -1,6 +1,5 @@
 import { Hono } from "npm:hono";
 import { cors } from "npm:hono/cors";
-import { logger } from "npm:hono/logger";
 import { createClient } from "npm:@supabase/supabase-js@2.49.8";
 import { Webhook } from "npm:svix@1.17.0";
 import { logRequest, logAudit, logAI, truncate } from "../_shared/logging.ts";
@@ -13,7 +12,35 @@ const BASE_PATH = "/make-server-6c2837d6";
 const V1_PATH = `${BASE_PATH}/v1`;
 const GATEWAY_PREFIX = "/bright-api";
 
-app.use('*', logger(console.log));
+// B-011: Structured JSON request logging middleware
+app.use('*', async (c, next) => {
+  const start = Date.now();
+  const traceId = c.req.header('X-Trace-Id') ?? crypto.randomUUID();
+  const tenantId = c.req.header('X-Tenant-Id') ?? '';
+  const userId = c.req.header('X-User-Id') ?? '';
+  c.set('trace_id' as never, traceId);
+
+  await next();
+
+  const duration = Date.now() - start;
+  const status = c.res.status;
+  const level = status >= 500 ? 'error' : status >= 400 ? 'warn' : duration > 2000 ? 'warn' : 'info';
+
+  logRequest({
+    level,
+    message: `${c.req.method} ${c.req.path} → ${status} (${duration}ms)`,
+    traceId,
+    tenantId: tenantId || undefined,
+    userId: userId || undefined,
+    data: {
+      method: c.req.method,
+      path: c.req.path,
+      status,
+      duration_ms: duration,
+      ...(duration > 2000 ? { slow_query: true } : {}),
+    },
+  });
+});
 
 app.use(
   "/*",
