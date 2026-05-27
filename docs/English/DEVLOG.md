@@ -8,6 +8,23 @@ Project development history, completed work, encountered errors, and their solut
 
 ---
 
+## 2026-05-27 — UI/UX #5: Notifications UI polish
+
+### Done
+
+- **Badge**: `animate-ping` ring (pulsing halo around the red dot) + inner count badge
+- **"Mark all as read"** button: header area with `CheckCheck` icon + `Promise.allSettled` parallel marking
+- **Empty state**: `BellOff` icon + text (was text only before)
+- **Per-notification**: type emoji icon (task/hr/invoice/system/🔔 default), indigo dot for unread, `bg-indigo-50` background
+- **Header row** added: "Bildirishnomalar" title + "Mark all" button when unread count > 0
+- Replaced `CheckSquare` with contextual type emojis
+
+### Files
+
+- `frontend/src/features/notifications/components/NotificationsDropdown.tsx` (complete rewrite)
+
+---
+
 ## 2026-05-27 — UI/UX #4: Mobile responsive fixes (3 pages)
 
 ### Done

@@ -8,6 +8,23 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #5: Notifications UI polish
+
+### Bajarildi
+
+- **Badge**: `animate-ping` halqa (qizil nuqta atrofida pulsatsion ring) + ichki qizil raqam badge
+- **"Barchasini o'qi"** tugma: header da `CheckCheck` ikonka + `Promise.allSettled` parallel mark
+- **Empty state**: `BellOff` ikonka + matn (avval faqat matn)
+- **Har bir notification**: tur ikonkasi (emoji), o'qilmagan holat uchun indigo nuqta, `bg-indigo-50` fon
+- **Header** qo'shildi: "Bildirishnomalar" sarlavha + o'qilmagan hisobi bor bo'lsa "Barchasini o'qi"
+- `CheckSquare` → tur emoji'si (task/hr/invoice/system/🔔 default)
+
+### Fayllar
+
+- `frontend/src/features/notifications/components/NotificationsDropdown.tsx` (to'liq qayta yozildi)
+
+---
+
 ## 2026-05-27 — UI/UX #4: Mobile responsive tekshiruv (3 sahifa)
 
 ### Bajarildi

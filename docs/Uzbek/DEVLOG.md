@@ -8,6 +8,18 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #5: Notifications UI polish
+
+### Bajarildi
+
+- Badge: animate-ping ring, mark all as read tugma, BellOff empty state, tur emoji ikonkasi, o'qilmagan nuqta
+
+### Fayllar
+
+- `frontend/src/features/notifications/components/NotificationsDropdown.tsx` (to'liq qayta yozildi)
+
+---
+
 ## 2026-05-27 — UI/UX #4: Mobile responsive tekshiruv (3 sahifa)
 
 ### Bajarildi

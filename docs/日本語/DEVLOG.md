@@ -8,6 +8,22 @@
 
 ---
 
+## 2026-05-27 — UI/UX #5: 通知UI改善
+
+### 実施内容
+
+- **バッジ**: `animate-ping`リング（赤い点の周りに脈動するハロー）+ カウントバッジ
+- **「全て既読」ボタン**: ヘッダーに`CheckCheck`アイコン + `Promise.allSettled`で並列マーク
+- **空状態**: `BellOff`アイコン + テキスト（以前はテキストのみ）
+- **各通知**: タイプ絵文字（task/hr/invoice/system/🔔）、未読インジゴ点、`bg-indigo-50`背景
+- ヘッダー行追加: タイトル + 未読数ある時「全て既読」ボタン
+
+### ファイル
+
+- `frontend/src/features/notifications/components/NotificationsDropdown.tsx` (完全再構築)
+
+---
+
 ## 2026-05-27 — UI/UX #4: モバイルレスポンシブ修正（3ページ）
 
 ### 実施内容
