@@ -8,6 +8,41 @@
 
 ---
 
+## 2026-05-27 — Задача 1: подключение ai_usage_logs (отслеживание затрат для биллинга)
+
+### Контекст
+
+Пока ожидаем API-кредиты, начали backend-работы, не требующие кредитов. Первая задача: таблица `ai_usage_logs` была создана 2026-05-14, но эндпоинты `/v1/ai/chat` и `/v1/admin/ai/chat` ещё не писали в неё данные. Это критично для биллинга — без понимания того, сколько AI-кредитов тратит каждый тенант, платёжная система Phase 3 не сможет работать.
+
+### Сделано
+
+**Вспомогательная функция `insertAiUsageLog` (новая, non-blocking):**
+- `supabase.from("ai_usage_logs").insert(...)` — использует service_role клиент (обход RLS)
+- Нормализация `provider`: `"openai_fallback"` → `"openai"` (ограничение DB: `('claude','openai','fallback')`)
+- Non-blocking: `.then(({ error }) => ...)` — основной запрос не замедляется
+- Тип `AiUsageLogEntry` — типизированный интерфейс
+
+**Эндпоинт `/v1/ai/chat` обновлён:**
+- `insertAiUsageLog()` вызывается после каждого AI-ответа
+- Сохраняемые данные: `tenant_id`, `user_id`, `endpoint`, `model`, `provider`, `complexity`, `prompt_tokens`, `completion_tokens`, `cost_usd`, `cached`, `latency_ms`, `trace_id`
+
+**Эндпоинт `/v1/admin/ai/chat` обновлён:**
+- Добавлены переменные отслеживания токенов: `adminModel`, `adminProvider`, `adminInputTokens`, `adminOutputTokens`, `adminCostUsd`, `adminCached`
+- Данные ответов `callClaude()` и `callOpenAI()` теперь собираются
+- Admin chat НЕ пишет в `ai_usage_logs` (FK-ограничение — у admin нет tenant) — логируется через `console.info()`
+- TODO: в будущем nullable `tenant_id` или отдельная `admin_ai_usage_logs`
+
+**Уточнение:**
+- Эндпоинт `/v1/docs/search` уже существовал (строка 2916) — работает через `ILIKE`
+- Функция `match_documents()` есть, но требует OpenAI embedding — подключим при поступлении кредитов
+- Задача 2 (подключение `match_documents()`) зависит от кредитов, отложена
+
+### Файлы
+
+- `supabase/functions/server/index.ts` (изменён: helper `insertAiUsageLog` + 2 эндпоинта подключены)
+
+---
+
 ## 2026-05-15 — Улучшения веб-части (завершено): 8 крупных изменений UI/UX
 
 ### Контекст

@@ -8,6 +8,39 @@
 
 ---
 
+## 2026-05-27 — タスク1: ai_usage_logsの接続（ビリング用コスト追跡）
+
+### コンテキスト
+
+APIクレジット待機中、クレジット不要のバックエンド作業を開始。最初のタスク：`ai_usage_logs`テーブルは2026-05-14に作成済みだったが、`/v1/ai/chat`と`/v1/admin/ai/chat`エンドポイントがまだデータを書き込んでいなかった。Phase 3の課金システムには各テナントのAIクレジット消費量の把握が不可欠。
+
+### 実施内容
+
+**`insertAiUsageLog`ヘルパー関数（新規、non-blocking）：**
+- `supabase.from("ai_usage_logs").insert(...)` — service_roleクライアントを使用（RLSバイパス）
+- `provider`の正規化：`"openai_fallback"` → `"openai"`（DB制約：`('claude','openai','fallback')`）
+- Non-blocking：`.then(({ error }) => ...)` — メインリクエストを遅延させない
+- `AiUsageLogEntry`型 — 型付きインターフェース
+
+**`/v1/ai/chat`エンドポイント更新：**
+- 各AIレスポンス後に`insertAiUsageLog()`を呼び出し
+- 保存データ：`tenant_id`、`user_id`、`endpoint`、`model`、`provider`、`complexity`、`prompt_tokens`、`completion_tokens`、`cost_usd`、`cached`、`latency_ms`、`trace_id`
+
+**`/v1/admin/ai/chat`エンドポイント更新：**
+- トークン追跡変数を追加：`adminModel`、`adminProvider`、`adminInputTokens`等
+- Admin chatはFK制約のため`ai_usage_logs`に書き込まない（テナントなし）→ `console.info()`でログ
+- TODO：将来的にnullable `tenant_id`または別途`admin_ai_usage_logs`
+
+**補足：**
+- `/v1/docs/search`はすでに存在（`ILIKE`で動作中）
+- `match_documents()`はOpenAIクレジット到着後に接続予定
+
+### ファイル
+
+- `supabase/functions/server/index.ts`（変更：`insertAiUsageLog`ヘルパー + 2エンドポイント接続）
+
+---
+
 ## 2026-05-15 — Web改善（完了）：8つの主要UI/UX変更
 
 ### コンテキスト

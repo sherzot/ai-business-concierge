@@ -8,6 +8,25 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — Vazifa 1: ai_usage_logs wiring (billing cost tracking)
+
+### Kontekst
+
+API kreditlar kutilayotganda kredit talab qilmaydigan backend ishlari boshlandi.
+
+### Bajarildi
+
+- `insertAiUsageLog` helper funksiya — non-blocking, service_role orqali `ai_usage_logs` ga yozadi
+- `/v1/ai/chat` — har AI so'rovdan keyin `insertAiUsageLog()` chaqiriladi
+- `/v1/admin/ai/chat` — token tracking o'zgaruvchilari qo'shildi; admin chatda tenant yo'qligi sababli `ai_usage_logs` ga yozilmaydi, faqat `console.info()`
+- `/v1/docs/search` allaqachon mavjud (ILIKE bilan); `match_documents()` kredit kelgach ulanadi
+
+### Fayllar
+
+- `supabase/functions/server/index.ts` (o'zgargan)
+
+---
+
 ## 2026-05-15 — Web takomillashtirish (tugallandi): 8 ta UI/UX o'zgarish
 
 ### Bajarildi

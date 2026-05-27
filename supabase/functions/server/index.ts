@@ -503,6 +503,50 @@ const writeAiInteraction = async (ctx: TenantContext, entry: AiInteractionEntry)
   }
 };
 
+// ---------------------------------------------------------------------------
+// insertAiUsageLog — ai_usage_logs jadvaliga non-blocking yozish
+// Billing va cost tracking uchun. service_role client ishlatadi (RLS bypass).
+// ---------------------------------------------------------------------------
+type AiUsageLogEntry = {
+  tenantId: string;
+  userId?: string | null;
+  endpoint: string;
+  model: string;
+  provider: string;       // 'claude' | 'openai' | 'fallback'
+  complexity?: string;
+  promptTokens: number;
+  completionTokens: number;
+  costUsd: number;
+  cached: boolean;
+  latencyMs: number;
+  traceId: string;
+};
+
+const insertAiUsageLog = (entry: AiUsageLogEntry): void => {
+  // provider constraint: ('claude','openai','fallback')
+  const providerNorm =
+    entry.provider === "openai_fallback" ? "openai"
+    : ["claude", "openai", "fallback"].includes(entry.provider) ? entry.provider
+    : "fallback";
+
+  supabase.from("ai_usage_logs").insert({
+    tenant_id:         entry.tenantId,
+    user_id:           entry.userId ?? null,
+    endpoint:          entry.endpoint,
+    model:             entry.model,
+    provider:          providerNorm,
+    complexity:        entry.complexity ?? null,
+    prompt_tokens:     entry.promptTokens,
+    completion_tokens: entry.completionTokens,
+    cost_usd:          entry.costUsd,
+    cached:            entry.cached,
+    latency_ms:        entry.latencyMs,
+    trace_id:          entry.traceId,
+  }).then(({ error }) => {
+    if (error) console.error("[ai_usage_log] insert error:", error.message);
+  });
+};
+
 app.use("*", async (c, next) => {
   const traceId = c.req.header("x-trace-id") ?? crypto.randomUUID();
   c.set(TRACE_ID_KEY, traceId);
@@ -2479,6 +2523,22 @@ const registerRoutes = (prefix: string) => {
       trace_id: traceId,
     });
 
+    // Har AI chaqiruv — ai_usage_logs ga non-blocking yozish (billing uchun)
+    insertAiUsageLog({
+      tenantId:         (ctx as TenantContext).tenantId,
+      userId:           (ctx as TenantContext).userId,
+      endpoint:         "/v1/ai/chat",
+      model:            llmModel,
+      provider:         llmProvider,
+      complexity,
+      promptTokens:     inputTokens,
+      completionTokens: outputTokens,
+      costUsd,
+      cached,
+      latencyMs,
+      traceId,
+    });
+
     // Disclaimer — KB topilmasa yoki past similarity
     if (!kbFound || kbSimilarity < 0.85) {
       const disclaimer = locale === "ru"
@@ -3049,6 +3109,14 @@ Respond in ${reqLocale === "ru" ? "Russian" : reqLocale === "en" ? "English" : "
 Be concise, professional, and data-driven. You can help with: user management, company onboarding, system monitoring, and platform strategy.`;
 
     let reply = "Kechirasiz, hozir javob bera olmayapman.";
+    const adminStart = Date.now();
+    let adminModel = "none";
+    let adminProvider = "fallback";
+    let adminInputTokens = 0;
+    let adminOutputTokens = 0;
+    let adminCostUsd = 0;
+    let adminCached = false;
+    const adminTraceId = c.req.header("x-trace-id") ?? crypto.randomUUID();
 
     if (ANTHROPIC_API_KEY) {
       try {
@@ -3060,6 +3128,12 @@ Be concise, professional, and data-driven. You can help with: user management, c
           complexity: "analysis",
         });
         if (claudeRes.text) reply = claudeRes.text;
+        adminModel = claudeRes.model;
+        adminProvider = "claude";
+        adminInputTokens = claudeRes.inputTokens;
+        adminOutputTokens = claudeRes.outputTokens;
+        adminCostUsd = claudeRes.costUsd;
+        adminCached = claudeRes.cached;
       } catch {
         if (OPENAI_API_KEY) {
           try {
@@ -3074,6 +3148,8 @@ Be concise, professional, and data-driven. You can help with: user management, c
               ? oaiRes.output.flatMap((i: any) => i.content || []).map((p: any) => p.text).filter(Boolean).join("\n")
               : "";
             if (text) reply = text;
+            adminModel = OPENAI_MODEL;
+            adminProvider = "openai";
           } catch { /* fallback */ }
         }
       }
@@ -3090,7 +3166,16 @@ Be concise, professional, and data-driven. You can help with: user management, c
           ? oaiRes.output.flatMap((i: any) => i.content || []).map((p: any) => p.text).filter(Boolean).join("\n")
           : "";
         if (text) reply = text;
+        adminModel = OPENAI_MODEL;
+        adminProvider = "openai";
       } catch { /* fallback */ }
+    }
+
+    // TODO: admin AI usage logging — ai_usage_logs.tenant_id FK bor (tenants.id),
+    // admin chatda tenant yo'q. Kelajakda: alohida admin_ai_usage_logs yoki nullable tenant_id.
+    // Hozircha: faqat console log.
+    if (adminModel !== "none") {
+      console.info(`[admin/ai/chat] model=${adminModel} provider=${adminProvider} tokens=${adminInputTokens}+${adminOutputTokens} cost=$${adminCostUsd.toFixed(6)} latency=${Date.now() - adminStart}ms trace=${adminTraceId}`);
     }
 
     return success(c, { reply });

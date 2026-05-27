@@ -8,6 +8,41 @@ Project development history, completed work, encountered errors, and their solut
 
 ---
 
+## 2026-05-27 — Task 1: ai_usage_logs wiring (billing cost tracking)
+
+### Context
+
+While waiting for API credits, we started backend work that doesn't require credits. First task: the `ai_usage_logs` table was created on 2026-05-14 but the `/v1/ai/chat` and `/v1/admin/ai/chat` endpoints weren't writing to it. This is critical for billing — without knowing how much AI credit each tenant consumes, the Phase 3 payment system cannot function.
+
+### Done
+
+**`insertAiUsageLog` helper function (new, non-blocking):**
+- `supabase.from("ai_usage_logs").insert(...)` — uses service_role client (RLS bypass)
+- `provider` normalization: `"openai_fallback"` → `"openai"` (DB constraint: `('claude','openai','fallback')`)
+- Non-blocking: `.then(({ error }) => ...)` — main request is not slowed down
+- `AiUsageLogEntry` type — typed interface
+
+**`/v1/ai/chat` endpoint updated:**
+- `insertAiUsageLog()` is called after each AI response
+- Stored data: `tenant_id`, `user_id`, `endpoint`, `model`, `provider`, `complexity`, `prompt_tokens`, `completion_tokens`, `cost_usd`, `cached`, `latency_ms`, `trace_id`
+
+**`/v1/admin/ai/chat` endpoint updated:**
+- Token tracking variables added: `adminModel`, `adminProvider`, `adminInputTokens`, `adminOutputTokens`, `adminCostUsd`, `adminCached`
+- Response data from `callClaude()` and `callOpenAI()` is now collected
+- Admin chat does NOT write to `ai_usage_logs` (FK constraint — no tenant in admin context) — logged via `console.info()`
+- TODO: future solution: nullable `tenant_id` or separate `admin_ai_usage_logs`
+
+**Clarification:**
+- `/v1/docs/search` endpoint already exists (line 2916) — works with `ILIKE`
+- `match_documents()` pgvector function exists but requires OpenAI embedding credits — will connect when credits arrive
+- Task 2 (`match_documents()` wiring) depends on credits, deferred
+
+### Files
+
+- `supabase/functions/server/index.ts` (changed: `insertAiUsageLog` helper + 2 endpoints wired)
+
+---
+
 ## 2026-05-15 — Web improvements (completed): 8 major UI/UX changes
 
 ### Context

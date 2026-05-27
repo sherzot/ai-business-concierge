@@ -8,6 +8,41 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — Vazifa 1: ai_usage_logs wiring (billing cost tracking)
+
+### Kontekst
+
+API kreditlar kutilayotgan paytda kredit talab qilmaydigan backend ishlarni boshladik. Birinchi vazifa: `ai_usage_logs` jadval 2026-05-14 da yaratilgan edi, lekin `/v1/ai/chat` va `/v1/admin/ai/chat` endpointlar hali bu jadvalga yozmayotgan edi. Bu billing uchun hal qiluvchi — har qaysi tenant qancha AI kredit sarflayotganini bilmasak, Phase 3 to'lov tizimi ishlay olmaydi.
+
+### Bajarildi
+
+**`insertAiUsageLog` helper funksiya (yangi, non-blocking):**
+- `supabase.from("ai_usage_logs").insert(...)` — service_role client ishlatadi (RLS bypass)
+- `provider` normalizatsiya: `"openai_fallback"` → `"openai"` (DB constraint: `('claude','openai','fallback')`)
+- Non-blocking: `.then(({ error }) => ...)` — asosiy request sekinlamaydi
+- `AiUsageLogEntry` type — typed interface
+
+**`/v1/ai/chat` endpoint yangilandi:**
+- `insertAiUsageLog()` chaqiriladi har AI so'rovdan keyin
+- Saqlangan ma'lumotlar: `tenant_id`, `user_id`, `endpoint`, `model`, `provider`, `complexity`, `prompt_tokens`, `completion_tokens`, `cost_usd`, `cached`, `latency_ms`, `trace_id`
+
+**`/v1/admin/ai/chat` endpoint yangilandi:**
+- Token tracking o'zgaruvchilari qo'shildi: `adminModel`, `adminProvider`, `adminInputTokens`, `adminOutputTokens`, `adminCostUsd`, `adminCached`
+- `callClaude()` va `callOpenAI()` javob ma'lumotlari to'planadi
+- Admin chat uchun `ai_usage_logs` ga yozilmaydi (`tenant_id` FK bor, admin da tenant yo'q) — `console.info()` bilan loglanadi
+- TODO: kelajakda `tenant_id nullable` yoki alohida `admin_ai_usage_logs`
+
+**Aniqlik:**
+- `/v1/docs/search` endpoint allaqachon mavjud (line 2916) — `ILIKE` bilan ishlaydi
+- `match_documents()` pgvector funksiyasi bor, lekin OpenAI embedding kredit kerak — kredit kelgach ulash
+- Vazifa 2 (`match_documents()` wiring) kreditga bog'liq, o'tkazib yuborildi
+
+### Fayllar
+
+- `supabase/functions/server/index.ts` (o'zgargan: `insertAiUsageLog` helper + 2 endpoint ulandi)
+
+---
+
 ## 2026-05-15 — Web takomillashtirish (tugallandi): 8 ta muhim UI/UX o'zgarish
 
 ### Kontekst
