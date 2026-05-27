@@ -6,6 +6,7 @@ import { Webhook } from "npm:svix@1.17.0";
 import { logRequest, logAudit, logAI, truncate } from "../_shared/logging.ts";
 import { callClaude, classifyComplexity } from "./services/llm-router.ts";
 import { searchKnowledgeBase, addDisclaimerIfNeeded } from "./services/knowledge-base.ts";
+import { checkAiSafety, wrapUserMessage } from "./services/ai-safety.ts";
 
 const app = new Hono();
 const BASE_PATH = "/make-server-6c2837d6";
@@ -2360,14 +2361,25 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 422, "VALIDATION_ERROR", "message majburiy.");
     }
 
+    // ── AI Safety: injection himoya + sanitizatsiya + rate limit ─────────────
+    const safety = checkAiSafety(message, (ctx as any).userId ?? null);
+    if (!safety.safe) {
+      const isRu = (reqLocale ?? "uz") === "ru";
+      const errMsg = isRu && safety.messageRu ? safety.messageRu : safety.message;
+      const httpStatus = safety.code === "RATE_LIMITED" ? 429 : 422;
+      return failure(c, httpStatus, safety.code, errMsg);
+    }
+    // Sanitizatsiya qilingan va xavfsiz xabar ishlatiladi
+    const safeMessage = safety.sanitized;
+
     const locale = (reqLocale ?? "uz") as string;
     const promptVersion = "v2";
-    const inputExcerpt = truncate(message, 500);
+    const inputExcerpt = truncate(safeMessage, 500);
     const traceId = getTraceId(c);
     const aiStart = Date.now();
 
     // Murakkablikni aniqlash
-    const complexity = classifyComplexity(message);
+    const complexity = classifyComplexity(safeMessage);
     const promptName = `ai_coo_${complexity}`;
 
     // Statik fallback (AI mavjud bo'lmasa)
@@ -2386,7 +2398,7 @@ const registerRoutes = (prefix: string) => {
       return locale === "ru" ? "Понятно. Изучу этот вопрос." : "Tushunarli. Buni o'rganib chiqaman.";
     };
 
-    let reply = buildFallbackReply(message);
+    let reply = buildFallbackReply(safeMessage);
     let llmProvider = "fallback";
     let llmModel = "none";
     let llmError: string | null = null;
@@ -2402,7 +2414,7 @@ const registerRoutes = (prefix: string) => {
     if (OPENAI_API_KEY) {
       try {
         const kbResult = await searchKnowledgeBase(supabase, OPENAI_API_KEY, {
-          query: message,
+          query: safeMessage,
           locale: locale as "uz" | "ru" | "en",
         });
         if (kbResult.found) {
@@ -2416,10 +2428,11 @@ const registerRoutes = (prefix: string) => {
     }
 
     // 1) Claude (asosiy)
+    // wrapUserMessage: foydalanuvchi xabarini "User message:\n" blokiga o'rash (prompt layering)
     if (ANTHROPIC_API_KEY) {
       try {
         const claudeRes = await callClaude(ANTHROPIC_API_KEY, {
-          message,
+          message: wrapUserMessage(safeMessage),
           systemPrompt: system_prompt,
           context: kbContext || undefined,
           locale,
@@ -2450,7 +2463,7 @@ const registerRoutes = (prefix: string) => {
                   role: "system",
                   content: "Sen AI Business Concierge. Javoblar qisqa, amaliy va foydali bo'lsin.",
                 },
-                { role: "user", content: message },
+                { role: "user", content: wrapUserMessage(safeMessage) },
               ],
             });
             const outputText = Array.isArray(aiResponse.output)
@@ -2482,7 +2495,7 @@ const registerRoutes = (prefix: string) => {
               role: "system",
               content: "Sen AI Business Concierge. Javoblar qisqa, amaliy va foydali bo'lsin.",
             },
-            { role: "user", content: message },
+            { role: "user", content: wrapUserMessage(safeMessage) },
           ],
         });
         const outputText = Array.isArray(aiResponse.output)
