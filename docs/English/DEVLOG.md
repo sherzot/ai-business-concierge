@@ -8,6 +8,23 @@ Project development history, completed work, encountered errors, and their solut
 
 ---
 
+## 2026-05-27 — UI/UX #6: Employee onboarding step wizard
+
+### Done
+
+- `AddEmployeePage` converted to 3-step wizard:
+  - **Step 1**: Mode selection — large visual cards (`Send`/`Lock` icons, selected badge)
+  - **Step 2**: Info form — icon-prefixed inputs, mode indicator with "Change" link, spinner during submit
+  - **Step 3**: Success — large `CheckCircle2` green circle, "Add another" and "Employee list" buttons
+- `StepIndicator` component: numbered circles (active/done/future), connector lines (color changes), step labels
+- Added `onSuccess?` prop — external callback option on step 3
+
+### Files
+
+- `frontend/src/features/hr/pages/AddEmployeePage.tsx` (complete rewrite)
+
+---
+
 ## 2026-05-27 — UI/UX #5: Notifications UI polish
 
 ### Done

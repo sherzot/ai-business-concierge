@@ -8,6 +8,19 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #6: Employee onboarding step wizard
+
+### Bajarildi
+
+- AddEmployeePage: 3 qadam wizard (mode tanlash, ma'lumot, muvaffaqiyat)
+- StepIndicator: numbered circles, connector chiziqlar
+
+### Fayllar
+
+- `frontend/src/features/hr/pages/AddEmployeePage.tsx` (to'liq qayta yozildi)
+
+---
+
 ## 2026-05-27 — UI/UX #5: Notifications UI polish
 
 ### Bajarildi

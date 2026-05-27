@@ -8,6 +8,23 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 ---
 
+## 2026-05-27 — UI/UX #6: Employee onboarding step wizard
+
+### Bajarildi
+
+- `AddEmployeePage` 3 qadam wizardga o'tkazildi:
+  - **Step 1**: Mode tanlash — katta visual kartalar (`Send`/`Lock` ikonka, tanlangan badge)
+  - **Step 2**: Ma'lumotlar formasi — ikonkali input lar, mode ko'rsatkich + "O'zgartirish" link, yuborilayotganda spinner
+  - **Step 3**: Muvaffaqiyat — `CheckCircle2` katta ko'k doira, "Yana qo'shish" va "Xodimlar ro'yxati" tugmalar
+- `StepIndicator` component: numbered circles (active/done/future), connector chiziqlar (rang o'zgaradi), step labels
+- `onSuccess?` prop qo'shildi — step 3 da tashqi callback imkoni
+
+### Fayllar
+
+- `frontend/src/features/hr/pages/AddEmployeePage.tsx` (to'liq qayta yozildi)
+
+---
+
 ## 2026-05-27 — UI/UX #5: Notifications UI polish
 
 ### Bajarildi

@@ -8,6 +8,23 @@
 
 ---
 
+## 2026-05-27 — UI/UX #6: 従業員オンボーディングステップウィザード
+
+### 実施内容
+
+- `AddEmployeePage`を3ステップウィザードに変換:
+  - **Step 1**: 方法選択 — 大きなビジュアルカード（`Send`/`Lock`アイコン、選択バッジ）
+  - **Step 2**: 情報フォーム — アイコン付きinput、方法インジケーター+「変更」リンク、送信中スピナー
+  - **Step 3**: 成功 — 大きな緑の`CheckCircle2`、「もう1人追加」「従業員一覧」ボタン
+- `StepIndicator`コンポーネント: 番号付き円（active/done/future）、コネクター線（色変化）、ステップラベル
+- `onSuccess?`プロップ追加
+
+### ファイル
+
+- `frontend/src/features/hr/pages/AddEmployeePage.tsx` (完全再構築)
+
+---
+
 ## 2026-05-27 — UI/UX #5: 通知UI改善
 
 ### 実施内容
