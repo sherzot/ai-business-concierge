@@ -4,6 +4,20 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md)
 
+## 2026-05-27 — #5 Admin Audit Logビューア + バックエンド
+
+### コンテキスト
+B-006トリガーがaudit_logsテーブルを自動的に埋める。スーパー管理者がこのデータを閲覧・フィルタリング・検査する手段が必要だった。
+
+### 実施内容
+- `GET /admin/audit`エンドポイント: super_admin/sub_adminロール確認、フィルター（entity_type/action/from/to/limit）
+- `auditApi.ts`型付きクライアント
+- `AdminAuditPage.tsx`: staggerアコーディオンリスト、actionバッジ（create/update/delete色分け）、payload JSON展開
+- Router: `/admin/audit`ルート; AdminLayout: Shieldアイコン + "Audit Log"ナビ項目
+
+### ファイル
+- `auditApi.ts`、`AdminAuditPage.tsx`（新規）; `router.tsx`、`AdminLayout.tsx`、`server/index.ts`（変更）
+
 ## 2026-05-27 — #4 Admin Knowledge Base CRUD UI + バックエンド
 
 ### コンテキスト

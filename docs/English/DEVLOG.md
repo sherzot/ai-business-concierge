@@ -4,6 +4,33 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek translation](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #5 Admin Audit Log viewer + backend
+
+### Context
+The B-006 trigger fills the audit_logs table automatically. Super admins needed a way to view, filter, and inspect this data.
+
+### Done
+- `GET /admin/audit` backend endpoint (server/index.ts):
+  - super_admin / sub_admin role check
+  - Query params: tenant_id, entity_type, action, from, to, limit (max 500)
+  - Returns audit_logs ordered by created_at desc
+- `frontend/src/features/admin/api/auditApi.ts` (new) — typed API client
+- `frontend/src/features/admin/pages/AdminAuditPage.tsx` (new):
+  - Header: total/displayed count + refresh button
+  - Filters: search, entity_type select, action select, from/to date
+  - Stagger-animated accordion list
+  - Each row: action badge (create/update/delete colored), entity_type, event_type, short user_id, timestamp
+  - Expanded: full payload JSON (pre formatted)
+- Router: `/admin/audit` route added
+- AdminLayout: `Shield` icon + "Audit Log" nav item (between Knowledge Base and Health)
+
+### Files
+- `frontend/src/features/admin/api/auditApi.ts` (new)
+- `frontend/src/features/admin/pages/AdminAuditPage.tsx` (new)
+- `frontend/src/app/router.tsx` (changed)
+- `frontend/src/features/admin/components/AdminLayout.tsx` (changed)
+- `supabase/functions/server/index.ts` (changed)
+
 ## 2026-05-27 — #4 Admin Knowledge Base CRUD UI + backend
 
 ### Context

@@ -3453,6 +3453,41 @@ Be concise, professional, and data-driven. You can help with: user management, c
     return success(c, { tenant_id: tenantId, status: body.status });
   });
 
+  // ─── GET /admin/audit — audit log viewer ───────────────────────────────────
+  app.get(`${prefix}/admin/audit`, async (c) => {
+    const auth = c.req.header("authorization");
+    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    const { data: ut } = await supabase
+      .from("user_tenants").select("role").eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
+    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+
+    const tenant_id  = c.req.query("tenant_id");
+    const entity_type = c.req.query("entity_type");
+    const action     = c.req.query("action");
+    const from_date  = c.req.query("from");
+    const to_date    = c.req.query("to");
+    const limit_str  = c.req.query("limit") ?? "100";
+    const limit      = Math.min(parseInt(limit_str) || 100, 500);
+
+    let q = supabase.from("audit_logs")
+      .select("id, tenant_id, user_id, action, event_type, entity_type, entity_id, payload, created_at")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (tenant_id)   q = q.eq("tenant_id", tenant_id);
+    if (entity_type) q = q.eq("entity_type", entity_type);
+    if (action)      q = q.eq("action", action);
+    if (from_date)   q = q.gte("created_at", from_date);
+    if (to_date)     q = q.lte("created_at", to_date);
+
+    const { data, error } = await q;
+    if (error) return failure(c, 500, "DB_ERROR", error.message);
+    return success(c, data ?? []);
+  });
+
   // ─── Knowledge Base CRUD (admin only) ──────────────────────────────────────
 
   async function requireSuperAdmin(c: ReturnType<typeof app.route extends never ? never : any>) {

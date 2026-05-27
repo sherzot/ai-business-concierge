@@ -4,6 +4,33 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [Uzbek](Uzbek/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-05-27 — #5 Admin Audit Log viewer + backend
+
+### Kontekst
+B-006 trigger orqali audit_logs jadvali to'ldiriladi. Super adminlar uchun bu ma'lumotlarni ko'rish, filtrlash va tekshirish imkoniyati kerak edi.
+
+### Bajarildi
+- `GET /admin/audit` backend endpoint (server/index.ts):
+  - super_admin / sub_admin tekshiruvi
+  - Query params: tenant_id, entity_type, action, from, to, limit (max 500)
+  - `audit_logs` jadvaldan tartibli (created_at desc) ma'lumot
+- `frontend/src/features/admin/api/auditApi.ts` (yangi) — typed API client
+- `frontend/src/features/admin/pages/AdminAuditPage.tsx` (yangi):
+  - Header: jami / ko'rsatilgan yozuvlar soni + yangilash tugmasi
+  - Filtrlar: qidiruv, entity_type select, action select, sanadan / sanagacha
+  - Stagger-animatsiyali ro'yxat
+  - Har bir qatorda: action badge (create/update/delete rangli), entity_type, event_type, user_id (qisqartirilgan), vaqt
+  - Kengaytirilganda: to'liq payload JSON (pre format)
+- Router: `/admin/audit` route qo'shildi
+- AdminLayout: `Shield` icon + "Audit Log" nav item (Knowledge Base va Health o'rtasida)
+
+### Fayllar
+- `frontend/src/features/admin/api/auditApi.ts` (yangi)
+- `frontend/src/features/admin/pages/AdminAuditPage.tsx` (yangi)
+- `frontend/src/app/router.tsx` (o'zgargan)
+- `frontend/src/features/admin/components/AdminLayout.tsx` (o'zgargan)
+- `supabase/functions/server/index.ts` (o'zgargan)
+
 ## 2026-05-27 — #4 Admin Knowledge Base CRUD UI + backend
 
 ### Kontekst

@@ -4,6 +4,20 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #5 Просмотрщик Audit Log + бэкенд
+
+### Контекст
+Триггер B-006 автоматически заполняет таблицу audit_logs. Супер-администраторам нужна была возможность просматривать, фильтровать и изучать эти данные.
+
+### Сделано
+- Эндпоинт `GET /admin/audit` (server/index.ts): проверка super_admin/sub_admin, фильтры tenant_id/entity_type/action/from/to/limit, возвращает audit_logs по created_at desc
+- `auditApi.ts` — типизированный API-клиент
+- `AdminAuditPage.tsx`: заголовок с подсчётом, фильтры (поиск + selects + даты), stagger-список с аккордеоном, action-бейджи (create/update/delete в цвете), развёртывание payload в JSON
+- Router: маршрут `/admin/audit`; AdminLayout: иконка Shield + «Audit Log» в nav
+
+### Файлы
+- `auditApi.ts` (новый), `AdminAuditPage.tsx` (новый), `router.tsx`, `AdminLayout.tsx`, `server/index.ts` (изменены)
+
 ## 2026-05-27 — #4 Admin Knowledge Base CRUD UI + бэкенд
 
 ### Контекст

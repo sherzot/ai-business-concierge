@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [O'zbekcha (asosiy)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #5 Admin Audit Log viewer + backend
+
+### Bajarildi
+- `GET /admin/audit` endpoint: super_admin auth, filter (entity_type, action, date)
+- `auditApi.ts` typed client, `AdminAuditPage.tsx`: stagger ro'yxat, action badge, payload JSON accordion
+- Router `/admin/audit` + AdminLayout Shield icon
+
+### Fayllar
+- `auditApi.ts`, `AdminAuditPage.tsx` (yangi), `router.tsx`, `AdminLayout.tsx`, `server/index.ts` (o'zgargan)
+
 ## 2026-05-27 — #4 Admin Knowledge Base CRUD UI + backend
 
 ### Bajarildi
