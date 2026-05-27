@@ -4,6 +4,24 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #6 PWA манифест — офлайн-оболочка, установка на главный экран
+
+### Контекст
+Приложение было доступно только в браузере. На мобильных устройствах нужна была возможность установки на главный экран и офлайн-работы.
+
+### Сделано
+- Установлен `vite-plugin-pwa@1.3.0` (devDependency)
+- `vite.config.ts`: добавлен плагин `VitePWA()`, `registerType: 'autoUpdate'`
+  - Web App Manifest: name/short_name, theme_color `#4f46e5`, display standalone, start_url `/app`
+  - Иконки: `icon.svg` (any/maskable) + `favicon.ico`
+  - Workbox: прекэш JS/CSS/HTML/ICO/SVG/WOFF2; рантайм-кэш API (StaleWhileRevalidate, 5 мин)
+- `icon.svg` (новый) — SVG-иконка приложения (indigo-шестигранник)
+- `index.html`: theme-color → `#4f46e5`, apple-touch-icon, PWA мета-теги
+- Результат сборки: `dist/sw.js` + `dist/workbox-*.js`
+
+### Файлы
+- `vite.config.ts` (изменён), `public/icon.svg` (новый), `index.html` (изменён), `package.json` (изменён)
+
 ## 2026-05-27 — #5 Просмотрщик Audit Log + бэкенд
 
 ### Контекст

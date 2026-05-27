@@ -4,6 +4,27 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek translation](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #6 PWA manifest — offline shell, home screen install
+
+### Context
+The app was only accessible as a browser tab. Mobile devices needed home screen installation and offline shell capability.
+
+### Done
+- Installed `vite-plugin-pwa@1.3.0` (devDependency)
+- Updated `vite.config.ts`: added `VitePWA()` plugin with `registerType: 'autoUpdate'`
+  - Web App Manifest: name/short_name, theme_color `#4f46e5`, standalone display, start_url `/app`
+  - Icons: `icon.svg` (any/maskable) + `favicon.ico`
+  - Workbox: precache JS/CSS/HTML/ICO/SVG/WOFF2; runtime cache for API URLs (StaleWhileRevalidate, 5min)
+- `frontend/public/icon.svg` (new) — indigo hexagon SVG app icon
+- `frontend/index.html`: theme-color updated, apple-touch-icon, apple PWA meta tags
+- Build output: `dist/sw.js` + `dist/workbox-*.js` (9 precache entries, 1.7MB)
+
+### Files
+- `frontend/vite.config.ts` (changed)
+- `frontend/public/icon.svg` (new)
+- `frontend/index.html` (changed)
+- `frontend/package.json` (changed — vite-plugin-pwa devDep)
+
 ## 2026-05-27 — #5 Admin Audit Log viewer + backend
 
 ### Context

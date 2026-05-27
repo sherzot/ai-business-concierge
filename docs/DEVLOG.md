@@ -4,6 +4,35 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [Uzbek](Uzbek/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-05-27 — #6 PWA manifest — offline shell, home screen install
+
+### Kontekst
+Ilova faqat browser tab orqali ishlayotgan edi. Mobile qurilmalarda home screen ga qo'shish va offline ishlash imkoniyati kerak edi.
+
+### Bajarildi
+- `vite-plugin-pwa@1.3.0` o'rnatildi (`devDependencies`)
+- `vite.config.ts` yangilandi:
+  - `VitePWA()` plugin qo'shildi, `registerType: 'autoUpdate'`
+  - Web App Manifest:
+    - name: "AI Business Concierge", short_name: "AI Concierge"
+    - theme_color: `#4f46e5` (indigo), background_color: `#0f172a` (dark)
+    - display: `standalone`, start_url: `/app`
+    - Icons: `icon.svg` (any/maskable) + `favicon.ico`
+  - Workbox config: `globPatterns` JS/CSS/HTML/ICO/SVG/WOFF2
+  - Runtime cache: API URL pattern → `StaleWhileRevalidate` (5 min, max 50 entries)
+- `frontend/public/icon.svg` (yangi) — SVG app icon (indigo hexagon + spark)
+- `frontend/index.html` yangilandi:
+  - theme-color → `#4f46e5`
+  - `apple-touch-icon`, `apple-mobile-web-app-capable`, `apple-mobile-web-app-title`
+  - `mobile-web-app-capable`
+- Build natijasi: `dist/sw.js` + `dist/workbox-*.js` yaratildi (9 entry precache, 1.7MB)
+
+### Fayllar
+- `frontend/vite.config.ts` (o'zgargan)
+- `frontend/public/icon.svg` (yangi)
+- `frontend/index.html` (o'zgargan)
+- `frontend/package.json` (o'zgargan — vite-plugin-pwa devDep)
+
 ## 2026-05-27 — #5 Admin Audit Log viewer + backend
 
 ### Kontekst

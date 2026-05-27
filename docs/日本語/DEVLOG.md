@@ -4,6 +4,24 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md)
 
+## 2026-05-27 — #6 PWAマニフェスト — オフラインシェル、ホーム画面インストール
+
+### コンテキスト
+アプリはブラウザタブでのみアクセス可能だった。モバイルデバイスでのホーム画面インストールとオフラインシェル機能が必要だった。
+
+### 実施内容
+- `vite-plugin-pwa@1.3.0`をインストール（devDependency）
+- `vite.config.ts`更新: `VitePWA()`プラグイン追加
+  - Webアプリマニフェスト: name/short_name、theme_color `#4f46e5`、standalone表示、start_url `/app`
+  - アイコン: `icon.svg`（any/maskable）+ `favicon.ico`
+  - Workbox: JS/CSS/HTML/ICO/SVG/WOFF2をプリキャッシュ; API URLのランタイムキャッシュ（StaleWhileRevalidate、5分）
+- `public/icon.svg`（新規）— indigoの六角形SVGアイコン
+- `index.html`: theme-color → `#4f46e5`、apple-touch-icon、PWAメタタグ
+- ビルド結果: `dist/sw.js` + `dist/workbox-*.js`生成
+
+### ファイル
+- `vite.config.ts`（変更）、`public/icon.svg`（新規）、`index.html`（変更）、`package.json`（変更）
+
 ## 2026-05-27 — #5 Admin Audit Logビューア + バックエンド
 
 ### コンテキスト

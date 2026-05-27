@@ -4,6 +4,18 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [O'zbekcha (asosiy)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #6 PWA manifest — offline shell, home screen install
+
+### Bajarildi
+- `vite-plugin-pwa@1.3.0` o'rnatildi
+- `vite.config.ts`: `VitePWA()` plugin, manifest (name, indigo theme, standalone, start_url /app), Workbox precache + StaleWhileRevalidate API cache
+- `public/icon.svg` — SVG app icon
+- `index.html`: PWA meta tags, apple-touch-icon
+- Build: `dist/sw.js` + `dist/workbox-*.js` yaratildi
+
+### Fayllar
+- `vite.config.ts`, `public/icon.svg`, `index.html`, `package.json` (o'zgargan)
+
 ## 2026-05-27 — #5 Admin Audit Log viewer + backend
 
 ### Bajarildi
