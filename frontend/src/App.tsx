@@ -61,6 +61,7 @@ import {
 } from "./shared/ui/dropdown-menu";
 import { LocaleSelect } from "./shared/components/LocaleSelect";
 import { ThemeToggle } from "./shared/components/ThemeToggle";
+import { CommandPalette } from "./shared/components/CommandPalette";
 import { useTour, type TourStep } from "./shared/components/OnboardingTour";
 import { getMembers } from "./features/tasks/api/tasksApi";
 import { getTasks } from "./features/tasks/api/tasksApi";
@@ -145,6 +146,7 @@ export default function App() {
   const [inboxBadge, setInboxBadge] = useState(0);
   const [tasksBadge, setTasksBadge] = useState(0);
   const [aiTasksCount, setAiTasksCount] = useState(5);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const tenantRef = React.useRef<HTMLDivElement>(null);
 
@@ -167,11 +169,10 @@ export default function App() {
       const mod = isMac ? e.metaKey : e.ctrlKey;
       if (!mod) return;
 
-      // Cmd/Ctrl+K — focus search
+      // Cmd/Ctrl+K — open command palette
       if (e.key === "k") {
         e.preventDefault();
-        searchInputRef.current?.focus();
-        searchInputRef.current?.select();
+        setPaletteOpen((prev) => !prev);
       }
 
       // Cmd/Ctrl+N — navigate to add-employee (HR section)
@@ -481,17 +482,15 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="relative hidden md:block">
+            <button
+              data-tour="search"
+              onClick={() => setPaletteOpen(true)}
+              className="relative hidden md:flex items-center gap-2 pl-10 pr-4 py-2 w-72 bg-slate-100 border-none rounded-full text-sm text-slate-400 hover:bg-slate-200 transition-colors cursor-pointer"
+            >
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-              <input
-                ref={searchInputRef}
-                type="text"
-                data-tour="search"
-                placeholder={`${translate("nav.searchPlaceholder")} (⌘K)`}
-                className="pl-10 pr-10 py-2 w-72 bg-slate-100 border-none rounded-full text-sm focus:ring-2 focus:ring-indigo-500/30 focus:bg-white transition-all"
-              />
-              <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-500" size={16} />
-            </div>
+              <span className="flex-1 text-left">{translate("nav.searchPlaceholder")}</span>
+              <kbd className="text-[11px] bg-white text-slate-400 rounded px-1.5 py-0.5 font-mono shadow-sm border border-slate-200">⌘K</kbd>
+            </button>
             <ThemeToggle />
             <LocaleSelect variant="light" />
             {currentTenant && (
@@ -622,6 +621,23 @@ export default function App() {
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
+
+      {/* ⌘K Command Palette */}
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        onNavigate={(module) => {
+          if (module.startsWith("employee-detail:")) {
+            const id = module.replace("employee-detail:", "");
+            setSelectedEmployeeId(id);
+            setActiveModule("employee-detail");
+          } else {
+            navigate(module);
+          }
+        }}
+        tenantId={currentTenant?.id}
+        canAccess={canAccess}
+      />
     </div>
   );
 }

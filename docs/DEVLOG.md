@@ -4,6 +4,31 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [Uzbek](Uzbek/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-05-27 — #2 CommandPalette: ⌘K global modal qidiruvi
+
+### Kontekst
+Avvalgi ⌘K faqat search inputga fokus qilardi. Real CommandPalette — modal, fuzzy search, klaviatura navigatsiyasi — kerak edi.
+
+### Bajarildi
+- `CommandPalette.tsx` yangi komponent yaratildi (`shared/components/`)
+- Framer-motion: backdrop + modal scale/fade animatsiya
+- 13 ta page item (Dashboard → Notifications), 1 ta quick action (Add Employee)
+- Xodimlar: `listEmployees(tenantId, "active")` — palette ochilganda lazy load
+- Fuzzy match: `includes()` + char-by-char fallback; match substring `<span>` highlight
+- Keyboard: ArrowUp/Down cursor harakat, Enter → select, Escape → yopish
+- Grouped sections: Pages / Quick Actions / Employees + scroll-into-view
+- Footer hint: `↑↓ navigate`, `↵ open`, `ESC close`
+- `App.tsx` o'zgarishlari:
+  - `paletteOpen` state qo'shildi
+  - ⌘K handler: `setPaletteOpen(prev => !prev)` (toggle)
+  - Search input → click-to-open button (⌘K badge ko'rsatadi)
+  - `<CommandPalette>` layout pastiga render (portal orqali `document.body`)
+  - `employee-detail:` prefix navigatsiya employee detail sahifasiga o'tadi
+
+### Fayllar
+- `frontend/src/shared/components/CommandPalette.tsx` (yangi)
+- `frontend/src/App.tsx` (o'zgargan)
+
 ## 2026-05-27 — B-005 + B-006 + B-011: DB indekslar, audit triggers, structured logging
 
 ### Kontekst

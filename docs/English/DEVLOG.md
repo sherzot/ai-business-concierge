@@ -4,6 +4,31 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek translation](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #2 CommandPalette: ⌘K global modal search
+
+### Context
+The previous ⌘K shortcut only focused the search input. A proper CommandPalette — modal, fuzzy search, keyboard navigation — was needed.
+
+### Done
+- Created `CommandPalette.tsx` new component (`shared/components/`)
+- Framer-motion: backdrop + modal scale/fade animation
+- 13 page items (Dashboard → Notifications), 1 quick action (Add Employee)
+- Employees: `listEmployees(tenantId, "active")` — lazy loaded when palette opens
+- Fuzzy match: `includes()` + char-by-char fallback; match substring `<span>` highlight
+- Keyboard: ArrowUp/Down cursor movement, Enter → select, Escape → close
+- Grouped sections: Pages / Quick Actions / Employees + scroll-into-view
+- Footer hint: `↑↓ navigate`, `↵ open`, `ESC close`
+- `App.tsx` changes:
+  - Added `paletteOpen` state
+  - ⌘K handler: `setPaletteOpen(prev => !prev)` (toggle)
+  - Search input → click-to-open button (shows ⌘K badge)
+  - `<CommandPalette>` rendered at layout bottom (via portal to `document.body`)
+  - `employee-detail:` prefix navigates to employee detail page
+
+### Files
+- `frontend/src/shared/components/CommandPalette.tsx` (new)
+- `frontend/src/App.tsx` (changed)
+
 ## 2026-05-27 — B-005 + B-006 + B-011: DB indexes, audit triggers, structured logging
 
 ### Context

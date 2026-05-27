@@ -4,6 +4,28 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #2 CommandPalette: глобальный модальный поиск ⌘K
+
+### Контекст
+Предыдущий ⌘K лишь фокусировал поле поиска. Нужна была полноценная CommandPalette — модальное окно с fuzzy-поиском и навигацией с клавиатуры.
+
+### Сделано
+- Создан компонент `CommandPalette.tsx` (`shared/components/`)
+- Framer-motion: анимация backdrop + scale/fade модального окна
+- 13 пунктов страниц (Dashboard → Notifications), 1 быстрое действие (Add Employee)
+- Сотрудники: `listEmployees(tenantId, "active")` — ленивая загрузка при открытии
+- Fuzzy-поиск: `includes()` + посимвольный fallback; подсветка совпадений через `<span>`
+- Клавиатура: ArrowUp/Down для навигации курсором, Enter → выбор, Escape → закрытие
+- Сгруппированные секции: Pages / Quick Actions / Employees + scroll-into-view
+- Подсказки в футере: `↑↓`, `↵`, `ESC`
+- Изменения `App.tsx`: состояние `paletteOpen`, ⌘K открывает палитру (toggle),
+  поле поиска → кнопка с бейджем ⌘K, `<CommandPalette>` в конце разметки (portal),
+  префикс `employee-detail:` → навигация на страницу сотрудника
+
+### Файлы
+- `frontend/src/shared/components/CommandPalette.tsx` (новый)
+- `frontend/src/App.tsx` (изменён)
+
 ## 2026-05-27 — B-005 + B-006 + B-011: индексы БД, audit-триггеры, структурированное логирование
 
 ### Контекст

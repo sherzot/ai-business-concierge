@@ -4,6 +4,18 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [O'zbekcha (asosiy)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #2 CommandPalette: ⌘K global modal qidiruv
+
+### Bajarildi
+- `CommandPalette.tsx` yaratildi: framer-motion modal, fuzzy search, group sections
+- 13 page + 1 action + xodimlar (lazy load)
+- Keyboard: ArrowUp/Down, Enter, Escape
+- App.tsx: `paletteOpen` state, ⌘K toggle, search input → click-to-open button
+
+### Fayllar
+- `frontend/src/shared/components/CommandPalette.tsx` (yangi)
+- `frontend/src/App.tsx` (o'zgargan)
+
 ## 2026-05-27 — B-005 + B-006 + B-011: DB indekslar, audit triggers, structured logging
 
 ### Bajarildi

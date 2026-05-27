@@ -4,6 +4,28 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md)
 
+## 2026-05-27 — #2 CommandPalette: ⌘Kグローバルモーダル検索
+
+### コンテキスト
+以前の⌘Kは検索入力にフォーカスするだけだった。適切なCommandPalette — モーダル、ファジー検索、キーボードナビゲーション — が必要だった。
+
+### 実施内容
+- `CommandPalette.tsx`コンポーネントを新規作成（`shared/components/`）
+- Framer-motion: バックドロップ + scale/fadeモーダルアニメーション
+- 13ページアイテム（Dashboard → Notifications）、1クイックアクション（Add Employee）
+- 従業員: `listEmployees(tenantId, "active")` — パレット開時にレイジーロード
+- ファジーマッチ: `includes()` + 文字単位フォールバック; マッチ部分を`<span>`ハイライト
+- キーボード: ArrowUp/Downでカーソル移動、Enter → 選択、Escape → 閉じる
+- グループセクション: Pages / Quick Actions / Employees + scroll-into-view
+- フッターヒント: `↑↓`、`↵`、`ESC`
+- `App.tsx`変更: `paletteOpen`状態追加、⌘Kハンドラーでトグル、
+  検索入力 → クリック時オープンボタン（⌘Kバッジ表示）、
+  `<CommandPalette>`をレイアウト末尾にレンダリング（portal経由）
+
+### ファイル
+- `frontend/src/shared/components/CommandPalette.tsx`（新規）
+- `frontend/src/App.tsx`（変更）
+
 ## 2026-05-27 — B-005 + B-006 + B-011: DBインデックス、監査トリガー、構造化ログ
 
 ### コンテキスト
