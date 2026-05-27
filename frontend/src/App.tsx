@@ -37,6 +37,7 @@ import { useAuthContext } from "./features/auth/context/AuthContext";
 import { useI18n } from "./app/providers/I18nProvider";
 import { InboxPage } from "./features/inbox/pages/InboxPage";
 import { ReportsPage } from "./features/reports/pages/ReportsPage";
+import { AnalyticsPage } from "./features/reports/pages/AnalyticsPage";
 import { DashboardPage } from "./features/reports/pages/DashboardPage";
 import { RoleBasedDashboard } from "./features/reports/pages/RoleBasedDashboard";
 import { TasksPage } from "./features/tasks/pages/TasksPage";
@@ -243,6 +244,8 @@ export default function App() {
         return <RoleBasedDashboard tenant={tenant} onNavigate={setActiveModule} />;
       case "reports":
         return <ReportsPage tenant={tenant} />;
+      case "analytics":
+        return <AnalyticsPage tenant={tenant} />;
       case "inbox":
         return <InboxPage tenant={tenant} />;
       case "tasks":

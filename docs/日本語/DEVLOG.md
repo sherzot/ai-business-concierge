@@ -4,6 +4,25 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md)
 
+## 2026-05-27 — #7 レポート/分析チャート — 実際のDBデータ
+
+### コンテキスト
+ReportsPageはモックデータを使用していた。実際のDB集計と可視化が必要だった。
+
+### 実施内容
+- バックエンド`GET /analytics`: タスク統計、7日トレンド、inbox分類（30日）、従業員統計
+- `analyticsApi.ts`（新規）、`AnalyticsPage.tsx`（新規）:
+  - staggerアニメーションのKPIカード行
+  - Recharts AreaChart（作成/完了トレンド、グラデーション塗りつぶし）
+  - Recharts PieChart（ドーナツ、4色）
+  - Recharts BarChart（inbox categoriy別カラーバー）
+  - 従業員統計グリッド、リフレッシュ + ローディング/エラー状態
+- `App.tsx`: `case "analytics"` → `<AnalyticsPage>`追加
+- `CommandPalette.tsx`: "Analytics"ページ項目追加
+
+### ファイル
+- `analyticsApi.ts`、`AnalyticsPage.tsx`（新規）; `server/index.ts`、`App.tsx`、`CommandPalette.tsx`（変更）
+
 ## 2026-05-27 — #6 PWAマニフェスト — オフラインシェル、ホーム画面インストール
 
 ### コンテキスト

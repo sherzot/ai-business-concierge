@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [O'zbekcha (asosiy)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #7 Reports/Analytics charts — real DB data
+
+### Bajarildi
+- `GET /analytics` endpoint: task stats, 7-kunlik trend, inbox kategoriyalar, xodim stats
+- `analyticsApi.ts` + `AnalyticsPage.tsx`: AreaChart, PieChart, BarChart (Recharts), stagger KPI
+- App.tsx `analytics` case; CommandPalette "Analytics" item
+
+### Fayllar
+- `analyticsApi.ts`, `AnalyticsPage.tsx` (yangi); `server/index.ts`, `App.tsx`, `CommandPalette.tsx` (o'zgargan)
+
 ## 2026-05-27 — #6 PWA manifest — offline shell, home screen install
 
 ### Bajarildi

@@ -1176,6 +1176,85 @@ const registerRoutes = (prefix: string) => {
     return success(c, stats);
   });
 
+  // ─── GET /analytics — real DB aggregation for reports/charts ───────────────
+  app.get(`${prefix}/analytics`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+    const tenantId = ctx.tenantId;
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400000).toISOString();
+    const sevenDaysAgo  = new Date(now.getTime() - 7  * 86400000).toISOString();
+
+    // 1) Task status counts
+    const { data: taskRows } = await supabase
+      .from("tasks")
+      .select("status, created_at, due_date")
+      .eq("tenant_id", tenantId)
+      .is("deleted_at", null);
+
+    const tasks = taskRows ?? [];
+    const taskStats = {
+      total:       tasks.length,
+      todo:        tasks.filter((t) => t.status === "todo").length,
+      in_progress: tasks.filter((t) => t.status === "in_progress").length,
+      done:        tasks.filter((t) => t.status === "done").length,
+      overdue:     tasks.filter((t) =>
+        t.status !== "done" && t.due_date && new Date(t.due_date) < now
+      ).length,
+    };
+
+    // 2) Tasks created per day (last 7 days)
+    const taskTrend: { day: string; created: number; done: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now.getTime() - i * 86400000);
+      const label = d.toLocaleDateString("uz-UZ", { weekday: "short" });
+      const dayStr = d.toISOString().slice(0, 10);
+      taskTrend.push({
+        day: label,
+        created: tasks.filter((t) => t.created_at?.slice(0, 10) === dayStr).length,
+        done:    tasks.filter((t) => t.status === "done" && t.created_at?.slice(0, 10) === dayStr).length,
+      });
+    }
+
+    // 3) Inbox volume by category (last 30 days)
+    const { data: inboxRows } = await supabase
+      .from("inbox_items")
+      .select("category")
+      .eq("tenant_id", tenantId)
+      .gte("timestamp", thirtyDaysAgo);
+
+    const inboxByCategory: Record<string, number> = {};
+    for (const r of inboxRows ?? []) {
+      const cat = r.category ?? "Other";
+      inboxByCategory[cat] = (inboxByCategory[cat] ?? 0) + 1;
+    }
+    const inboxCategories = Object.entries(inboxByCategory)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    // 4) Employee counts (active vs pending)
+    const { data: memberRows } = await supabase
+      .from("user_tenants")
+      .select("status, created_at")
+      .eq("tenant_id", tenantId);
+
+    const members = memberRows ?? [];
+    const employeeStats = {
+      total:        members.length,
+      active:       members.filter((m) => m.status === "active").length,
+      pending:      members.filter((m) => m.status !== "active" && m.status !== "terminated").length,
+      recent_joins: members.filter((m) => m.created_at >= sevenDaysAgo).length,
+    };
+
+    return success(c, {
+      taskStats,
+      taskTrend,
+      inboxCategories,
+      employeeStats,
+      generatedAt: now.toISOString(),
+    });
+  });
+
   app.get(`${prefix}/inbox`, async (c) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;

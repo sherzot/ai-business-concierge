@@ -4,6 +4,37 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [Uzbek](Uzbek/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-05-27 — #7 Reports/Analytics charts — real DB data
+
+### Kontekst
+ReportsPage mock data ishlatayotgan edi. Haqiqiy DB aggregatsiyasi va vizualizatsiya kerak edi: task holatlari, 7-kunlik trend, inbox kategoriyalari, xodim statistikasi.
+
+### Bajarildi
+**Backend (server/index.ts) — `GET /analytics`:**
+- Task stats: total, todo, in_progress, done, overdue (deleted_at IS NULL filter)
+- Task trend (7 kun): har bir kun uchun created va done sonlari
+- Inbox by category (30 kun): `group by category` analog (JS aggregatsiya)
+- Employee stats: total, active, pending, recent_joins (7 kun)
+
+**Frontend:**
+- `frontend/src/features/reports/api/analyticsApi.ts` (yangi) — typed API client
+- `frontend/src/features/reports/pages/AnalyticsPage.tsx` (yangi):
+  - KPI row: jami vazifalar, muddati o'tgan, inbox (30 kun), xodimlar (stagger animatsiya)
+  - Task trend → Recharts `AreaChart` (2 area: created/done, gradient fill)
+  - Task status → Recharts `PieChart` (donut, 4 rang)
+  - Inbox kategoriyalar → Recharts `BarChart` (har bar uchun rang)
+  - Employee stats → 4 ta stat box grid
+  - Refresh tugmasi + loading/error states
+- `App.tsx`: `case "analytics"` → `<AnalyticsPage>` qo'shildi
+- `CommandPalette.tsx`: "Analytics" page item qo'shildi
+
+### Fayllar
+- `frontend/src/features/reports/api/analyticsApi.ts` (yangi)
+- `frontend/src/features/reports/pages/AnalyticsPage.tsx` (yangi)
+- `supabase/functions/server/index.ts` (o'zgargan)
+- `frontend/src/App.tsx` (o'zgargan)
+- `frontend/src/shared/components/CommandPalette.tsx` (o'zgargan)
+
 ## 2026-05-27 — #6 PWA manifest — offline shell, home screen install
 
 ### Kontekst

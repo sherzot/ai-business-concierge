@@ -4,6 +4,19 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #7 Аналитика и графики — реальные данные из БД
+
+### Контекст
+ReportsPage использовала мок-данные. Нужны были реальные агрегации из БД и визуализация.
+
+### Сделано
+- Backend `GET /analytics`: task stats (total/todo/in_progress/done/overdue), 7-дневный тренд, inbox по категориям (30д), статистика сотрудников
+- `analyticsApi.ts` (новый), `AnalyticsPage.tsx` (новый): KPI-ряд со stagger, AreaChart тренда, PieChart статусов, BarChart inbox, grid статистики сотрудников
+- `App.tsx`: добавлен `case "analytics"`; `CommandPalette.tsx`: добавлен элемент "Analytics"
+
+### Файлы
+- `analyticsApi.ts`, `AnalyticsPage.tsx` (новые); `server/index.ts`, `App.tsx`, `CommandPalette.tsx` (изменены)
+
 ## 2026-05-27 — #6 PWA манифест — офлайн-оболочка, установка на главный экран
 
 ### Контекст

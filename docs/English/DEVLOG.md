@@ -4,6 +4,37 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek translation](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-05-27 — #7 Reports/Analytics charts — real DB data
+
+### Context
+ReportsPage was using mock data. Real DB aggregation and visualization was needed: task status, 7-day trend, inbox categories, employee stats.
+
+### Done
+**Backend (server/index.ts) — `GET /analytics`:**
+- Task stats: total, todo, in_progress, done, overdue (with deleted_at IS NULL filter)
+- Task trend (7 days): created and done counts per day
+- Inbox by category (30 days): JS-side aggregation by category
+- Employee stats: total, active, pending, recent_joins (7 days)
+
+**Frontend:**
+- `analyticsApi.ts` (new) — typed API client
+- `AnalyticsPage.tsx` (new):
+  - KPI row: total tasks, overdue, inbox (30d), employees (stagger animation)
+  - Task trend → Recharts AreaChart (2 areas: created/done, gradient fill)
+  - Task status → Recharts PieChart (donut, 4 colors)
+  - Inbox categories → Recharts BarChart (colored bars)
+  - Employee stats → 4-box grid
+  - Refresh button + loading/error states
+- `App.tsx`: `case "analytics"` → `<AnalyticsPage>` added
+- `CommandPalette.tsx`: "Analytics" page item added
+
+### Files
+- `frontend/src/features/reports/api/analyticsApi.ts` (new)
+- `frontend/src/features/reports/pages/AnalyticsPage.tsx` (new)
+- `supabase/functions/server/index.ts` (changed)
+- `frontend/src/App.tsx` (changed)
+- `frontend/src/shared/components/CommandPalette.tsx` (changed)
+
 ## 2026-05-27 — #6 PWA manifest — offline shell, home screen install
 
 ### Context
