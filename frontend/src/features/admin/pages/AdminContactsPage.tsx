@@ -194,7 +194,7 @@ export function AdminContactsPage() {
         <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-500">
           <Users size={40} className="opacity-30" />
           <p className="text-sm font-medium">Murojaat topilmadi</p>
-          {(search || statusFilter !== "all") && (
+          {(search || filter !== "all") && (
             <p className="text-xs text-slate-600">Filtrlarni tozalang yoki boshqa so'z kiriting</p>
           )}
         </div>

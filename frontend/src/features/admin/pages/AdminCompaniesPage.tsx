@@ -249,7 +249,7 @@ export function AdminCompaniesPage() {
         <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-500">
           <Building2 size={40} className="opacity-30" />
           <p className="text-sm font-medium">Kompaniya topilmadi</p>
-          {(search || statusFilter !== "all") && (
+          {(search || filter !== "all") && (
             <p className="text-xs text-slate-600">Filtrlarni tozalang yoki boshqa so'z kiriting</p>
           )}
         </div>
