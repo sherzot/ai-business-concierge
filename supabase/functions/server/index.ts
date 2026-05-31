@@ -4783,16 +4783,34 @@ Be concise, professional, and data-driven. You can help with: user management, c
   });
   // ── Risk Scanner ──────────────────────────────────────────────────────
   app.post(`${prefix}/admin/risk/scan`, async (c) => {
-    return riskScanRoutes.fetch(c.req.raw, Deno.env.toObject());
+    const req = new Request("http://localhost/scan", {
+      method: "POST",
+      headers: c.req.raw.headers,
+      body: c.req.raw.body,
+    });
+    return riskScanRoutes.fetch(req);
   });
   app.get(`${prefix}/admin/risk/scans`, async (c) => {
-    return riskScanRoutes.fetch(c.req.raw, Deno.env.toObject());
+    const req = new Request("http://localhost/scans", {
+      headers: c.req.raw.headers,
+    });
+    return riskScanRoutes.fetch(req);
   });
   app.get(`${prefix}/admin/risk/scans/:id`, async (c) => {
-    return riskScanRoutes.fetch(c.req.raw, Deno.env.toObject());
+    const id = c.req.param("id");
+    const req = new Request(`http://localhost/scans/${id}`, {
+      headers: c.req.raw.headers,
+    });
+    return riskScanRoutes.fetch(req);
   });
   app.patch(`${prefix}/admin/risk/findings/:id`, async (c) => {
-    return riskScanRoutes.fetch(c.req.raw, Deno.env.toObject());
+    const id = c.req.param("id");
+    const req = new Request(`http://localhost/findings/${id}`, {
+      method: "PATCH",
+      headers: c.req.raw.headers,
+      body: c.req.raw.body,
+    });
+    return riskScanRoutes.fetch(req);
   });
   // B-013: OpenAPI spec + Scalar docs UI
   app.get(`${prefix}/docs/api`, (c) => c.json(OPENAPI_SPEC));

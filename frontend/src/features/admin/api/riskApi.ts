@@ -5,8 +5,12 @@ import { apiRequest } from "../../../shared/lib/apiClient";
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export type RiskSeverity = "critical" | "high" | "medium" | "low" | "info";
-export type FindingStatus = "open" | "acknowledged" | "resolved" | "false_positive";
-export type ScanStatus    = "running" | "completed" | "failed";
+export type FindingStatus =
+  | "open"
+  | "acknowledged"
+  | "resolved"
+  | "false_positive";
+export type ScanStatus = "running" | "completed" | "failed";
 
 export interface RiskScan {
   id: string;
@@ -49,32 +53,42 @@ export interface ScanResult {
 
 /** Yangi skan ishga tushirish */
 export async function triggerRiskScan(): Promise<ScanResult> {
-  const res = await apiRequest<{ data: ScanResult }>("/admin/risk/scan", {
+  const res = await apiRequest<any>("/admin/risk/scan", {
     method: "POST",
   });
-  return (res as any).data ?? res;
+  // Response: { data: { scan, findings } }
+  if (res?.data?.scan) return res.data;
+  if (res?.scan) return res;
+  return res;
 }
 
 /** Skan tarixi (oxirgi 20) */
 export async function getRiskScans(): Promise<RiskScan[]> {
-  const res = await apiRequest<{ data: RiskScan[] }>("/admin/risk/scans");
-  return (res as any).data ?? res;
+  const res = await apiRequest<any>("/admin/risk/scans");
+  if (Array.isArray(res?.data)) return res.data;
+  if (Array.isArray(res)) return res;
+  return [];
 }
 
 /** Bitta skan + topilmalari */
 export async function getRiskScanDetail(id: string): Promise<ScanResult> {
-  const res = await apiRequest<{ data: ScanResult }>(`/admin/risk/scans/${id}`);
-  return (res as any).data ?? res;
+  const res = await apiRequest<any>(`/admin/risk/scans/${id}`);
+  if (res?.data?.scan) return res.data;
+  if (res?.scan) return res;
+  return res;
 }
 
 /** Topilma statusini o'zgartirish */
 export async function updateFindingStatus(
   id: string,
-  status: FindingStatus
+  status: FindingStatus,
 ): Promise<RiskFinding> {
-  const res = await apiRequest<{ data: RiskFinding }>(`/admin/risk/findings/${id}`, {
-    method: "PATCH",
-    body: JSON.stringify({ status }),
-  });
+  const res = await apiRequest<{ data: RiskFinding }>(
+    `/admin/risk/findings/${id}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    },
+  );
   return (res as any).data ?? res;
 }
