@@ -86,7 +86,7 @@ function ScoreRing({ score }: { score: number }) {
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 
 function StatCard({ count, severity }: { count: number; severity: RiskSeverity }) {
-  const cfg = SEV_CONFIG[severity];
+  const cfg = SEV_CONFIG[severity] ?? SEV_CONFIG["low"];
   const Icon = cfg.icon;
   return (
     <div className={`rounded-xl border p-4 flex items-center gap-3 ${cfg.bg} ${cfg.border}`}>
@@ -112,7 +112,7 @@ function FindingRow({
 }) {
   const [expanded, setExpanded] = useState(false);
   const [updating, setUpdating] = useState(false);
-  const cfg = SEV_CONFIG[finding.severity];
+  const cfg = SEV_CONFIG[finding.severity] ?? SEV_CONFIG["low"];
   const Icon = cfg.icon;
   const statusCfg = STATUS_CONFIG[finding.status];
 
