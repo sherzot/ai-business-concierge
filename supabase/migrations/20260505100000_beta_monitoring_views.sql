@@ -14,7 +14,6 @@ SELECT
   COUNT(DISTINCT CASE WHEN c.locale = 'ja' THEN telegram_chat_id END)      AS users_ja
 FROM ai_conversations c
 WHERE platform = 'telegram';
-
 -- 2. Kunlik faollik (so'nggi 14 kun)
 CREATE OR REPLACE VIEW v_beta_daily_activity AS
 SELECT
@@ -30,7 +29,6 @@ WHERE c.platform = 'telegram'
   AND m.created_at > now() - interval '14 days'
 GROUP BY DATE(m.created_at)
 ORDER BY day DESC;
-
 -- 3. Feedback statistika
 CREATE OR REPLACE VIEW v_beta_feedback AS
 SELECT
@@ -42,7 +40,6 @@ SELECT
     / NULLIF(COUNT(*), 0), 1
   )                                                      AS satisfaction_pct
 FROM ai_feedback;
-
 -- 4. Model ishlatilishi va narx
 CREATE OR REPLACE VIEW v_beta_model_usage AS
 SELECT

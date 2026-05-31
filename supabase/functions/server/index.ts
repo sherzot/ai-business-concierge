@@ -5,8 +5,12 @@ import { Webhook } from "npm:svix@1.17.0";
 import { logRequest, logAudit, logAI, truncate } from "../_shared/logging.ts";
 import { OPENAPI_SPEC, renderScalarHtml } from "./openapi.ts";
 import { callClaude, classifyComplexity } from "./services/llm-router.ts";
-import { searchKnowledgeBase, addDisclaimerIfNeeded } from "./services/knowledge-base.ts";
+import {
+  searchKnowledgeBase,
+  addDisclaimerIfNeeded,
+} from "./services/knowledge-base.ts";
 import { checkAiSafety, wrapUserMessage } from "./services/ai-safety.ts";
+import riskScanRoutes from "./routes/risk-scan.ts";
 
 const app = new Hono();
 const BASE_PATH = "/make-server-6c2837d6";
@@ -14,18 +18,25 @@ const V1_PATH = `${BASE_PATH}/v1`;
 const GATEWAY_PREFIX = "/bright-api";
 
 // B-011: Structured JSON request logging middleware
-app.use('*', async (c, next) => {
+app.use("*", async (c, next) => {
   const start = Date.now();
-  const traceId = c.req.header('X-Trace-Id') ?? crypto.randomUUID();
-  const tenantId = c.req.header('X-Tenant-Id') ?? '';
-  const userId = c.req.header('X-User-Id') ?? '';
-  c.set('trace_id' as never, traceId);
+  const traceId = c.req.header("X-Trace-Id") ?? crypto.randomUUID();
+  const tenantId = c.req.header("X-Tenant-Id") ?? "";
+  const userId = c.req.header("X-User-Id") ?? "";
+  c.set("trace_id" as never, traceId);
 
   await next();
 
   const duration = Date.now() - start;
   const status = c.res.status;
-  const level = status >= 500 ? 'error' : status >= 400 ? 'warn' : duration > 2000 ? 'warn' : 'info';
+  const level =
+    status >= 500
+      ? "error"
+      : status >= 400
+        ? "warn"
+        : duration > 2000
+          ? "warn"
+          : "info";
 
   logRequest({
     level,
@@ -47,7 +58,13 @@ app.use(
   "/*",
   cors({
     origin: "*",
-    allowHeaders: ["Content-Type", "Authorization", "X-Tenant-Id", "X-User-Id", "X-Trace-Id"],
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Tenant-Id",
+      "X-User-Id",
+      "X-Trace-Id",
+    ],
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
     maxAge: 600,
@@ -76,10 +93,12 @@ const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY") ?? "";
 const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") ?? "gpt-4o-mini";
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
 const RESEND_WEBHOOK_SECRET = Deno.env.get("RESEND_WEBHOOK_SECRET") ?? "";
-const RESEND_API_KEY        = Deno.env.get("RESEND_API_KEY") ?? "";
-const RESEND_FROM_EMAIL     = Deno.env.get("RESEND_FROM_EMAIL") ?? "noreply@aibizconcierge.uz";
-const APP_URL               = Deno.env.get("APP_URL") ?? "https://ai-business-concierge1.netlify.app";
-const ADMIN_NOTIFY_EMAIL    = Deno.env.get("ADMIN_NOTIFY_EMAIL") ?? "";
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
+const RESEND_FROM_EMAIL =
+  Deno.env.get("RESEND_FROM_EMAIL") ?? "noreply@aibizconcierge.uz";
+const APP_URL =
+  Deno.env.get("APP_URL") ?? "https://ai-business-concierge1.netlify.app";
+const ADMIN_NOTIFY_EMAIL = Deno.env.get("ADMIN_NOTIFY_EMAIL") ?? "";
 
 const supabase = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
@@ -88,7 +107,8 @@ const supabase = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
 const TOOL_REGISTRY = [
   {
     tool_name: "classify_inbox",
-    description: "Classify inbox item into HR/Docs/Sales/Support/Billing/General",
+    description:
+      "Classify inbox item into HR/Docs/Sales/Support/Billing/General",
     input_schema: {
       type: "object",
       properties: { message: { type: "string" } },
@@ -153,7 +173,8 @@ const HR_CASES_SEED = [
     status: "open",
     priority: "high",
     created_at: "2026-02-03T09:10:00Z",
-    summary: "Marketing bo'limida stress yuqori, so'rovnoma natijalari diqqat talab qiladi.",
+    summary:
+      "Marketing bo'limida stress yuqori, so'rovnoma natijalari diqqat talab qiladi.",
   },
   {
     id: "hr_002",
@@ -200,7 +221,8 @@ const INTEGRATIONS_SEED = [
 ];
 
 const getTraceId = (c: any) => c.get(TRACE_ID_KEY) ?? crypto.randomUUID();
-const getTenantId = (c: any) => c.get(TENANT_ID_KEY) ?? c.get(TENANT_CTX_KEY)?.tenantId;
+const getTenantId = (c: any) =>
+  c.get(TENANT_ID_KEY) ?? c.get(TENANT_CTX_KEY)?.tenantId;
 
 const success = (c: any, data: any, meta: Record<string, unknown> = {}) =>
   c.json({
@@ -235,13 +257,19 @@ const failure = (
 
 const decodeBase64Url = (input: string) => {
   const base64 = input.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+  const padded = base64.padEnd(
+    base64.length + ((4 - (base64.length % 4)) % 4),
+    "=",
+  );
   return atob(padded);
 };
 
 const decodeBase64UrlBytes = (input: string) => {
   const base64 = input.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+  const padded = base64.padEnd(
+    base64.length + ((4 - (base64.length % 4)) % 4),
+    "=",
+  );
   const binary = atob(padded);
   return Uint8Array.from(binary, (c) => c.charCodeAt(0));
 };
@@ -274,7 +302,9 @@ const verifyJwtHS256 = async (token: string) => {
 };
 
 /** JWT_SECRET kerak emas – Supabase Auth API orqali token tekshirish */
-const verifyTokenViaSupabaseAuth = async (token: string): Promise<{ sub: string; email?: string } | null> => {
+const verifyTokenViaSupabaseAuth = async (
+  token: string,
+): Promise<{ sub: string; email?: string } | null> => {
   const apikey = SB_ANON_KEY || SB_SERVICE_ROLE_KEY;
   if (!SB_URL || !apikey) return null;
   try {
@@ -308,7 +338,8 @@ const getTenantContext = async (c: any): Promise<TenantContext | null> => {
     }
     if (payload) {
       const tenantId = payload.tenant_id ?? c.req.header("x-tenant-id");
-      const userId = payload.sub ?? payload.user_id ?? c.req.header("x-user-id");
+      const userId =
+        payload.sub ?? payload.user_id ?? c.req.header("x-user-id");
       if (tenantId) {
         const ctx: TenantContext = {
           tenantId,
@@ -404,7 +435,11 @@ const writeAuditLog = async (
       data: { entity_type: entry.entity_type, entity_id: entry.entity_id },
     });
   } catch (e) {
-    logError({ message: "audit_log insert failed", traceId: entry.trace_id, data: { err: String(e) } });
+    logError({
+      message: "audit_log insert failed",
+      traceId: entry.trace_id,
+      data: { err: String(e) },
+    });
   }
 };
 
@@ -413,7 +448,7 @@ const createTaskAssignmentNotification = async (
   tenantId: string,
   assigneeId: string,
   taskId: string,
-  taskTitle: string
+  taskTitle: string,
 ) => {
   try {
     await supabase.from("notifications").insert({
@@ -449,7 +484,10 @@ const createDocAssignmentNotification = async (
 };
 
 // HR/leader larni xabardor qilish: xodim akkauntini sozladi
-const createHrSetupCompleteNotification = async (tenantId: string, employeeName: string) => {
+const createHrSetupCompleteNotification = async (
+  tenantId: string,
+  employeeName: string,
+) => {
   try {
     const { data: hrUsers } = await supabase
       .from("user_tenants")
@@ -474,14 +512,18 @@ const createHrSetupCompleteNotification = async (tenantId: string, employeeName:
 };
 
 // Xodimni xabardor qilish: HR tasdiqladi
-const createEmployeeConfirmedNotification = async (tenantId: string, userId: string) => {
+const createEmployeeConfirmedNotification = async (
+  tenantId: string,
+  userId: string,
+) => {
   try {
     await supabase.from("notifications").insert({
       tenant_id: tenantId,
       user_id: userId,
       type: "employee_confirmed",
       title: "Hisobingiz tasdiqlandi",
-      message: "HR xodimi siz tasdiqladi. Endi platformaning barcha imkoniyatlaridan foydalanishingiz mumkin.",
+      message:
+        "HR xodimi siz tasdiqladi. Endi platformaning barcha imkoniyatlaridan foydalanishingiz mumkin.",
     });
   } catch (e) {
     console.error("createEmployeeConfirmedNotification error:", e);
@@ -502,7 +544,10 @@ type AiInteractionEntry = {
   trace_id: string;
 };
 
-const writeAiInteraction = async (ctx: TenantContext, entry: AiInteractionEntry) => {
+const writeAiInteraction = async (
+  ctx: TenantContext,
+  entry: AiInteractionEntry,
+) => {
   const row = {
     tenant_id: ctx.tenantId,
     user_id: ctx.userId ?? null,
@@ -528,7 +573,11 @@ const writeAiInteraction = async (ctx: TenantContext, entry: AiInteractionEntry)
       data: { latency_ms: entry.latency_ms, success: entry.success_flag },
     });
   } catch (e) {
-    logError({ message: "ai_interaction insert failed", traceId: entry.trace_id, data: { err: String(e) } });
+    logError({
+      message: "ai_interaction insert failed",
+      traceId: entry.trace_id,
+      data: { err: String(e) },
+    });
   }
 };
 
@@ -541,7 +590,7 @@ type AiUsageLogEntry = {
   userId?: string | null;
   endpoint: string;
   model: string;
-  provider: string;       // 'claude' | 'openai' | 'fallback'
+  provider: string; // 'claude' | 'openai' | 'fallback'
   complexity?: string;
   promptTokens: number;
   completionTokens: number;
@@ -554,26 +603,31 @@ type AiUsageLogEntry = {
 const insertAiUsageLog = (entry: AiUsageLogEntry): void => {
   // provider constraint: ('claude','openai','fallback')
   const providerNorm =
-    entry.provider === "openai_fallback" ? "openai"
-    : ["claude", "openai", "fallback"].includes(entry.provider) ? entry.provider
-    : "fallback";
+    entry.provider === "openai_fallback"
+      ? "openai"
+      : ["claude", "openai", "fallback"].includes(entry.provider)
+        ? entry.provider
+        : "fallback";
 
-  supabase.from("ai_usage_logs").insert({
-    tenant_id:         entry.tenantId,
-    user_id:           entry.userId ?? null,
-    endpoint:          entry.endpoint,
-    model:             entry.model,
-    provider:          providerNorm,
-    complexity:        entry.complexity ?? null,
-    prompt_tokens:     entry.promptTokens,
-    completion_tokens: entry.completionTokens,
-    cost_usd:          entry.costUsd,
-    cached:            entry.cached,
-    latency_ms:        entry.latencyMs,
-    trace_id:          entry.traceId,
-  }).then(({ error }) => {
-    if (error) console.error("[ai_usage_log] insert error:", error.message);
-  });
+  supabase
+    .from("ai_usage_logs")
+    .insert({
+      tenant_id: entry.tenantId,
+      user_id: entry.userId ?? null,
+      endpoint: entry.endpoint,
+      model: entry.model,
+      provider: providerNorm,
+      complexity: entry.complexity ?? null,
+      prompt_tokens: entry.promptTokens,
+      completion_tokens: entry.completionTokens,
+      cost_usd: entry.costUsd,
+      cached: entry.cached,
+      latency_ms: entry.latencyMs,
+      trace_id: entry.traceId,
+    })
+    .then(({ error }) => {
+      if (error) console.error("[ai_usage_log] insert error:", error.message);
+    });
 };
 
 app.use("*", async (c, next) => {
@@ -608,7 +662,11 @@ app.use("*", async (c, next) => {
         data: { status_code: statusCode, duration_ms: durationMs },
       });
     } catch (e) {
-      logError({ message: "request_log insert failed", traceId, data: { err: String(e) } });
+      logError({
+        message: "request_log insert failed",
+        traceId,
+        data: { err: String(e) },
+      });
     }
   }
 });
@@ -623,25 +681,25 @@ const ALLOWED_TASK_PRIORITIES = ["high", "medium", "low"];
 
 const getMockTasks = () => [
   {
-    id: 't-1',
-    title: 'Q4 Moliyaviy hisobotni tayyorlash',
-    status: 'in_progress',
-    priority: 'high',
-    assignee: { name: 'Aziza M.' },
+    id: "t-1",
+    title: "Q4 Moliyaviy hisobotni tayyorlash",
+    status: "in_progress",
+    priority: "high",
+    assignee: { name: "Aziza M." },
     dueDate: new Date(Date.now() + 86400000 * 2).toISOString(),
-    tags: ['Finance', 'Report'],
-    comments: 3
+    tags: ["Finance", "Report"],
+    comments: 3,
   },
   {
-    id: 't-2',
-    title: 'Yangi ofis menejerini ishga olish',
-    status: 'todo',
-    priority: 'medium',
-    assignee: { name: 'Jasur A.' },
+    id: "t-2",
+    title: "Yangi ofis menejerini ishga olish",
+    status: "todo",
+    priority: "medium",
+    assignee: { name: "Jasur A." },
     dueDate: new Date(Date.now() + 86400000 * 5).toISOString(),
-    tags: ['HR', 'Hiring'],
-    comments: 0
-  }
+    tags: ["HR", "Hiring"],
+    comments: 0,
+  },
 ];
 
 const getMockInbox = () => [
@@ -650,7 +708,8 @@ const getMockInbox = () => [
     source: "telegram",
     sender: { name: "Aziz Rakhimov (HR Lead)" },
     subject: "Yangi ofis menejeri vakansiyasi",
-    preview: "Assalomu alaykum. Yangi ofis menejeri uchun e'lon matnini tasdiqlashingiz kerak.",
+    preview:
+      "Assalomu alaykum. Yangi ofis menejeri uchun e'lon matnini tasdiqlashingiz kerak.",
     timestamp: new Date().toISOString(),
     isRead: false,
     category: "HR",
@@ -678,37 +737,46 @@ const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const computeDashboardStats = (
   tasks: any[],
   inboxItems: any[],
-  documents: { metadata?: { expiry_date?: string } }[] = []
+  documents: { metadata?: { expiry_date?: string } }[] = [],
 ) => {
   const dueDate = (t: any) => t.due_date ?? t.dueDate;
-  const overdue = tasks.filter(
-    (task) => {
-      const d = dueDate(task);
-      return d && new Date(d) < new Date() && task.status !== "done";
-    }
-  ).length;
+  const overdue = tasks.filter((task) => {
+    const d = dueDate(task);
+    return d && new Date(d) < new Date() && task.status !== "done";
+  }).length;
   const doneCount = tasks.filter((t) => t.status === "done").length;
   const pendingApprovals = inboxItems.filter(
     (item) => item.category === "HR" || item.category === "Billing",
   ).length;
-  const healthScore = Math.max(60, Math.min(100, 100 - overdue * 5 - pendingApprovals * 3));
+  const healthScore = Math.max(
+    60,
+    Math.min(100, 100 - overdue * 5 - pendingApprovals * 3),
+  );
   const monthlyRevenue = 40000 + doneCount * 500 - overdue * 200;
 
   const now = new Date();
   const chartData = DAY_LABELS.map((day, i) => {
-    const dayScore = Math.max(60, Math.min(100, healthScore - (6 - i) * 2 + (i % 2)));
+    const dayScore = Math.max(
+      60,
+      Math.min(100, healthScore - (6 - i) * 2 + (i % 2)),
+    );
     return { day, score: dayScore };
   });
 
-  const insights: { type: "danger" | "warning" | "info"; title: string; desc: string }[] = [];
+  const insights: {
+    type: "danger" | "warning" | "info";
+    title: string;
+    desc: string;
+  }[] = [];
 
   if (overdue > 0 || inboxItems.some((i) => i.category === "Billing")) {
     insights.push({
       type: "danger",
       title: "Kassadagi yetishmovchilik xavfi",
-      desc: overdue > 0
-        ? `${overdue} ta muddati o'tgan vazifa. Joriy xarajatlar sur'ati bilan 15-sana uchun kutilayotgan balans manfiy bo'lishi mumkin.`
-        : "Billing xabarlari kutilmoqda. Joriy xarajatlar sur'ati bilan 15-sana uchun kutilayotgan balans manfiy bo'lishi mumkin.",
+      desc:
+        overdue > 0
+          ? `${overdue} ta muddati o'tgan vazifa. Joriy xarajatlar sur'ati bilan 15-sana uchun kutilayotgan balans manfiy bo'lishi mumkin.`
+          : "Billing xabarlari kutilmoqda. Joriy xarajatlar sur'ati bilan 15-sana uchun kutilayotgan balans manfiy bo'lishi mumkin.",
     });
   }
 
@@ -717,9 +785,10 @@ const computeDashboardStats = (
     insights.push({
       type: "warning",
       title: "HR: Diqqat talab qiladi",
-      desc: hrCount >= 2
-        ? `Oxirgi so'rovnomalarda Marketing bo'limida stress darajasi oshgan. ${hrCount} ta HR xabari kutilmoqda.`
-        : `${pendingApprovals} ta tasdiqlash kutilmoqda. Oxirgi so'rovnomalarda stress darajasi oshgan bo'lishi mumkin.`,
+      desc:
+        hrCount >= 2
+          ? `Oxirgi so'rovnomalarda Marketing bo'limida stress darajasi oshgan. ${hrCount} ta HR xabari kutilmoqda.`
+          : `${pendingApprovals} ta tasdiqlash kutilmoqda. Oxirgi so'rovnomalarda stress darajasi oshgan bo'lishi mumkin.`,
     });
   }
 
@@ -733,7 +802,9 @@ const computeDashboardStats = (
   if (expiringDocs.length > 0) {
     const d = expiringDocs[0];
     const exp = d.metadata?.expiry_date;
-    const daysLeft = exp ? Math.ceil((new Date(exp).getTime() - now.getTime()) / 86400000) : 0;
+    const daysLeft = exp
+      ? Math.ceil((new Date(exp).getTime() - now.getTime()) / 86400000)
+      : 0;
     insights.push({
       type: "info",
       title: "Shartnoma muddati tugamoqda",
@@ -751,8 +822,10 @@ const computeDashboardStats = (
 
   const prevOverdue = Math.max(0, overdue - 1);
   const trendOverdue = overdue - prevOverdue;
-  const trendHealth = healthScore >= 95 ? "+2%" : healthScore >= 85 ? "+1%" : "0%";
-  const trendRevenue = doneCount > 0 ? `+${Math.min(15, doneCount * 2)}%` : "0%";
+  const trendHealth =
+    healthScore >= 95 ? "+2%" : healthScore >= 85 ? "+1%" : "0%";
+  const trendRevenue =
+    doneCount > 0 ? `+${Math.min(15, doneCount * 2)}%` : "0%";
 
   return {
     healthScore,
@@ -769,17 +842,37 @@ const computeDashboardStats = (
 };
 
 const ROLE_ACCESS: Record<string, string[]> = {
-  super_admin: ["admin", "reports", "inbox", "tasks", "hr", "docs", "integrations", "settings", "billing", "ai", "knowledge_base"],
-  leader:          ["reports", "inbox", "tasks", "hr", "docs", "integrations", "settings"],
-  hr:              ["reports", "inbox", "tasks", "hr", "docs", "settings"],
-  accounting:      ["reports", "docs", "integrations", "settings"],
+  super_admin: [
+    "admin",
+    "reports",
+    "inbox",
+    "tasks",
+    "hr",
+    "docs",
+    "integrations",
+    "settings",
+    "billing",
+    "ai",
+    "knowledge_base",
+  ],
+  leader: [
+    "reports",
+    "inbox",
+    "tasks",
+    "hr",
+    "docs",
+    "integrations",
+    "settings",
+  ],
+  hr: ["reports", "inbox", "tasks", "hr", "docs", "settings"],
+  accounting: ["reports", "docs", "integrations", "settings"],
   department_head: ["reports", "inbox", "tasks", "docs", "settings"],
-  employee:        ["inbox", "tasks", "settings"],
+  employee: ["inbox", "tasks", "settings"],
 };
 
 // ─── In-memory rate limit: IP → { count, resetAt } ───────────────────────────
 const contactRateMap = new Map<string, { count: number; resetAt: number }>();
-const CONTACT_LIMIT = 3;         // 3 murojaatgacha
+const CONTACT_LIMIT = 3; // 3 murojaatgacha
 const CONTACT_WINDOW_MS = 60 * 60 * 1000; // 1 soat
 
 function checkContactRateLimit(ip: string): boolean {
@@ -795,16 +888,26 @@ function checkContactRateLimit(ip: string): boolean {
 }
 
 // ─── Email helpers ────────────────────────────────────────────────────────────
-async function sendCompanyInviteEmail(to: string, name: string, token: string): Promise<void> {
+async function sendCompanyInviteEmail(
+  to: string,
+  name: string,
+  token: string,
+): Promise<void> {
   if (!RESEND_API_KEY) {
-    console.warn("[invite] RESEND_API_KEY yo'q, email yuborilmadi. Link:", `${APP_URL}/register?token=${token}`);
+    console.warn(
+      "[invite] RESEND_API_KEY yo'q, email yuborilmadi. Link:",
+      `${APP_URL}/register?token=${token}`,
+    );
     return;
   }
   const link = `${APP_URL}/register?token=${token}`;
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
-      headers: { "Authorization": `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         from: `AI Business Concierge <${RESEND_FROM_EMAIL}>`,
         to: [to],
@@ -835,17 +938,35 @@ async function sendCompanyInviteEmail(to: string, name: string, token: string): 
 }
 
 // ─── Generic Resend sender ────────────────────────────────────────────────────
-async function sendResendEmail(to: string, subject: string, html: string, tag: string): Promise<void> {
-  if (!RESEND_API_KEY) { console.warn(`[${tag}] RESEND_API_KEY yo'q, email yuborilmadi.`); return; }
+async function sendResendEmail(
+  to: string,
+  subject: string,
+  html: string,
+  tag: string,
+): Promise<void> {
+  if (!RESEND_API_KEY) {
+    console.warn(`[${tag}] RESEND_API_KEY yo'q, email yuborilmadi.`);
+    return;
+  }
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
-      headers: { "Authorization": `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: `AI Business Concierge <${RESEND_FROM_EMAIL}>`, to: [to], subject, html }),
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: `AI Business Concierge <${RESEND_FROM_EMAIL}>`,
+        to: [to],
+        subject,
+        html,
+      }),
     });
     if (!res.ok) console.warn(`[${tag}] Resend error:`, await res.text());
     else console.info(`[${tag}] Email sent to ${to}`);
-  } catch (e) { console.warn(`[${tag}] Email yuborishda xatolik:`, e); }
+  } catch (e) {
+    console.warn(`[${tag}] Email yuborishda xatolik:`, e);
+  }
 }
 
 function emailLayout(content: string): string {
@@ -866,7 +987,11 @@ function emailBtn(href: string, label: string): string {
 }
 
 // 2. Company registered (pending approval)
-async function sendCompanyRegisteredEmail(to: string, name: string, companyName: string): Promise<void> {
+async function sendCompanyRegisteredEmail(
+  to: string,
+  name: string,
+  companyName: string,
+): Promise<void> {
   const html = emailLayout(`
     <h2 style="color:#fff;margin-bottom:8px">Tabriklaymiz, ${name}!</h2>
     <p style="color:#94a3b8;line-height:1.6"><strong style="color:#a5b4fc">${companyName}</strong> kompaniyangiz muvaffaqiyatli ro'yxatdan o'tdi.</p>
@@ -876,11 +1001,20 @@ async function sendCompanyRegisteredEmail(to: string, name: string, companyName:
     </div>
     <p style="color:#64748b;font-size:13px">Savol bo'lsa: <a href="mailto:support@aibizconcierge.uz" style="color:#6366f1">support@aibizconcierge.uz</a></p>
   `);
-  await sendResendEmail(to, "Ro'yxatdan o'tish qabul qilindi — AI Business Concierge", html, "company_registered");
+  await sendResendEmail(
+    to,
+    "Ro'yxatdan o'tish qabul qilindi — AI Business Concierge",
+    html,
+    "company_registered",
+  );
 }
 
 // 3. Company rejected
-async function sendCompanyRejectedEmail(to: string, name: string, reason?: string): Promise<void> {
+async function sendCompanyRejectedEmail(
+  to: string,
+  name: string,
+  reason?: string,
+): Promise<void> {
   const html = emailLayout(`
     <h2 style="color:#fff;margin-bottom:8px">Hurmatli ${name},</h2>
     <p style="color:#94a3b8;line-height:1.6">Afsuski, murojaatingiz ko'rib chiqildi va hozircha qabul qilinmadi.</p>
@@ -889,22 +1023,41 @@ async function sendCompanyRejectedEmail(to: string, name: string, reason?: strin
     ${emailBtn(`${APP_URL}/contact`, "Qayta murojaat qilish")}
     <p style="color:#64748b;font-size:13px">Yoki: <a href="mailto:support@aibizconcierge.uz" style="color:#6366f1">support@aibizconcierge.uz</a></p>
   `);
-  await sendResendEmail(to, "Murojaat holati — AI Business Concierge", html, "company_rejected");
+  await sendResendEmail(
+    to,
+    "Murojaat holati — AI Business Concierge",
+    html,
+    "company_rejected",
+  );
 }
 
 // 4. Company approved (tenant active)
-async function sendCompanyApprovedEmail(to: string, name: string, companyName: string): Promise<void> {
+async function sendCompanyApprovedEmail(
+  to: string,
+  name: string,
+  companyName: string,
+): Promise<void> {
   const html = emailLayout(`
     <h2 style="color:#fff;margin-bottom:8px">🎉 Kompaniya tasdiqlandi!</h2>
     <p style="color:#94a3b8;line-height:1.6">Hurmatli <strong style="color:#fff">${name}</strong>, <strong style="color:#a5b4fc">${companyName}</strong> kompaniyangiz admin tomonidan tasdiqlandi.</p>
     <p style="color:#94a3b8;line-height:1.6">Endi platforma imkoniyatlaridan to'liq foydalanishingiz mumkin: xodimlar qo'shish, vazifalar, AI yordamchi va boshqalar.</p>
     ${emailBtn(`${APP_URL}/app`, "Dashboardga kirish")}
   `);
-  await sendResendEmail(to, "Kompaniya tasdiqlandi — AI Business Concierge", html, "company_approved");
+  await sendResendEmail(
+    to,
+    "Kompaniya tasdiqlandi — AI Business Concierge",
+    html,
+    "company_approved",
+  );
 }
 
 // 5. Employee invite (supplemental branded)
-async function sendEmployeeInviteEmail(to: string, name: string, companyName: string, setupLink: string): Promise<void> {
+async function sendEmployeeInviteEmail(
+  to: string,
+  name: string,
+  companyName: string,
+  setupLink: string,
+): Promise<void> {
   const html = emailLayout(`
     <h2 style="color:#fff;margin-bottom:8px">Assalomu alaykum, ${name}!</h2>
     <p style="color:#94a3b8;line-height:1.6"><strong style="color:#a5b4fc">${companyName}</strong> kompaniyasi sizni AI Business Concierge platformasiga qo'shdi.</p>
@@ -912,11 +1065,20 @@ async function sendEmployeeInviteEmail(to: string, name: string, companyName: st
     ${emailBtn(setupLink, "Akkauntni sozlash")}
     <p style="color:#64748b;font-size:13px;margin-top:8px">Havola <strong>48 soat</strong> davomida amal qiladi.<br>Agar siz bu taklifni kutmagan bo'lsangiz, ushbu emailni e'tiborsiz qoldiring.</p>
   `);
-  await sendResendEmail(to, `${companyName} — Platformaga taklif`, html, "employee_invite");
+  await sendResendEmail(
+    to,
+    `${companyName} — Platformaga taklif`,
+    html,
+    "employee_invite",
+  );
 }
 
 // 6. Employee welcome (after setup-complete)
-async function sendEmployeeWelcomeEmail(to: string, name: string, companyName: string): Promise<void> {
+async function sendEmployeeWelcomeEmail(
+  to: string,
+  name: string,
+  companyName: string,
+): Promise<void> {
   const html = emailLayout(`
     <h2 style="color:#fff;margin-bottom:8px">Xush kelibsiz, ${name}! 👋</h2>
     <p style="color:#94a3b8;line-height:1.6">Akkauntingiz muvaffaqiyatli sozlandi. Siz <strong style="color:#a5b4fc">${companyName}</strong> platformasining to'liq a'zosisiz.</p>
@@ -930,11 +1092,21 @@ async function sendEmployeeWelcomeEmail(to: string, name: string, companyName: s
     </div>
     ${emailBtn(`${APP_URL}/app`, "Dashboardga kirish")}
   `);
-  await sendResendEmail(to, "Xush kelibsiz — AI Business Concierge", html, "employee_welcome");
+  await sendResendEmail(
+    to,
+    "Xush kelibsiz — AI Business Concierge",
+    html,
+    "employee_welcome",
+  );
 }
 
 // 7. Admin notification: new company registration
-async function sendAdminNewRegistrationEmail(companyName: string, leaderName: string, leaderEmail: string, tenantId: string): Promise<void> {
+async function sendAdminNewRegistrationEmail(
+  companyName: string,
+  leaderName: string,
+  leaderEmail: string,
+  tenantId: string,
+): Promise<void> {
   if (!ADMIN_NOTIFY_EMAIL) return;
   const html = emailLayout(`
     <h2 style="color:#fff;margin-bottom:8px">Yangi kompaniya ro'yxatdan o'tdi</h2>
@@ -947,7 +1119,12 @@ async function sendAdminNewRegistrationEmail(companyName: string, leaderName: st
     <p style="color:#94a3b8;line-height:1.6">Admin panelida ko'rib chiqing va tasdiqlang yoki rad eting.</p>
     ${emailBtn(`${APP_URL}/app`, "Admin panelga kirish")}
   `);
-  await sendResendEmail(ADMIN_NOTIFY_EMAIL, `Yangi ro'yxatdan o'tish: ${companyName}`, html, "admin_new_reg");
+  await sendResendEmail(
+    ADMIN_NOTIFY_EMAIL,
+    `Yangi ro'yxatdan o'tish: ${companyName}`,
+    html,
+    "admin_new_reg",
+  );
 }
 
 const registerRoutes = (prefix: string) => {
@@ -955,43 +1132,98 @@ const registerRoutes = (prefix: string) => {
 
   // ─── POST /v1/contact — public, rate limited ──────────────────────────────
   app.post(`${prefix}/contact`, async (c) => {
-    const ip = c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const ip =
+      c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
     if (!checkContactRateLimit(ip)) {
-      return c.json({ error: { code: "RATE_LIMITED", message: "Soatda 3 ta murojaat yubora olasiz. Keyinroq urinib ko'ring." } }, 429);
+      return c.json(
+        {
+          error: {
+            code: "RATE_LIMITED",
+            message:
+              "Soatda 3 ta murojaat yubora olasiz. Keyinroq urinib ko'ring.",
+          },
+        },
+        429,
+      );
     }
 
     let body: Record<string, unknown>;
-    try { body = await c.req.json(); }
-    catch { return c.json({ error: { code: "INVALID_JSON", message: "JSON format xato." } }, 400); }
+    try {
+      body = await c.req.json();
+    } catch {
+      return c.json(
+        { error: { code: "INVALID_JSON", message: "JSON format xato." } },
+        400,
+      );
+    }
 
-    const full_name     = String(body.full_name   ?? "").trim();
-    const phone         = String(body.phone        ?? "").trim();
-    const email         = String(body.email        ?? "").trim();
-    const company_name  = String(body.company_name ?? "").trim() || null;
-    const stir          = String(body.stir         ?? "").trim() || null;
+    const full_name = String(body.full_name ?? "").trim();
+    const phone = String(body.phone ?? "").trim();
+    const email = String(body.email ?? "").trim();
+    const company_name = String(body.company_name ?? "").trim() || null;
+    const stir = String(body.stir ?? "").trim() || null;
     const business_type = String(body.business_type ?? "").trim() || null;
-    const employee_count= String(body.employee_count?? "").trim() || null;
-    const message       = String(body.message      ?? "").trim() || null;
-    const source        = String(body.source       ?? "").trim() || null;
+    const employee_count = String(body.employee_count ?? "").trim() || null;
+    const message = String(body.message ?? "").trim() || null;
+    const source = String(body.source ?? "").trim() || null;
 
     if (!full_name || !phone || !email) {
-      return c.json({ error: { code: "VALIDATION_ERROR", message: "full_name, phone, email majburiy." } }, 400);
+      return c.json(
+        {
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "full_name, phone, email majburiy.",
+          },
+        },
+        400,
+      );
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return c.json({ error: { code: "VALIDATION_ERROR", message: "Email format noto'g'ri." } }, 400);
+      return c.json(
+        {
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Email format noto'g'ri.",
+          },
+        },
+        400,
+      );
     }
 
-    const allowed_bt = ["yatt","llc","jsc","other",null];
-    const allowed_ec = ["1-10","11-50","51-200","200+",null];
-    const allowed_src = ["ads","referral","search","telegram","other",null];
+    const allowed_bt = ["yatt", "llc", "jsc", "other", null];
+    const allowed_ec = ["1-10", "11-50", "51-200", "200+", null];
+    const allowed_src = [
+      "ads",
+      "referral",
+      "search",
+      "telegram",
+      "other",
+      null,
+    ];
     if (!allowed_bt.includes(business_type as string | null)) {
-      return c.json({ error: { code: "VALIDATION_ERROR", message: "business_type noto'g'ri." } }, 400);
+      return c.json(
+        {
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "business_type noto'g'ri.",
+          },
+        },
+        400,
+      );
     }
 
     const { error: dbErr } = await supabase.from("contact_requests").insert({
-      full_name, phone, email, company_name, stir,
-      business_type: allowed_bt.includes(business_type as string | null) ? business_type : null,
-      employee_count: allowed_ec.includes(employee_count as string | null) ? employee_count : null,
+      full_name,
+      phone,
+      email,
+      company_name,
+      stir,
+      business_type: allowed_bt.includes(business_type as string | null)
+        ? business_type
+        : null,
+      employee_count: allowed_ec.includes(employee_count as string | null)
+        ? employee_count
+        : null,
       message,
       source: allowed_src.includes(source as string | null) ? source : null,
       status: "new",
@@ -999,11 +1231,21 @@ const registerRoutes = (prefix: string) => {
 
     if (dbErr) {
       console.error("[contact] db error:", dbErr);
-      return c.json({ error: { code: "SERVER_ERROR", message: "Server xatosi. Qaytadan urinib ko'ring." } }, 500);
+      return c.json(
+        {
+          error: {
+            code: "SERVER_ERROR",
+            message: "Server xatosi. Qaytadan urinib ko'ring.",
+          },
+        },
+        500,
+      );
     }
 
     // TODO: Resend orqali admin emailiga xabar yuborish (Phase 1.5.4)
-    console.info(`[contact] new request from ${email} (${company_name ?? "—"})`);
+    console.info(
+      `[contact] new request from ${email} (${company_name ?? "—"})`,
+    );
 
     return c.json({ success: true }, 201);
   });
@@ -1015,9 +1257,17 @@ const registerRoutes = (prefix: string) => {
     }
     const token = auth.replace("Bearer ", "").trim();
     // Supabase Auth API orqali tokenni tekshirish (JWT_SECRET talab qilmaydi)
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
     if (authError || !user) {
-      return failure(c, 401, "INVALID_TOKEN", "Token noto'g'ri yoki muddati tugagan.");
+      return failure(
+        c,
+        401,
+        "INVALID_TOKEN",
+        "Token noto'g'ri yoki muddati tugagan.",
+      );
     }
     const userId = user.id;
 
@@ -1054,7 +1304,8 @@ const registerRoutes = (prefix: string) => {
             id: t.id,
             role: "super_admin",
             fullName,
-            permissions: ROLE_ACCESS["super_admin"] ?? ROLE_ACCESS["leader"] ?? [],
+            permissions:
+              ROLE_ACCESS["super_admin"] ?? ROLE_ACCESS["leader"] ?? [],
           });
         }
       }
@@ -1063,10 +1314,13 @@ const registerRoutes = (prefix: string) => {
     const { data: tenantRows } = await supabase
       .from("tenants")
       .select("id, name, plan")
-      .in("id", tenants.map((t) => t.id));
+      .in(
+        "id",
+        tenants.map((t) => t.id),
+      );
 
     const tenantMap = Object.fromEntries(
-      (tenantRows ?? []).map((t) => [t.id, t])
+      (tenantRows ?? []).map((t) => [t.id, t]),
     );
 
     const enrichedTenants = tenants.map((t) => ({
@@ -1091,7 +1345,9 @@ const registerRoutes = (prefix: string) => {
 
     const { data: viewRow } = await supabase
       .from("tenant_daily_stats")
-      .select("total_tasks, open_tasks, overdue_tasks, done_tasks, inbox_unread_count, pending_approvals")
+      .select(
+        "total_tasks, open_tasks, overdue_tasks, done_tasks, inbox_unread_count, pending_approvals",
+      )
       .eq("tenant_id", ctx.tenantId)
       .single();
 
@@ -1105,7 +1361,10 @@ const registerRoutes = (prefix: string) => {
     const overdue = viewRow?.overdue_tasks ?? 0;
     const doneCount = viewRow?.done_tasks ?? 0;
     const pendingApprovals = viewRow?.pending_approvals ?? 0;
-    const healthScore = Math.max(60, Math.min(100, 100 - overdue * 5 - pendingApprovals * 3));
+    const healthScore = Math.max(
+      60,
+      Math.min(100, 100 - overdue * 5 - pendingApprovals * 3),
+    );
     const monthlyRevenue = 40000 + doneCount * 500 - overdue * 200;
 
     const chartData = DAY_LABELS.map((day, i) => ({
@@ -1113,14 +1372,19 @@ const registerRoutes = (prefix: string) => {
       score: Math.max(60, Math.min(100, healthScore - (6 - i) * 2 + (i % 2))),
     }));
 
-    const insights: { type: "danger" | "warning" | "info"; title: string; desc: string }[] = [];
+    const insights: {
+      type: "danger" | "warning" | "info";
+      title: string;
+      desc: string;
+    }[] = [];
     if (overdue > 0 || pendingApprovals > 0) {
       insights.push({
         type: "danger",
         title: "Kassadagi yetishmovchilik xavfi",
-        desc: overdue > 0
-          ? `${overdue} ta muddati o'tgan vazifa. Joriy xarajatlar sur'ati bilan 15-sana uchun kutilayotgan balans manfiy bo'lishi mumkin.`
-          : "Billing xabarlari kutilmoqda. Joriy xarajatlar sur'ati bilan 15-sana uchun kutilayotgan balans manfiy bo'lishi mumkin.",
+        desc:
+          overdue > 0
+            ? `${overdue} ta muddati o'tgan vazifa. Joriy xarajatlar sur'ati bilan 15-sana uchun kutilayotgan balans manfiy bo'lishi mumkin.`
+            : "Billing xabarlari kutilmoqda. Joriy xarajatlar sur'ati bilan 15-sana uchun kutilayotgan balans manfiy bo'lishi mumkin.",
       });
     }
     const hrCount = viewRow?.inbox_unread_count ?? 0;
@@ -1128,22 +1392,27 @@ const registerRoutes = (prefix: string) => {
       insights.push({
         type: "warning",
         title: "HR: Diqqat talab qiladi",
-        desc: hrCount >= 2
-          ? `Oxirgi so'rovnomalarda Marketing bo'limida stress darajasi oshgan. ${hrCount} ta HR xabari kutilmoqda.`
-          : `${pendingApprovals} ta tasdiqlash kutilmoqda. Oxirgi so'rovnomalarda stress darajasi oshgan bo'lishi mumkin.`,
+        desc:
+          hrCount >= 2
+            ? `Oxirgi so'rovnomalarda Marketing bo'limida stress darajasi oshgan. ${hrCount} ta HR xabari kutilmoqda.`
+            : `${pendingApprovals} ta tasdiqlash kutilmoqda. Oxirgi so'rovnomalarda stress darajasi oshgan bo'lishi mumkin.`,
       });
     }
     const now = new Date();
     const expiringDocs = safeDocs.filter((d: any) => {
       const exp = d.metadata?.expiry_date;
       if (!exp) return false;
-      const daysLeft = Math.ceil((new Date(exp).getTime() - now.getTime()) / 86400000);
+      const daysLeft = Math.ceil(
+        (new Date(exp).getTime() - now.getTime()) / 86400000,
+      );
       return daysLeft > 0 && daysLeft <= 14;
     });
     if (expiringDocs.length > 0) {
       const d = expiringDocs[0];
       const exp = d.metadata?.expiry_date;
-      const daysLeft = exp ? Math.ceil((new Date(exp).getTime() - now.getTime()) / 86400000) : 0;
+      const daysLeft = exp
+        ? Math.ceil((new Date(exp).getTime() - now.getTime()) / 86400000)
+        : 0;
       insights.push({
         type: "info",
         title: "Shartnoma muddati tugamoqda",
@@ -1159,8 +1428,10 @@ const registerRoutes = (prefix: string) => {
     }
 
     const trendOverdue = overdue - Math.max(0, overdue - 1);
-    const trendHealth = healthScore >= 95 ? "+2%" : healthScore >= 85 ? "+1%" : "0%";
-    const trendRevenue = doneCount > 0 ? `+${Math.min(15, doneCount * 2)}%` : "0%";
+    const trendHealth =
+      healthScore >= 95 ? "+2%" : healthScore >= 85 ? "+1%" : "0%";
+    const trendRevenue =
+      doneCount > 0 ? `+${Math.min(15, doneCount * 2)}%` : "0%";
 
     const stats = {
       healthScore,
@@ -1184,7 +1455,7 @@ const registerRoutes = (prefix: string) => {
     const tenantId = ctx.tenantId;
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400000).toISOString();
-    const sevenDaysAgo  = new Date(now.getTime() - 7  * 86400000).toISOString();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 86400000).toISOString();
 
     // 1) Task status counts
     const { data: taskRows } = await supabase
@@ -1195,12 +1466,12 @@ const registerRoutes = (prefix: string) => {
 
     const tasks = taskRows ?? [];
     const taskStats = {
-      total:       tasks.length,
-      todo:        tasks.filter((t) => t.status === "todo").length,
+      total: tasks.length,
+      todo: tasks.filter((t) => t.status === "todo").length,
       in_progress: tasks.filter((t) => t.status === "in_progress").length,
-      done:        tasks.filter((t) => t.status === "done").length,
-      overdue:     tasks.filter((t) =>
-        t.status !== "done" && t.due_date && new Date(t.due_date) < now
+      done: tasks.filter((t) => t.status === "done").length,
+      overdue: tasks.filter(
+        (t) => t.status !== "done" && t.due_date && new Date(t.due_date) < now,
       ).length,
     };
 
@@ -1212,8 +1483,11 @@ const registerRoutes = (prefix: string) => {
       const dayStr = d.toISOString().slice(0, 10);
       taskTrend.push({
         day: label,
-        created: tasks.filter((t) => t.created_at?.slice(0, 10) === dayStr).length,
-        done:    tasks.filter((t) => t.status === "done" && t.created_at?.slice(0, 10) === dayStr).length,
+        created: tasks.filter((t) => t.created_at?.slice(0, 10) === dayStr)
+          .length,
+        done: tasks.filter(
+          (t) => t.status === "done" && t.created_at?.slice(0, 10) === dayStr,
+        ).length,
       });
     }
 
@@ -1241,9 +1515,11 @@ const registerRoutes = (prefix: string) => {
 
     const members = memberRows ?? [];
     const employeeStats = {
-      total:        members.length,
-      active:       members.filter((m) => m.status === "active").length,
-      pending:      members.filter((m) => m.status !== "active" && m.status !== "terminated").length,
+      total: members.length,
+      active: members.filter((m) => m.status === "active").length,
+      pending: members.filter(
+        (m) => m.status !== "active" && m.status !== "terminated",
+      ).length,
       recent_joins: members.filter((m) => m.created_at >= sevenDaysAgo).length,
     };
 
@@ -1260,7 +1536,11 @@ const registerRoutes = (prefix: string) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
 
-    const { data, error } = await supabase.from("inbox_items").select("*").eq("tenant_id", ctx.tenantId).order("timestamp", { ascending: false });
+    const { data, error } = await supabase
+      .from("inbox_items")
+      .select("*")
+      .eq("tenant_id", ctx.tenantId)
+      .order("timestamp", { ascending: false });
     if (error) {
       return failure(c, 500, "DB_ERROR", "Inbox yuklashda xatolik.");
     }
@@ -1274,7 +1554,12 @@ const registerRoutes = (prefix: string) => {
     const body = await c.req.json();
     const sourceMessageId = body?.source_message_id;
     if (!sourceMessageId) {
-      return failure(c, 400, "INVALID_PAYLOAD", "source_message_id talab qilinadi.");
+      return failure(
+        c,
+        400,
+        "INVALID_PAYLOAD",
+        "source_message_id talab qilinadi.",
+      );
     }
 
     const newItem = {
@@ -1301,7 +1586,11 @@ const registerRoutes = (prefix: string) => {
       return success(c, existing, { idempotent: true });
     }
 
-    const { data, error } = await supabase.from("inbox_items").insert(newItem).select("*").single();
+    const { data, error } = await supabase
+      .from("inbox_items")
+      .insert(newItem)
+      .select("*")
+      .single();
     if (error) {
       return failure(c, 500, "DB_ERROR", "Inbox saqlashda xatolik.");
     }
@@ -1333,11 +1622,25 @@ const registerRoutes = (prefix: string) => {
         };
         wh.verify(rawBody, headers);
       } catch {
-        return failure(c, 401, "INVALID_SIGNATURE", "Webhook imzosi noto'g'ri.");
+        return failure(
+          c,
+          401,
+          "INVALID_SIGNATURE",
+          "Webhook imzosi noto'g'ri.",
+        );
       }
     }
 
-    let payload: { type?: string; data?: { email_id?: string; from?: string; to?: string[]; subject?: string; created_at?: string } };
+    let payload: {
+      type?: string;
+      data?: {
+        email_id?: string;
+        from?: string;
+        to?: string[];
+        subject?: string;
+        created_at?: string;
+      };
+    };
     try {
       payload = JSON.parse(rawBody);
     } catch {
@@ -1350,11 +1653,13 @@ const registerRoutes = (prefix: string) => {
 
     const { email_id, from, to, subject, created_at } = payload.data;
     const toRaw = Array.isArray(to) ? to : [to].filter(Boolean);
-    const toAddrs = toRaw.map((e) => {
-      const s = String(e).trim();
-      const match = s.match(/<([^>]+)>/);
-      return (match ? match[1] : s).toLowerCase();
-    }).filter(Boolean);
+    const toAddrs = toRaw
+      .map((e) => {
+        const s = String(e).trim();
+        const match = s.match(/<([^>]+)>/);
+        return (match ? match[1] : s).toLowerCase();
+      })
+      .filter(Boolean);
     if (!toAddrs.length) {
       return c.json({ received: true }, 200);
     }
@@ -1367,22 +1672,38 @@ const registerRoutes = (prefix: string) => {
     let mapping = mappings?.[0];
 
     if (!mapping?.tenant_id) {
-      const { data: defaultTenant } = await supabase.from("tenants").select("id").limit(1).single();
+      const { data: defaultTenant } = await supabase
+        .from("tenants")
+        .select("id")
+        .limit(1)
+        .single();
       if (defaultTenant?.id) {
         mapping = { tenant_id: defaultTenant.id };
-        console.warn("Resend webhook: mapping yo'q, default tenant ishlatildi, to=", toAddrs);
+        console.warn(
+          "Resend webhook: mapping yo'q, default tenant ishlatildi, to=",
+          toAddrs,
+        );
       } else {
-        console.warn("Resend webhook: tenant topilmadi, to=", toAddrs, "mapErr=", mapErr);
+        console.warn(
+          "Resend webhook: tenant topilmadi, to=",
+          toAddrs,
+          "mapErr=",
+          mapErr,
+        );
         return c.json({ received: true }, 200);
       }
     }
 
     const senderMatch = String(from || "").match(/^([^<]*)<?([^>]*)>?$/);
-    const senderName = (senderMatch?.[1]?.trim() || "Unknown").replace(/^["']|["']$/g, "");
+    const senderName = (senderMatch?.[1]?.trim() || "Unknown").replace(
+      /^["']|["']$/g,
+      "",
+    );
     const senderEmail = senderMatch?.[2]?.trim() || "";
     const sender = { name: senderName || "Unknown", email: senderEmail };
 
-    const sourceMessageId = email_id || `resend-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
+    const sourceMessageId =
+      email_id || `resend-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
     const newItem = {
       tenant_id: mapping.tenant_id,
       source: "email",
@@ -1421,7 +1742,7 @@ const registerRoutes = (prefix: string) => {
   app.get(`${prefix}/settings/profile`, async (c) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
-    const userId   = (ctx as any).userId as string;
+    const userId = (ctx as any).userId as string;
     const tenantId = (ctx as any).tenantId as string;
 
     const { data, error } = await supabase
@@ -1430,10 +1751,15 @@ const registerRoutes = (prefix: string) => {
       .eq("user_id", userId)
       .eq("tenant_id", tenantId)
       .single();
-    if (error || !data) return failure(c, 404, "NOT_FOUND", "Profil topilmadi.");
+    if (error || !data)
+      return failure(c, 404, "NOT_FOUND", "Profil topilmadi.");
 
-    const { data: { user }, error: authErr } = await supabase.auth.admin.getUserById(userId);
-    if (authErr || !user) return failure(c, 500, "AUTH_ERROR", "Auth foydalanuvchi topilmadi.");
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.admin.getUserById(userId);
+    if (authErr || !user)
+      return failure(c, 500, "AUTH_ERROR", "Auth foydalanuvchi topilmadi.");
 
     return success(c, {
       full_name: data.full_name,
@@ -1448,7 +1774,7 @@ const registerRoutes = (prefix: string) => {
   app.patch(`${prefix}/settings/profile`, async (c) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
-    const userId   = (ctx as any).userId as string;
+    const userId = (ctx as any).userId as string;
     const tenantId = (ctx as any).tenantId as string;
 
     const body = await c.req.json().catch(() => ({}));
@@ -1457,14 +1783,24 @@ const registerRoutes = (prefix: string) => {
     const updates: Record<string, unknown> = {};
     if (full_name !== undefined) {
       if (typeof full_name !== "string" || full_name.trim().length < 2)
-        return failure(c, 422, "VALIDATION_ERROR", "Ism kamida 2 belgi bo'lishi kerak.");
+        return failure(
+          c,
+          422,
+          "VALIDATION_ERROR",
+          "Ism kamida 2 belgi bo'lishi kerak.",
+        );
       updates.full_name = full_name.trim();
     }
     if (phone !== undefined) {
       updates.phone = typeof phone === "string" ? phone.trim() || null : null;
     }
     if (Object.keys(updates).length === 0)
-      return failure(c, 422, "VALIDATION_ERROR", "Hech narsa o'zgartirilmagan.");
+      return failure(
+        c,
+        422,
+        "VALIDATION_ERROR",
+        "Hech narsa o'zgartirilmagan.",
+      );
 
     const { error } = await supabase
       .from("user_tenants")
@@ -1481,12 +1817,22 @@ const registerRoutes = (prefix: string) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
     const tenantId = c.req.param("id");
-    if (tenantId !== ctx.tenantId) return failure(c, 403, "FORBIDDEN", "Boshqa tenant profiliga kirish mumkin emas.");
+    if (tenantId !== ctx.tenantId)
+      return failure(
+        c,
+        403,
+        "FORBIDDEN",
+        "Boshqa tenant profiliga kirish mumkin emas.",
+      );
     const { data, error } = await supabase
       .from("tenants")
-      .select("id,name,status,legal_form,stir,legal_address,activity_type,reg_date,website,description,contact_phone,contact_email,bank_name,bank_account,employee_count_range,created_at,updated_at")
-      .eq("id", tenantId).single();
-    if (error || !data) return failure(c, 404, "NOT_FOUND", "Tenant topilmadi.");
+      .select(
+        "id,name,status,legal_form,stir,legal_address,activity_type,reg_date,website,description,contact_phone,contact_email,bank_name,bank_account,employee_count_range,created_at,updated_at",
+      )
+      .eq("id", tenantId)
+      .single();
+    if (error || !data)
+      return failure(c, 404, "NOT_FOUND", "Tenant topilmadi.");
     return success(c, data);
   });
 
@@ -1495,22 +1841,55 @@ const registerRoutes = (prefix: string) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
     const tenantId = c.req.param("id");
-    if (tenantId !== ctx.tenantId) return failure(c, 403, "FORBIDDEN", "Boshqa tenant profilini o'zgartira olmaysiz.");
+    if (tenantId !== ctx.tenantId)
+      return failure(
+        c,
+        403,
+        "FORBIDDEN",
+        "Boshqa tenant profilini o'zgartira olmaysiz.",
+      );
 
     const role = (ctx as any).role as string;
-    if (!["company_admin", "leader", "super_admin", "sub_admin"].includes(role)) {
-      return failure(c, 403, "FORBIDDEN", "Faqat company_admin kompaniya profilini o'zgartira oladi.");
+    if (
+      !["company_admin", "leader", "super_admin", "sub_admin"].includes(role)
+    ) {
+      return failure(
+        c,
+        403,
+        "FORBIDDEN",
+        "Faqat company_admin kompaniya profilini o'zgartira oladi.",
+      );
     }
 
     const body = await c.req.json().catch(() => ({}));
-    const allowed = ["name","legal_form","stir","legal_address","activity_type","reg_date","website","description","contact_phone","contact_email","bank_name","bank_account","employee_count_range"];
+    const allowed = [
+      "name",
+      "legal_form",
+      "stir",
+      "legal_address",
+      "activity_type",
+      "reg_date",
+      "website",
+      "description",
+      "contact_phone",
+      "contact_email",
+      "bank_name",
+      "bank_account",
+      "employee_count_range",
+    ];
     const update: Record<string, unknown> = {};
     for (const key of allowed) {
       if (key in body) update[key] = body[key] === "" ? null : body[key];
     }
-    if (Object.keys(update).length === 0) return failure(c, 400, "VALIDATION_ERROR", "Hech narsa o'zgarmadi.");
+    if (Object.keys(update).length === 0)
+      return failure(c, 400, "VALIDATION_ERROR", "Hech narsa o'zgarmadi.");
 
-    const { data, error } = await supabase.from("tenants").update(update).eq("id", tenantId).select().single();
+    const { data, error } = await supabase
+      .from("tenants")
+      .update(update)
+      .eq("id", tenantId)
+      .select()
+      .single();
     if (error) return failure(c, 500, "DB_ERROR", error.message);
     return success(c, data);
   });
@@ -1521,15 +1900,22 @@ const registerRoutes = (prefix: string) => {
     if (!(ctx as any).tenantId) return ctx;
     const tenantId = c.req.param("id");
     const targetId = c.req.param("userId");
-    if (tenantId !== ctx.tenantId) return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
+    if (tenantId !== ctx.tenantId)
+      return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
 
     const [{ data: ut }, { data: ep }] = await Promise.all([
-      supabase.from("user_tenants")
+      supabase
+        .from("user_tenants")
         .select("full_name,role,status,position,phone,created_at")
-        .eq("tenant_id", tenantId).eq("user_id", targetId).single(),
-      supabase.from("employee_profiles")
+        .eq("tenant_id", tenantId)
+        .eq("user_id", targetId)
+        .single(),
+      supabase
+        .from("employee_profiles")
         .select("*")
-        .eq("tenant_id", tenantId).eq("user_id", targetId).maybeSingle(),
+        .eq("tenant_id", tenantId)
+        .eq("user_id", targetId)
+        .maybeSingle(),
     ]);
 
     if (!ut) return failure(c, 404, "NOT_FOUND", "Xodim topilmadi.");
@@ -1540,37 +1926,88 @@ const registerRoutes = (prefix: string) => {
   app.patch(`${prefix}/tenants/:id/members/:userId/profile`, async (c) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
-    const tenantId    = c.req.param("id");
-    const targetId    = c.req.param("userId");
+    const tenantId = c.req.param("id");
+    const targetId = c.req.param("userId");
     const callerUserId = (ctx as any).userId as string;
-    if (tenantId !== ctx.tenantId) return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
+    if (tenantId !== ctx.tenantId)
+      return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
 
-    const { data: callerRow } = await supabase.from("user_tenants")
-      .select("role").eq("user_id", callerUserId).eq("tenant_id", tenantId).single();
+    const { data: callerRow } = await supabase
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", callerUserId)
+      .eq("tenant_id", tenantId)
+      .single();
     const role = callerRow?.role ?? "";
-    const allowed = ["leader", "hr", "super_admin", "sub_admin", "company_admin"];
-    if (!allowed.includes(role)) return failure(c, 403, "FORBIDDEN_ROLE", "Faqat HR yoki rahbar tahrir qila oladi.");
+    const allowed = [
+      "leader",
+      "hr",
+      "super_admin",
+      "sub_admin",
+      "company_admin",
+    ];
+    if (!allowed.includes(role))
+      return failure(
+        c,
+        403,
+        "FORBIDDEN_ROLE",
+        "Faqat HR yoki rahbar tahrir qila oladi.",
+      );
 
     const body = await c.req.json().catch(() => ({}));
     const ALLOWED_FIELDS = [
-      "last_name","first_name","middle_name","birth_date","gender","citizenship",
-      "passport_number","jshshir","address","position","department","hire_date",
-      "work_type","work_schedule","salary","salary_currency","phone","email",
-      "blood_group","notes","emergency_name","emergency_phone","emergency_rel",
+      "last_name",
+      "first_name",
+      "middle_name",
+      "birth_date",
+      "gender",
+      "citizenship",
+      "passport_number",
+      "jshshir",
+      "address",
+      "position",
+      "department",
+      "hire_date",
+      "work_type",
+      "work_schedule",
+      "salary",
+      "salary_currency",
+      "phone",
+      "email",
+      "blood_group",
+      "notes",
+      "emergency_name",
+      "emergency_phone",
+      "emergency_rel",
     ];
     const data: Record<string, unknown> = {};
     for (const f of ALLOWED_FIELDS) {
       if (f in body) data[f] = body[f] === "" ? null : body[f];
     }
     if (Object.keys(data).length === 0)
-      return failure(c, 422, "VALIDATION_ERROR", "Hech narsa o'zgartirilmagan.");
+      return failure(
+        c,
+        422,
+        "VALIDATION_ERROR",
+        "Hech narsa o'zgartirilmagan.",
+      );
     if (!data.last_name || !data.first_name || !data.position)
       if ("last_name" in data || "first_name" in data || "position" in data)
-        return failure(c, 422, "VALIDATION_ERROR", "Familiya, ism va lavozim majburiy.");
+        return failure(
+          c,
+          422,
+          "VALIDATION_ERROR",
+          "Familiya, ism va lavozim majburiy.",
+        );
 
-    const { data: result, error } = await supabase.from("employee_profiles")
-      .upsert({ ...data, user_id: targetId, tenant_id: tenantId }, { onConflict: "user_id,tenant_id" })
-      .select().single();
+    const { data: result, error } = await supabase
+      .from("employee_profiles")
+      .upsert(
+        { ...data, user_id: targetId, tenant_id: tenantId },
+        { onConflict: "user_id,tenant_id" },
+      )
+      .select()
+      .single();
     if (error) return failure(c, 500, "DB_ERROR", error.message);
     return success(c, result);
   });
@@ -1581,7 +2018,12 @@ const registerRoutes = (prefix: string) => {
 
     const tenantId = c.req.param("id");
     if (tenantId !== ctx.tenantId) {
-      return failure(c, 403, "FORBIDDEN", "Boshqa tenant a'zolariga kirish mumkin emas.");
+      return failure(
+        c,
+        403,
+        "FORBIDDEN",
+        "Boshqa tenant a'zolariga kirish mumkin emas.",
+      );
     }
 
     // ?status=active|terminated|all (default: active)
@@ -1592,7 +2034,9 @@ const registerRoutes = (prefix: string) => {
 
     let query = supabase
       .from("user_tenants")
-      .select("user_id, full_name, role, status, terminated_at, termination_reason")
+      .select(
+        "user_id, full_name, role, status, terminated_at, termination_reason",
+      )
       .eq("tenant_id", tenantId);
 
     if (statusFilter !== "all") {
@@ -1663,22 +2107,45 @@ const registerRoutes = (prefix: string) => {
       .from("user_tenants")
       .select("role, tenant_id")
       .eq("user_id", callerUserId);
-    const isSuperAdmin = (callerRows ?? []).some((r) => r.role === "super_admin");
-    const tenantSpecificRole = (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
+    const isSuperAdmin = (callerRows ?? []).some(
+      (r) => r.role === "super_admin",
+    );
+    const tenantSpecificRole =
+      (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
     const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
-    if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
-      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR tahrir qila oladi.");
+    if (
+      callerRole !== "leader" &&
+      callerRole !== "hr" &&
+      callerRole !== "super_admin"
+    ) {
+      return failure(
+        c,
+        403,
+        "FORBIDDEN_ROLE",
+        "Faqat Super Admin, Rahbar yoki HR tahrir qila oladi.",
+      );
     }
 
     // O'zining rolini o'zgartirishni taqiqlash
     if (callerUserId === targetUserId) {
-      return failure(c, 403, "SELF_EDIT_FORBIDDEN", "O'zingizning rolingizni o'zgartirib bo'lmaydi.");
+      return failure(
+        c,
+        403,
+        "SELF_EDIT_FORBIDDEN",
+        "O'zingizning rolingizni o'zgartirib bo'lmaydi.",
+      );
     }
 
     const body = await c.req.json().catch(() => ({}));
     const { role, full_name } = body as { role?: string; full_name?: string };
 
-    const ALLOWED_ROLES = ["leader", "hr", "accounting", "department_head", "employee"];
+    const ALLOWED_ROLES = [
+      "leader",
+      "hr",
+      "accounting",
+      "department_head",
+      "employee",
+    ];
     const updates: Record<string, unknown> = {};
     if (role !== undefined) {
       if (!ALLOWED_ROLES.includes(role)) {
@@ -1693,7 +2160,12 @@ const registerRoutes = (prefix: string) => {
       updates.full_name = full_name.trim();
     }
     if (Object.keys(updates).length === 0) {
-      return failure(c, 422, "VALIDATION_ERROR", "Hech narsa o'zgartirilmagan.");
+      return failure(
+        c,
+        422,
+        "VALIDATION_ERROR",
+        "Hech narsa o'zgartirilmagan.",
+      );
     }
 
     const { error } = await supabase
@@ -1725,23 +2197,41 @@ const registerRoutes = (prefix: string) => {
     const callerUserId = (ctx as any).userId ?? null;
     if (!callerUserId) return failure(c, 401, "UNAUTHORIZED", "User ID yo'q.");
     if (callerUserId === targetUserId) {
-      return failure(c, 403, "SELF_DELETE_FORBIDDEN", "O'zingizni ishdan ketkaza olmaysiz.");
+      return failure(
+        c,
+        403,
+        "SELF_DELETE_FORBIDDEN",
+        "O'zingizni ishdan ketkaza olmaysiz.",
+      );
     }
     // Super_admin har tenantda ruxsatga ega; boshqalar — faqat o'z tenantida
     const { data: callerRows } = await supabase
       .from("user_tenants")
       .select("role, tenant_id")
       .eq("user_id", callerUserId);
-    const isSuperAdmin = (callerRows ?? []).some((r) => r.role === "super_admin");
-    const tenantSpecificRole = (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
+    const isSuperAdmin = (callerRows ?? []).some(
+      (r) => r.role === "super_admin",
+    );
+    const tenantSpecificRole =
+      (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
     const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
-    if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
-      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR ishdan ketkaza oladi.");
+    if (
+      callerRole !== "leader" &&
+      callerRole !== "hr" &&
+      callerRole !== "super_admin"
+    ) {
+      return failure(
+        c,
+        403,
+        "FORBIDDEN_ROLE",
+        "Faqat Super Admin, Rahbar yoki HR ishdan ketkaza oladi.",
+      );
     }
 
     // Sabab body'da yoki query'da kelishi mumkin
     const body = await c.req.json().catch(() => ({}));
-    const reason = (body as { reason?: string }).reason?.toString().slice(0, 500) ?? null;
+    const reason =
+      (body as { reason?: string }).reason?.toString().slice(0, 500) ?? null;
 
     const { error } = await supabase
       .from("user_tenants")
@@ -1756,7 +2246,12 @@ const registerRoutes = (prefix: string) => {
       .eq("status", "active"); // qayta-qayta o'chirishni oldini olish
 
     if (error) {
-      return failure(c, 500, "DB_ERROR", `Ishdan ketkazishda xato: ${error.message}`);
+      return failure(
+        c,
+        500,
+        "DB_ERROR",
+        `Ishdan ketkazishda xato: ${error.message}`,
+      );
     }
     return success(c, { user_id: targetUserId, status: "terminated" });
   });
@@ -1767,24 +2262,50 @@ const registerRoutes = (prefix: string) => {
   app.patch(`${prefix}/tenants/:id/members/:userId/status`, async (c) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
-    const tenantId     = c.req.param("id");
+    const tenantId = c.req.param("id");
     const targetUserId = c.req.param("userId");
     const callerUserId = (ctx as any).userId as string;
-    if (tenantId !== ctx.tenantId) return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
-    if (callerUserId === targetUserId) return failure(c, 403, "SELF_EDIT_FORBIDDEN", "O'zingizni bloklab bo'lmaydi.");
+    if (tenantId !== ctx.tenantId)
+      return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
+    if (callerUserId === targetUserId)
+      return failure(
+        c,
+        403,
+        "SELF_EDIT_FORBIDDEN",
+        "O'zingizni bloklab bo'lmaydi.",
+      );
 
-    const { data: callerRow } = await supabase.from("user_tenants")
-      .select("role").eq("user_id", callerUserId).eq("tenant_id", tenantId).single();
+    const { data: callerRow } = await supabase
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", callerUserId)
+      .eq("tenant_id", tenantId)
+      .single();
     const role = callerRow?.role ?? "";
-    if (!["leader", "hr", "super_admin", "sub_admin", "company_admin"].includes(role))
-      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat HR yoki rahbar o'zgartira oladi.");
+    if (
+      !["leader", "hr", "super_admin", "sub_admin", "company_admin"].includes(
+        role,
+      )
+    )
+      return failure(
+        c,
+        403,
+        "FORBIDDEN_ROLE",
+        "Faqat HR yoki rahbar o'zgartira oladi.",
+      );
 
     const body = await c.req.json().catch(() => ({}));
     const { status } = body as { status?: string };
     if (!status || !["blocked", "active"].includes(status))
-      return failure(c, 422, "VALIDATION_ERROR", "status: 'blocked' yoki 'active' bo'lishi kerak.");
+      return failure(
+        c,
+        422,
+        "VALIDATION_ERROR",
+        "status: 'blocked' yoki 'active' bo'lishi kerak.",
+      );
 
-    const { error } = await supabase.from("user_tenants")
+    const { error } = await supabase
+      .from("user_tenants")
       .update({ status })
       .eq("user_id", targetUserId)
       .eq("tenant_id", tenantId);
@@ -1796,64 +2317,106 @@ const registerRoutes = (prefix: string) => {
   // POST /tenants/:id/members/:userId/reset-password — admin parolni reset qilish
   // Faqat leader|hr|super_admin. Email link orqali yoki to'g'ridan-to'g'ri yangi parol.
   // ---------------------------------------------------------------------------
-  app.post(`${prefix}/tenants/:id/members/:userId/reset-password`, async (c) => {
-    const ctx = await requireTenant(c);
-    if (!(ctx as any).tenantId) return ctx;
+  app.post(
+    `${prefix}/tenants/:id/members/:userId/reset-password`,
+    async (c) => {
+      const ctx = await requireTenant(c);
+      if (!(ctx as any).tenantId) return ctx;
 
-    const tenantId = c.req.param("id");
-    const targetUserId = c.req.param("userId");
-    if (tenantId !== ctx.tenantId) {
-      return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
-    }
-
-    const callerUserId = (ctx as any).userId ?? null;
-    if (!callerUserId) return failure(c, 401, "UNAUTHORIZED", "User ID yo'q.");
-    // Super_admin har tenantda ruxsatga ega; boshqalar — faqat o'z tenantida
-    const { data: callerRows } = await supabase
-      .from("user_tenants")
-      .select("role, tenant_id")
-      .eq("user_id", callerUserId);
-    const isSuperAdmin = (callerRows ?? []).some((r) => r.role === "super_admin");
-    const tenantSpecificRole = (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
-    const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
-    if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
-      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR parolni reset qila oladi.");
-    }
-
-    const body = await c.req.json().catch(() => ({}));
-    const { mode, new_password } = body as { mode?: "link" | "set"; new_password?: string };
-
-    if (mode === "set") {
-      if (!new_password || new_password.length < 8) {
-        return failure(c, 422, "VALIDATION_ERROR", "Yangi parol kamida 8 belgi.");
+      const tenantId = c.req.param("id");
+      const targetUserId = c.req.param("userId");
+      if (tenantId !== ctx.tenantId) {
+        return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
       }
-      const { error } = await supabase.auth.admin.updateUserById(targetUserId, {
-        password: new_password,
+
+      const callerUserId = (ctx as any).userId ?? null;
+      if (!callerUserId)
+        return failure(c, 401, "UNAUTHORIZED", "User ID yo'q.");
+      // Super_admin har tenantda ruxsatga ega; boshqalar — faqat o'z tenantida
+      const { data: callerRows } = await supabase
+        .from("user_tenants")
+        .select("role, tenant_id")
+        .eq("user_id", callerUserId);
+      const isSuperAdmin = (callerRows ?? []).some(
+        (r) => r.role === "super_admin",
+      );
+      const tenantSpecificRole =
+        (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
+      const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
+      if (
+        callerRole !== "leader" &&
+        callerRole !== "hr" &&
+        callerRole !== "super_admin"
+      ) {
+        return failure(
+          c,
+          403,
+          "FORBIDDEN_ROLE",
+          "Faqat Super Admin, Rahbar yoki HR parolni reset qila oladi.",
+        );
+      }
+
+      const body = await c.req.json().catch(() => ({}));
+      const { mode, new_password } = body as {
+        mode?: "link" | "set";
+        new_password?: string;
+      };
+
+      if (mode === "set") {
+        if (!new_password || new_password.length < 8) {
+          return failure(
+            c,
+            422,
+            "VALIDATION_ERROR",
+            "Yangi parol kamida 8 belgi.",
+          );
+        }
+        const { error } = await supabase.auth.admin.updateUserById(
+          targetUserId,
+          {
+            password: new_password,
+          },
+        );
+        if (error) {
+          return failure(
+            c,
+            500,
+            "AUTH_ERROR",
+            `Parolni o'zgartirib bo'lmadi: ${error.message}`,
+          );
+        }
+        return success(c, { user_id: targetUserId, status: "password_set" });
+      }
+
+      // Default: link orqali reset
+      const { data: targetUser } =
+        await supabase.auth.admin.getUserById(targetUserId);
+      if (!targetUser?.user?.email) {
+        return failure(c, 404, "NOT_FOUND", "Xodim email topilmadi.");
+      }
+      const appUrl =
+        Deno.env.get("APP_URL") ??
+        c.req.header("origin") ??
+        "https://ai-business-concierge1.netlify.app";
+      const { error: linkErr } = await supabase.auth.resetPasswordForEmail(
+        targetUser.user.email,
+        { redirectTo: `${appUrl}/reset-password` },
+      );
+      if (linkErr) {
+        return failure(
+          c,
+          500,
+          "AUTH_ERROR",
+          `Reset link yuborib bo'lmadi: ${linkErr.message}`,
+        );
+      }
+      return success(c, {
+        user_id: targetUserId,
+        status: "reset_link_sent",
+        email: targetUser.user.email,
       });
-      if (error) {
-        return failure(c, 500, "AUTH_ERROR", `Parolni o'zgartirib bo'lmadi: ${error.message}`);
-      }
-      return success(c, { user_id: targetUserId, status: "password_set" });
-    }
-
-    // Default: link orqali reset
-    const { data: targetUser } = await supabase.auth.admin.getUserById(targetUserId);
-    if (!targetUser?.user?.email) {
-      return failure(c, 404, "NOT_FOUND", "Xodim email topilmadi.");
-    }
-    const appUrl =
-      Deno.env.get("APP_URL") ??
-      c.req.header("origin") ??
-      "https://ai-business-concierge1.netlify.app";
-    const { error: linkErr } = await supabase.auth.resetPasswordForEmail(
-      targetUser.user.email,
-      { redirectTo: `${appUrl}/reset-password` },
-    );
-    if (linkErr) {
-      return failure(c, 500, "AUTH_ERROR", `Reset link yuborib bo'lmadi: ${linkErr.message}`);
-    }
-    return success(c, { user_id: targetUserId, status: "reset_link_sent", email: targetUser.user.email });
-  });
+    },
+  );
 
   // ---------------------------------------------------------------------------
   // POST /tenants/:id/members/:userId/hard-delete — butunlay o'chirish
@@ -1873,25 +2436,48 @@ const registerRoutes = (prefix: string) => {
     const callerUserId = (ctx as any).userId ?? null;
     if (!callerUserId) return failure(c, 401, "UNAUTHORIZED", "User ID yo'q.");
     if (callerUserId === targetUserId) {
-      return failure(c, 403, "SELF_DELETE_FORBIDDEN", "O'zingizni butunlay o'chira olmaysiz.");
+      return failure(
+        c,
+        403,
+        "SELF_DELETE_FORBIDDEN",
+        "O'zingizni butunlay o'chira olmaysiz.",
+      );
     }
     // Super_admin har tenantda ruxsatga ega; boshqalar — faqat o'z tenantida
     const { data: callerRows } = await supabase
       .from("user_tenants")
       .select("role, tenant_id")
       .eq("user_id", callerUserId);
-    const isSuperAdmin = (callerRows ?? []).some((r) => r.role === "super_admin");
-    const tenantSpecificRole = (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
+    const isSuperAdmin = (callerRows ?? []).some(
+      (r) => r.role === "super_admin",
+    );
+    const tenantSpecificRole =
+      (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
     const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
-    if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
-      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR butunlay o'chira oladi.");
+    if (
+      callerRole !== "leader" &&
+      callerRole !== "hr" &&
+      callerRole !== "super_admin"
+    ) {
+      return failure(
+        c,
+        403,
+        "FORBIDDEN_ROLE",
+        "Faqat Super Admin, Rahbar yoki HR butunlay o'chira oladi.",
+      );
     }
 
     // Confirmation: target xodim ismini yuborish kerak (typo prevention)
     const body = await c.req.json().catch(() => ({}));
-    const confirmName = (body as { confirm_name?: string }).confirm_name?.trim() ?? "";
+    const confirmName =
+      (body as { confirm_name?: string }).confirm_name?.trim() ?? "";
     if (!confirmName) {
-      return failure(c, 422, "VALIDATION_ERROR", "Tasdiqlash uchun xodim ismi majburiy.");
+      return failure(
+        c,
+        422,
+        "VALIDATION_ERROR",
+        "Tasdiqlash uchun xodim ismi majburiy.",
+      );
     }
     const { data: targetRow } = await supabase
       .from("user_tenants")
@@ -1914,7 +2500,12 @@ const registerRoutes = (prefix: string) => {
       .neq("tenant_id", tenantId);
 
     if (countErr) {
-      return failure(c, 500, "DB_ERROR", "Boshqa tenant a'zoligini tekshirishda xato.");
+      return failure(
+        c,
+        500,
+        "DB_ERROR",
+        "Boshqa tenant a'zoligini tekshirishda xato.",
+      );
     }
 
     // 2. Bu tenantdan unlink
@@ -1945,7 +2536,10 @@ const registerRoutes = (prefix: string) => {
       entity_type: "user_tenants",
       entity_id: targetUserId,
       trace_id: getTraceId(c),
-      payload: { auth_user_deleted: authUserDeleted, confirmed_name: confirmName },
+      payload: {
+        auth_user_deleted: authUserDeleted,
+        confirmed_name: confirmName,
+      },
     });
 
     return success(c, {
@@ -1975,11 +2569,23 @@ const registerRoutes = (prefix: string) => {
       .from("user_tenants")
       .select("role, tenant_id")
       .eq("user_id", callerUserId);
-    const isSuperAdmin = (callerRows ?? []).some((r) => r.role === "super_admin");
-    const tenantSpecificRole = (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
+    const isSuperAdmin = (callerRows ?? []).some(
+      (r) => r.role === "super_admin",
+    );
+    const tenantSpecificRole =
+      (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
     const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
-    if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
-      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR tiklash mumkin.");
+    if (
+      callerRole !== "leader" &&
+      callerRole !== "hr" &&
+      callerRole !== "super_admin"
+    ) {
+      return failure(
+        c,
+        403,
+        "FORBIDDEN_ROLE",
+        "Faqat Super Admin, Rahbar yoki HR tiklash mumkin.",
+      );
     }
 
     const { error } = await supabase
@@ -2008,7 +2614,12 @@ const registerRoutes = (prefix: string) => {
 
     const tenantId = c.req.param("id");
     if (tenantId !== ctx.tenantId) {
-      return failure(c, 403, "FORBIDDEN", "Boshqa tenantga xodim qo'shib bo'lmaydi.");
+      return failure(
+        c,
+        403,
+        "FORBIDDEN",
+        "Boshqa tenantga xodim qo'shib bo'lmaydi.",
+      );
     }
 
     // Caller rolini user_tenants jadvalidan o'qish (JWT'da role claim yo'q)
@@ -2026,8 +2637,17 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 500, "DB_ERROR", "Caller rolini o'qishda xato.");
     }
     const callerRole = (callerRow?.role as string) ?? "";
-    if (callerRole !== "leader" && callerRole !== "hr" && callerRole !== "super_admin") {
-      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat Super Admin, Rahbar yoki HR xodim qo'sha oladi.");
+    if (
+      callerRole !== "leader" &&
+      callerRole !== "hr" &&
+      callerRole !== "super_admin"
+    ) {
+      return failure(
+        c,
+        403,
+        "FORBIDDEN_ROLE",
+        "Faqat Super Admin, Rahbar yoki HR xodim qo'sha oladi.",
+      );
     }
 
     const body = await c.req.json().catch(() => ({}));
@@ -2040,18 +2660,34 @@ const registerRoutes = (prefix: string) => {
     };
 
     // Validatsiya
-    const ALLOWED_ROLES = ["leader", "hr", "accounting", "department_head", "employee"];
+    const ALLOWED_ROLES = [
+      "leader",
+      "hr",
+      "accounting",
+      "department_head",
+      "employee",
+    ];
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return failure(c, 422, "VALIDATION_ERROR", "Email yaroqsiz.");
     }
     if (!full_name || full_name.trim().length < 2) {
-      return failure(c, 422, "VALIDATION_ERROR", "Ism kamida 2 belgi bo'lishi kerak.");
+      return failure(
+        c,
+        422,
+        "VALIDATION_ERROR",
+        "Ism kamida 2 belgi bo'lishi kerak.",
+      );
     }
     if (!role || !ALLOWED_ROLES.includes(role)) {
       return failure(c, 422, "VALIDATION_ERROR", "Rol yaroqsiz.");
     }
     if (mode !== "invite" && mode !== "password") {
-      return failure(c, 422, "VALIDATION_ERROR", "Mode 'invite' yoki 'password' bo'lishi kerak.");
+      return failure(
+        c,
+        422,
+        "VALIDATION_ERROR",
+        "Mode 'invite' yoki 'password' bo'lishi kerak.",
+      );
     }
     if (mode === "password" && (!password || password.length < 8)) {
       return failure(c, 422, "VALIDATION_ERROR", "Parol kamida 8 belgi.");
@@ -2070,10 +2706,18 @@ const registerRoutes = (prefix: string) => {
 
     try {
       if (mode === "invite") {
-        const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
-          data: { full_name, tenant_id: tenantId, role, setup_complete: false },
-          redirectTo: `${appUrl}/setup-account`,
-        });
+        const { data, error } = await supabase.auth.admin.inviteUserByEmail(
+          email,
+          {
+            data: {
+              full_name,
+              tenant_id: tenantId,
+              role,
+              setup_complete: false,
+            },
+            redirectTo: `${appUrl}/setup-account`,
+          },
+        );
         if (error) throw error;
         userId = data.user?.id ?? null;
         actionMessage = "invited";
@@ -2092,9 +2736,19 @@ const registerRoutes = (prefix: string) => {
       const msg = err instanceof Error ? err.message : "AUTH_ERROR";
       // Email allaqachon mavjud bo'lsa Supabase 422 yoki 400 qaytaradi
       if (/already registered|exists|duplicate/i.test(msg)) {
-        return failure(c, 409, "EMAIL_EXISTS", "Bu email allaqachon ro'yxatdan o'tgan.");
+        return failure(
+          c,
+          409,
+          "EMAIL_EXISTS",
+          "Bu email allaqachon ro'yxatdan o'tgan.",
+        );
       }
-      return failure(c, 500, "AUTH_ERROR", `Foydalanuvchi yaratib bo'lmadi: ${msg}`);
+      return failure(
+        c,
+        500,
+        "AUTH_ERROR",
+        `Foydalanuvchi yaratib bo'lmadi: ${msg}`,
+      );
     }
 
     if (!userId) {
@@ -2102,15 +2756,13 @@ const registerRoutes = (prefix: string) => {
     }
 
     // 2. user_tenants jadvaliga bog'lash
-    const { error: linkError } = await supabase
-      .from("user_tenants")
-      .insert({
-        user_id: userId,
-        tenant_id: tenantId,
-        role,
-        full_name: full_name.trim(),
-        status: mode === "invite" ? "password_pending" : "active",
-      });
+    const { error: linkError } = await supabase.from("user_tenants").insert({
+      user_id: userId,
+      tenant_id: tenantId,
+      role,
+      full_name: full_name.trim(),
+      status: mode === "invite" ? "password_pending" : "active",
+    });
 
     if (linkError) {
       // Rollback: agar user_tenants insert fail bo'lsa, auth user'ni o'chirish
@@ -2119,14 +2771,28 @@ const registerRoutes = (prefix: string) => {
       } catch {
         // best-effort rollback
       }
-      return failure(c, 500, "DB_ERROR", `Tenantga bog'lashda xato: ${linkError.message}`);
+      return failure(
+        c,
+        500,
+        "DB_ERROR",
+        `Tenantga bog'lashda xato: ${linkError.message}`,
+      );
     }
 
     // Supplemental branded invite email (non-blocking, alongside Supabase's native email)
     if (mode === "invite") {
-      const { data: tenantRow } = await supabase.from("tenants").select("name").eq("id", tenantId).single();
+      const { data: tenantRow } = await supabase
+        .from("tenants")
+        .select("name")
+        .eq("id", tenantId)
+        .single();
       const setupLink = `${appUrl}/setup-account`;
-      sendEmployeeInviteEmail(email, full_name.trim(), tenantRow?.name ?? "Kompaniya", setupLink);
+      sendEmployeeInviteEmail(
+        email,
+        full_name.trim(),
+        tenantRow?.name ?? "Kompaniya",
+        setupLink,
+      );
     }
 
     return success(c, {
@@ -2141,9 +2807,14 @@ const registerRoutes = (prefix: string) => {
   // POST /auth/setup-complete — xodim parol va ma'lumotlarini to'ldirdi → password_set
   app.post(`${prefix}/auth/setup-complete`, async (c) => {
     const auth = c.req.header("authorization") ?? "";
-    if (!auth.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
-    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token yaroqsiz.");
+    if (!auth.startsWith("Bearer "))
+      return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user)
+      return failure(c, 401, "UNAUTHORIZED", "Token yaroqsiz.");
     const userId = user.id;
 
     const { error } = await supabase
@@ -2162,9 +2833,13 @@ const registerRoutes = (prefix: string) => {
         .from("user_tenants")
         .select("full_name, tenant_id, tenants(name)")
         .eq("user_id", userId)
-        .limit(1).single();
-      const name = (utRow?.full_name ?? user.user_metadata?.full_name ?? user.email) as string;
-      const companyName = ((utRow as any)?.tenants?.name ?? "Kompaniya") as string;
+        .limit(1)
+        .single();
+      const name = (utRow?.full_name ??
+        user.user_metadata?.full_name ??
+        user.email) as string;
+      const companyName = ((utRow as any)?.tenants?.name ??
+        "Kompaniya") as string;
       sendEmployeeWelcomeEmail(user.email, name, companyName);
       if (utRow?.tenant_id) {
         createHrSetupCompleteNotification(utRow.tenant_id, name);
@@ -2181,29 +2856,53 @@ const registerRoutes = (prefix: string) => {
 
     const tenantId = c.req.param("id");
     const targetUserId = c.req.param("userId");
-    if (tenantId !== ctx.tenantId) return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
+    if (tenantId !== ctx.tenantId)
+      return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
 
     const { data: callerRow } = await supabase
-      .from("user_tenants").select("role")
-      .eq("user_id", (ctx as any).userId).eq("tenant_id", tenantId).maybeSingle();
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", (ctx as any).userId)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
     const callerRole = callerRow?.role ?? "";
     if (!["leader", "hr", "super_admin"].includes(callerRole)) {
-      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat HR yoki Rahbar taklif yuboroladi.");
+      return failure(
+        c,
+        403,
+        "FORBIDDEN_ROLE",
+        "Faqat HR yoki Rahbar taklif yuboroladi.",
+      );
     }
 
-    const { data: userRes, error: userErr } = await supabase.auth.admin.getUserById(targetUserId);
-    if (userErr || !userRes?.user) return failure(c, 404, "NOT_FOUND", "Foydalanuvchi topilmadi.");
+    const { data: userRes, error: userErr } =
+      await supabase.auth.admin.getUserById(targetUserId);
+    if (userErr || !userRes?.user)
+      return failure(c, 404, "NOT_FOUND", "Foydalanuvchi topilmadi.");
 
     const email = userRes.user.email;
-    if (!email) return failure(c, 422, "NO_EMAIL", "Foydalanuvchi emaili yo'q.");
+    if (!email)
+      return failure(c, 422, "NO_EMAIL", "Foydalanuvchi emaili yo'q.");
 
-    const appUrl = Deno.env.get("APP_URL") ?? c.req.header("origin") ?? "https://ai-business-concierge1.netlify.app";
+    const appUrl =
+      Deno.env.get("APP_URL") ??
+      c.req.header("origin") ??
+      "https://ai-business-concierge1.netlify.app";
 
-    const { error: inviteErr } = await supabase.auth.admin.inviteUserByEmail(email, {
-      data: userRes.user.user_metadata ?? {},
-      redirectTo: `${appUrl}/setup-account`,
-    });
-    if (inviteErr) return failure(c, 500, "INVITE_ERROR", `Taklif yuborib bo'lmadi: ${inviteErr.message}`);
+    const { error: inviteErr } = await supabase.auth.admin.inviteUserByEmail(
+      email,
+      {
+        data: userRes.user.user_metadata ?? {},
+        redirectTo: `${appUrl}/setup-account`,
+      },
+    );
+    if (inviteErr)
+      return failure(
+        c,
+        500,
+        "INVITE_ERROR",
+        `Taklif yuborib bo'lmadi: ${inviteErr.message}`,
+      );
 
     return success(c, { status: "invite_resent", email });
   });
@@ -2215,14 +2914,23 @@ const registerRoutes = (prefix: string) => {
 
     const tenantId = c.req.param("id");
     const targetUserId = c.req.param("userId");
-    if (tenantId !== ctx.tenantId) return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
+    if (tenantId !== ctx.tenantId)
+      return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
 
     const { data: callerRow } = await supabase
-      .from("user_tenants").select("role")
-      .eq("user_id", (ctx as any).userId).eq("tenant_id", tenantId).maybeSingle();
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", (ctx as any).userId)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
     const callerRole = callerRow?.role ?? "";
     if (!["leader", "hr", "super_admin"].includes(callerRole)) {
-      return failure(c, 403, "FORBIDDEN_ROLE", "Faqat HR yoki Rahbar tasdiqlashga ruxsatga ega.");
+      return failure(
+        c,
+        403,
+        "FORBIDDEN_ROLE",
+        "Faqat HR yoki Rahbar tasdiqlashga ruxsatga ega.",
+      );
     }
 
     const { error } = await supabase
@@ -2232,7 +2940,8 @@ const registerRoutes = (prefix: string) => {
       .eq("tenant_id", tenantId)
       .in("status", ["password_set", "password_pending"]);
 
-    if (error) return failure(c, 500, "DB_ERROR", `Tasdiqlashda xato: ${error.message}`);
+    if (error)
+      return failure(c, 500, "DB_ERROR", `Tasdiqlashda xato: ${error.message}`);
 
     // Non-blocking in-app notification to the confirmed employee
     createEmployeeConfirmedNotification(tenantId, targetUserId);
@@ -2244,7 +2953,11 @@ const registerRoutes = (prefix: string) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
 
-    const { data, error } = await supabase.from("tasks").select("*").eq("tenant_id", ctx.tenantId).order("created_at", { ascending: false });
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("tenant_id", ctx.tenantId)
+      .order("created_at", { ascending: false });
     if (error) {
       return failure(c, 500, "DB_ERROR", "Tasks yuklashda xatolik.");
     }
@@ -2270,7 +2983,10 @@ const registerRoutes = (prefix: string) => {
     const newTask = {
       tenant_id: ctx.tenantId,
       title: body.title,
-      description: typeof body.description === "string" ? body.description.trim() || null : null,
+      description:
+        typeof body.description === "string"
+          ? body.description.trim() || null
+          : null,
       status: body.status || "todo",
       priority: body.priority || "medium",
       assignee: body.assignee ?? null,
@@ -2279,7 +2995,11 @@ const registerRoutes = (prefix: string) => {
       comments: 0,
     };
 
-    const { data, error } = await supabase.from("tasks").insert(newTask).select("*").single();
+    const { data, error } = await supabase
+      .from("tasks")
+      .insert(newTask)
+      .select("*")
+      .single();
     if (error) {
       return failure(c, 500, "DB_ERROR", "Task saqlashda xatolik.");
     }
@@ -2294,7 +3014,12 @@ const registerRoutes = (prefix: string) => {
 
     const assignee = body.assignee;
     if (assignee?.id && typeof assignee.id === "string") {
-      await createTaskAssignmentNotification(ctx.tenantId, assignee.id, data.id, newTask.title);
+      await createTaskAssignmentNotification(
+        ctx.tenantId,
+        assignee.id,
+        data.id,
+        newTask.title,
+      );
     }
 
     return success(c, data);
@@ -2310,9 +3035,10 @@ const registerRoutes = (prefix: string) => {
     const updates: Record<string, unknown> = {};
     if (body.title !== undefined) updates.title = body.title;
     if (body.description !== undefined) {
-      updates.description = typeof body.description === "string"
-        ? body.description.trim() || null
-        : null;
+      updates.description =
+        typeof body.description === "string"
+          ? body.description.trim() || null
+          : null;
     }
     if (body.status !== undefined) {
       if (!ALLOWED_TASK_STATUSES.includes(body.status)) {
@@ -2351,7 +3077,12 @@ const registerRoutes = (prefix: string) => {
 
     const assignee = body.assignee;
     if (assignee?.id && typeof assignee.id === "string") {
-      await createTaskAssignmentNotification(ctx.tenantId, assignee.id, data.id, data.title);
+      await createTaskAssignmentNotification(
+        ctx.tenantId,
+        assignee.id,
+        data.id,
+        data.title,
+      );
     }
 
     return success(c, data);
@@ -2364,7 +3095,12 @@ const registerRoutes = (prefix: string) => {
     const taskId = c.req.param("id");
     const userId = (ctx as any).userId;
     if (!userId) {
-      return failure(c, 401, "AUTH_REQUIRED", "Tasdiqlash uchun tizimga kirish kerak.");
+      return failure(
+        c,
+        401,
+        "AUTH_REQUIRED",
+        "Tasdiqlash uchun tizimga kirish kerak.",
+      );
     }
 
     const { data: task, error: fetchError } = await supabase
@@ -2378,7 +3114,9 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 404, "NOT_FOUND", "Task topilmadi.");
     }
 
-    const assigneeId = (task.assignee as { id?: string })?.id ?? (task.assignee as { user_id?: string })?.user_id;
+    const assigneeId =
+      (task.assignee as { id?: string })?.id ??
+      (task.assignee as { user_id?: string })?.user_id;
     if (assigneeId !== userId) {
       return failure(c, 403, "FORBIDDEN", "Faqat mas'ul tasdiqlashi mumkin.");
     }
@@ -2472,7 +3210,8 @@ const registerRoutes = (prefix: string) => {
     const safety = checkAiSafety(message, (ctx as any).userId ?? null);
     if (!safety.safe) {
       const isRu = (reqLocale ?? "uz") === "ru";
-      const errMsg = isRu && safety.messageRu ? safety.messageRu : safety.message;
+      const errMsg =
+        isRu && safety.messageRu ? safety.messageRu : safety.message;
       const httpStatus = safety.code === "RATE_LIMITED" ? 429 : 422;
       return failure(c, httpStatus, safety.code, errMsg);
     }
@@ -2492,7 +3231,11 @@ const registerRoutes = (prefix: string) => {
     // Statik fallback (AI mavjud bo'lmasa)
     const buildFallbackReply = (input: string): string => {
       const m = input.toLowerCase();
-      if (m.includes("xarajat") || m.includes("expense") || m.includes("budget")) {
+      if (
+        m.includes("xarajat") ||
+        m.includes("expense") ||
+        m.includes("budget")
+      ) {
         return locale === "ru"
           ? "Расходы за январь составили $12,400. Это на 15% меньше прошлого месяца."
           : "Yanvar oyi xarajatlari $12,400 ni tashkil etdi. Bu o'tgan oyga nisbatan 15% kamroq.";
@@ -2502,7 +3245,9 @@ const registerRoutes = (prefix: string) => {
           ? "У вас сегодня 3 важные задачи."
           : "Sizda bugun 3 ta muhim vazifa bor.";
       }
-      return locale === "ru" ? "Понятно. Изучу этот вопрос." : "Tushunarli. Buni o'rganib chiqaman.";
+      return locale === "ru"
+        ? "Понятно. Изучу этот вопрос."
+        : "Tushunarli. Buni o'rganib chiqaman.";
     };
 
     let reply = buildFallbackReply(safeMessage);
@@ -2568,7 +3313,8 @@ const registerRoutes = (prefix: string) => {
               input: [
                 {
                   role: "system",
-                  content: "Sen AI Business Concierge. Javoblar qisqa, amaliy va foydali bo'lsin.",
+                  content:
+                    "Sen AI Business Concierge. Javoblar qisqa, amaliy va foydali bo'lsin.",
                 },
                 { role: "user", content: wrapUserMessage(safeMessage) },
               ],
@@ -2587,7 +3333,9 @@ const registerRoutes = (prefix: string) => {
           } catch (fallbackErr) {
             // Ikkala AI ham ishlamadi — statik fallback qoladi
             llmError = `CLAUDE:${llmError} | OPENAI:${
-              fallbackErr instanceof Error ? fallbackErr.message : "OPENAI_ERROR"
+              fallbackErr instanceof Error
+                ? fallbackErr.message
+                : "OPENAI_ERROR"
             }`;
           }
         }
@@ -2600,7 +3348,8 @@ const registerRoutes = (prefix: string) => {
           input: [
             {
               role: "system",
-              content: "Sen AI Business Concierge. Javoblar qisqa, amaliy va foydali bo'lsin.",
+              content:
+                "Sen AI Business Concierge. Javoblar qisqa, amaliy va foydali bo'lsin.",
             },
             { role: "user", content: wrapUserMessage(safeMessage) },
           ],
@@ -2645,13 +3394,13 @@ const registerRoutes = (prefix: string) => {
 
     // Har AI chaqiruv — ai_usage_logs ga non-blocking yozish (billing uchun)
     insertAiUsageLog({
-      tenantId:         (ctx as TenantContext).tenantId,
-      userId:           (ctx as TenantContext).userId,
-      endpoint:         "/v1/ai/chat",
-      model:            llmModel,
-      provider:         llmProvider,
+      tenantId: (ctx as TenantContext).tenantId,
+      userId: (ctx as TenantContext).userId,
+      endpoint: "/v1/ai/chat",
+      model: llmModel,
+      provider: llmProvider,
       complexity,
-      promptTokens:     inputTokens,
+      promptTokens: inputTokens,
       completionTokens: outputTokens,
       costUsd,
       cached,
@@ -2661,9 +3410,10 @@ const registerRoutes = (prefix: string) => {
 
     // Disclaimer — KB topilmasa yoki past similarity
     if (!kbFound || kbSimilarity < 0.85) {
-      const disclaimer = locale === "ru"
-        ? "\n\n⚠️ Это AI-консультация, которая не заменяет профессиональную юридическую или финансовую помощь."
-        : "\n\n⚠️ Bu AI maslahat bo'lib, professional huquqiy yoki moliyaviy maslahat o'rnini bosmaydi.";
+      const disclaimer =
+        locale === "ru"
+          ? "\n\n⚠️ Это AI-консультация, которая не заменяет профессиональную юридическую или финансовую помощь."
+          : "\n\n⚠️ Bu AI maslahat bo'lib, professional huquqiy yoki moliyaviy maslahat o'rnini bosmaydi.";
       if (llmProvider !== "fallback") reply = reply + disclaimer;
     }
 
@@ -2705,18 +3455,21 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 422, "VALIDATION_ERROR", "message_id majburiy.");
     }
     if (rating !== 1 && rating !== -1) {
-      return failure(c, 422, "VALIDATION_ERROR", "rating 1 yoki -1 bo'lishi kerak.");
+      return failure(
+        c,
+        422,
+        "VALIDATION_ERROR",
+        "rating 1 yoki -1 bo'lishi kerak.",
+      );
     }
 
-    const { error } = await supabase
-      .from("ai_feedback")
-      .insert({
-        message_id,
-        tenant_id: ctx.tenantId,
-        user_id: (ctx as any).userId ?? null,
-        rating,
-        comment: comment?.toString().slice(0, 500) ?? null,
-      });
+    const { error } = await supabase.from("ai_feedback").insert({
+      message_id,
+      tenant_id: ctx.tenantId,
+      user_id: (ctx as any).userId ?? null,
+      rating,
+      comment: comment?.toString().slice(0, 500) ?? null,
+    });
 
     if (error) {
       return failure(c, 500, "DB_ERROR", "Feedbackni saqlab bo'lmadi.", {
@@ -2757,7 +3510,8 @@ const registerRoutes = (prefix: string) => {
         locale: "uz" as const,
         error: {
           code: "NOT_IMPLEMENTED",
-          message_uz: "HR Candidate Analysis modul hozircha tayyor emas. Tez orada implementatsiya tugaydi.",
+          message_uz:
+            "HR Candidate Analysis modul hozircha tayyor emas. Tez orada implementatsiya tugaydi.",
           message_ja: "HR 候補者分析モジュールはまだ準備中です。",
           message_en: "HR Candidate Analysis is under implementation.",
         },
@@ -2833,7 +3587,12 @@ const registerRoutes = (prefix: string) => {
     const { title, content, metadata } = payload ?? {};
 
     if (!title && !content && !metadata) {
-      return failure(c, 422, "VALIDATION_ERROR", "title/content/metadata dan biri majburiy.");
+      return failure(
+        c,
+        422,
+        "VALIDATION_ERROR",
+        "title/content/metadata dan biri majburiy.",
+      );
     }
 
     const { data: existing, error: fetchError } = await supabase
@@ -2856,7 +3615,11 @@ const registerRoutes = (prefix: string) => {
 
     const { data: updated, error: updateError } = await supabase
       .from("documents")
-      .update({ title: nextTitle, content: nextContent, metadata: nextMetadata })
+      .update({
+        title: nextTitle,
+        content: nextContent,
+        metadata: nextMetadata,
+      })
       .eq("tenant_id", ctx.tenantId)
       .eq("id", id)
       .select("*")
@@ -2873,7 +3636,11 @@ const registerRoutes = (prefix: string) => {
 
     let chunkCount = 0;
     if (content) {
-      await supabase.from("doc_chunks").delete().eq("tenant_id", ctx.tenantId).eq("document_id", id);
+      await supabase
+        .from("doc_chunks")
+        .delete()
+        .eq("tenant_id", ctx.tenantId)
+        .eq("document_id", id);
 
       const chunks = String(nextContent)
         .split("\n\n")
@@ -2992,7 +3759,12 @@ const registerRoutes = (prefix: string) => {
 
     const { data: doc, error } = await supabase
       .from("documents")
-      .insert({ tenant_id: ctx.tenantId, title, content, metadata: metadata ?? {} })
+      .insert({
+        tenant_id: ctx.tenantId,
+        title,
+        content,
+        metadata: metadata ?? {},
+      })
       .select("*")
       .single();
     if (error) {
@@ -3025,9 +3797,15 @@ const registerRoutes = (prefix: string) => {
     });
 
     // Mas'ul biriktirilgan bo'lsa — notification yuborish
-    const assigneeId = (metadata as Record<string, unknown> | null)?.assignee_id as string | undefined;
+    const assigneeId = (metadata as Record<string, unknown> | null)
+      ?.assignee_id as string | undefined;
     if (assigneeId && typeof assigneeId === "string") {
-      await createDocAssignmentNotification(ctx.tenantId, assigneeId, doc.id, title);
+      await createDocAssignmentNotification(
+        ctx.tenantId,
+        assigneeId,
+        doc.id,
+        title,
+      );
     }
 
     return success(c, { document_id: doc.id, chunks: chunks.length });
@@ -3066,29 +3844,42 @@ const registerRoutes = (prefix: string) => {
   // ─── GET /v1/admin/companies — kompaniyalar ro'yxati (super_admin / sub_admin) ──
   app.get(`${prefix}/admin/companies`, async (c) => {
     const auth = c.req.header("authorization");
-    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    if (!auth?.startsWith("Bearer "))
+      return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
 
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
-    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user)
+      return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
 
     const { data: ut } = await supabase
-      .from("user_tenants").select("role").eq("user_id", user.id)
-      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
-    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"])
+      .limit(1)
+      .single();
+    if (!ut)
+      return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
 
     const statusFilter = c.req.query("status");
     let q = supabase
       .from("tenants")
-      .select(`
+      .select(
+        `
         id, name, status, legal_form, stir, legal_address,
         activity_type, contact_phone, contact_email, website,
         employee_count_range, bank_name, bank_account,
         blocked_reason, blocked_at, approved_at, created_at, updated_at,
         contact_request_id
-      `)
+      `,
+      )
       .order("created_at", { ascending: false })
       .limit(300);
-    if (statusFilter && statusFilter !== "all") q = q.eq("status", statusFilter);
+    if (statusFilter && statusFilter !== "all")
+      q = q.eq("status", statusFilter);
 
     const { data: tenants, error } = await q;
     if (error) return failure(c, 500, "DB_ERROR", error.message);
@@ -3118,19 +3909,32 @@ const registerRoutes = (prefix: string) => {
   // ─── GET /v1/admin/contacts — super_admin / sub_admin ─────────────────────
   app.get(`${prefix}/admin/contacts`, async (c) => {
     const auth = c.req.header("authorization");
-    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    if (!auth?.startsWith("Bearer "))
+      return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
 
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
-    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user)
+      return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
 
     const { data: ut } = await supabase
-      .from("user_tenants").select("role").eq("user_id", user.id)
-      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
-    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"])
+      .limit(1)
+      .single();
+    if (!ut)
+      return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
 
     const status = c.req.query("status");
-    let q = supabase.from("contact_requests")
-      .select("id,full_name,company_name,phone,email,business_type,employee_count,message,source,status,admin_note,invite_token,invite_expires_at,created_at")
+    let q = supabase
+      .from("contact_requests")
+      .select(
+        "id,full_name,company_name,phone,email,business_type,employee_count,message,source,status,admin_note,invite_token,invite_expires_at,created_at",
+      )
       .order("created_at", { ascending: false })
       .limit(200);
     if (status && status !== "all") q = q.eq("status", status);
@@ -3143,13 +3947,23 @@ const registerRoutes = (prefix: string) => {
   // ─── GET /v1/admin/health — tizim holati (super_admin) ──────────────────────
   app.get(`${prefix}/admin/health`, async (c) => {
     const auth = c.req.header("authorization");
-    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
-    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    if (!auth?.startsWith("Bearer "))
+      return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user)
+      return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
     const { data: ut } = await supabase
-      .from("user_tenants").select("role").eq("user_id", user.id)
-      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
-    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"])
+      .limit(1)
+      .single();
+    if (!ut)
+      return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
 
     const t0 = Date.now();
 
@@ -3166,15 +3980,37 @@ const registerRoutes = (prefix: string) => {
       { count: unreadNotifications },
     ] = await Promise.all([
       supabase.from("tenants").select("*", { count: "exact", head: true }),
-      supabase.from("tenants").select("*", { count: "exact", head: true }).eq("status", "active"),
-      supabase.from("tenants").select("*", { count: "exact", head: true }).eq("status", "pending_approval"),
+      supabase
+        .from("tenants")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "active"),
+      supabase
+        .from("tenants")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending_approval"),
       supabase.from("user_tenants").select("*", { count: "exact", head: true }),
-      supabase.from("user_tenants").select("*", { count: "exact", head: true }).eq("status", "active"),
-      supabase.from("user_tenants").select("*", { count: "exact", head: true }).eq("status", "password_pending"),
-      supabase.from("contact_requests").select("*", { count: "exact", head: true }),
-      supabase.from("contact_requests").select("*", { count: "exact", head: true }).in("status", ["new", "contacted"]),
-      supabase.from("notifications").select("*", { count: "exact", head: true }),
-      supabase.from("notifications").select("*", { count: "exact", head: true }).is("read_at", null),
+      supabase
+        .from("user_tenants")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "active"),
+      supabase
+        .from("user_tenants")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "password_pending"),
+      supabase
+        .from("contact_requests")
+        .select("*", { count: "exact", head: true }),
+      supabase
+        .from("contact_requests")
+        .select("*", { count: "exact", head: true })
+        .in("status", ["new", "contacted"]),
+      supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true }),
+      supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .is("read_at", null),
     ]);
 
     const dbLatencyMs = Date.now() - t0;
@@ -3183,26 +4019,53 @@ const registerRoutes = (prefix: string) => {
       status: "ok",
       checked_at: new Date().toISOString(),
       db_latency_ms: dbLatencyMs,
-      tenants: { total: totalTenants ?? 0, active: activeTenants ?? 0, pending_approval: pendingTenants ?? 0 },
-      users: { total: totalUsers ?? 0, active: activeUsers ?? 0, pending_setup: pendingUsers ?? 0 },
-      contacts: { total: totalContacts ?? 0, needs_action: pendingContacts ?? 0 },
-      notifications: { total: totalNotifications ?? 0, unread: unreadNotifications ?? 0 },
+      tenants: {
+        total: totalTenants ?? 0,
+        active: activeTenants ?? 0,
+        pending_approval: pendingTenants ?? 0,
+      },
+      users: {
+        total: totalUsers ?? 0,
+        active: activeUsers ?? 0,
+        pending_setup: pendingUsers ?? 0,
+      },
+      contacts: {
+        total: totalContacts ?? 0,
+        needs_action: pendingContacts ?? 0,
+      },
+      notifications: {
+        total: totalNotifications ?? 0,
+        unread: unreadNotifications ?? 0,
+      },
     });
   });
 
   // ─── POST /v1/admin/ai/chat — admin AI yordamchisi (super_admin) ────────────
   app.post(`${prefix}/admin/ai/chat`, async (c) => {
     const auth = c.req.header("authorization");
-    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
-    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    if (!auth?.startsWith("Bearer "))
+      return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user)
+      return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
     const { data: ut } = await supabase
-      .from("user_tenants").select("role").eq("user_id", user.id)
-      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
-    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"])
+      .limit(1)
+      .single();
+    if (!ut)
+      return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
 
     const body = await c.req.json().catch(() => ({}));
-    const { message, locale: reqLocale = "uz" } = body as { message?: string; locale?: string };
+    const { message, locale: reqLocale = "uz" } = body as {
+      message?: string;
+      locale?: string;
+    };
     if (!message || typeof message !== "string" || !message.trim()) {
       return failure(c, 422, "VALIDATION_ERROR", "message majburiy.");
     }
@@ -3210,13 +4073,26 @@ const registerRoutes = (prefix: string) => {
     // Platforma statistikasini kontekst sifatida olish
     let platformContext = "";
     try {
-      const [{ count: tenants }, { count: users }, { count: pendingTenants }, { count: pendingUsers }] =
-        await Promise.all([
-          supabase.from("tenants").select("*", { count: "exact", head: true }),
-          supabase.from("user_tenants").select("*", { count: "exact", head: true }).eq("status", "active"),
-          supabase.from("tenants").select("*", { count: "exact", head: true }).eq("status", "pending_approval"),
-          supabase.from("user_tenants").select("*", { count: "exact", head: true }).eq("status", "password_pending"),
-        ]);
+      const [
+        { count: tenants },
+        { count: users },
+        { count: pendingTenants },
+        { count: pendingUsers },
+      ] = await Promise.all([
+        supabase.from("tenants").select("*", { count: "exact", head: true }),
+        supabase
+          .from("user_tenants")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "active"),
+        supabase
+          .from("tenants")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "pending_approval"),
+        supabase
+          .from("user_tenants")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "password_pending"),
+      ]);
       platformContext = `Platform stats: ${tenants} tenants total, ${users} active users, ${pendingTenants} tenants pending approval, ${pendingUsers} users pending setup.`;
     } catch {
       // Kontekst yuklanmasa ham ishlayveradi
@@ -3265,12 +4141,18 @@ Be concise, professional, and data-driven. You can help with: user management, c
               ],
             });
             const text = Array.isArray(oaiRes.output)
-              ? oaiRes.output.flatMap((i: any) => i.content || []).map((p: any) => p.text).filter(Boolean).join("\n")
+              ? oaiRes.output
+                  .flatMap((i: any) => i.content || [])
+                  .map((p: any) => p.text)
+                  .filter(Boolean)
+                  .join("\n")
               : "";
             if (text) reply = text;
             adminModel = OPENAI_MODEL;
             adminProvider = "openai";
-          } catch { /* fallback */ }
+          } catch {
+            /* fallback */
+          }
         }
       }
     } else if (OPENAI_API_KEY) {
@@ -3283,19 +4165,27 @@ Be concise, professional, and data-driven. You can help with: user management, c
           ],
         });
         const text = Array.isArray(oaiRes.output)
-          ? oaiRes.output.flatMap((i: any) => i.content || []).map((p: any) => p.text).filter(Boolean).join("\n")
+          ? oaiRes.output
+              .flatMap((i: any) => i.content || [])
+              .map((p: any) => p.text)
+              .filter(Boolean)
+              .join("\n")
           : "";
         if (text) reply = text;
         adminModel = OPENAI_MODEL;
         adminProvider = "openai";
-      } catch { /* fallback */ }
+      } catch {
+        /* fallback */
+      }
     }
 
     // TODO: admin AI usage logging — ai_usage_logs.tenant_id FK bor (tenants.id),
     // admin chatda tenant yo'q. Kelajakda: alohida admin_ai_usage_logs yoki nullable tenant_id.
     // Hozircha: faqat console log.
     if (adminModel !== "none") {
-      console.info(`[admin/ai/chat] model=${adminModel} provider=${adminProvider} tokens=${adminInputTokens}+${adminOutputTokens} cost=$${adminCostUsd.toFixed(6)} latency=${Date.now() - adminStart}ms trace=${adminTraceId}`);
+      console.info(
+        `[admin/ai/chat] model=${adminModel} provider=${adminProvider} tokens=${adminInputTokens}+${adminOutputTokens} cost=$${adminCostUsd.toFixed(6)} latency=${Date.now() - adminStart}ms trace=${adminTraceId}`,
+      );
     }
 
     return success(c, { reply });
@@ -3304,19 +4194,35 @@ Be concise, professional, and data-driven. You can help with: user management, c
   // ─── PATCH /v1/admin/contacts/:id/status ─────────────────────────────────
   app.patch(`${prefix}/admin/contacts/:id/status`, async (c) => {
     const auth = c.req.header("authorization");
-    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    if (!auth?.startsWith("Bearer "))
+      return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
 
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
-    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user)
+      return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
 
     const { data: ut } = await supabase
-      .from("user_tenants").select("role").eq("user_id", user.id)
-      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
-    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"])
+      .limit(1)
+      .single();
+    if (!ut)
+      return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
 
     const id = c.req.param("id");
     const body = await c.req.json().catch(() => ({}));
-    const allowed = ["new","contacted","invite_sent","registered","rejected"];
+    const allowed = [
+      "new",
+      "contacted",
+      "invite_sent",
+      "registered",
+      "rejected",
+    ];
     if (!allowed.includes(body.status)) {
       return failure(c, 400, "VALIDATION_ERROR", "Status noto'g'ri.");
     }
@@ -3332,32 +4238,51 @@ Be concise, professional, and data-driven. You can help with: user management, c
       const { data: existing } = await supabase
         .from("contact_requests")
         .select("email,full_name,invite_token")
-        .eq("id", id).single();
+        .eq("id", id)
+        .single();
 
       // Yangi token (yoki qayta yuborish uchun eskisini saqlab qolish)
-      inviteToken = existing?.invite_token ?? (
-        crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "")
-      );
-      const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
-      update.invite_token      = inviteToken;
+      inviteToken =
+        existing?.invite_token ??
+        crypto.randomUUID().replace(/-/g, "") +
+          crypto.randomUUID().replace(/-/g, "");
+      const expiresAt = new Date(
+        Date.now() + 48 * 60 * 60 * 1000,
+      ).toISOString();
+      update.invite_token = inviteToken;
       update.invite_expires_at = expiresAt;
 
       if (existing?.email) {
         // Non-blocking email send
-        sendCompanyInviteEmail(existing.email, existing.full_name ?? "Hurmatli mijoz", inviteToken);
+        sendCompanyInviteEmail(
+          existing.email,
+          existing.full_name ?? "Hurmatli mijoz",
+          inviteToken,
+        );
       }
     }
 
     if (body.status === "rejected") {
       const { data: contact } = await supabase
-        .from("contact_requests").select("email,full_name").eq("id", id).single();
+        .from("contact_requests")
+        .select("email,full_name")
+        .eq("id", id)
+        .single();
       if (contact?.email) {
-        sendCompanyRejectedEmail(contact.email, contact.full_name ?? "Hurmatli mijoz", body.admin_note as string | undefined);
+        sendCompanyRejectedEmail(
+          contact.email,
+          contact.full_name ?? "Hurmatli mijoz",
+          body.admin_note as string | undefined,
+        );
       }
     }
 
     const { data, error } = await supabase
-      .from("contact_requests").update(update).eq("id", id).select().single();
+      .from("contact_requests")
+      .update(update)
+      .eq("id", id)
+      .select()
+      .single();
     if (error) return failure(c, 500, "DB_ERROR", error.message);
     return success(c, data);
   });
@@ -3365,45 +4290,69 @@ Be concise, professional, and data-driven. You can help with: user management, c
   // ─── GET /v1/register/validate-token?token=... — public ──────────────────
   app.get(`${prefix}/register/validate-token`, async (c) => {
     const token = c.req.query("token");
-    if (!token) return failure(c, 400, "VALIDATION_ERROR", "token parametri kerak.");
+    if (!token)
+      return failure(c, 400, "VALIDATION_ERROR", "token parametri kerak.");
 
     const { data: contact, error } = await supabase
       .from("contact_requests")
-      .select("id,full_name,company_name,email,phone,business_type,employee_count,status,invite_expires_at")
+      .select(
+        "id,full_name,company_name,email,phone,business_type,employee_count,status,invite_expires_at",
+      )
       .eq("invite_token", token)
       .single();
 
-    if (error || !contact) return failure(c, 404, "NOT_FOUND", "Token topilmadi yoki yaroqsiz.");
-    if (contact.status === "registered") return failure(c, 410, "ALREADY_USED", "Bu havola allaqachon ishlatilgan.");
-    if (contact.status !== "invite_sent") return failure(c, 400, "INVALID_TOKEN", "Token noto'g'ri holatda.");
+    if (error || !contact)
+      return failure(c, 404, "NOT_FOUND", "Token topilmadi yoki yaroqsiz.");
+    if (contact.status === "registered")
+      return failure(
+        c,
+        410,
+        "ALREADY_USED",
+        "Bu havola allaqachon ishlatilgan.",
+      );
+    if (contact.status !== "invite_sent")
+      return failure(c, 400, "INVALID_TOKEN", "Token noto'g'ri holatda.");
     if (new Date(contact.invite_expires_at) < new Date()) {
-      return failure(c, 410, "TOKEN_EXPIRED", "Token muddati o'tgan. Admin bilan bog'laning.");
+      return failure(
+        c,
+        410,
+        "TOKEN_EXPIRED",
+        "Token muddati o'tgan. Admin bilan bog'laning.",
+      );
     }
 
     return success(c, {
       contact_request_id: contact.id,
-      full_name:     contact.full_name,
-      company_name:  contact.company_name,
-      email:         contact.email,
-      phone:         contact.phone,
+      full_name: contact.full_name,
+      company_name: contact.company_name,
+      email: contact.email,
+      phone: contact.phone,
       business_type: contact.business_type,
-      employee_count:contact.employee_count,
+      employee_count: contact.employee_count,
     });
   });
 
   // ─── POST /v1/register/company — public ──────────────────────────────────
   app.post(`${prefix}/register/company`, async (c) => {
     let body: Record<string, unknown>;
-    try { body = await c.req.json(); }
-    catch { return failure(c, 400, "INVALID_JSON", "JSON format xato."); }
+    try {
+      body = await c.req.json();
+    } catch {
+      return failure(c, 400, "INVALID_JSON", "JSON format xato.");
+    }
 
-    const token    = String(body.token    ?? "").trim();
+    const token = String(body.token ?? "").trim();
     const password = String(body.password ?? "").trim();
     if (!token || !password) {
       return failure(c, 400, "VALIDATION_ERROR", "token va password majburiy.");
     }
     if (password.length < 8) {
-      return failure(c, 400, "VALIDATION_ERROR", "Parol kamida 8 belgi bo'lishi kerak.");
+      return failure(
+        c,
+        400,
+        "VALIDATION_ERROR",
+        "Parol kamida 8 belgi bo'lishi kerak.",
+      );
     }
 
     // Token tekshirish
@@ -3413,45 +4362,59 @@ Be concise, professional, and data-driven. You can help with: user management, c
       .eq("invite_token", token)
       .single();
 
-    if (ctErr || !contact) return failure(c, 404, "NOT_FOUND", "Token topilmadi.");
-    if (contact.status === "registered") return failure(c, 410, "ALREADY_USED", "Bu havola allaqachon ishlatilgan.");
-    if (contact.status !== "invite_sent") return failure(c, 400, "INVALID_TOKEN", "Token noto'g'ri holatda.");
+    if (ctErr || !contact)
+      return failure(c, 404, "NOT_FOUND", "Token topilmadi.");
+    if (contact.status === "registered")
+      return failure(
+        c,
+        410,
+        "ALREADY_USED",
+        "Bu havola allaqachon ishlatilgan.",
+      );
+    if (contact.status !== "invite_sent")
+      return failure(c, 400, "INVALID_TOKEN", "Token noto'g'ri holatda.");
     if (new Date(contact.invite_expires_at) < new Date()) {
       return failure(c, 410, "TOKEN_EXPIRED", "Token muddati o'tgan.");
     }
 
     // Auth user yaratish
-    const { data: authData, error: authErr } = await supabase.auth.admin.createUser({
-      email: contact.email,
-      password,
-      email_confirm: true,
-      user_metadata: { full_name: contact.full_name },
-    });
+    const { data: authData, error: authErr } =
+      await supabase.auth.admin.createUser({
+        email: contact.email,
+        password,
+        email_confirm: true,
+        user_metadata: { full_name: contact.full_name },
+      });
     if (authErr) {
       if (authErr.message?.includes("already")) {
-        return failure(c, 409, "EMAIL_EXISTS", "Bu email allaqachon ro'yxatdan o'tgan. Login sahifasiga o'ting.");
+        return failure(
+          c,
+          409,
+          "EMAIL_EXISTS",
+          "Bu email allaqachon ro'yxatdan o'tgan. Login sahifasiga o'ting.",
+        );
       }
       return failure(c, 500, "AUTH_ERROR", authErr.message);
     }
     const userId = authData.user.id;
 
     // Kompaniya nomi
-    const companyName  = String(body.company_name  ?? contact.full_name).trim();
-    const legalForm    = String(body.legal_form    ?? "").trim() || null;
-    const stir         = String(body.stir          ?? "").trim() || null;
+    const companyName = String(body.company_name ?? contact.full_name).trim();
+    const legalForm = String(body.legal_form ?? "").trim() || null;
+    const stir = String(body.stir ?? "").trim() || null;
     const legalAddress = String(body.legal_address ?? "").trim() || null;
 
     // Tenant yaratish
     const tenantId = crypto.randomUUID();
     const { error: tenantErr } = await supabase.from("tenants").insert({
-      id:                 tenantId,
-      name:               companyName,
-      plan:               "Pro",
-      status:             "pending_approval",
-      legal_form:         legalForm,
+      id: tenantId,
+      name: companyName,
+      plan: "Pro",
+      status: "pending_approval",
+      legal_form: legalForm,
       stir,
-      legal_address:      legalAddress,
-      contact_email:      contact.email,
+      legal_address: legalAddress,
+      contact_email: contact.email,
       contact_request_id: contact.id,
     });
     if (tenantErr) {
@@ -3461,11 +4424,11 @@ Be concise, professional, and data-driven. You can help with: user management, c
 
     // company_admin sifatida bog'lash
     const { error: utErr } = await supabase.from("user_tenants").insert({
-      user_id:   userId,
+      user_id: userId,
       tenant_id: tenantId,
-      role:      "company_admin",
+      role: "company_admin",
       full_name: contact.full_name,
-      status:    "active",
+      status: "active",
     });
     if (utErr) {
       await supabase.auth.admin.deleteUser(userId);
@@ -3474,48 +4437,89 @@ Be concise, professional, and data-driven. You can help with: user management, c
     }
 
     // Contact request → registered
-    await supabase.from("contact_requests").update({
-      status:    "registered",
-      tenant_id: tenantId,
-    }).eq("id", contact.id);
+    await supabase
+      .from("contact_requests")
+      .update({
+        status: "registered",
+        tenant_id: tenantId,
+      })
+      .eq("id", contact.id);
 
-    console.info(`[register] company=${companyName} tenant=${tenantId} user=${userId}`);
+    console.info(
+      `[register] company=${companyName} tenant=${tenantId} user=${userId}`,
+    );
 
     // Non-blocking emails
-    sendCompanyRegisteredEmail(contact.email, contact.full_name ?? "Hurmatli rahbar", companyName);
-    sendAdminNewRegistrationEmail(companyName, contact.full_name ?? "—", contact.email, tenantId);
+    sendCompanyRegisteredEmail(
+      contact.email,
+      contact.full_name ?? "Hurmatli rahbar",
+      companyName,
+    );
+    sendAdminNewRegistrationEmail(
+      companyName,
+      contact.full_name ?? "—",
+      contact.email,
+      tenantId,
+    );
 
-    return c.json({ data: {
-      tenant_id: tenantId,
-      message:   "Ro'yxatdan o'tish muvaffaqiyatli. Admin tasdiqlashini kuting.",
-    }}, 201);
+    return c.json(
+      {
+        data: {
+          tenant_id: tenantId,
+          message:
+            "Ro'yxatdan o'tish muvaffaqiyatli. Admin tasdiqlashini kuting.",
+        },
+      },
+      201,
+    );
   });
 
   // ─── PATCH /v1/admin/tenants/:id/status — kompaniyani tasdiqlash/bloklash ──
   app.patch(`${prefix}/admin/tenants/:id/status`, async (c) => {
     const auth = c.req.header("authorization");
-    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
-    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    if (!auth?.startsWith("Bearer "))
+      return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user)
+      return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
 
     const { data: ut } = await supabase
-      .from("user_tenants").select("role").eq("user_id", user.id)
-      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
-    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"])
+      .limit(1)
+      .single();
+    if (!ut)
+      return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
 
     const tenantId = c.req.param("id");
     const body = await c.req.json().catch(() => ({}));
     const allowed = ["active", "suspended", "blocked"];
     if (!allowed.includes(body.status)) {
-      return failure(c, 400, "VALIDATION_ERROR", "Status: active | suspended | blocked.");
+      return failure(
+        c,
+        400,
+        "VALIDATION_ERROR",
+        "Status: active | suspended | blocked.",
+      );
     }
 
     const { data: tenantRow, error: fetchErr } = await supabase
-      .from("tenants").select("name, contact_email").eq("id", tenantId).single();
-    if (fetchErr || !tenantRow) return failure(c, 404, "NOT_FOUND", "Tenant topilmadi.");
+      .from("tenants")
+      .select("name, contact_email")
+      .eq("id", tenantId)
+      .single();
+    if (fetchErr || !tenantRow)
+      return failure(c, 404, "NOT_FOUND", "Tenant topilmadi.");
 
     const { error } = await supabase
-      .from("tenants").update({ status: body.status }).eq("id", tenantId);
+      .from("tenants")
+      .update({ status: body.status })
+      .eq("id", tenantId);
     if (error) return failure(c, 500, "DB_ERROR", error.message);
 
     // company_approved email
@@ -3525,9 +4529,14 @@ Be concise, professional, and data-driven. You can help with: user management, c
         .select("full_name")
         .eq("tenant_id", tenantId)
         .in("role", ["leader", "company_admin"])
-        .limit(1).single();
+        .limit(1)
+        .single();
       const leaderName = leaderRow?.full_name ?? "Hurmatli rahbar";
-      sendCompanyApprovedEmail(tenantRow.contact_email, leaderName, tenantRow.name);
+      sendCompanyApprovedEmail(
+        tenantRow.contact_email,
+        leaderName,
+        tenantRow.name,
+      );
     }
 
     return success(c, { tenant_id: tenantId, status: body.status });
@@ -3536,32 +4545,45 @@ Be concise, professional, and data-driven. You can help with: user management, c
   // ─── GET /admin/audit — audit log viewer ───────────────────────────────────
   app.get(`${prefix}/admin/audit`, async (c) => {
     const auth = c.req.header("authorization");
-    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
-    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    if (!auth?.startsWith("Bearer "))
+      return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user)
+      return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
     const { data: ut } = await supabase
-      .from("user_tenants").select("role").eq("user_id", user.id)
-      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
-    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"])
+      .limit(1)
+      .single();
+    if (!ut)
+      return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
 
-    const tenant_id  = c.req.query("tenant_id");
+    const tenant_id = c.req.query("tenant_id");
     const entity_type = c.req.query("entity_type");
-    const action     = c.req.query("action");
-    const from_date  = c.req.query("from");
-    const to_date    = c.req.query("to");
-    const limit_str  = c.req.query("limit") ?? "100";
-    const limit      = Math.min(parseInt(limit_str) || 100, 500);
+    const action = c.req.query("action");
+    const from_date = c.req.query("from");
+    const to_date = c.req.query("to");
+    const limit_str = c.req.query("limit") ?? "100";
+    const limit = Math.min(parseInt(limit_str) || 100, 500);
 
-    let q = supabase.from("audit_logs")
-      .select("id, tenant_id, user_id, action, event_type, entity_type, entity_id, payload, created_at")
+    let q = supabase
+      .from("audit_logs")
+      .select(
+        "id, tenant_id, user_id, action, event_type, entity_type, entity_id, payload, created_at",
+      )
       .order("created_at", { ascending: false })
       .limit(limit);
 
-    if (tenant_id)   q = q.eq("tenant_id", tenant_id);
+    if (tenant_id) q = q.eq("tenant_id", tenant_id);
     if (entity_type) q = q.eq("entity_type", entity_type);
-    if (action)      q = q.eq("action", action);
-    if (from_date)   q = q.gte("created_at", from_date);
-    if (to_date)     q = q.lte("created_at", to_date);
+    if (action) q = q.eq("action", action);
+    if (from_date) q = q.gte("created_at", from_date);
+    if (to_date) q = q.lte("created_at", to_date);
 
     const { data, error } = await q;
     if (error) return failure(c, 500, "DB_ERROR", error.message);
@@ -3570,36 +4592,58 @@ Be concise, professional, and data-driven. You can help with: user management, c
 
   // ─── Knowledge Base CRUD (admin only) ──────────────────────────────────────
 
-  async function requireSuperAdmin(c: ReturnType<typeof app.route extends never ? never : any>) {
+  async function requireSuperAdmin(
+    c: ReturnType<typeof app.route extends never ? never : any>,
+  ) {
     const auth = c.req.header("authorization");
     if (!auth?.startsWith("Bearer ")) return null;
-    const { data: { user }, error } = await supabase.auth.getUser(auth.slice(7));
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(auth.slice(7));
     if (error || !user) return null;
     const { data: ut } = await supabase
-      .from("user_tenants").select("role").eq("user_id", user.id)
-      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"])
+      .limit(1)
+      .single();
     return ut ? user : null;
   }
 
   // GET /admin/kb — list articles
   app.get(`${prefix}/admin/kb`, async (c) => {
     const auth = c.req.header("authorization");
-    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
-    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    if (!auth?.startsWith("Bearer "))
+      return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user)
+      return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
     const { data: ut } = await supabase
-      .from("user_tenants").select("role").eq("user_id", user.id)
-      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
-    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"])
+      .limit(1)
+      .single();
+    if (!ut)
+      return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
 
-    const locale   = c.req.query("locale");
+    const locale = c.req.query("locale");
     const category = c.req.query("category");
     const is_active = c.req.query("is_active");
 
-    let q = supabase.from("knowledge_base")
-      .select("id, tenant_id, locale, category, question, answer, tags, version, is_active, created_at, updated_at")
+    let q = supabase
+      .from("knowledge_base")
+      .select(
+        "id, tenant_id, locale, category, question, answer, tags, version, is_active, created_at, updated_at",
+      )
       .order("created_at", { ascending: false });
-    if (locale)   q = q.eq("locale", locale);
+    if (locale) q = q.eq("locale", locale);
     if (category) q = q.eq("category", category);
     if (is_active !== undefined) q = q.eq("is_active", is_active === "true");
 
@@ -3611,27 +4655,50 @@ Be concise, professional, and data-driven. You can help with: user management, c
   // POST /admin/kb — create article
   app.post(`${prefix}/admin/kb`, async (c) => {
     const auth = c.req.header("authorization");
-    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
-    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    if (!auth?.startsWith("Bearer "))
+      return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user)
+      return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
     const { data: ut } = await supabase
-      .from("user_tenants").select("role").eq("user_id", user.id)
-      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
-    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"])
+      .limit(1)
+      .single();
+    if (!ut)
+      return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
 
     const body = await c.req.json().catch(() => ({}));
-    const { locale, category, question, answer, tags, is_active, tenant_id } = body;
+    const { locale, category, question, answer, tags, is_active, tenant_id } =
+      body;
     if (!locale || !category || !question || !answer) {
-      return failure(c, 400, "VALIDATION_ERROR", "locale, category, question, answer majburiy.");
+      return failure(
+        c,
+        400,
+        "VALIDATION_ERROR",
+        "locale, category, question, answer majburiy.",
+      );
     }
 
-    const { data, error } = await supabase.from("knowledge_base").insert({
-      locale, category, question, answer,
-      tags: tags ?? [],
-      is_active: is_active ?? true,
-      tenant_id: tenant_id ?? null,
-      version: 1,
-    }).select().single();
+    const { data, error } = await supabase
+      .from("knowledge_base")
+      .insert({
+        locale,
+        category,
+        question,
+        answer,
+        tags: tags ?? [],
+        is_active: is_active ?? true,
+        tenant_id: tenant_id ?? null,
+        version: 1,
+      })
+      .select()
+      .single();
     if (error) return failure(c, 500, "DB_ERROR", error.message);
     return success(c, data, 201);
   });
@@ -3639,25 +4706,47 @@ Be concise, professional, and data-driven. You can help with: user management, c
   // PUT /admin/kb/:id — update article
   app.put(`${prefix}/admin/kb/:id`, async (c) => {
     const auth = c.req.header("authorization");
-    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
-    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    if (!auth?.startsWith("Bearer "))
+      return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user)
+      return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
     const { data: ut } = await supabase
-      .from("user_tenants").select("role").eq("user_id", user.id)
-      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
-    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"])
+      .limit(1)
+      .single();
+    if (!ut)
+      return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
 
     const id = c.req.param("id");
     const body = await c.req.json().catch(() => ({}));
     const updates: Record<string, unknown> = {};
-    const allowed = ["locale", "category", "question", "answer", "tags", "is_active", "tenant_id"];
+    const allowed = [
+      "locale",
+      "category",
+      "question",
+      "answer",
+      "tags",
+      "is_active",
+      "tenant_id",
+    ];
     for (const k of allowed) {
       if (k in body) updates[k] = body[k];
     }
     updates.updated_at = new Date().toISOString();
 
-    const { data, error } = await supabase.from("knowledge_base")
-      .update(updates).eq("id", id).select().single();
+    const { data, error } = await supabase
+      .from("knowledge_base")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
     if (error) return failure(c, 500, "DB_ERROR", error.message);
     if (!data) return failure(c, 404, "NOT_FOUND", "Maqola topilmadi.");
     return success(c, data);
@@ -3666,16 +4755,29 @@ Be concise, professional, and data-driven. You can help with: user management, c
   // DELETE /admin/kb/:id — delete article
   app.delete(`${prefix}/admin/kb/:id`, async (c) => {
     const auth = c.req.header("authorization");
-    if (!auth?.startsWith("Bearer ")) return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
-    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    if (!auth?.startsWith("Bearer "))
+      return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user)
+      return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
     const { data: ut } = await supabase
-      .from("user_tenants").select("role").eq("user_id", user.id)
-      .in("role", ["super_admin", "sub_admin"]).limit(1).single();
-    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"])
+      .limit(1)
+      .single();
+    if (!ut)
+      return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
 
     const id = c.req.param("id");
-    const { error } = await supabase.from("knowledge_base").delete().eq("id", id);
+    const { error } = await supabase
+      .from("knowledge_base")
+      .delete()
+      .eq("id", id);
     if (error) return failure(c, 500, "DB_ERROR", error.message);
     return success(c, { deleted: id });
   });
@@ -3697,5 +4799,7 @@ registerRoutes(BASE_PATH);
 registerRoutes(V1_PATH);
 registerRoutes(`${GATEWAY_PREFIX}${BASE_PATH}`);
 registerRoutes(`${GATEWAY_PREFIX}${V1_PATH}`);
+app.route(`${V1_PATH}/admin/risk`, riskScanRoutes);
+app.route(`${GATEWAY_PREFIX}${V1_PATH}/admin/risk`, riskScanRoutes);
 
 Deno.serve(app.fetch);

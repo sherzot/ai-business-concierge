@@ -51,12 +51,10 @@ CREATE TABLE IF NOT EXISTS employee_profiles (
 
   UNIQUE (user_id, tenant_id)
 );
-
 -- Indekslar
 CREATE INDEX IF NOT EXISTS employee_profiles_tenant_idx  ON employee_profiles(tenant_id);
 CREATE INDEX IF NOT EXISTS employee_profiles_user_idx    ON employee_profiles(user_id)    WHERE user_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS employee_profiles_jshshir_idx ON employee_profiles(jshshir)    WHERE jshshir IS NOT NULL;
-
 -- updated_at trigger
 CREATE OR REPLACE FUNCTION update_employee_profiles_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
@@ -65,15 +63,12 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
 DROP TRIGGER IF EXISTS employee_profiles_updated_at ON employee_profiles;
 CREATE TRIGGER employee_profiles_updated_at
   BEFORE UPDATE ON employee_profiles
   FOR EACH ROW EXECUTE FUNCTION update_employee_profiles_updated_at();
-
 -- RLS
 ALTER TABLE employee_profiles ENABLE ROW LEVEL SECURITY;
-
 -- super_admin / sub_admin — barcha kompaniyalar
 DROP POLICY IF EXISTS "employee_profiles_admin_all" ON employee_profiles;
 CREATE POLICY "employee_profiles_admin_all"
@@ -90,7 +85,6 @@ CREATE POLICY "employee_profiles_admin_all"
       WHERE user_id = auth.uid() AND role IN ('super_admin','sub_admin')
     )
   );
-
 -- company_admin / hr — o'z tenantlari
 DROP POLICY IF EXISTS "employee_profiles_hr_all" ON employee_profiles;
 CREATE POLICY "employee_profiles_hr_all"
@@ -109,13 +103,11 @@ CREATE POLICY "employee_profiles_hr_all"
         AND role IN ('company_admin','leader','hr')
     )
   );
-
 -- Xodim o'z profilini ko'radi (o'zgartira olmaydi)
 DROP POLICY IF EXISTS "employee_profiles_self_select" ON employee_profiles;
 CREATE POLICY "employee_profiles_self_select"
   ON employee_profiles FOR SELECT
   USING (user_id = auth.uid());
-
 -- Manager o'z bo'limining xodimlarini ko'radi
 DROP POLICY IF EXISTS "employee_profiles_manager_select" ON employee_profiles;
 CREATE POLICY "employee_profiles_manager_select"
@@ -126,7 +118,6 @@ CREATE POLICY "employee_profiles_manager_select"
       WHERE user_id = auth.uid() AND role = 'manager'
     )
   );
-
 COMMENT ON TABLE employee_profiles IS
   'Xodimlarning to''liq HR ma''lumotlari. HR tomonidan yaratiladi. user_id — account yaratilgandan keyin to''ldiriladi.';
 COMMENT ON COLUMN employee_profiles.user_id IS

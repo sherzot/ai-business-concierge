@@ -2,10 +2,8 @@
 -- Goal: keep strict tenant isolation under RLS (authenticated users only see their tenant(s))
 
 begin;
-
 -- Ensure RLS is enabled (safe if already enabled)
 alter table public.tenants enable row level security;
-
 -- tenants: allow authenticated to see only their tenant(s)
 do $$
 begin
@@ -32,11 +30,9 @@ begin
   end if;
 end
 $$;
-
 -- Replace view with SECURITY INVOKER semantics (default).
 -- If it was previously SECURITY DEFINER, dropping guarantees it is removed.
 drop view if exists public.tenant_daily_stats;
-
 create view public.tenant_daily_stats as
 select
   date_trunc('day', now())::date as date,
@@ -74,8 +70,6 @@ left join (
   from public.inbox_items
   group by tenant_id
 ) ii on t.id = ii.tenant_id;
-
 -- Ensure authenticated can read the view (underlying RLS still applies)
 grant select on public.tenant_daily_stats to authenticated;
-
 commit;

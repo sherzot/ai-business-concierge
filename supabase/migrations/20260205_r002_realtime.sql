@@ -9,7 +9,6 @@ create policy "inbox_items_select_own_tenant"
       select tenant_id from user_tenants where user_id = auth.uid()
     )
   );
-
 create policy "tasks_select_own_tenant"
   on tasks for select
   to authenticated
@@ -18,7 +17,6 @@ create policy "tasks_select_own_tenant"
       select tenant_id from user_tenants where user_id = auth.uid()
     )
   );
-
 -- 2. Realtime publication ga jadvallarni qo'shish
 alter publication supabase_realtime add table inbox_items;
 alter publication supabase_realtime add table tasks;

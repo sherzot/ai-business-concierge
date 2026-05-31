@@ -5,6 +5,5 @@
 
 alter table public.tasks
   add column if not exists description text;
-
 comment on column public.tasks.description is
   'Vazifa mazmuni / qo''shimcha izoh. Markdown bo''lishi mumkin.';

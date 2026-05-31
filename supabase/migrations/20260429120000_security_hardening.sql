@@ -14,13 +14,11 @@
 -- =============================================================================
 
 begin;
-
 -- -----------------------------------------------------------------------------
 -- 1. tenant_daily_stats — SECURITY INVOKER (default, lekin explicit)
 --    PG15+ syntax: with (security_invoker = true)
 -- -----------------------------------------------------------------------------
 drop view if exists public.tenant_daily_stats;
-
 create view public.tenant_daily_stats
 with (security_invoker = true)
 as
@@ -60,15 +58,12 @@ left join (
   from public.inbox_items
   group by tenant_id
 ) ii on t.id = ii.tenant_id;
-
 grant select on public.tenant_daily_stats to authenticated;
-
 -- -----------------------------------------------------------------------------
 -- 2. phase0_rls_health — SECURITY INVOKER + faqat service_role o'qiy oladi
 --    (Bu admin diagnostic view, oddiy user ga kerak emas)
 -- -----------------------------------------------------------------------------
 drop view if exists public.phase0_rls_health;
-
 create view public.phase0_rls_health
 with (security_invoker = true)
 as
@@ -88,13 +83,10 @@ where c.relname in (
 )
 group by c.relname, c.relrowsecurity
 order by c.relname;
-
 comment on view public.phase0_rls_health is
   'Phase 0 jadvallari uchun RLS coverage diagnostic. Faqat service_role uchun.';
-
 revoke all on public.phase0_rls_health from public, anon, authenticated;
 grant select on public.phase0_rls_health to service_role;
-
 -- -----------------------------------------------------------------------------
 -- 3. Funksiyalar — search_path lock + restrictive grants
 --    set search_path = pg_catalog, public — schema injection oldini oladi
@@ -124,10 +116,8 @@ begin
         updated_at     = now();
 end;
 $$;
-
 revoke execute on function public.increment_usage(text, uuid, integer, integer, integer) from public, anon;
 grant execute on function public.increment_usage(text, uuid, integer, integer, integer) to authenticated, service_role;
-
 -- match_knowledge (KB semantic search)
 create or replace function public.match_knowledge(
   query_embedding  vector(1536),
@@ -168,10 +158,8 @@ begin
   limit match_count;
 end;
 $$;
-
 revoke execute on function public.match_knowledge(vector, text, text, integer, float) from public, anon;
 grant execute on function public.match_knowledge(vector, text, text, integer, float) to authenticated, service_role;
-
 -- set_updated_at — trigger function, NOT security definer
 -- Lekin search_path immutable bo'lishi kerak (advisor warning)
 create or replace function public.set_updated_at()
@@ -184,9 +172,7 @@ begin
   return new;
 end;
 $$;
-
 commit;
-
 -- =============================================================================
 -- Eslatma — Dashboard tarafidan sozlanadigan
 -- =============================================================================
@@ -198,4 +184,4 @@ commit;
 --
 -- ⚪ "Extension pgvector in public schema" — info darajasi, MVP da qabul.
 --    Production ga o'tishda extensions schema'ga ko'chirish mumkin.
--- =============================================================================
+-- =============================================================================;

@@ -14,18 +14,15 @@ do $$ begin
     alter table request_logs rename column status to status_code;
   end if;
 end $$;
-
 -- 2) audit_logs: add event_type, entity_type, entity_id; trace_id -> text
 alter table audit_logs add column if not exists event_type text;
 alter table audit_logs add column if not exists entity_type text;
 alter table audit_logs add column if not exists entity_id uuid;
 update audit_logs set event_type = action where event_type is null and action is not null;
 alter table audit_logs alter column trace_id type text using trace_id::text;
-
 -- 3) ai_interactions: trace_id -> text; tenant_id nullable for background jobs
 alter table ai_interactions alter column trace_id type text using trace_id::text;
 alter table ai_interactions alter column tenant_id drop not null;
-
 -- 4) job_logs (optional)
 create table if not exists job_logs (
   id uuid primary key default gen_random_uuid(),
@@ -42,7 +39,6 @@ create table if not exists job_logs (
 create index if not exists job_logs_tenant_id_idx on job_logs (tenant_id);
 create index if not exists job_logs_created_at_idx on job_logs (created_at);
 alter table job_logs enable row level security;
-
 -- 5) tenant_daily_stats VIEW (dashboard caching)
 create or replace view tenant_daily_stats as
 select

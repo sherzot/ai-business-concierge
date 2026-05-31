@@ -25,12 +25,10 @@ begin
   end if;
 end;
 $$;
-
 -- Yangi CHECK constraint: super_admin qo'shildi
 alter table user_tenants
   add constraint user_tenants_role_check
   check (role in ('super_admin', 'leader', 'hr', 'accounting', 'department_head', 'employee'));
-
 -- Super admin uchun maxsus comment
 comment on column user_tenants.role is
   'Foydalanuvchi roli: super_admin (tizim admin) | leader (Rahbar) | hr | accounting | department_head | employee';

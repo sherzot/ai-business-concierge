@@ -15,10 +15,8 @@ values ('platform', 'AI Business Concierge — Platform', 'enterprise')
 on conflict (id) do update
   set name = excluded.name,
       plan = excluded.plan;
-
 comment on table public.tenants is
   'Multi-tenant: har kompaniya o''z tenant''i. ''platform'' — SUPER_ADMIN uchun maxsus tenant.';
-
 -- 2. (Ixtiyoriy) Permissions ustuni mavjud bo'lsa, super_admin'ga "*" beriladi
 -- Hozir user_tenants.permissions jsonb / text[] ekanligini bilmaymiz —
 -- bu joyda hech narsa qilmaymiz. Manual SQL bilan SUPER_ADMIN'ga huquq beriladi.
@@ -48,4 +46,4 @@ comment on table public.tenants is
 --   from public.user_tenants ut
 --   join public.tenants t on t.id = ut.tenant_id
 --   where ut.role = 'super_admin';
--- =============================================================================
+-- =============================================================================;

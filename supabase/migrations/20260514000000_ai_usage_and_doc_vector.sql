@@ -10,7 +10,6 @@
 -- =============================================================================
 
 begin;
-
 -- -----------------------------------------------------------------------------
 -- 1. AI USAGE LOGS — har AI chaqiruv uchun token va narx
 -- -----------------------------------------------------------------------------
@@ -32,24 +31,18 @@ create table if not exists public.ai_usage_logs (
   trace_id            text,
   created_at          timestamptz   not null default now()
 );
-
 comment on table public.ai_usage_logs is
   'Har AI chaqiruv token va narx ma''lumoti. Tenant cost tracking, billing va churn tahlili uchun.';
-
 -- Indekslar — analitika va billing uchun
 create index if not exists ai_usage_logs_tenant_created_idx
   on public.ai_usage_logs(tenant_id, created_at desc);
-
 create index if not exists ai_usage_logs_user_created_idx
   on public.ai_usage_logs(user_id, created_at desc)
   where user_id is not null;
-
 create index if not exists ai_usage_logs_endpoint_idx
   on public.ai_usage_logs(endpoint, created_at desc);
-
 -- RLS — tenant izolyatsiya
 alter table public.ai_usage_logs enable row level security;
-
 drop policy if exists "ai_usage_tenant_select" on public.ai_usage_logs;
 create policy "ai_usage_tenant_select"
   on public.ai_usage_logs for select
@@ -61,13 +54,11 @@ create policy "ai_usage_tenant_select"
         and ut.role in ('super_admin', 'sub_admin')
     )
   );
-
 -- Faqat backend (service_role) yozadi
 drop policy if exists "ai_usage_insert_blocked" on public.ai_usage_logs;
 create policy "ai_usage_insert_blocked"
   on public.ai_usage_logs for insert
   with check (false);
-
 -- -----------------------------------------------------------------------------
 -- 2. AI USAGE SUMMARY — tenant bo'yicha agregat (Admin dashboard uchun tez)
 -- -----------------------------------------------------------------------------
@@ -86,27 +77,21 @@ select
   avg(latency_ms)::int                  as avg_latency_ms
 from public.ai_usage_logs
 group by tenant_id, date_trunc('day', created_at);
-
 comment on view public.v_ai_usage_summary is
   'Kunlik agregat per tenant. Admin /v1/admin/ai/usage endpoint uchun.';
-
 -- -----------------------------------------------------------------------------
 -- 3. PGVECTOR DOC_CHUNKS — semantic search uchun
 -- -----------------------------------------------------------------------------
 create extension if not exists vector;
-
 alter table public.doc_chunks
   add column if not exists embedding vector(1536);
-
 comment on column public.doc_chunks.embedding is
   'OpenAI text-embedding-3-small (1536 o''lcham). RAG search uchun.';
-
 -- HNSW index — knowledge_base patterndan keladi
 create index if not exists doc_chunks_embedding_idx
   on public.doc_chunks
   using hnsw (embedding vector_cosine_ops)
   with (m = 16, ef_construction = 64);
-
 -- -----------------------------------------------------------------------------
 -- 4. match_documents() — RAG search funksiyasi (tenant scoped)
 -- -----------------------------------------------------------------------------
@@ -142,26 +127,20 @@ begin
   limit match_count;
 end;
 $$;
-
 comment on function public.match_documents is
   'RAG semantic search: doc_chunks ichidan eng yaqin chunklar. p_tenant_id NULL bo''lsa global qidirish.';
-
 revoke execute on function public.match_documents(vector, float, integer, text)
   from public, anon;
 grant execute on function public.match_documents(vector, float, integer, text)
   to authenticated, service_role;
-
 -- -----------------------------------------------------------------------------
 -- 5. Performance indexes — tez-tez ishlatiladigan filtrlar
 -- -----------------------------------------------------------------------------
 create index if not exists doc_chunks_document_idx
   on public.doc_chunks(document_id);
-
 create index if not exists doc_chunks_tenant_idx
   on public.doc_chunks(tenant_id);
-
 commit;
-
 -- =============================================================================
 -- Yakuniy:
 --   • ai_usage_logs jadval + 3 ta index + RLS
@@ -169,4 +148,4 @@ commit;
 --   • doc_chunks.embedding ustun + HNSW index
 --   • match_documents() RAG funksiyasi
 --   • doc_chunks document/tenant indekslari
--- =============================================================================
+-- =============================================================================;

@@ -26,12 +26,10 @@ CREATE TABLE IF NOT EXISTS contact_requests (
   created_at        timestamptz   NOT NULL DEFAULT now(),
   updated_at        timestamptz   NOT NULL DEFAULT now()
 );
-
 -- Indekslar
 CREATE INDEX IF NOT EXISTS contact_requests_status_idx  ON contact_requests(status);
 CREATE INDEX IF NOT EXISTS contact_requests_email_idx   ON contact_requests(email);
 CREATE INDEX IF NOT EXISTS contact_requests_created_idx ON contact_requests(created_at DESC);
-
 -- updated_at avtomatik yangilanishi
 CREATE OR REPLACE FUNCTION update_contact_requests_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
@@ -40,18 +38,14 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
 DROP TRIGGER IF EXISTS contact_requests_updated_at ON contact_requests;
 CREATE TRIGGER contact_requests_updated_at
   BEFORE UPDATE ON contact_requests
   FOR EACH ROW EXECUTE FUNCTION update_contact_requests_updated_at();
-
 -- RLS
 ALTER TABLE contact_requests ENABLE ROW LEVEL SECURITY;
-
 -- Faqat super_admin / sub_admin ko'radi va o'zgartiradi
 DROP POLICY IF EXISTS "contact_requests_admin_all" ON contact_requests;
-
 CREATE POLICY "contact_requests_admin_all"
   ON contact_requests
   FOR ALL
@@ -69,7 +63,6 @@ CREATE POLICY "contact_requests_admin_all"
         AND role IN ('super_admin', 'sub_admin')
     )
   );
-
 -- Comment
 COMMENT ON TABLE contact_requests IS
   'Kompaniya murojaatlari: landing page forma → admin CRM → invite → ro''yxat';

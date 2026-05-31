@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Users, Building2, Activity, MessageSquare, BookOpen, Shield,
-  Zap, LogOut, Menu, X, ChevronRight, PanelLeftClose, PanelLeftOpen,
+  Zap, LogOut, Menu, X, ChevronRight, PanelLeftClose, PanelLeftOpen, ShieldAlert,
 } from "lucide-react";
 import { useAuthContext } from "../../auth/context/AuthContext";
 import { apiRequest } from "../../../shared/lib/apiClient";
@@ -15,6 +15,7 @@ const NAV = [
   { to: "/admin/knowledge-base", label: "Knowledge Base",icon: BookOpen },
   { to: "/admin/audit",          label: "Audit Log",     icon: Shield },
   { to: "/admin/health",         label: "Tizim holati",  icon: Activity },
+  { to: "/admin/risk", label: "Xavfsizlik", icon: ShieldAlert },
   { to: "/admin/ai-chat",        label: "AI Chat",       icon: MessageSquare },
 ];
 

@@ -13,15 +13,11 @@ create table if not exists notifications (
   read_at timestamptz,
   created_at timestamptz not null default now()
 );
-
 create index if not exists notifications_tenant_user_idx on notifications (tenant_id, user_id);
 create index if not exists notifications_user_unread_idx on notifications (user_id, read_at) where read_at is null;
-
 alter table notifications enable row level security;
-
 create policy "notifications_select_own"
   on notifications for select to authenticated
   using (user_id = auth.uid());
-
 -- tasks jadvaliga acknowledged_at qo'shish
 alter table tasks add column if not exists acknowledged_at timestamptz;

@@ -20,12 +20,10 @@
 -- =============================================================================
 
 begin;
-
 -- -----------------------------------------------------------------------------
 -- 1. v_beta_stats — Telegram beta umumiy statistika
 -- -----------------------------------------------------------------------------
 drop view if exists public.v_beta_stats;
-
 create view public.v_beta_stats
 with (security_invoker = true)
 as
@@ -41,15 +39,12 @@ select
   count(distinct case when c.locale = 'ja' then telegram_chat_id end)       as users_ja
 from public.ai_conversations c
 where platform = 'telegram';
-
 comment on view public.v_beta_stats is
   'Telegram beta umumiy statistika. SECURITY INVOKER — caller RLS qoidalariga rioya qiladi.';
-
 -- -----------------------------------------------------------------------------
 -- 2. v_beta_daily_activity — kunlik faollik (so'nggi 14 kun)
 -- -----------------------------------------------------------------------------
 drop view if exists public.v_beta_daily_activity;
-
 create view public.v_beta_daily_activity
 with (security_invoker = true)
 as
@@ -66,15 +61,12 @@ where c.platform = 'telegram'
   and m.created_at > now() - interval '14 days'
 group by date(m.created_at)
 order by day desc;
-
 comment on view public.v_beta_daily_activity is
   'Kunlik Telegram bot faolligi (14 kun). SECURITY INVOKER.';
-
 -- -----------------------------------------------------------------------------
 -- 3. v_beta_feedback — feedback statistika
 -- -----------------------------------------------------------------------------
 drop view if exists public.v_beta_feedback;
-
 create view public.v_beta_feedback
 with (security_invoker = true)
 as
@@ -87,15 +79,12 @@ select
     / nullif(count(*), 0), 1
   )                                                      as satisfaction_pct
 from public.ai_feedback;
-
 comment on view public.v_beta_feedback is
   'AI Concierge javoblariga 👍/👎 statistika. SECURITY INVOKER.';
-
 -- -----------------------------------------------------------------------------
 -- 4. v_beta_model_usage — model bo'yicha ishlatish va narx
 -- -----------------------------------------------------------------------------
 drop view if exists public.v_beta_model_usage;
-
 create view public.v_beta_model_usage
 with (security_invoker = true)
 as
@@ -110,15 +99,12 @@ from public.ai_messages
 where role = 'assistant' and llm_model is not null
 group by llm_model
 order by requests desc;
-
 comment on view public.v_beta_model_usage is
   'LLM modellari ishlatish va narx (Haiku vs Sonnet). SECURITY INVOKER.';
-
 -- -----------------------------------------------------------------------------
 -- 5. employee_invite_stats — tenant bo'yicha invite holati
 -- -----------------------------------------------------------------------------
 drop view if exists public.employee_invite_stats;
-
 create view public.employee_invite_stats
 with (security_invoker = true)
 as
@@ -132,10 +118,8 @@ select
   max(created_at)                                   as last_invite_at
 from public.employee_invites
 group by tenant_id;
-
 comment on view public.employee_invite_stats is
   'Xodim invite tokenlari statistikasi per tenant. SECURITY INVOKER — RLS rioya qilinadi.';
-
 -- -----------------------------------------------------------------------------
 -- 6. Beta monitoring va invite stats faqat super_admin/sub_admin uchun
 --    (oddiy authenticated user bilmasligi kerak)
@@ -151,11 +135,9 @@ grant select on public.v_beta_daily_activity to service_role;
 grant select on public.v_beta_feedback       to service_role;
 grant select on public.v_beta_model_usage    to service_role;
 grant select on public.employee_invite_stats to authenticated, service_role;
-
 commit;
-
 -- =============================================================================
 -- Tasdiq:
 --   Supabase Dashboard → Advisors → Security → Refresh
 --   "Security Definer View" errors 0 ga tushishi kerak.
--- =============================================================================
+-- =============================================================================;
