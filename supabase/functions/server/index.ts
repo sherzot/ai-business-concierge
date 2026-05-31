@@ -4781,7 +4781,19 @@ Be concise, professional, and data-driven. You can help with: user management, c
     if (error) return failure(c, 500, "DB_ERROR", error.message);
     return success(c, { deleted: id });
   });
-
+  // ── Risk Scanner ──────────────────────────────────────────────────────
+  app.post(`${prefix}/admin/risk/scan`, async (c) => {
+    return riskScanRoutes.fetch(c.req.raw, Deno.env.toObject());
+  });
+  app.get(`${prefix}/admin/risk/scans`, async (c) => {
+    return riskScanRoutes.fetch(c.req.raw, Deno.env.toObject());
+  });
+  app.get(`${prefix}/admin/risk/scans/:id`, async (c) => {
+    return riskScanRoutes.fetch(c.req.raw, Deno.env.toObject());
+  });
+  app.patch(`${prefix}/admin/risk/findings/:id`, async (c) => {
+    return riskScanRoutes.fetch(c.req.raw, Deno.env.toObject());
+  });
   // B-013: OpenAPI spec + Scalar docs UI
   app.get(`${prefix}/docs/api`, (c) => c.json(OPENAPI_SPEC));
   app.get(`${prefix}/docs`, (c) => {
@@ -4799,7 +4811,5 @@ registerRoutes(BASE_PATH);
 registerRoutes(V1_PATH);
 registerRoutes(`${GATEWAY_PREFIX}${BASE_PATH}`);
 registerRoutes(`${GATEWAY_PREFIX}${V1_PATH}`);
-app.route(`${V1_PATH}/admin/risk`, riskScanRoutes);
-app.route(`${GATEWAY_PREFIX}${V1_PATH}/admin/risk`, riskScanRoutes);
 
 Deno.serve(app.fetch);
