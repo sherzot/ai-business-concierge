@@ -2,7 +2,124 @@
 
 Project development history, completed work, encountered errors, and their solutions.
 
-> **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek translation](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
+> **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
+
+## 2026-06-02 — Security Hardening: 14 Fixes (commit `fb5bde5`)
+
+### Context
+A comprehensive security audit was performed on the system. A total of 14 critical and medium-severity vulnerabilities were identified and resolved.
+
+### Done
+
+**Critical (K):**
+- **K-001** `getTenantContext()` — removed unauthenticated `x-tenant-id` header fallback; replaced with JWT + DB membership verification
+- **K-002** `/ai/chat` — `system_prompt` parameter rejected (closes prompt injection vector)
+- **K-004** `frontend/config.ts` — hardcoded Supabase credentials removed; app throws on startup if env vars are missing
+- **K-005** `telegram-bot/index.ts` — `TELEGRAM_WEBHOOK_SECRET` is now mandatory; returns 503 if not set
+- **K-006** `docs/DEMO_USERS.md` — demo user passwords removed from documentation
+
+**High (H):**
+- **H-001** CORS — wildcard `*` replaced with explicit domains: `aibizconcierge.uz`, `netlify.app`, `localhost`
+- **H-002** AI quota — `guardUsage()` + `recordUsage()` wired into `/ai/chat`
+- **H-004** `RequireRole.tsx` — new component; `/admin` route now protected with DB-backed role check
+- **H-005** `match_knowledge()` — `match_tenant_id` parameter added; tenant isolation enforced at DB level
+- **H-006** Resend webhook — signature verification made mandatory; returns 503 if `RESEND_WEBHOOK_SECRET` not set
+- **H-007** `apiClient.ts` — anon key fallback removed; throws if no valid auth token
+
+**Medium (M):**
+- **M-003** Invite token — new token generated on every resend (previous token invalidated)
+- **M-005** Hard-delete — `hr` role removed; only `leader/company_admin/super_admin` may hard-delete
+- **M-006** Notifications mark-read — `tenant_id` filter added
+- **M-008** Password minimum length raised from 8 → 12 characters (3 locations)
+
+**Manual steps (completed by user ✅):**
+- Supabase anon key rotated
+- Netlify env vars updated (`VITE_SUPABASE_PROJECT_ID`, `VITE_SUPABASE_ANON_KEY`)
+- Demo user passwords updated in Supabase Auth
+
+### Files
+- `supabase/functions/server/index.ts` (changed)
+- `supabase/functions/server/services/knowledge-base.ts` (changed — H-005)
+- `supabase/functions/telegram-bot/index.ts` (changed — K-005)
+- `frontend/src/app/config.ts` (changed — K-004)
+- `frontend/src/shared/lib/apiClient.ts` (changed — H-007)
+- `frontend/src/app/router.tsx` (changed — H-004)
+- `frontend/src/features/auth/components/RequireRole.tsx` (new — H-004)
+- `docs/DEMO_USERS.md` (changed — K-006)
+- `supabase/migrations/20260602000000_h005_match_knowledge_tenant.sql` (new — H-005)
+
+---
+
+## 2026-06-02 — Bug Fixes: AdminRiskPage `color` crash, statusFilter, Netlify Node.js
+
+### Context
+After the Risk Scanner page went live, several runtime errors were discovered. Netlify and local builds also produced different asset hashes.
+
+### Done
+- **AdminRiskPage `TypeError: Cannot read properties of undefined (reading 'color')`** — root cause: backend `findings` array was missing the `status` field → `STATUS_CONFIG[undefined]` crashed. Fixed:
+  - `risk-scan.ts`: added `status: "open"` to every `findings.push()` call
+  - `AdminRiskPage.tsx`: added `STATUS_CONFIG[finding.status] ?? STATUS_CONFIG["open"]` fallback
+- **`statusFilter` error** — `AdminContactsPage` and `AdminCompaniesPage` were sending `statusFilter` but the API expects `filter`. Fixed.
+- **Netlify hash mismatch** — local Node 22 vs Netlify default Node 18 produced different build hashes. Added `NODE_VERSION = "22"` to `netlify.toml`.
+- **`frontend/.gitignore`** — committed for the first time, with `dist/` entry.
+
+### Files
+- `supabase/functions/server/routes/risk-scan.ts` (changed)
+- `frontend/src/features/admin/pages/AdminRiskPage.tsx` (changed)
+- `frontend/src/features/admin/pages/AdminContactsPage.tsx` (changed)
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (changed)
+- `netlify.toml` (changed)
+- `frontend/.gitignore` (new)
+
+---
+
+## 2026-05-30 — B-014 Security Risk Scanner: AdminRiskPage + `POST /risk/scan`
+
+### Context
+Super Admin / Sub Admin needed a way to scan the system for security issues in real time and visualize the results.
+
+### Done
+- **DB migration** `20260530000000_risk_scanner.sql`:
+  - `risk_scans` table — each scan session: `status`, `score`, `critical/high/medium/low_count`, `duration_ms`, `source`
+  - `risk_findings` table — individual findings: `severity`, `title`, `description`, `location`, `remediation`, `status`
+  - RLS: only `super_admin/sub_admin` can read
+- **Backend** `POST /v1/risk/scan` (`routes/risk-scan.ts`):
+  - Hybrid mode: static checks + Supabase Advisor API
+  - Static checks: CORS config, required env vars, RLS status per table
+  - Advisor findings: DB security advisories (missing RLS, un-indexed FKs, etc.)
+  - Result saved to `risk_scans` + `risk_findings`; `score` calculated (0–100)
+- **Frontend** `AdminRiskPage.tsx` (new):
+  - "Start Scan" button with loading state
+  - Severity badges: `critical` (red), `high` (orange), `medium` (yellow), `low` (blue)
+  - Findings list: title, description, location, remediation
+  - Score indicator
+- **Router**: `/admin/risk` route added
+- **AdminLayout**: "Risk Scanner" sidebar link added
+
+### Files
+- `supabase/migrations/20260530000000_risk_scanner.sql` (new)
+- `supabase/functions/server/routes/risk-scan.ts` (new)
+- `supabase/functions/server/index.ts` (changed — route registered)
+- `frontend/src/features/admin/pages/AdminRiskPage.tsx` (new)
+- `frontend/src/app/router.tsx` (changed)
+- `frontend/src/features/admin/components/AdminLayout.tsx` (changed)
+
+---
+
+## 2026-05-27 — B-005/B-006 DB Performance Indexes + Audit Triggers
+
+### Context
+The `tasks`, `inbox_items`, and `documents` tables lacked soft-delete support. Performance indexes were missing for frequently queried tables. Audit log triggers were also absent.
+
+### Done
+- **`deleted_at`** column added to `tasks`, `inbox_items`, `documents`
+- **Partial indexes** (`WHERE deleted_at IS NULL`) on `tasks`, `inbox_items`, `documents`, `notifications`, `audit_logs`, `request_logs` — active records queried faster
+- **Audit log triggers** on `company_info`, `employee_profiles`, `documents`, `tasks` — key mutations automatically written to `audit_logs`
+
+### Files
+- `supabase/migrations/20260527105554_b005_b006_optimization.sql` (new)
+
+---
 
 ## 2026-05-27 — #8 B-013 OpenAPI/Scalar docs — `GET /docs/api` + `GET /docs`
 

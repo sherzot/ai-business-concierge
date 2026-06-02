@@ -2,7 +2,124 @@
 
 История развития проекта, выполненные работы, обнаруженные ошибки и их решения.
 
-> **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
+> **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
+
+## 2026-06-02 — Усиление безопасности: 14 исправлений (коммит `fb5bde5`)
+
+### Контекст
+Проведён всесторонний аудит безопасности системы. Выявлено и устранено 14 критических и среднеуровневых уязвимостей.
+
+### Сделано
+
+**Критические (K):**
+- **K-001** `getTenantContext()` — убран ненадёжный fallback на заголовок `x-tenant-id` без аутентификации; заменён на JWT + проверку членства в БД
+- **K-002** `/ai/chat` — параметр `system_prompt` отклоняется (вектор prompt injection закрыт)
+- **K-004** `frontend/config.ts` — убраны захардкоженные Supabase-credentials; при отсутствии env vars приложение не запускается
+- **K-005** `telegram-bot/index.ts` — `TELEGRAM_WEBHOOK_SECRET` стал обязательным; при отсутствии возвращает 503
+- **K-006** `docs/DEMO_USERS.md` — пароли демо-пользователей удалены из документации
+
+**Высокие (H):**
+- **H-001** CORS — wildcard `*` заменён явным списком доменов: `aibizconcierge.uz`, `netlify.app`, `localhost`
+- **H-002** AI-квота — `guardUsage()` + `recordUsage()` подключены к `/ai/chat`
+- **H-004** `RequireRole.tsx` — новый компонент; маршрут `/admin` защищён проверкой роли через БД
+- **H-005** `match_knowledge()` — добавлен параметр `match_tenant_id`; изоляция тенантов обеспечена на уровне БД
+- **H-006** Resend webhook — верификация подписи стала обязательной; при отсутствии `RESEND_WEBHOOK_SECRET` возвращает 503
+- **H-007** `apiClient.ts` — fallback на anon key убран; при отсутствии токена выбрасывается ошибка
+
+**Средние (M):**
+- **M-003** Invite token — новый токен генерируется при каждом повторном отправлении (старый инвалидируется)
+- **M-005** Hard-delete — роль `hr` исключена; жёсткое удаление доступно только `leader/company_admin/super_admin`
+- **M-006** Notifications mark-read — добавлен фильтр по `tenant_id`
+- **M-008** Минимальная длина пароля повышена с 8 до 12 символов (в 3 местах)
+
+**Ручные действия (выполнены пользователем ✅):**
+- Anon key Supabase ротирован
+- Env vars в Netlify обновлены (`VITE_SUPABASE_PROJECT_ID`, `VITE_SUPABASE_ANON_KEY`)
+- Пароли демо-пользователей обновлены в Supabase Auth
+
+### Файлы
+- `supabase/functions/server/index.ts` (изменён)
+- `supabase/functions/server/services/knowledge-base.ts` (изменён — H-005)
+- `supabase/functions/telegram-bot/index.ts` (изменён — K-005)
+- `frontend/src/app/config.ts` (изменён — K-004)
+- `frontend/src/shared/lib/apiClient.ts` (изменён — H-007)
+- `frontend/src/app/router.tsx` (изменён — H-004)
+- `frontend/src/features/auth/components/RequireRole.tsx` (новый — H-004)
+- `docs/DEMO_USERS.md` (изменён — K-006)
+- `supabase/migrations/20260602000000_h005_match_knowledge_tenant.sql` (новый — H-005)
+
+---
+
+## 2026-06-02 — Исправления: AdminRiskPage `color` crash, statusFilter, Netlify Node.js
+
+### Контекст
+После запуска страницы Risk Scanner обнаружено несколько runtime-ошибок. Также выявлено расхождение хешей между Netlify и локальной сборкой.
+
+### Сделано
+- **AdminRiskPage `TypeError: Cannot read properties of undefined (reading 'color')`** — причина: в массиве `findings` бэкенда отсутствовало поле `status` → `STATUS_CONFIG[undefined]` падал. Исправление:
+  - `risk-scan.ts`: во все вызовы `findings.push()` добавлено `status: "open"`
+  - `AdminRiskPage.tsx`: добавлен fallback `STATUS_CONFIG[finding.status] ?? STATUS_CONFIG["open"]`
+- **Ошибка `statusFilter`** — `AdminContactsPage` и `AdminCompaniesPage` отправляли `statusFilter`, тогда как API ожидает `filter`. Исправлено.
+- **Расхождение хешей Netlify** — локальный Node 22 против Netlify Node 18 давал разные хеши сборки. В `netlify.toml` добавлено `NODE_VERSION = "22"`.
+- **`frontend/.gitignore`** — добавлен в репозиторий впервые, с записью `dist/`.
+
+### Файлы
+- `supabase/functions/server/routes/risk-scan.ts` (изменён)
+- `frontend/src/features/admin/pages/AdminRiskPage.tsx` (изменён)
+- `frontend/src/features/admin/pages/AdminContactsPage.tsx` (изменён)
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (изменён)
+- `netlify.toml` (изменён)
+- `frontend/.gitignore` (новый)
+
+---
+
+## 2026-05-30 — B-014 Сканер безопасности: AdminRiskPage + `POST /risk/scan`
+
+### Контекст
+Super Admin / Sub Admin требовалась возможность проверять безопасность системы в реальном времени и визуализировать результаты.
+
+### Сделано
+- **DB миграция** `20260530000000_risk_scanner.sql`:
+  - Таблица `risk_scans` — каждая сессия сканирования: `status`, `score`, `critical/high/medium/low_count`, `duration_ms`, `source`
+  - Таблица `risk_findings` — конкретные находки: `severity`, `title`, `description`, `location`, `remediation`, `status`
+  - RLS: только `super_admin/sub_admin` могут читать
+- **Бэкенд** `POST /v1/risk/scan` (`routes/risk-scan.ts`):
+  - Гибридный режим: статические проверки + Supabase Advisor API
+  - Статические проверки: конфиг CORS, наличие env vars, статус RLS по таблицам
+  - Находки Advisor: рекомендации по безопасности БД (таблицы без RLS, FK без индексов и т.д.)
+  - Результат сохраняется в `risk_scans` + `risk_findings`; вычисляется `score` (0–100)
+- **Фронтенд** `AdminRiskPage.tsx` (новый):
+  - Кнопка «Начать сканирование» с состоянием загрузки
+  - Бейджи по критичности: `critical` (красный), `high` (оранжевый), `medium` (жёлтый), `low` (синий)
+  - Список находок: title, description, location, remediation
+  - Индикатор score
+- **Router**: добавлен маршрут `/admin/risk`
+- **AdminLayout**: добавлена ссылка «Risk Scanner» в sidebar
+
+### Файлы
+- `supabase/migrations/20260530000000_risk_scanner.sql` (новый)
+- `supabase/functions/server/routes/risk-scan.ts` (новый)
+- `supabase/functions/server/index.ts` (изменён — маршрут зарегистрирован)
+- `frontend/src/features/admin/pages/AdminRiskPage.tsx` (новый)
+- `frontend/src/app/router.tsx` (изменён)
+- `frontend/src/features/admin/components/AdminLayout.tsx` (изменён)
+
+---
+
+## 2026-05-27 — B-005/B-006 Оптимизация БД: индексы производительности + аудит-триггеры
+
+### Контекст
+В таблицах `tasks`, `inbox_items` и `documents` не было мягкого удаления. Также отсутствовали частичные индексы и аудит-триггеры.
+
+### Сделано
+- **Колонка `deleted_at`** добавлена в `tasks`, `inbox_items`, `documents`
+- **Partial indexes** (`WHERE deleted_at IS NULL`) для `tasks`, `inbox_items`, `documents`, `notifications`, `audit_logs`, `request_logs` — быстрее запросы по активным записям
+- **Аудит-триггеры** для `company_info`, `employee_profiles`, `documents`, `tasks` — ключевые изменения автоматически пишутся в `audit_logs`
+
+### Файлы
+- `supabase/migrations/20260527105554_b005_b006_optimization.sql` (новый)
+
+---
 
 ## 2026-05-27 — #8 B-013 OpenAPI/Scalar docs — `GET /docs/api` + `GET /docs`
 

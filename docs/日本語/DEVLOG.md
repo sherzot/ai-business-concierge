@@ -2,7 +2,124 @@
 
 プロジェクト開発履歴、完了した作業、遭遇したエラーとその解決策。
 
-> **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [Uzbek](../Uzbek/DEVLOG.md)
+> **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
+
+## 2026-06-02 — セキュリティ強化：14件の修正（コミット `fb5bde5`）
+
+### コンテキスト
+システムの包括的なセキュリティ監査を実施。合計14件の重大・中程度の脆弱性を特定し修正した。
+
+### 実施内容
+
+**クリティカル（K）：**
+- **K-001** `getTenantContext()` — 未認証の `x-tenant-id` ヘッダーフォールバックを削除；JWT + DBメンバーシップ検証に置き換え
+- **K-002** `/ai/chat` — `system_prompt` パラメータを拒否（プロンプトインジェクションベクターを閉鎖）
+- **K-004** `frontend/config.ts` — ハードコードされたSupabase認証情報を削除；env vars未設定時はアプリが起動しない
+- **K-005** `telegram-bot/index.ts` — `TELEGRAM_WEBHOOK_SECRET` が必須に；未設定時は503を返す
+- **K-006** `docs/DEMO_USERS.md` — デモユーザーのパスワードをドキュメントから削除
+
+**高（H）：**
+- **H-001** CORS — ワイルドカード `*` を明示的なドメインリストに変更：`aibizconcierge.uz`、`netlify.app`、`localhost`
+- **H-002** AIクォータ — `guardUsage()` + `recordUsage()` を `/ai/chat` に接続
+- **H-004** `RequireRole.tsx` — 新規コンポーネント作成；`/admin` ルートをDB経由のロール検証で保護
+- **H-005** `match_knowledge()` — `match_tenant_id` パラメータを追加；DBレベルでテナント分離を実現
+- **H-006** Resend webhook — 署名検証を必須化；`RESEND_WEBHOOK_SECRET` 未設定時は503
+- **H-007** `apiClient.ts` — anonキーフォールバックを削除；認証トークンがない場合はエラーをスロー
+
+**中（M）：**
+- **M-003** 招待トークン — 再送信のたびに新トークンを生成（旧トークンは無効化）
+- **M-005** ハード削除 — `hr` ロールを除外；`leader/company_admin/super_admin` のみ実行可能
+- **M-006** 通知既読化 — `tenant_id` フィルターを追加
+- **M-008** パスワード最小長を8文字から12文字に引き上げ（3か所）
+
+**手動対応（ユーザーが完了 ✅）：**
+- Supabase anonキーをローテーション
+- Netlify env varsを更新（`VITE_SUPABASE_PROJECT_ID`、`VITE_SUPABASE_ANON_KEY`）
+- デモユーザーのパスワードをSupabase Authで更新
+
+### ファイル
+- `supabase/functions/server/index.ts`（変更）
+- `supabase/functions/server/services/knowledge-base.ts`（変更 — H-005）
+- `supabase/functions/telegram-bot/index.ts`（変更 — K-005）
+- `frontend/src/app/config.ts`（変更 — K-004）
+- `frontend/src/shared/lib/apiClient.ts`（変更 — H-007）
+- `frontend/src/app/router.tsx`（変更 — H-004）
+- `frontend/src/features/auth/components/RequireRole.tsx`（新規 — H-004）
+- `docs/DEMO_USERS.md`（変更 — K-006）
+- `supabase/migrations/20260602000000_h005_match_knowledge_tenant.sql`（新規 — H-005）
+
+---
+
+## 2026-06-02 — バグ修正：AdminRiskPage `color` クラッシュ、statusFilter、Netlify Node.js
+
+### コンテキスト
+Risk Scannerページ公開後、複数のランタイムエラーが発見された。NetlifyとローカルビルドでアセットハッシュÅが異なる問題もあった。
+
+### 実施内容
+- **AdminRiskPage `TypeError: Cannot read properties of undefined (reading 'color')`** — 原因：バックエンドの `findings` 配列に `status` フィールドがなく `STATUS_CONFIG[undefined]` がクラッシュ。修正：
+  - `risk-scan.ts`：すべての `findings.push()` に `status: "open"` を追加
+  - `AdminRiskPage.tsx`：`STATUS_CONFIG[finding.status] ?? STATUS_CONFIG["open"]` フォールバックを追加
+- **`statusFilter` エラー** — `AdminContactsPage` と `AdminCompaniesPage` が `statusFilter` を送信していたが、APIは `filter` を期待していた。修正済み。
+- **Netlify ハッシュ不一致** — ローカルのNode 22 vs NetlifyのNode 18でビルドハッシュが異なっていた。`netlify.toml` に `NODE_VERSION = "22"` を追加。
+- **`frontend/.gitignore`** — `dist/` エントリを含め初めてコミット。
+
+### ファイル
+- `supabase/functions/server/routes/risk-scan.ts`（変更）
+- `frontend/src/features/admin/pages/AdminRiskPage.tsx`（変更）
+- `frontend/src/features/admin/pages/AdminContactsPage.tsx`（変更）
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx`（変更）
+- `netlify.toml`（変更）
+- `frontend/.gitignore`（新規）
+
+---
+
+## 2026-05-30 — B-014 セキュリティリスクスキャナー：AdminRiskPage + `POST /risk/scan`
+
+### コンテキスト
+Super Admin / Sub Admin がシステムのセキュリティをリアルタイムでスキャンし、結果を視覚的に確認できる機能が必要だった。
+
+### 実施内容
+- **DBマイグレーション** `20260530000000_risk_scanner.sql`：
+  - `risk_scans` テーブル — 各スキャンセッション：`status`、`score`、`critical/high/medium/low_count`、`duration_ms`、`source`
+  - `risk_findings` テーブル — 個別の検出項目：`severity`、`title`、`description`、`location`、`remediation`、`status`
+  - RLS：`super_admin/sub_admin` のみ閲覧可能
+- **バックエンド** `POST /v1/risk/scan`（`routes/risk-scan.ts`）：
+  - ハイブリッドモード：静的チェック + Supabase Advisor API
+  - 静的チェック：CORSコンフィグ、env vars存在確認、テーブルごとのRLSステータス
+  - Advisor検出：DBセキュリティ勧告（RLSなしテーブル、インデックスなしFKなど）
+  - 結果を `risk_scans` + `risk_findings` に保存；`score` を算出（0–100）
+- **フロントエンド** `AdminRiskPage.tsx`（新規）：
+  - 「スキャン開始」ボタン + ローディング状態
+  - 深刻度バッジ：`critical`（赤）、`high`（オレンジ）、`medium`（黄）、`low`（青）
+  - 検出リスト：title、description、location、remediation
+  - スコアインジケーター
+- **Router**：`/admin/risk` ルートを追加
+- **AdminLayout**：「Risk Scanner」サイドバーリンクを追加
+
+### ファイル
+- `supabase/migrations/20260530000000_risk_scanner.sql`（新規）
+- `supabase/functions/server/routes/risk-scan.ts`（新規）
+- `supabase/functions/server/index.ts`（変更 — ルート登録）
+- `frontend/src/features/admin/pages/AdminRiskPage.tsx`（新規）
+- `frontend/src/app/router.tsx`（変更）
+- `frontend/src/features/admin/components/AdminLayout.tsx`（変更）
+
+---
+
+## 2026-05-27 — B-005/B-006 DB最適化：パフォーマンスインデックス + 監査トリガー
+
+### コンテキスト
+`tasks`、`inbox_items`、`documents` テーブルにソフトデリート機能がなかった。頻繁にクエリされるテーブルのパーシャルインデックスも不足していた。監査ログトリガーも未実装だった。
+
+### 実施内容
+- **`deleted_at`** カラムを `tasks`、`inbox_items`、`documents` に追加
+- **パーシャルインデックス**（`WHERE deleted_at IS NULL`）：`tasks`、`inbox_items`、`documents`、`notifications`、`audit_logs`、`request_logs` — アクティブレコードのクエリが高速化
+- **監査ログトリガー**：`company_info`、`employee_profiles`、`documents`、`tasks` — 重要な変更が自動的に `audit_logs` に記録される
+
+### ファイル
+- `supabase/migrations/20260527105554_b005_b006_optimization.sql`（新規）
+
+---
 
 ## 2026-05-27 — #8 B-013 OpenAPI/Scalar docs — `GET /docs/api` + `GET /docs`
 
