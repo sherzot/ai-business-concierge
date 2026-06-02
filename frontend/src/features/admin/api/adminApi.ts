@@ -61,3 +61,38 @@ export async function sendAdminAIMessage(message: string, locale = "uz"): Promis
     body: JSON.stringify({ message, locale }),
   });
 }
+
+export type AiModelStat = {
+  model: string;
+  requests: number;
+  tokens: number;
+  cost_usd: number;
+};
+
+export type AiDailyStat = {
+  date: string;
+  requests: number;
+  tokens: number;
+  cost_usd: number;
+};
+
+export type AiTenantStat = {
+  tenant_id: string;
+  tenant_name: string;
+  requests: number;
+  cost_usd: number;
+};
+
+export type AiStats = {
+  period_days: number;
+  total_requests: number;
+  total_tokens: number;
+  total_cost_usd: number;
+  by_model: AiModelStat[];
+  top_tenants: AiTenantStat[];
+  daily: AiDailyStat[];
+};
+
+export async function getAdminAiStats(days = 30): Promise<AiStats> {
+  return apiRequest<AiStats>(`/admin/ai-stats?days=${days}`);
+}

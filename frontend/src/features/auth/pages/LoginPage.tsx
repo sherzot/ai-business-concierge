@@ -23,7 +23,7 @@ function accountStatusMessage(
 
 export function LoginPage() {
   const { translate } = useI18n();
-  const { session, loading, login, error } = useAuthContext();
+  const { session, loading, login, error, currentTenant } = useAuthContext();
   const navigate = useNavigate();
 
   const [email, setEmail]         = useState("");
@@ -32,8 +32,10 @@ export function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!loading && session) navigate("/app", { replace: true });
-  }, [session, loading, navigate]);
+    if (loading || !session) return;
+    const isAdmin = currentTenant?.role === "super_admin" || currentTenant?.role === "sub_admin";
+    navigate(isAdmin ? "/admin" : "/app", { replace: true });
+  }, [session, loading, currentTenant, navigate]);
 
   if (loading) {
     return (

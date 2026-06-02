@@ -15,14 +15,18 @@ export function ProtectedLayout() {
       navigate("/login", { replace: true });
       return;
     }
-    // Yangi xodim email invite orqali kelgan, parol/telefon/DOB hali kiritmagan —
-    // dashboard'ga ruxsat yo'q, avval /setup-account ni tugatsin.
     const meta = (session.user.user_metadata ?? {}) as Record<string, unknown>;
     if (meta.setup_complete === false) {
       navigate("/setup-account", { replace: true });
       return;
     }
-  }, [session, loading, navigate]);
+    // Admin foydalanuvchi /app ga kirmasin — /admin ga yo'naltiramiz
+    const role = currentTenant?.role;
+    if (role === "super_admin" || role === "sub_admin") {
+      navigate("/admin", { replace: true });
+      return;
+    }
+  }, [session, loading, currentTenant, navigate]);
 
   if (loading) {
     return (

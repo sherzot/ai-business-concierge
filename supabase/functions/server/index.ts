@@ -849,33 +849,20 @@ const computeDashboardStats = (
   };
 };
 
+const ADMIN_MODULES = ["admin", "reports", "inbox", "tasks", "hr", "docs", "integrations", "settings", "billing", "ai", "knowledge_base"];
+
 const ROLE_ACCESS: Record<string, string[]> = {
-  super_admin: [
-    "admin",
-    "reports",
-    "inbox",
-    "tasks",
-    "hr",
-    "docs",
-    "integrations",
-    "settings",
-    "billing",
-    "ai",
-    "knowledge_base",
-  ],
-  leader: [
-    "reports",
-    "inbox",
-    "tasks",
-    "hr",
-    "docs",
-    "integrations",
-    "settings",
-  ],
-  hr: ["reports", "inbox", "tasks", "hr", "docs", "settings"],
-  accounting: ["reports", "docs", "integrations", "settings"],
+  // Tizim darajasi — barcha modullar + admin panel
+  super_admin:   ADMIN_MODULES,
+  sub_admin:     ADMIN_MODULES,
+  // Kompaniya darajasi
+  company_admin: ["reports", "inbox", "tasks", "hr", "docs", "integrations", "settings", "billing", "ai", "knowledge_base"],
+  leader:        ["reports", "inbox", "tasks", "hr", "docs", "integrations", "settings"],
+  hr:            ["reports", "inbox", "tasks", "hr", "docs", "settings"],
+  accounting:    ["reports", "docs", "integrations", "billing", "settings"],
   department_head: ["reports", "inbox", "tasks", "docs", "settings"],
-  employee: ["inbox", "tasks", "settings"],
+  manager:       ["reports", "inbox", "tasks", "docs", "settings"],
+  employee:      ["inbox", "tasks", "settings"],
 };
 
 // ─── DB-based rate limit: contact form ────────────────────────────────────────
@@ -4070,6 +4057,96 @@ const registerRoutes = (prefix: string) => {
         total: totalNotifications ?? 0,
         unread: unreadNotifications ?? 0,
       },
+    });
+  });
+
+  // ─── GET /v1/admin/ai-stats — AI foydalanish statistikasi (super_admin) ──────
+  app.get(`${prefix}/admin/ai-stats`, async (c) => {
+    const auth = c.req.header("authorization");
+    if (!auth?.startsWith("Bearer "))
+      return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user) return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+    const { data: ut } = await supabase
+      .from("user_tenants").select("role")
+      .eq("user_id", user.id).in("role", ["super_admin", "sub_admin"]).limit(1).maybeSingle();
+    if (!ut) return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+
+    const days = parseInt(c.req.query("days") ?? "30", 10);
+    const since = new Date(Date.now() - days * 86_400_000).toISOString();
+
+    const [totals, byModel, byTenant, daily] = await Promise.all([
+      // Jami
+      supabase.from("ai_usage_logs")
+        .select("total_tokens, cost_usd, provider")
+        .gte("created_at", since),
+      // Model bo'yicha
+      supabase.from("ai_usage_logs")
+        .select("model, provider, cost_usd, total_tokens")
+        .gte("created_at", since),
+      // Tenant bo'yicha top-5
+      supabase.from("ai_usage_logs")
+        .select("tenant_id, cost_usd, total_tokens")
+        .gte("created_at", since)
+        .not("tenant_id", "is", null)
+        .limit(200),
+      // Kunlik (oxirgi 30 kun)
+      supabase.from("ai_usage_logs")
+        .select("created_at, cost_usd, total_tokens, provider")
+        .gte("created_at", since)
+        .order("created_at", { ascending: true }),
+    ]);
+
+    const rows = totals.data ?? [];
+    const totalRequests = rows.length;
+    const totalTokens   = rows.reduce((s: number, r: any) => s + (r.total_tokens ?? 0), 0);
+    const totalCostUsd  = rows.reduce((s: number, r: any) => s + (r.cost_usd ?? 0), 0);
+
+    // Model bo'yicha
+    const modelMap: Record<string, { requests: number; tokens: number; cost: number }> = {};
+    for (const r of (byModel.data ?? []) as any[]) {
+      const key = `${r.provider}/${r.model}`;
+      if (!modelMap[key]) modelMap[key] = { requests: 0, tokens: 0, cost: 0 };
+      modelMap[key].requests++;
+      modelMap[key].tokens += r.total_tokens ?? 0;
+      modelMap[key].cost   += r.cost_usd ?? 0;
+    }
+
+    // Tenant bo'yicha
+    const tenantMap: Record<string, { requests: number; tokens: number; cost: number }> = {};
+    for (const r of (byTenant.data ?? []) as any[]) {
+      const key = r.tenant_id;
+      if (!tenantMap[key]) tenantMap[key] = { requests: 0, tokens: 0, cost: 0 };
+      tenantMap[key].requests++;
+      tenantMap[key].tokens += r.total_tokens ?? 0;
+      tenantMap[key].cost   += r.cost_usd ?? 0;
+    }
+    const topTenants = Object.entries(tenantMap)
+      .sort((a, b) => b[1].cost - a[1].cost)
+      .slice(0, 5)
+      .map(([id, v]) => ({ tenant_id: id, ...v }));
+
+    // Kunlik aggregatsiya
+    const dayMap: Record<string, { requests: number; cost: number; tokens: number }> = {};
+    for (const r of (daily.data ?? []) as any[]) {
+      const day = (r.created_at as string).slice(0, 10);
+      if (!dayMap[day]) dayMap[day] = { requests: 0, cost: 0, tokens: 0 };
+      dayMap[day].requests++;
+      dayMap[day].cost   += r.cost_usd ?? 0;
+      dayMap[day].tokens += r.total_tokens ?? 0;
+    }
+    const dailyChart = Object.entries(dayMap)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, v]) => ({ date, ...v }));
+
+    return success(c, {
+      period_days: days,
+      total_requests: totalRequests,
+      total_tokens:   totalTokens,
+      total_cost_usd: Math.round(totalCostUsd * 10_000) / 10_000,
+      by_model:  Object.entries(modelMap).map(([model, v]) => ({ model, ...v })),
+      top_tenants: topTenants,
+      daily: dailyChart,
     });
   });
 

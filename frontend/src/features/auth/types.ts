@@ -1,10 +1,13 @@
 export type UserRole =
   | "super_admin"      // Platforma admin (barcha tenantlarni ko'radi)
-  | "leader"           // Tenant admin (kompaniya rahbari)
-  | "hr"
-  | "accounting"
-  | "department_head"
-  | "employee";
+  | "sub_admin"        // Platforma yordamchi admin (super_admin bilan teng huquq)
+  | "company_admin"    // Kompaniya to'liq admin (billing, hr, ai, kb)
+  | "leader"           // Kompaniya rahbari (company_admin alias, legacy)
+  | "hr"               // Kadrlar bo'limi
+  | "accounting"       // Buxgalteriya
+  | "department_head"  // Bo'lim boshlig'i
+  | "manager"          // Menejer (department_head alias)
+  | "employee";        // Xodim (cheklangan kirish)
 
 export type TenantAssignment = {
   id: string;

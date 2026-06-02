@@ -3,8 +3,12 @@ import { useNavigate } from "react-router-dom";
 import {
   Building2, Users, Activity, MessageSquare, ArrowRight,
   RefreshCw, Clock, CheckCircle2, AlertCircle, TrendingUp,
+  ShieldCheck, Zap, DollarSign, Bot,
 } from "lucide-react";
-import { getAdminHealth, getAdminCompanies, type HealthStats, type Company } from "../api/adminApi";
+import {
+  getAdminHealth, getAdminCompanies, getAdminAiStats,
+  type HealthStats, type Company, type AiStats,
+} from "../api/adminApi";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // StatCard
@@ -209,6 +213,212 @@ function LatencyGauge({ ms }: { ms: number }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SecurityPosture — 14+ completed security fixes
+// ─────────────────────────────────────────────────────────────────────────────
+const SECURITY_FIXES = [
+  // Critical
+  { id: "K-001", sev: "critical", title: "getTenantContext() — autentifikatsiyasiz header bekor qilindi" },
+  { id: "K-002", sev: "critical", title: "/ai/chat — system_prompt injection to'sib qo'yildi" },
+  { id: "K-004", sev: "critical", title: "Hardcoded credentials config.ts dan olib tashlandi" },
+  { id: "K-005", sev: "critical", title: "Telegram webhook secreti majburiy qilindi" },
+  { id: "K-006", sev: "critical", title: "Demo foydalanuvchi parollari hujjatlardan o'chirildi" },
+  // High
+  { id: "H-001", sev: "high",     title: "CORS — wildcard '*' aniq domenlar bilan almashtirildi" },
+  { id: "H-002", sev: "high",     title: "AI kvota — guardUsage() + recordUsage() ulandi" },
+  { id: "H-003", sev: "high",     title: "Rate limiting — in-memory emas, DB asosiga o'tkazildi" },
+  { id: "H-004", sev: "high",     title: "RequireRole — /admin marshrut DB-based tekshiruvi" },
+  { id: "H-005", sev: "high",     title: "match_knowledge() — tenant izolyatsiyasi DB darajasida" },
+  { id: "H-006", sev: "high",     title: "Resend webhook — imzo tekshiruvi majburiy qilindi" },
+  { id: "H-007", sev: "high",     title: "apiClient.ts — anon key fallback olib tashlandi" },
+  // Medium
+  { id: "M-002", sev: "medium",   title: "increment_usage() — auth.uid() tekshiruvi qo'shildi" },
+  { id: "M-003", sev: "medium",   title: "Taklif tokeni — har safar yangi token generatsiya" },
+  { id: "M-004", sev: "medium",   title: "CV matni — LLM ga yuborishdan oldin sanitizatsiya" },
+  { id: "M-005", sev: "medium",   title: "Hard-delete — faqat admin rollar ruxsat etildi" },
+  { id: "M-006", sev: "medium",   title: "Bildirishnomalar — tenant_id filtri qo'shildi" },
+  { id: "M-008", sev: "medium",   title: "Parol uzunligi — minimum 8 dan 12 ga oshirildi" },
+] as const;
+
+type SevKey = "critical" | "high" | "medium";
+const SEV_CONFIG: Record<SevKey, { label: string; dot: string; badge: string }> = {
+  critical: { label: "Kritik",   dot: "bg-red-500",    badge: "text-red-400 bg-red-500/10 border-red-500/25" },
+  high:     { label: "Yuqori",   dot: "bg-orange-500", badge: "text-orange-400 bg-orange-500/10 border-orange-500/25" },
+  medium:   { label: "O'rta",    dot: "bg-amber-400",  badge: "text-amber-400 bg-amber-500/10 border-amber-500/25" },
+};
+
+function SecurityPosture() {
+  const grouped = useMemo(() => ({
+    critical: SECURITY_FIXES.filter((f) => f.sev === "critical"),
+    high:     SECURITY_FIXES.filter((f) => f.sev === "high"),
+    medium:   SECURITY_FIXES.filter((f) => f.sev === "medium"),
+  }), []);
+
+  return (
+    <div className="bg-slate-800/30 border border-white/8 rounded-xl p-5 mb-4">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-9 h-9 rounded-lg bg-emerald-500/15 flex items-center justify-center shrink-0">
+          <ShieldCheck size={18} className="text-emerald-400" />
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold text-white">Xavfsizlik holati</h3>
+          <p className="text-xs text-slate-500">{SECURITY_FIXES.length} ta muammo aniqlandi va bartaraf etildi</p>
+        </div>
+        <span className="ml-auto text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+          {SECURITY_FIXES.length}/{SECURITY_FIXES.length} ✓
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {(["critical", "high", "medium"] as SevKey[]).map((sev) => {
+          const cfg = SEV_CONFIG[sev];
+          const fixes = grouped[sev];
+          return (
+            <div key={sev}>
+              <div className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border mb-3 ${cfg.badge}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                {cfg.label} ({fixes.length})
+              </div>
+              <ul className="space-y-2">
+                {fixes.map((f) => (
+                  <li key={f.id} className="flex items-start gap-2 text-xs">
+                    <CheckCircle2 size={13} className="text-emerald-500 mt-0.5 shrink-0" />
+                    <span className="text-slate-400 leading-relaxed">
+                      <span className="font-mono text-slate-500 mr-1">{f.id}</span>
+                      {f.title}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AiCostBarChart — daily cost visualization
+// ─────────────────────────────────────────────────────────────────────────────
+function AiCostBarChart({ daily }: { daily: { date: string; cost_usd: number }[] }) {
+  const max = Math.max(...daily.map((d) => d.cost_usd), 0.001);
+  const H = 56, barW = 10;
+
+  if (!daily.length) {
+    return <p className="text-xs text-slate-500 py-4 text-center">Ma'lumot yo'q</p>;
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <svg width={daily.length * 14} height={H + 18} className="overflow-visible min-w-full">
+        {daily.map((d, i) => {
+          const bh = Math.max((d.cost_usd / max) * H, d.cost_usd > 0 ? 2 : 1);
+          const x = i * 14;
+          const y = H - bh;
+          return (
+            <g key={d.date}>
+              <rect x={x} y={y} width={barW} height={bh} rx={2}
+                fill={d.cost_usd > 0 ? "#6366f1" : "#1e293b"}
+                className="transition-all duration-300" />
+              {i % 7 === 0 && (
+                <text x={x + barW / 2} y={H + 13} textAnchor="middle"
+                  fill="#475569" fontSize={7}>{d.date.slice(5)}</text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AiStatsPanel
+// ─────────────────────────────────────────────────────────────────────────────
+function AiStatsPanel({ stats }: { stats: AiStats | null }) {
+  const fmtCost = (v: number) =>
+    v < 0.01 ? `$${(v * 100).toFixed(3)}¢` : `$${v.toFixed(3)}`;
+  const fmtNum  = (v: number) => v.toLocaleString("uz-UZ");
+
+  return (
+    <div className="bg-slate-800/30 border border-white/8 rounded-xl p-5 mb-4">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-9 h-9 rounded-lg bg-indigo-500/15 flex items-center justify-center shrink-0">
+          <Bot size={18} className="text-indigo-400" />
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold text-white">AI Biznes Tahlil</h3>
+          <p className="text-xs text-slate-500">So'nggi {stats?.period_days ?? 30} kun</p>
+        </div>
+      </div>
+
+      {/* Summary row */}
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        {[
+          { icon: Zap,         label: "So'rovlar",  value: fmtNum(stats?.total_requests ?? 0),    accent: "text-indigo-400" },
+          { icon: Activity,    label: "Tokenlar",   value: fmtNum(stats?.total_tokens ?? 0),      accent: "text-sky-400" },
+          { icon: DollarSign,  label: "Xarajat",    value: fmtCost(stats?.total_cost_usd ?? 0),   accent: "text-emerald-400" },
+        ].map(({ icon: Icon, label, value, accent }) => (
+          <div key={label} className="bg-slate-900/50 border border-white/6 rounded-xl p-3 text-center">
+            <Icon size={16} className={`${accent} mx-auto mb-1`} />
+            <p className="text-base font-bold text-white tabular-nums">{value}</p>
+            <p className="text-xs text-slate-500">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Columns: chart + model breakdown */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Daily cost chart */}
+        <div>
+          <p className="text-xs text-slate-500 mb-2">Kunlik xarajat ($)</p>
+          <AiCostBarChart daily={stats?.daily ?? []} />
+        </div>
+
+        {/* Model breakdown */}
+        <div>
+          <p className="text-xs text-slate-500 mb-2">Modellar kesimida</p>
+          {stats?.by_model?.length ? (
+            <ul className="space-y-2">
+              {stats.by_model.map((m) => (
+                <li key={m.model} className="flex items-center gap-2 text-xs">
+                  <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0" />
+                  <span className="text-slate-300 font-mono truncate flex-1" title={m.model}>
+                    {m.model.replace("claude-", "").replace("-20", " ")}
+                  </span>
+                  <span className="text-slate-400 tabular-nums">{fmtNum(m.requests)}</span>
+                  <span className="text-slate-600">·</span>
+                  <span className="text-emerald-400 tabular-nums">{fmtCost(m.cost_usd)}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-slate-500">Ma'lumot yo'q</p>
+          )}
+
+          {/* Top tenants */}
+          {(stats?.top_tenants?.length ?? 0) > 0 && (
+            <>
+              <p className="text-xs text-slate-500 mt-4 mb-2">Top kompaniyalar</p>
+              <ul className="space-y-2">
+                {stats!.top_tenants.slice(0, 5).map((t) => (
+                  <li key={t.tenant_id} className="flex items-center gap-2 text-xs">
+                    <span className="w-2 h-2 rounded-full bg-sky-500 shrink-0" />
+                    <span className="text-slate-300 truncate flex-1">{t.tenant_name}</span>
+                    <span className="text-slate-400 tabular-nums">{fmtNum(t.requests)}</span>
+                    <span className="text-emerald-400 tabular-nums">{fmtCost(t.cost_usd)}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // QuickLink
 // ─────────────────────────────────────────────────────────────────────────────
 function QuickLink({ to, icon: Icon, label, desc }: {
@@ -239,6 +449,7 @@ export function AdminDashboardPage() {
   const navigate = useNavigate();
   const [health, setHealth]       = useState<HealthStats | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [aiStats, setAiStats]     = useState<AiStats | null>(null);
   const [loading, setLoading]     = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -246,9 +457,14 @@ export function AdminDashboardPage() {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
     try {
-      const [h, c] = await Promise.all([getAdminHealth(), getAdminCompanies()]);
+      const [h, c, ai] = await Promise.all([
+        getAdminHealth(),
+        getAdminCompanies(),
+        getAdminAiStats(30).catch(() => null),
+      ]);
       setHealth(h);
       setCompanies(c);
+      setAiStats(ai);
     } catch {
       // each section shows its own state
     } finally {
@@ -425,6 +641,12 @@ export function AdminDashboardPage() {
               </div>
             </div>
           </div>
+
+          {/* Security posture */}
+          <SecurityPosture />
+
+          {/* AI stats */}
+          <AiStatsPanel stats={aiStats} />
 
           {/* Quick links */}
           <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Tezkor harakatlar</h3>
