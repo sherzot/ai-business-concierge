@@ -96,3 +96,20 @@ export type AiStats = {
 export async function getAdminAiStats(days = 30): Promise<AiStats> {
   return apiRequest<AiStats>(`/admin/ai-stats?days=${days}`);
 }
+
+export type AdminUser = {
+  id: string;
+  user_id: string;
+  tenant_id: string;
+  tenant_name: string;
+  role: string;
+  status: string;
+  email: string;
+  full_name: string | null;
+  phone: string | null;
+  created_at: string;
+};
+
+export async function getAdminUsers(): Promise<AdminUser[]> {
+  return apiRequest<AdminUser[]>("/admin/users");
+}

@@ -99,7 +99,7 @@ export function AdminAuditPage() {
         </div>
         <button
           onClick={load}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/8 border border-white/8 transition-colors shrink-0"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/8 border border-slate-200 dark:border-white/8 transition-colors shrink-0"
         >
           <RefreshCw size={13} /> Yangilash
         </button>
@@ -114,7 +114,7 @@ export function AdminAuditPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Qidiruv..."
-            className="pl-8 pr-4 py-1.5 bg-slate-800 border border-white/10 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 w-44"
+            className="pl-8 pr-4 py-1.5 bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 w-44"
           />
         </div>
 
@@ -122,7 +122,7 @@ export function AdminAuditPage() {
         <select
           value={filterEntity}
           onChange={(e) => setFilterEntity(e.target.value)}
-          className="bg-slate-800 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
+          className="bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
         >
           <option value="all">Barcha entity</option>
           {ENTITY_TYPES.map((e) => <option key={e} value={e}>{e}</option>)}
@@ -132,7 +132,7 @@ export function AdminAuditPage() {
         <select
           value={filterAction}
           onChange={(e) => setFilterAction(e.target.value)}
-          className="bg-slate-800 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
+          className="bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
         >
           <option value="all">Barcha amal</option>
           {ACTIONS.map((a) => <option key={a} value={a}>{a}</option>)}
@@ -143,7 +143,7 @@ export function AdminAuditPage() {
           type="date"
           value={filterFrom}
           onChange={(e) => setFilterFrom(e.target.value)}
-          className="bg-slate-800 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
+          className="bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
           title="Dan"
         />
         <span className="text-slate-600 text-xs">—</span>
@@ -151,7 +151,7 @@ export function AdminAuditPage() {
           type="date"
           value={filterTo}
           onChange={(e) => setFilterTo(e.target.value)}
-          className="bg-slate-800 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
+          className="bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
           title="Gacha"
         />
       </div>
@@ -181,11 +181,11 @@ export function AdminAuditPage() {
             <motion.div
               key={log.id}
               variants={staggerItem}
-              className="rounded-xl bg-slate-800/50 border border-white/8 overflow-hidden"
+              className="rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/8 overflow-hidden"
             >
               {/* Row */}
               <div
-                className="flex flex-wrap items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-800/80 transition-colors"
+                className="flex flex-wrap items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors"
                 onClick={() => setExpanded(expanded === log.id ? null : log.id)}
               >
                 {/* Action badge */}
@@ -229,7 +229,7 @@ export function AdminAuditPage() {
 
               {/* Expanded payload */}
               {expanded === log.id && (
-                <div className="px-4 pb-4 border-t border-white/6">
+                <div className="px-4 pb-4 border-t border-slate-200 dark:border-white/6">
                   <div className="mt-3 rounded-lg bg-slate-900/60 p-3 overflow-x-auto">
                     <pre className="text-xs text-slate-300 whitespace-pre-wrap break-all">
                       {JSON.stringify(

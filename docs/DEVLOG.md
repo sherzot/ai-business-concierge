@@ -4,6 +4,49 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-06-03 — Dark/Light Theme, Admin Sidebar Kengaytirish, Users va AI Stats sahifalari
+
+### Kontekst
+Barcha dashboardlarda (super_admin va kompaniya) to'liq qoʻng'ir/yorqin mavzu qoʻllab-quvvatlash; Admin sidebar yangi guruhlar bilan kengaytirildi; Super admin uchun barcha kompaniya foydalanuvchilarini ko'rish imkoniyati; yangi AI statistika sahifasi.
+
+### Bajarildi
+
+**Dark/light theme — barcha dashboardlar:**
+- `AdminLayout.tsx` — to'liq qayta yozildi: yangi `NAV_GROUPS` guruhlangan navigatsiya tuzilmasi, to'liq `dark:` variantlari qo'shildi (sidebar, topbar, navlar, tooltip, avatar, logout)
+- `App.tsx` — kompaniya dashboard sidebar, topbar, barcha havolalar va `NavItem` komponenti `dark:` variantlari bilan yangilandi
+- `AdminDashboardPage.tsx`, `AdminContactsPage.tsx`, `AdminCompaniesPage.tsx`, `AdminHealthPage.tsx`, `AdminAuditPage.tsx`, `AdminRiskPage.tsx`, `AdminAIChatPage.tsx`, `AdminKnowledgeBasePage.tsx` — 8 ta admin sahifada ommaviy `dark:` variant almashtirish o'tkazildi
+
+**Admin sidebar kengaytirish:**
+- Navigatsiya guruhlarga bo'lindi: Asosiy, Boshqaruv, Monitoring, Kontent
+- Yangi menular: **Foydalanuvchilar** (`/admin/users`), **AI Statistika** (`/admin/ai-stats`)
+- `Globe` ikonasi "Asosiy sayt" uchun, `PanelLeftOpen/Close` collapse/expand uchun
+- Collapsed holat tooltip-lari dark mode da to'g'ri ko'rsatiladi
+
+**Yangi admin sahifalar:**
+- `AdminUsersPage.tsx` — barcha platforma foydalanuvchilarini ko'rish: email, ism, kompaniya, rol (rangli badge), status, sana; rol filtrlari, qidiruv, paginatsiya
+- `AdminAiStatsPage.tsx` — AI foydalanish tahlili: KPI kartalar, kunlik bar grafik, model taqsimoti (progress bar), top kompaniyalar; 7/14/30/60/90 kunlik davr tanlash
+
+**Backend yangi endpoint:**
+- `GET /admin/users` — barcha `user_tenants` + `profiles` + `tenants` join; faqat super_admin/sub_admin; 500 ta limit
+
+**Router yangilanishi:**
+- `router.tsx` — `/admin/users` → `AdminUsersPage`, `/admin/ai-stats` → `AdminAiStatsPage` qo'shildi
+
+**API qatlami:**
+- `adminApi.ts` — `AdminUser` turi va `getAdminUsers()` funksiyasi qo'shildi
+
+### Fayllar
+- `frontend/src/features/admin/components/AdminLayout.tsx` (o'zgargan — to'liq qayta yozildi)
+- `frontend/src/App.tsx` (o'zgargan — dark mode + NavItem)
+- `frontend/src/features/admin/pages/AdminUsersPage.tsx` (yangi)
+- `frontend/src/features/admin/pages/AdminAiStatsPage.tsx` (yangi)
+- `frontend/src/features/admin/api/adminApi.ts` (o'zgargan — AdminUser + getAdminUsers)
+- `frontend/src/app/router.tsx` (o'zgargan — yangi admin routelar)
+- `supabase/functions/server/index.ts` (o'zgargan — GET /admin/users)
+- `frontend/src/features/admin/pages/*.tsx` (8 fayl — dark mode variantlari)
+
+---
+
 ## 2026-06-02 — RBAC, Admin Dashboard, va ULTRA Xavfsizlik Davomi (H-008..H-010)
 
 ### Kontekst

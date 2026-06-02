@@ -293,43 +293,44 @@ export default function App() {
   const userName = currentTenant?.fullName?.split(" ")[0] ?? profile?.user?.email?.split("@")[0] ?? "User";
 
   return (
-    <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
-      {/* Sidebar - 2-rasm dizayni */}
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-white overflow-hidden">
+      {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-[260px] bg-gradient-to-b from-indigo-950 via-slate-900 to-slate-950 text-white transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 flex flex-col shadow-2xl",
+          "fixed inset-y-0 left-0 z-50 w-[260px] transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 flex flex-col shadow-2xl",
+          "bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-white/8",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Logo */}
-        <div className="h-20 flex flex-col justify-center px-5 border-b border-slate-800/80">
+        <div className="h-20 flex flex-col justify-center px-5 border-b border-slate-200 dark:border-slate-800/80">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-500/30 ring-1 ring-white/10">
+            <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
               <Zap size={22} className="text-white" strokeWidth={2.5} />
             </div>
             <div>
-              <h1 className="font-semibold text-base tracking-tight">AI Concierge</h1>
-              <p className="text-xs text-slate-400">{translate("nav.sidebarTagline")}</p>
+              <h1 className="font-semibold text-base tracking-tight text-slate-900 dark:text-white">AI Concierge</h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{translate("nav.sidebarTagline")}</p>
             </div>
           </div>
         </div>
 
         {/* Tenant selector */}
-        <div ref={tenantRef} className="px-4 py-5 relative">
+        <div ref={tenantRef} className="px-4 py-4 relative">
           <button
             onClick={() => setTenantDropdownOpen(!tenantDropdownOpen)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 bg-slate-800/90 hover:bg-slate-700/90 rounded-xl transition-colors border border-slate-700/50"
+            className="w-full flex items-center gap-3 px-3 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/90 dark:hover:bg-slate-700/90 rounded-xl transition-colors border border-slate-200 dark:border-slate-700/50"
           >
-            <div className="w-9 h-9 rounded-lg bg-slate-700/80 flex items-center justify-center shrink-0">
-              <Building2 size={18} className="text-slate-300" />
+            <div className="w-9 h-9 rounded-lg bg-slate-200 dark:bg-slate-700/80 flex items-center justify-center shrink-0">
+              <Building2 size={18} className="text-slate-600 dark:text-slate-300" />
             </div>
             <div className="flex-1 text-left min-w-0">
-              <p className="text-sm font-semibold text-white truncate">{currentTenant.name}</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{currentTenant.name}</p>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="inline-flex items-center rounded-full bg-indigo-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-300 ring-1 ring-indigo-400/30">
+                <span className="inline-flex items-center rounded-full bg-indigo-100 dark:bg-indigo-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-400/30">
                   {translate(ROLE_KEYS[currentTenant.role] ?? "auth.role.employee")}
                 </span>
-                <span className="text-xs text-slate-400 truncate">
+                <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
                   · {translate("nav.employeesCount", { count: String(memberCount) })}
                 </span>
               </div>
@@ -337,7 +338,7 @@ export default function App() {
             <ChevronDown size={16} className="text-slate-400 shrink-0" />
           </button>
           {tenantDropdownOpen && profile?.tenants && (
-            <div className="absolute left-4 right-4 mt-1 bg-slate-800 border border-slate-700 rounded-xl shadow-xl z-50 py-1">
+            <div className="absolute left-4 right-4 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 py-1">
               {profile.tenants.length > 1 ? (
                 profile.tenants
                   .filter((t) => t.id !== currentTenant.id)
@@ -348,13 +349,13 @@ export default function App() {
                         setCurrentTenant(t);
                         setTenantDropdownOpen(false);
                       }}
-                      className="w-full px-3 py-2 text-left text-sm text-slate-200 hover:bg-slate-700 hover:text-white rounded-lg mx-1"
+                      className="w-full px-3 py-2 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white rounded-lg mx-1"
                     >
                       {t.name}
                     </button>
                   ))
               ) : (
-                <div className="py-3 px-4 text-center text-sm text-slate-400">
+                <div className="py-3 px-4 text-center text-sm text-slate-500 dark:text-slate-400">
                   Boshqa tashkilot yo&apos;q
                 </div>
               )}
@@ -388,7 +389,7 @@ export default function App() {
             <div className="pt-2">
               <button
                 onClick={() => setHrExpanded(!hrExpanded)}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors"
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-black/5 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <HeartPulse size={18} />
@@ -397,7 +398,7 @@ export default function App() {
                 {hrExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </button>
               {hrExpanded && (
-                <div className="ml-4 mt-1 space-y-0.5 border-l border-slate-700/60 pl-3">
+                <div className="ml-4 mt-1 space-y-0.5 border-l border-slate-200 dark:border-slate-700/60 pl-3">
                   {allowedHr.map((m) => (
                     <NavItem
                       key={m.key}
@@ -424,7 +425,7 @@ export default function App() {
         </nav>
 
         {/* Bottom: Settings + AI Status */}
-        <div className="p-4 border-t border-slate-800/80 space-y-2">
+        <div className="p-4 border-t border-slate-200 dark:border-slate-800/80 space-y-2">
           {(currentTenant.role === "company_admin" || currentTenant.role === "leader") && (
             <NavItem
               icon={<Building2 size={20} />}
@@ -439,16 +440,16 @@ export default function App() {
             active={activeModule === "settings"}
             onClick={() => setActiveModule("settings")}
           />
-          <div className="flex items-center gap-3 px-3 py-2.5 bg-slate-800/90 rounded-xl border border-slate-700/50">
+          <div className="flex items-center gap-3 px-3 py-2.5 bg-slate-100 dark:bg-slate-800/90 rounded-xl border border-slate-200 dark:border-slate-700/50">
             <div className="relative">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-400/25 to-indigo-600/25 flex items-center justify-center ring-1 ring-indigo-300/20">
-                <Zap size={18} className="text-indigo-300" />
+              <div className="w-9 h-9 rounded-lg bg-indigo-100 dark:bg-gradient-to-br dark:from-indigo-400/25 dark:to-indigo-600/25 flex items-center justify-center ring-1 ring-indigo-200 dark:ring-indigo-300/20">
+                <Zap size={18} className="text-indigo-600 dark:text-indigo-300" />
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-slate-800" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-800" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white">{translate("nav.aiActive")}</p>
-              <p className="text-xs text-slate-400 truncate">
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">{translate("nav.aiActive")}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                 {translate("nav.aiTasksRunning", { count: String(aiTasksCount) })}
               </p>
             </div>
@@ -457,18 +458,18 @@ export default function App() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col min-w-0 bg-slate-50 relative">
-        {/* Topbar - 1-rasm dizayni */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-6 shadow-sm z-20">
+      <main className="flex-1 flex flex-col min-w-0 bg-slate-50 dark:bg-slate-950 relative">
+        {/* Topbar */}
+        <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/8 flex items-center justify-between px-4 lg:px-6 shadow-sm dark:shadow-none z-20">
           <div className="flex items-center gap-6">
             <button
-              className="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg"
+              className="lg:hidden p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             >
               <Menu size={20} />
             </button>
             <div>
-              <h2 className="text-lg font-semibold text-slate-800">
+              <h2 className="text-lg font-semibold text-slate-800 dark:text-white">
                 {activeModule === "dashboard" && translate("nav.dashboard")}
                 {activeModule === "reports" && translate("nav.reports")}
                 {activeModule === "inbox" && translate("nav.inbox")}
@@ -480,7 +481,7 @@ export default function App() {
                 {activeModule === "integrations" && translate("nav.integrations")}
                 {activeModule === "settings" && translate("nav.settings")}
               </h2>
-              <p className="text-sm text-slate-500">{translate("nav.welcome", { name: userName })}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{translate("nav.welcome", { name: userName })}</p>
             </div>
           </div>
 
@@ -488,11 +489,11 @@ export default function App() {
             <button
               data-tour="search"
               onClick={() => setPaletteOpen(true)}
-              className="relative hidden md:flex items-center gap-2 pl-10 pr-4 py-2 w-72 bg-slate-100 border-none rounded-full text-sm text-slate-400 hover:bg-slate-200 transition-colors cursor-pointer"
+              className="relative hidden md:flex items-center gap-2 pl-10 pr-4 py-2 w-72 bg-slate-100 dark:bg-slate-800 border-none rounded-full text-sm text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
             >
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <span className="flex-1 text-left">{translate("nav.searchPlaceholder")}</span>
-              <kbd className="text-[11px] bg-white text-slate-400 rounded px-1.5 py-0.5 font-mono shadow-sm border border-slate-200">⌘K</kbd>
+              <kbd className="text-[11px] bg-white dark:bg-slate-700 text-slate-400 rounded px-1.5 py-0.5 font-mono shadow-sm border border-slate-200 dark:border-white/10">⌘K</kbd>
             </button>
             <ThemeToggle />
             <LocaleSelect variant="light" />
@@ -501,7 +502,7 @@ export default function App() {
             )}
             <button
               onClick={() => startTour(DASHBOARD_TOUR)}
-              className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors"
+              className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
               title="Yo'riqnoma turini boshlash"
               aria-label="Yo'riqnoma"
             >
@@ -509,11 +510,11 @@ export default function App() {
             </button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+                <button className="relative p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                   <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium text-sm">
                     {userName.charAt(0).toUpperCase()}
                   </div>
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-indigo-500 rounded-full border-2 border-white" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-indigo-500 rounded-full border-2 border-white dark:border-slate-900" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -529,7 +530,7 @@ export default function App() {
             </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+                <button className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                   <MoreHorizontal size={20} />
                 </button>
               </DropdownMenuTrigger>
@@ -547,9 +548,9 @@ export default function App() {
           </div>
         </header>
 
-        {/* Dashboard action buttons - faqat dashboard sahifasida */}
+        {/* Dashboard action buttons */}
         {activeModule === "dashboard" && (
-          <div className="bg-white border-b border-slate-200 px-4 lg:px-6 py-3 flex flex-wrap gap-2">
+          <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-white/8 px-4 lg:px-6 py-3 flex flex-wrap gap-2">
             <button
               onClick={() => setActiveModule("tasks")}
               className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm"
@@ -559,28 +560,28 @@ export default function App() {
             </button>
             <button
               onClick={() => setActiveModule("docs")}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               <FilePlus size={18} />
               {translate("dashboard.actions.createDoc")}
             </button>
             <button
               onClick={() => setActiveModule("hr")}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               <UserPlus size={18} />
               {translate("dashboard.actions.addEmployee")}
             </button>
             <button
               onClick={() => setActiveModule("inbox")}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               <Send size={18} />
               {translate("dashboard.actions.sendMessage")}
             </button>
             <button
               onClick={() => setIsAIChatOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               <Calendar size={18} />
               {translate("dashboard.actions.meeting")}
@@ -620,7 +621,7 @@ export default function App() {
 
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -667,8 +668,8 @@ function NavItem({
         "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
         indent && "py-2",
         active
-          ? "bg-indigo-600 text-white shadow-md shadow-indigo-900/40"
-          : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+          ? "bg-indigo-600 text-white shadow-md"
+          : "text-slate-600 hover:text-slate-900 hover:bg-black/5 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60"
       )}
     >
       <div className="flex items-center gap-3">

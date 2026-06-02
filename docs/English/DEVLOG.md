@@ -4,6 +4,49 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-06-03 — Dark/Light Theme, Admin Sidebar Expansion, Users & AI Stats Pages
+
+### Context
+Full dark/light theme support across all dashboards (super_admin and company); admin sidebar reorganized with grouped navigation; super admin can now view all company users; new AI statistics page.
+
+### Done
+
+**Dark/light theme — all dashboards:**
+- `AdminLayout.tsx` — fully rewritten: new `NAV_GROUPS` grouped nav structure, full `dark:` variants (sidebar, topbar, nav items, tooltips, avatar, logout)
+- `App.tsx` — company dashboard sidebar, topbar, all links, and `NavItem` component updated with `dark:` variants
+- All 8 admin pages — mass `dark:` variant replacement applied
+
+**Admin sidebar expansion:**
+- Navigation split into groups: Main, Management, Monitoring, Content
+- New menu items: **Users** (`/admin/users`), **AI Statistics** (`/admin/ai-stats`)
+- `Globe` icon for "Main site", `PanelLeftOpen/Close` for collapse/expand
+- Collapsed-mode tooltips render correctly in dark mode
+
+**New admin pages:**
+- `AdminUsersPage.tsx` — view all platform users: email, name, company, role (colored badge), status, date; role filters, search, pagination
+- `AdminAiStatsPage.tsx` — AI usage analytics: KPI cards, daily bar chart, model breakdown (progress bars), top companies; 7/14/30/60/90 day period selector
+
+**Backend new endpoint:**
+- `GET /admin/users` — all `user_tenants` + `profiles` + `tenants` join; super_admin/sub_admin only; limit 500
+
+**Router update:**
+- `router.tsx` — added `/admin/users` → `AdminUsersPage`, `/admin/ai-stats` → `AdminAiStatsPage`
+
+**API layer:**
+- `adminApi.ts` — added `AdminUser` type and `getAdminUsers()` function
+
+### Files
+- `frontend/src/features/admin/components/AdminLayout.tsx` (changed — full rewrite)
+- `frontend/src/App.tsx` (changed — dark mode + NavItem)
+- `frontend/src/features/admin/pages/AdminUsersPage.tsx` (new)
+- `frontend/src/features/admin/pages/AdminAiStatsPage.tsx` (new)
+- `frontend/src/features/admin/api/adminApi.ts` (changed — AdminUser + getAdminUsers)
+- `frontend/src/app/router.tsx` (changed — new admin routes)
+- `supabase/functions/server/index.ts` (changed — GET /admin/users)
+- `frontend/src/features/admin/pages/*.tsx` (8 files — dark mode variants)
+
+---
+
 ## 2026-06-02 — RBAC, Admin Dashboard, and ULTRA Security Continuation (H-008..H-010)
 
 ### Context

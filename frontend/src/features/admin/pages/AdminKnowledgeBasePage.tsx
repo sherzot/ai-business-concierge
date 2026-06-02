@@ -61,10 +61,10 @@ function FormModal({ initial, onSave, onClose }: FormModalProps) {
       <motion.div
         initial={{ scale: 0.96, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-2xl bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+        className="w-full max-w-2xl bg-slate-900 border border-slate-300 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/8">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-white/8">
           <div className="flex items-center gap-2.5">
             <BookOpen size={18} className="text-indigo-400" />
             <h2 className="text-base font-semibold text-white">
@@ -85,7 +85,7 @@ function FormModal({ initial, onSave, onClose }: FormModalProps) {
               <select
                 value={locale}
                 onChange={(e) => setLocale(e.target.value)}
-                className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="w-full bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
               >
                 {LOCALES.map((l) => <option key={l} value={l}>{l.toUpperCase()}</option>)}
               </select>
@@ -95,7 +95,7 @@ function FormModal({ initial, onSave, onClose }: FormModalProps) {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="w-full bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
               >
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -109,7 +109,7 @@ function FormModal({ initial, onSave, onClose }: FormModalProps) {
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Mijoz so'raydigan savol..."
-              className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+              className="w-full bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
             />
           </label>
 
@@ -121,7 +121,7 @@ function FormModal({ initial, onSave, onClose }: FormModalProps) {
               onChange={(e) => setAnswer(e.target.value)}
               rows={6}
               placeholder="To'liq, aniq javob..."
-              className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none"
+              className="w-full bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none"
             />
           </label>
 
@@ -135,7 +135,7 @@ function FormModal({ initial, onSave, onClose }: FormModalProps) {
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="soliq, QQS, hisobot"
-                className="w-full bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="w-full bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
               />
             </label>
             <label className="block">
@@ -146,7 +146,7 @@ function FormModal({ initial, onSave, onClose }: FormModalProps) {
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
                   isActive
                     ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
-                    : "bg-slate-800 border-white/10 text-slate-400"
+                    : "bg-slate-800 border-slate-300 dark:border-white/10 text-slate-400"
                 }`}
               >
                 {isActive ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
@@ -268,7 +268,7 @@ export function AdminKnowledgeBasePage() {
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={load}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/8 border border-white/8 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/8 border border-slate-200 dark:border-white/8 transition-colors"
           >
             <RefreshCw size={13} /> Yangilash
           </button>
@@ -289,13 +289,13 @@ export function AdminKnowledgeBasePage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Qidiruv..."
-            className="pl-8 pr-4 py-1.5 bg-slate-800 border border-white/10 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 w-48"
+            className="pl-8 pr-4 py-1.5 bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 w-48"
           />
         </div>
         <select
           value={filterLocale}
           onChange={(e) => setFilterLocale(e.target.value)}
-          className="bg-slate-800 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
+          className="bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
         >
           <option value="all">Barcha tillar</option>
           {LOCALES.map((l) => <option key={l} value={l}>{l.toUpperCase()}</option>)}
@@ -303,7 +303,7 @@ export function AdminKnowledgeBasePage() {
         <select
           value={filterCategory}
           onChange={(e) => setFilterCategory(e.target.value)}
-          className="bg-slate-800 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
+          className="bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
         >
           <option value="all">Barcha kategoriyalar</option>
           {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -336,13 +336,13 @@ export function AdminKnowledgeBasePage() {
               variants={staggerItem}
               className={`rounded-xl border overflow-hidden transition-colors ${
                 article.is_active
-                  ? "bg-slate-800/50 border-white/8"
+                  ? "bg-slate-800/50 border-slate-200 dark:border-white/8"
                   : "bg-slate-900/30 border-white/4 opacity-60"
               }`}
             >
               {/* Row */}
               <div
-                className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-800/80 transition-colors"
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors"
                 onClick={() => setExpanded(expanded === article.id ? null : article.id)}
               >
                 {/* Locale badge */}
@@ -389,7 +389,7 @@ export function AdminKnowledgeBasePage() {
 
               {/* Expanded */}
               {expanded === article.id && (
-                <div className="px-4 pb-4 border-t border-white/6 space-y-3">
+                <div className="px-4 pb-4 border-t border-slate-200 dark:border-white/6 space-y-3">
                   <p className="text-sm text-slate-300 whitespace-pre-wrap pt-3">{article.answer}</p>
                   <div className="flex items-center gap-2 pt-1">
                     <button
@@ -428,7 +428,7 @@ export function AdminKnowledgeBasePage() {
       {/* Delete Confirm */}
       {deleting && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
-          <div className="bg-slate-900 border border-white/10 rounded-xl p-6 max-w-sm w-full mx-4 shadow-2xl">
+          <div className="bg-slate-900 border border-slate-300 dark:border-white/10 rounded-xl p-6 max-w-sm w-full mx-4 shadow-2xl">
             <h3 className="text-base font-semibold text-white mb-2">Maqolani o'chirish</h3>
             <p className="text-sm text-slate-400 mb-5">Bu amal qaytarib bo'lmaydi. Davom etasizmi?</p>
             <div className="flex justify-end gap-2">

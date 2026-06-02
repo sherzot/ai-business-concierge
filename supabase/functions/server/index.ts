@@ -3937,6 +3937,62 @@ const registerRoutes = (prefix: string) => {
     return success(c, result);
   });
 
+  // ─── GET /v1/admin/users — barcha foydalanuvchilar (super_admin / sub_admin) ─
+  app.get(`${prefix}/admin/users`, async (c) => {
+    const auth = c.req.header("authorization");
+    if (!auth?.startsWith("Bearer "))
+      return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser(auth.slice(7));
+    if (authErr || !user)
+      return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+
+    const { data: ut } = await supabase
+      .from("user_tenants")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["super_admin", "sub_admin"])
+      .limit(1)
+      .single();
+    if (!ut)
+      return failure(c, 403, "FORBIDDEN", "Faqat super_admin / sub_admin.");
+
+    const { data: rows, error } = await supabase
+      .from("user_tenants")
+      .select(`
+        id,
+        user_id,
+        tenant_id,
+        role,
+        status,
+        created_at,
+        tenants!inner ( name ),
+        profiles ( email, full_name, phone )
+      `)
+      .order("created_at", { ascending: false })
+      .limit(500);
+
+    if (error) return failure(c, 500, "DB_ERROR", error.message);
+
+    const result = (rows ?? []).map((r: any) => ({
+      id: r.id,
+      user_id: r.user_id,
+      tenant_id: r.tenant_id,
+      tenant_name: r.tenants?.name ?? "",
+      role: r.role,
+      status: r.status,
+      email: r.profiles?.email ?? "",
+      full_name: r.profiles?.full_name ?? null,
+      phone: r.profiles?.phone ?? null,
+      created_at: r.created_at,
+    }));
+
+    return success(c, result);
+  });
+
   // ─── GET /v1/admin/contacts — super_admin / sub_admin ─────────────────────
   app.get(`${prefix}/admin/contacts`, async (c) => {
     const auth = c.req.header("authorization");

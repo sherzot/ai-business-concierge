@@ -4,6 +4,49 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-06-03 — ダーク/ライトテーマ、管理者サイドバー拡張、ユーザー・AI統計ページ
+
+### コンテキスト
+全ダッシュボード（super_admin・企業）でのダーク/ライトテーマ完全対応；管理者サイドバーをグループ化ナビゲーションで再編成；super adminが全企業ユーザーを閲覧可能に；新AI統計ページ追加。
+
+### 実施内容
+
+**ダーク/ライトテーマ — 全ダッシュボード：**
+- `AdminLayout.tsx` — 完全書き直し：新しい`NAV_GROUPS`グループ構造、全コンポーネントに`dark:`バリアント追加（sidebar、topbar、nav、tooltip、avatar、logout）
+- `App.tsx` — 企業dashboardのsidebar、topbar、全リンク、`NavItem`コンポーネントを`dark:`バリアントで更新
+- 全8件のadminページ — `dark:`クラス一括置換
+
+**管理者サイドバー拡張：**
+- ナビゲーションをグループ化：メイン、管理、モニタリング、コンテンツ
+- 新メニュー：**ユーザー**（`/admin/users`）、**AI統計**（`/admin/ai-stats`）
+- `Globe`アイコン（メインサイト用）、`PanelLeftOpen/Close`（折りたたみ用）
+- 折りたたみモードのツールチップがダークモードで正しく表示
+
+**新しいadminページ：**
+- `AdminUsersPage.tsx` — 全プラットフォームユーザー表示：メール、氏名、企業、ロール（カラーbadge）、ステータス、日付；ロールフィルター、検索、ページネーション
+- `AdminAiStatsPage.tsx` — AI利用分析：KPIカード、日次棒グラフ、モデル別内訳（プログレスバー）、上位企業；7/14/30/60/90日の期間選択
+
+**バックエンド新エンドポイント：**
+- `GET /admin/users` — `user_tenants` + `profiles` + `tenants`のjoin；super_admin/sub_adminのみ；500件制限
+
+**ルーター更新：**
+- `router.tsx` — `/admin/users`と`/admin/ai-stats`を追加
+
+**APIレイヤー：**
+- `adminApi.ts` — `AdminUser`型と`getAdminUsers()`関数を追加
+
+### ファイル
+- `frontend/src/features/admin/components/AdminLayout.tsx`（変更 — 完全書き直し）
+- `frontend/src/App.tsx`（変更 — ダークモード + NavItem）
+- `frontend/src/features/admin/pages/AdminUsersPage.tsx`（新規）
+- `frontend/src/features/admin/pages/AdminAiStatsPage.tsx`（新規）
+- `frontend/src/features/admin/api/adminApi.ts`（変更）
+- `frontend/src/app/router.tsx`（変更）
+- `supabase/functions/server/index.ts`（変更 — GET /admin/users）
+- `frontend/src/features/admin/pages/*.tsx`（8ファイル — ダークモード）
+
+---
+
 ## 2026-06-02 — RBAC、管理者ダッシュボード、ULTRAセキュリティ継続（H-008〜H-010）
 
 ### コンテキスト

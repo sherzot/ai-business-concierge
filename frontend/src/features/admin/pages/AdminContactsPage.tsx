@@ -142,7 +142,7 @@ export function AdminContactsPage() {
             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
               filter === s
                 ? "bg-indigo-500 border-indigo-400 text-white"
-                : "bg-slate-800 border-white/10 text-slate-400 hover:text-white hover:border-white/20"
+                : "bg-slate-800 border-slate-300 dark:border-white/10 text-slate-400 hover:text-white hover:border-slate-300 dark:hover:border-white/20"
             }`}
           >
             {s === "all" ? "Hammasi" : STATUS_LABELS[s]}
@@ -163,7 +163,7 @@ export function AdminContactsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Ism, kompaniya, email yoki telefon..."
-          className="w-full rounded-xl bg-slate-800 border border-white/10 text-white placeholder-slate-500 pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+          className="w-full rounded-xl bg-slate-800 border border-slate-300 dark:border-white/10 text-white placeholder-slate-500 pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
         />
       </div>
 
@@ -178,7 +178,7 @@ export function AdminContactsPage() {
       {loading ? (
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="rounded-xl bg-slate-800/50 border border-white/8 px-5 py-4 animate-pulse">
+            <div key={i} className="rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/8 px-5 py-4 animate-pulse">
               <div className="flex items-center gap-4">
                 <div className="flex-1 space-y-2">
                   <div className="h-4 w-40 bg-slate-700 rounded" />
@@ -203,7 +203,7 @@ export function AdminContactsPage() {
           {filtered.map((c) => (
             <div
               key={c.id}
-              className="rounded-xl bg-slate-800/50 border border-white/8 overflow-hidden"
+              className="rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/8 overflow-hidden"
             >
               {/* Row */}
               <div
@@ -239,14 +239,14 @@ export function AdminContactsPage() {
 
               {/* Expanded */}
               {expanded === c.id && (
-                <div className="border-t border-white/8 px-5 py-4 bg-slate-900/40">
+                <div className="border-t border-slate-200 dark:border-white/8 px-5 py-4 bg-slate-900/40">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5 text-sm">
                     {c.business_type && <div><span className="text-slate-500">Biznes turi: </span><span className="text-slate-200">{c.business_type.toUpperCase()}</span></div>}
                     {c.employee_count && <div><span className="text-slate-500">Xodimlar: </span><span className="text-slate-200">{c.employee_count}</span></div>}
                     {c.source && <div><span className="text-slate-500">Manba: </span><span className="text-slate-200">{c.source}</span></div>}
                   </div>
                   {c.message && (
-                    <div className="mb-5 rounded-xl bg-slate-800 border border-white/8 px-4 py-3 text-sm text-slate-300">
+                    <div className="mb-5 rounded-xl bg-slate-800 border border-slate-200 dark:border-white/8 px-4 py-3 text-sm text-slate-300">
                       <span className="text-slate-500 text-xs block mb-1">Xabar:</span>
                       {c.message}
                     </div>

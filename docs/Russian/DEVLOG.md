@@ -4,6 +4,49 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-06-03 — Тёмная/светлая тема, расширение боковой панели, страницы Users и AI Stats
+
+### Контекст
+Полная поддержка тёмной/светлой темы во всех дашбордах (super_admin и компании); боковая панель Admin реорганизована с группированной навигацией; super admin теперь видит всех пользователей компаний; новая страница AI-статистики.
+
+### Сделано
+
+**Тёмная/светлая тема — все дашборды:**
+- `AdminLayout.tsx` — полностью переписан: новая структура `NAV_GROUPS`, полные `dark:` варианты (sidebar, topbar, nav, tooltips, avatar, logout)
+- `App.tsx` — компании sidebar, topbar, все ссылки и `NavItem` обновлены с `dark:` вариантами
+- Все 8 admin-страниц — массовая замена классов на `dark:` варианты
+
+**Расширение боковой панели:**
+- Навигация разбита на группы: Главная, Управление, Мониторинг, Контент
+- Новые пункты: **Пользователи** (`/admin/users`), **AI Статистика** (`/admin/ai-stats`)
+- Иконка `Globe` для «Основной сайт», `PanelLeftOpen/Close` для сворачивания
+- Тултипы в свёрнутом режиме корректно отображаются в тёмной теме
+
+**Новые admin-страницы:**
+- `AdminUsersPage.tsx` — просмотр всех пользователей платформы: email, имя, компания, роль (цветной badge), статус, дата; фильтры ролей, поиск, пагинация
+- `AdminAiStatsPage.tsx` — аналитика AI: KPI-карточки, дневной bar chart, разбивка по моделям, топ-компании; выбор периода 7/14/30/60/90 дней
+
+**Новый backend-эндпоинт:**
+- `GET /admin/users` — join `user_tenants` + `profiles` + `tenants`; только super_admin/sub_admin; лимит 500
+
+**Обновление роутера:**
+- `router.tsx` — добавлены `/admin/users` и `/admin/ai-stats`
+
+**API:**
+- `adminApi.ts` — добавлены тип `AdminUser` и функция `getAdminUsers()`
+
+### Файлы
+- `frontend/src/features/admin/components/AdminLayout.tsx` (изменён — полная перезапись)
+- `frontend/src/App.tsx` (изменён — тёмная тема + NavItem)
+- `frontend/src/features/admin/pages/AdminUsersPage.tsx` (новый)
+- `frontend/src/features/admin/pages/AdminAiStatsPage.tsx` (новый)
+- `frontend/src/features/admin/api/adminApi.ts` (изменён)
+- `frontend/src/app/router.tsx` (изменён)
+- `supabase/functions/server/index.ts` (изменён — GET /admin/users)
+- `frontend/src/features/admin/pages/*.tsx` (8 файлов — dark mode)
+
+---
+
 ## 2026-06-02 — RBAC, Дашборд администратора и продолжение ULTRA-аудита (H-008..H-010)
 
 ### Контекст

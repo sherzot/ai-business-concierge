@@ -19,6 +19,8 @@ import { AdminAIChatPage } from "../features/admin/pages/AdminAIChatPage";
 import { AdminKnowledgeBasePage } from "../features/admin/pages/AdminKnowledgeBasePage";
 import { AdminAuditPage } from "../features/admin/pages/AdminAuditPage";
 import { AdminRiskPage } from "../features/admin/pages/AdminRiskPage";
+import { AdminUsersPage } from "../features/admin/pages/AdminUsersPage";
+import { AdminAiStatsPage } from "../features/admin/pages/AdminAiStatsPage";
 
 export const router = createBrowserRouter([
   { path: "/",                element: <LandingPage /> },
@@ -47,7 +49,9 @@ export const router = createBrowserRouter([
       { path: "ai-chat",        element: <AdminAIChatPage /> },
       { path: "knowledge-base", element: <AdminKnowledgeBasePage /> },
       { path: "audit",          element: <AdminAuditPage /> },
-      { path: "risk", element: <AdminRiskPage /> },
+      { path: "risk",           element: <AdminRiskPage /> },
+      { path: "users",          element: <AdminUsersPage /> },
+      { path: "ai-stats",       element: <AdminAiStatsPage /> },
     ],
   },
 
