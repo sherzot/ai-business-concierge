@@ -8,8 +8,7 @@
  *
  * Ruxsat: faqat super_admin | sub_admin
  *
- * Qo'shish uchun index.ts ga:
- *   import riskScanRoutes from "./routes/risk-scan.ts";
+ * Qo'shish uchun index.ts ga (bu faylni import qiling):
  *   app.route(`${V1_PATH}/admin/risk`, riskScanRoutes);
  */
 
