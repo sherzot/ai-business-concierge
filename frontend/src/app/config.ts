@@ -1,9 +1,15 @@
-const defaultProjectId = "ufhepwdkjqptjvxrmpjn";
-const defaultAnonKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmaGVwd2RranFwdGp2eHJtcGpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxODU3NzksImV4cCI6MjA4NTc2MTc3OX0.Z4mdxlMGUYSubbzNzSap7kBXLrPzxx5TB27r7rBmNJ8";
+const projectIdEnv = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+const anonKeyEnv = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID ?? defaultProjectId;
-export const publicAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY ?? defaultAnonKey;
+if (!projectIdEnv || !anonKeyEnv) {
+  throw new Error(
+    "VITE_SUPABASE_PROJECT_ID va VITE_SUPABASE_ANON_KEY muhit o'zgaruvchilari sozlanmagan. " +
+    "frontend/.env faylini .env.example asosida yarating."
+  );
+}
+
+export const projectId = projectIdEnv;
+export const publicAnonKey = anonKeyEnv;
 export const supabaseUrl =
   import.meta.env.VITE_SUPABASE_URL ?? `https://${projectId}.supabase.co`;
 export const API_BASE_URL =

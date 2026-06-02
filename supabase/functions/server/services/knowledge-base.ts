@@ -99,6 +99,7 @@ export const searchKnowledgeBase = async (
     category?: KbCategory;
     threshold?: number;
     count?: number;
+    tenantId?: string;
   },
 ): Promise<KbSearchResult> => {
   const {
@@ -107,6 +108,7 @@ export const searchKnowledgeBase = async (
     category  = undefined,
     threshold = MATCH_THRESHOLD,
     count     = MATCH_COUNT,
+    tenantId  = undefined,
   } = params;
 
   // 1. Embedding olish
@@ -125,6 +127,7 @@ export const searchKnowledgeBase = async (
     match_category: category ?? null,
     match_count: count,
     match_threshold: threshold,
+    match_tenant_id: tenantId ?? null,
   });
 
   if (error || !data || data.length === 0) {

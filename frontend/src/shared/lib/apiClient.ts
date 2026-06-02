@@ -1,4 +1,4 @@
-import { API_BASE_URL, publicAnonKey } from "../../app/config";
+import { API_BASE_URL } from "../../app/config";
 import { supabase } from "./supabase";
 
 export type ApiOptions = RequestInit & { tenantId?: string };
@@ -8,10 +8,13 @@ export type ApiError = Error & { traceId?: string };
 export async function apiRequest<T>(endpoint: string, options: ApiOptions = {}): Promise<T> {
   const { tenantId, ...fetchOptions } = options;
   const { data: { session } } = await supabase.auth.getSession();
-  const token = session?.access_token ?? publicAnonKey;
+  if (!session?.access_token) {
+    const err = new Error("Authentication required") as ApiError;
+    throw err;
+  }
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${session.access_token}`,
     ...(tenantId ? { "X-Tenant-Id": tenantId } : {}),
     ...(session?.user?.id ? { "X-User-Id": session.user.id } : {}),
     ...(fetchOptions.headers as Record<string, string> ?? {}),

@@ -2,6 +2,7 @@ import React from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { ProtectedLayout } from "../features/auth/components/ProtectedLayout";
 import { RequireAuth } from "../features/auth/components/RequireAuth";
+import { RequireRole } from "../features/auth/components/RequireRole";
 import { AdminLayout } from "../features/admin/components/AdminLayout";
 import { LoginPage } from "../features/auth/pages/LoginPage";
 import { SetupAccountPage } from "../features/auth/pages/SetupAccountPage";
@@ -33,7 +34,9 @@ export const router = createBrowserRouter([
     path: "/admin",
     element: (
       <RequireAuth>
-        <AdminLayout />
+        <RequireRole roles={["super_admin", "sub_admin"]}>
+          <AdminLayout />
+        </RequireRole>
       </RequireAuth>
     ),
     children: [

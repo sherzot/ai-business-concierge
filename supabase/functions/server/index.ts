@@ -11,6 +11,7 @@ import {
 } from "./services/knowledge-base.ts";
 import { checkAiSafety, wrapUserMessage } from "./services/ai-safety.ts";
 import riskScanRoutes from "./routes/risk-scan.ts";
+import { guardUsage, recordUsage } from "./services/usage-tracking.ts";
 
 const app = new Hono();
 const BASE_PATH = "/make-server-6c2837d6";
@@ -57,7 +58,12 @@ app.use("*", async (c, next) => {
 app.use(
   "/*",
   cors({
-    origin: "*",
+    origin: [
+      "https://aibizconcierge.uz",
+      "https://ai-business-concierge1.netlify.app",
+      "http://localhost:5173",
+      "http://localhost:4173",
+    ],
     allowHeaders: [
       "Content-Type",
       "Authorization",
@@ -68,6 +74,7 @@ app.use(
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
     maxAge: 600,
+    credentials: true,
   }),
 );
 
@@ -337,22 +344,33 @@ const getTenantContext = async (c: any): Promise<TenantContext | null> => {
       if (supabaseUser) payload = { sub: supabaseUser.sub };
     }
     if (payload) {
-      const tenantId = payload.tenant_id ?? c.req.header("x-tenant-id");
-      const userId =
-        payload.sub ?? payload.user_id ?? c.req.header("x-user-id");
-      if (tenantId) {
+      const userId = payload.sub ?? payload.user_id;
+      if (!userId) return null;
+
+      // Case 1: JWT da tenant_id to'g'ridan mavjud (custom claim)
+      const jwtTenantId = payload.tenant_id;
+      if (jwtTenantId) {
         const ctx: TenantContext = {
-          tenantId,
+          tenantId: jwtTenantId,
           userId,
           roles: payload.roles ?? payload.app_metadata?.roles ?? [],
           permissions: payload.permissions ?? [],
         };
         c.set(TENANT_CTX_KEY, ctx);
-        c.set(TENANT_ID_KEY, tenantId);
+        c.set(TENANT_ID_KEY, jwtTenantId);
         return ctx;
       }
-      if (userId) {
-        const headerTenantId = c.req.header("x-tenant-id") ?? "";
+
+      // Case 2: JWT da tenant_id yo'q — header tenantini DB da tekshirib tasdiqlaymiz
+      const headerTenantId = c.req.header("x-tenant-id");
+      if (headerTenantId) {
+        const { data: membership } = await supabase
+          .from("user_tenants")
+          .select("tenant_id")
+          .eq("user_id", userId)
+          .eq("tenant_id", headerTenantId)
+          .maybeSingle();
+        if (!membership) return null; // Foydalanuvchi bu tenantga tegishli emas
         const ctx: TenantContext = {
           tenantId: headerTenantId,
           userId,
@@ -366,17 +384,7 @@ const getTenantContext = async (c: any): Promise<TenantContext | null> => {
     }
   }
 
-  const tenantId = c.req.header("x-tenant-id");
-  if (tenantId) {
-    const ctx = {
-      tenantId,
-      userId: c.req.header("x-user-id") ?? undefined,
-    };
-    c.set(TENANT_CTX_KEY, ctx);
-    c.set(TENANT_ID_KEY, tenantId);
-    return ctx;
-  }
-
+  // Autentifikatsiyasiz header fallback — yo'q qilindi (K-001)
   return null;
 };
 
@@ -1612,23 +1620,25 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 400, "INVALID_PAYLOAD", "Body bo'sh.");
     }
 
-    if (RESEND_WEBHOOK_SECRET) {
-      try {
-        const wh = new Webhook(RESEND_WEBHOOK_SECRET);
-        const headers = {
-          "svix-id": c.req.header("svix-id") ?? "",
-          "svix-timestamp": c.req.header("svix-timestamp") ?? "",
-          "svix-signature": c.req.header("svix-signature") ?? "",
-        };
-        wh.verify(rawBody, headers);
-      } catch {
-        return failure(
-          c,
-          401,
-          "INVALID_SIGNATURE",
-          "Webhook imzosi noto'g'ri.",
-        );
-      }
+    if (!RESEND_WEBHOOK_SECRET) {
+      console.error("[SECURITY] RESEND_WEBHOOK_SECRET sozlanmagan — webhook rad etildi");
+      return failure(c, 503, "CONFIG_ERROR", "Webhook tekshiruvi sozlanmagan.");
+    }
+    try {
+      const wh = new Webhook(RESEND_WEBHOOK_SECRET);
+      const headers = {
+        "svix-id": c.req.header("svix-id") ?? "",
+        "svix-timestamp": c.req.header("svix-timestamp") ?? "",
+        "svix-signature": c.req.header("svix-signature") ?? "",
+      };
+      wh.verify(rawBody, headers);
+    } catch {
+      return failure(
+        c,
+        401,
+        "INVALID_SIGNATURE",
+        "Webhook imzosi noto'g'ri.",
+      );
     }
 
     let payload: {
@@ -2363,7 +2373,7 @@ const registerRoutes = (prefix: string) => {
       };
 
       if (mode === "set") {
-        if (!new_password || new_password.length < 8) {
+        if (!new_password || new_password.length < 12) {
           return failure(
             c,
             422,
@@ -2456,14 +2466,14 @@ const registerRoutes = (prefix: string) => {
     const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
     if (
       callerRole !== "leader" &&
-      callerRole !== "hr" &&
+      callerRole !== "company_admin" &&
       callerRole !== "super_admin"
     ) {
       return failure(
         c,
         403,
         "FORBIDDEN_ROLE",
-        "Faqat Super Admin, Rahbar yoki HR butunlay o'chira oladi.",
+        "Faqat Super Admin yoki Rahbar butunlay o'chira oladi.",
       );
     }
 
@@ -2689,7 +2699,7 @@ const registerRoutes = (prefix: string) => {
         "Mode 'invite' yoki 'password' bo'lishi kerak.",
       );
     }
-    if (mode === "password" && (!password || password.length < 8)) {
+    if (mode === "password" && (!password || password.length < 12)) {
       return failure(c, 422, "VALIDATION_ERROR", "Parol kamida 8 belgi.");
     }
 
@@ -3169,6 +3179,7 @@ const registerRoutes = (prefix: string) => {
       .update({ read_at: new Date().toISOString() })
       .eq("id", notifId)
       .eq("user_id", userId)
+      .eq("tenant_id", (ctx as any).tenantId)
       .select("*")
       .single();
 
@@ -3201,10 +3212,22 @@ const registerRoutes = (prefix: string) => {
     if (!(ctx as any).tenantId) return ctx;
 
     const body = await c.req.json().catch(() => ({}));
-    const { message, context, locale: reqLocale, system_prompt } = body;
+    if (body.system_prompt !== undefined) {
+      return failure(c, 422, "VALIDATION_ERROR", "system_prompt maydoni ruxsat etilmagan.");
+    }
+    const { message, context, locale: reqLocale } = body;
     if (!message || typeof message !== "string") {
       return failure(c, 422, "VALIDATION_ERROR", "message majburiy.");
     }
+
+    // ── Kvota tekshiruvi (tarif limiti) ──────────────────────────────────────
+    const usageGate = await guardUsage({
+      supabase,
+      tenantId: (ctx as any).tenantId,
+      userId: (ctx as any).userId ?? null,
+      resource: "ai_requests",
+    });
+    if (!usageGate.ok) return c.json(usageGate.body, 429);
 
     // ── AI Safety: injection himoya + sanitizatsiya + rate limit ─────────────
     const safety = checkAiSafety(message, (ctx as any).userId ?? null);
@@ -3268,6 +3291,7 @@ const registerRoutes = (prefix: string) => {
         const kbResult = await searchKnowledgeBase(supabase, OPENAI_API_KEY, {
           query: safeMessage,
           locale: locale as "uz" | "ru" | "en",
+          tenantId: (ctx as any).tenantId,
         });
         if (kbResult.found) {
           kbContext = kbResult.contextText + (context ? `\n\n${context}` : "");
@@ -3285,7 +3309,6 @@ const registerRoutes = (prefix: string) => {
       try {
         const claudeRes = await callClaude(ANTHROPIC_API_KEY, {
           message: wrapUserMessage(safeMessage),
-          systemPrompt: system_prompt,
           context: kbContext || undefined,
           locale,
           complexity,
@@ -3407,6 +3430,12 @@ const registerRoutes = (prefix: string) => {
       latencyMs,
       traceId,
     });
+
+    // Muvaffaqiyatli AI so'rovni qaydga olish (non-blocking)
+    recordUsage(supabase, (ctx as any).tenantId, (ctx as any).userId ?? null, {
+      ai_requests: 1,
+      ai_tokens: inputTokens + outputTokens,
+    }).catch((e: unknown) => console.error("recordUsage failed", e));
 
     // Disclaimer — KB topilmasa yoki past similarity
     if (!kbFound || kbSimilarity < 0.85) {
@@ -4241,11 +4270,10 @@ Be concise, professional, and data-driven. You can help with: user management, c
         .eq("id", id)
         .single();
 
-      // Yangi token (yoki qayta yuborish uchun eskisini saqlab qolish)
+      // Har yuborishda yangi token — eski token bekor bo'ladi (M-003)
       inviteToken =
-        existing?.invite_token ??
         crypto.randomUUID().replace(/-/g, "") +
-          crypto.randomUUID().replace(/-/g, "");
+        crypto.randomUUID().replace(/-/g, "");
       const expiresAt = new Date(
         Date.now() + 48 * 60 * 60 * 1000,
       ).toISOString();
@@ -4346,7 +4374,7 @@ Be concise, professional, and data-driven. You can help with: user management, c
     if (!token || !password) {
       return failure(c, 400, "VALIDATION_ERROR", "token va password majburiy.");
     }
-    if (password.length < 8) {
+    if (password.length < 12) {
       return failure(
         c,
         400,

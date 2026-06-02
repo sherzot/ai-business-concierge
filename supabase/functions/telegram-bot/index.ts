@@ -14,7 +14,7 @@
 import { webhookCallback } from "npm:grammy@1";
 import { bot } from "./bot.ts";
 
-const SECRET = Deno.env.get("TELEGRAM_WEBHOOK_SECRET") ?? "";
+const SECRET = Deno.env.get("TELEGRAM_WEBHOOK_SECRET");
 
 Deno.serve(async (req: Request): Promise<Response> => {
   // Health check
@@ -29,9 +29,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
+  // Webhook secret majburiy — sozlanmagan bo'lsa xizmat bekor
+  if (!SECRET) {
+    console.error("[SECURITY] TELEGRAM_WEBHOOK_SECRET sozlanmagan — webhook rad etildi");
+    return new Response("Service Unavailable", { status: 503 });
+  }
+
   // Webhook secret tekshirish
   const secretHeader = req.headers.get("X-Telegram-Bot-Api-Secret-Token");
-  if (SECRET && secretHeader !== SECRET) {
+  if (secretHeader !== SECRET) {
     return new Response("Unauthorized", { status: 401 });
   }
 

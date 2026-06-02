@@ -4,12 +4,12 @@ Quyidagi hisoblarni **Supabase Dashboard → Authentication → Users → Add us
 
 ---
 
-## 1. Rahbar (Leader) – to‘liq kirish
+## 1. Rahbar (Leader) – to’liq kirish
 
 | Maydon | Qiymat |
 |--------|--------|
 | **Email** | `rahbar@demo.acme.uz` |
-| **Parol** | `Rahbar123!` |
+| **Parol** | `[MAXFIY — Supabase Dashboard yoki xususiy hujjatda]` |
 | **Rol** | leader |
 | **Ism** | Jasurbek Abdullayev |
 
@@ -20,29 +20,29 @@ Quyidagi hisoblarni **Supabase Dashboard → Authentication → Users → Add us
 | Maydon | Qiymat |
 |--------|--------|
 | **Email** | `hr@demo.acme.uz` |
-| **Parol** | `Hr123!` |
+| **Parol** | `[MAXFIY — Supabase Dashboard yoki xususiy hujjatda]` |
 | **Rol** | hr |
 | **Ism** | Aziz Rakhimov |
 
 ---
 
-## 3. Bug‘altiriya (Accounting)
+## 3. Bug’altiriya (Accounting)
 
 | Maydon | Qiymat |
 |--------|--------|
 | **Email** | `buxgalter@demo.acme.uz` |
-| **Parol** | `Bux123!` |
+| **Parol** | `[MAXFIY — Supabase Dashboard yoki xususiy hujjatda]` |
 | **Rol** | accounting |
 | **Ism** | Nilufar Usmonova |
 
 ---
 
-## 4. Bo‘lim boshliqi (Department Head)
+## 4. Bo’lim boshliqi (Department Head)
 
 | Maydon | Qiymat |
 |--------|--------|
 | **Email** | `bochim@demo.acme.uz` |
-| **Parol** | `Bochim123!` |
+| **Parol** | `[MAXFIY — Supabase Dashboard yoki xususiy hujjatda]` |
 | **Rol** | department_head |
 | **Ism** | Madina Karimova |
 
@@ -53,7 +53,7 @@ Quyidagi hisoblarni **Supabase Dashboard → Authentication → Users → Add us
 | Maydon | Qiymat |
 |--------|--------|
 | **Email** | `xodim@demo.acme.uz` |
-| **Parol** | `Xodim123!` |
+| **Parol** | `[MAXFIY — Supabase Dashboard yoki xususiy hujjatda]` |
 | **Rol** | employee |
 | **Ism** | Anvar Toshmatov |
 
