@@ -78,6 +78,17 @@ app.use(
   }),
 );
 
+// H-008: Security response headers — applied to every response
+app.use("*", async (c, next) => {
+  await next();
+  c.header("X-Content-Type-Options", "nosniff");
+  c.header("X-Frame-Options", "DENY");
+  c.header("Referrer-Policy", "strict-origin-when-cross-origin");
+  c.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  c.header("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'");
+  c.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+});
+
 type TenantContext = {
   tenantId: string;
   userId?: string;
@@ -4316,7 +4327,7 @@ Be concise, professional, and data-driven. You can help with: user management, c
 
     const { data: ut } = await supabase
       .from("user_tenants")
-      .select("role")
+      .select("role, tenant_id")
       .eq("user_id", user.id)
       .in("role", ["super_admin", "sub_admin"])
       .limit(1)
@@ -4393,6 +4404,24 @@ Be concise, professional, and data-driven. You can help with: user management, c
       .select()
       .single();
     if (error) return failure(c, 500, "DB_ERROR", error.message);
+
+    // H-009: Audit log for admin contact status change
+    const contactTraceId = c.get(TRACE_ID_KEY) ?? crypto.randomUUID();
+    await writeAuditLog(
+      { tenantId: ut.tenant_id, userId: user.id },
+      {
+        event_type: "admin.contact.status_changed",
+        entity_type: "contact_request",
+        entity_id: id,
+        trace_id: contactTraceId,
+        payload: {
+          new_status: body.status,
+          admin_note: body.admin_note ?? null,
+          invite_sent: body.status === "invite_sent",
+        },
+      },
+    );
+
     return success(c, data);
   });
 
@@ -4597,7 +4626,7 @@ Be concise, professional, and data-driven. You can help with: user management, c
 
     const { data: ut } = await supabase
       .from("user_tenants")
-      .select("role")
+      .select("role, tenant_id")
       .eq("user_id", user.id)
       .in("role", ["super_admin", "sub_admin"])
       .limit(1)
@@ -4630,6 +4659,23 @@ Be concise, professional, and data-driven. You can help with: user management, c
       .update({ status: body.status })
       .eq("id", tenantId);
     if (error) return failure(c, 500, "DB_ERROR", error.message);
+
+    // H-009: Audit log for admin tenant status change
+    const traceId = c.get(TRACE_ID_KEY) ?? crypto.randomUUID();
+    await writeAuditLog(
+      { tenantId: ut.tenant_id, userId: user.id },
+      {
+        event_type: "admin.tenant.status_changed",
+        entity_type: "tenant",
+        entity_id: tenantId,
+        trace_id: traceId,
+        payload: {
+          new_status: body.status,
+          tenant_name: tenantRow.name,
+          blocked_reason: body.blocked_reason ?? null,
+        },
+      },
+    );
 
     // company_approved email
     if (body.status === "active" && tenantRow.contact_email) {
