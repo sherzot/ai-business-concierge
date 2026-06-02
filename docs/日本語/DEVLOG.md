@@ -4,6 +4,49 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-06-02 — RBAC、管理者ダッシュボード、ULTRAセキュリティ継続（H-008〜H-010）
+
+### コンテキスト
+前セッションからの継続：ログインリダイレクトのバグ修正、ロール権限の整備、管理者ダッシュボードへの新パネル追加、ULTRAセキュリティ監査の継続。
+
+### 実施内容
+
+**ログインリダイレクト修正：**
+- `LoginPage.tsx` — `super_admin`/`sub_admin`は`/admin`へ、その他は`/app`へリダイレクト
+- `ProtectedLayout.tsx` — 管理者ロールが直接`/app`にアクセスした場合も`/admin`へ戻す
+
+**RBACロール拡張：**
+- `types.ts` — `sub_admin`、`company_admin`、`manager`ロールを追加
+- `index.ts` — 9つのロール全てに`ROLE_ACCESS`マップを完全定義
+
+**管理者ダッシュボード新パネル：**
+- `GET /admin/ai-stats` — AI利用統計エンドポイント（リクエスト数、トークン、コスト、モデル別、トップテナント）
+- `AdminDashboardPage.tsx` — 2つの新パネル：
+  - **セキュリティポスチャ** — 完了した18件の修正の視覚リスト（クリティカル/高/中）
+  - **AIビジネス分析** — 日次コストグラフ + モデル別内訳 + トップ企業
+
+**ULTRAセキュリティ監査（継続）：**
+- **H-008** — 全APIレスポンスにセキュリティヘッダー追加：`X-Content-Type-Options`、`X-Frame-Options: DENY`、`Strict-Transport-Security`、`Content-Security-Policy: default-src 'none'`、`Permissions-Policy`
+- **H-009** — 管理者の重要な変更操作に監査ログ追加：
+  - `PATCH /admin/tenants/:id/status` → `admin.tenant.status_changed`を記録
+  - `PATCH /admin/contacts/:id/status` → `admin.contact.status_changed`を記録
+- **H-010** — Netlify SPAのセキュリティヘッダー（`netlify.toml`の`[[headers]]`セクション）：
+  - CSP：`connect-src`でSupabaseとWSSを許可
+  - HSTS、X-Frame-Options、Referrer-Policy、Permissions-Policy
+
+**デプロイ：** `supabase functions deploy server`でEdge Functionをデプロイ済み。
+
+### ファイル
+- `frontend/src/features/auth/pages/LoginPage.tsx`（変更）
+- `frontend/src/features/auth/components/ProtectedLayout.tsx`（変更）
+- `frontend/src/features/auth/types.ts`（変更）
+- `supabase/functions/server/index.ts`（変更 — ROLE_ACCESS, ai-stats, H-008, H-009）
+- `frontend/src/features/admin/api/adminApi.ts`（変更）
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx`（変更）
+- `netlify.toml`（変更 — H-010）
+
+---
+
 ## 2026-06-02 — セキュリティ強化：14件の修正（コミット `fb5bde5`）
 
 ### コンテキスト

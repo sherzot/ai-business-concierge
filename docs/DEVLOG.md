@@ -4,6 +4,56 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-06-02 — RBAC, Admin Dashboard, va ULTRA Xavfsizlik Davomi (H-008..H-010)
+
+### Kontekst
+Avvalgi sessiyadan davom: login yo'naltirish xatosi, rol huquqlari, admin dashboard uchun yangi panellar, va ULTRA xavfsizlik auditi.
+
+### Bajarildi
+
+**Login yo'naltirish tuzatildi:**
+- `LoginPage.tsx` — `super_admin`/`sub_admin` endi `/admin` ga, qolganlar `/app` ga yo'naltiriladi
+- `ProtectedLayout.tsx` — admin rollar `/app` ga to'g'ridan-to'g'ri kirsa ham `/admin` ga qaytariladi
+
+**RBAC rollari kengaytirildi:**
+- `types.ts` — `sub_admin`, `company_admin`, `manager` rollari qo'shildi
+- `index.ts` — `ROLE_ACCESS` xaritasi 9 ta rol uchun to'liq belgilandi:
+  - `super_admin`/`sub_admin` — barcha modullar
+  - `company_admin` — billing, hr, ai, kb, settings
+  - `leader` — reports, inbox, tasks, hr, docs, integrations, settings
+  - `hr` — reports, inbox, tasks, hr, docs, settings
+  - `accounting` — reports, docs, integrations, billing, settings
+  - `department_head`/`manager` — reports, inbox, tasks, docs, settings
+  - `employee` — inbox, tasks, settings
+
+**Admin dashboard yangi panellari:**
+- `GET /admin/ai-stats` — AI foydalanish statistikasi endpoint (so'rovlar, tokenlar, xarajat, model kesimi, top tenantlar)
+- `AdminDashboardPage.tsx` — 2 ta yangi panel:
+  - **Xavfsizlik Holati** — 18 ta bajarilgan tuzatish (kritik/yuqori/o'rta) vizual ro'yxati
+  - **AI Biznes Tahlil** — kunlik xarajat grafigi + model kesimi + top kompaniyalar
+
+**ULTRA xavfsizlik (davomi):**
+- **H-008** — Barcha API javoblariga xavfsizlik headerlari: `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Strict-Transport-Security`, `Content-Security-Policy: default-src 'none'`, `Permissions-Policy`
+- **H-009** — Admin mutatsiyalari uchun audit log:
+  - `PATCH /admin/tenants/:id/status` → `admin.tenant.status_changed` yozadi
+  - `PATCH /admin/contacts/:id/status` → `admin.contact.status_changed` yozadi
+- **H-010** — Netlify SPA xavfsizlik headerlari (`netlify.toml` `[[headers]]` bo'limi):
+  - CSP: `connect-src` da Supabase va WSS ruxsati
+  - HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy
+
+**Deployment:** Edge Function `supabase functions deploy server` orqali deploy qilindi.
+
+### Fayllar
+- `frontend/src/features/auth/pages/LoginPage.tsx` (o'zgargan — login yo'naltirish)
+- `frontend/src/features/auth/components/ProtectedLayout.tsx` (o'zgargan — admin guard)
+- `frontend/src/features/auth/types.ts` (o'zgargan — yangi rollar)
+- `supabase/functions/server/index.ts` (o'zgargan — ROLE_ACCESS, ai-stats, H-008, H-009)
+- `frontend/src/features/admin/api/adminApi.ts` (o'zgargan — AiStats tipi + getAdminAiStats)
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (o'zgargan — 2 yangi panel)
+- `netlify.toml` (o'zgargan — H-010 xavfsizlik headerlari)
+
+---
+
 ## 2026-06-02 — Xavfsizlik Mustahkamlash: 14 ta tuzatish (commit `fb5bde5`)
 
 ### Kontekst

@@ -4,6 +4,56 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-06-02 — RBAC, Admin Dashboard, and ULTRA Security Continuation (H-008..H-010)
+
+### Context
+Continued from previous session: login redirect bug, role permissions, new admin dashboard panels, and continuation of the ULTRA security audit.
+
+### Done
+
+**Login redirect fixed:**
+- `LoginPage.tsx` — `super_admin`/`sub_admin` now redirect to `/admin`, others to `/app`
+- `ProtectedLayout.tsx` — admin roles navigating directly to `/app` are redirected back to `/admin`
+
+**RBAC roles expanded:**
+- `types.ts` — added `sub_admin`, `company_admin`, `manager` roles
+- `index.ts` — `ROLE_ACCESS` map fully defined for all 9 roles:
+  - `super_admin`/`sub_admin` — all modules
+  - `company_admin` — billing, hr, ai, kb, settings
+  - `leader` — reports, inbox, tasks, hr, docs, integrations, settings
+  - `hr` — reports, inbox, tasks, hr, docs, settings
+  - `accounting` — reports, docs, integrations, billing, settings
+  - `department_head`/`manager` — reports, inbox, tasks, docs, settings
+  - `employee` — inbox, tasks, settings
+
+**Admin dashboard new panels:**
+- `GET /admin/ai-stats` — AI usage statistics endpoint (requests, tokens, cost, by-model, top tenants)
+- `AdminDashboardPage.tsx` — 2 new panels:
+  - **Security Posture** — visual list of 18 completed fixes (critical/high/medium)
+  - **AI Business Analysis** — daily cost chart + model breakdown + top companies
+
+**ULTRA security (continued):**
+- **H-008** — Security headers on all API responses: `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Strict-Transport-Security`, `Content-Security-Policy: default-src 'none'`, `Permissions-Policy`
+- **H-009** — Audit logging for admin mutations:
+  - `PATCH /admin/tenants/:id/status` → writes `admin.tenant.status_changed`
+  - `PATCH /admin/contacts/:id/status` → writes `admin.contact.status_changed`
+- **H-010** — Netlify SPA security headers via `netlify.toml` `[[headers]]`:
+  - CSP: Supabase and WSS allowed in `connect-src`
+  - HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy
+
+**Deployment:** Edge Function deployed via `supabase functions deploy server`.
+
+### Files
+- `frontend/src/features/auth/pages/LoginPage.tsx` (changed — login redirect)
+- `frontend/src/features/auth/components/ProtectedLayout.tsx` (changed — admin guard)
+- `frontend/src/features/auth/types.ts` (changed — new roles)
+- `supabase/functions/server/index.ts` (changed — ROLE_ACCESS, ai-stats, H-008, H-009)
+- `frontend/src/features/admin/api/adminApi.ts` (changed — AiStats type + getAdminAiStats)
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (changed — 2 new panels)
+- `netlify.toml` (changed — H-010 security headers)
+
+---
+
 ## 2026-06-02 — Security Hardening: 14 Fixes (commit `fb5bde5`)
 
 ### Context

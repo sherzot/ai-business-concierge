@@ -4,6 +4,49 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-06-02 — RBAC, Дашборд администратора и продолжение ULTRA-аудита (H-008..H-010)
+
+### Контекст
+Продолжение предыдущей сессии: исправление редиректа при входе, права ролей, новые панели в дашборде администратора, продолжение ULTRA-аудита безопасности.
+
+### Сделано
+
+**Исправлен редирект при входе:**
+- `LoginPage.tsx` — `super_admin`/`sub_admin` перенаправляются в `/admin`, остальные — в `/app`
+- `ProtectedLayout.tsx` — если роль администратора переходит напрямую на `/app`, происходит редирект в `/admin`
+
+**Расширены роли RBAC:**
+- `types.ts` — добавлены роли `sub_admin`, `company_admin`, `manager`
+- `index.ts` — карта `ROLE_ACCESS` полностью определена для 9 ролей
+
+**Новые панели дашборда администратора:**
+- `GET /admin/ai-stats` — эндпоинт статистики использования AI (запросы, токены, расходы, разбивка по моделям, топ-тенанты)
+- `AdminDashboardPage.tsx` — 2 новые панели:
+  - **Состояние безопасности** — визуальный список 18 выполненных исправлений (критические/высокие/средние)
+  - **AI Бизнес-аналитика** — график дневных расходов + разбивка по моделям + топ-компании
+
+**Продолжение ULTRA-аудита безопасности:**
+- **H-008** — Заголовки безопасности на все API-ответы: `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Strict-Transport-Security`, `Content-Security-Policy: default-src 'none'`, `Permissions-Policy`
+- **H-009** — Аудит-логи для чувствительных мутаций администратора:
+  - `PATCH /admin/tenants/:id/status` → записывает `admin.tenant.status_changed`
+  - `PATCH /admin/contacts/:id/status` → записывает `admin.contact.status_changed`
+- **H-010** — Заголовки безопасности для Netlify SPA через `netlify.toml` `[[headers]]`:
+  - CSP: разрешены Supabase и WSS в `connect-src`
+  - HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy
+
+**Деплой:** Edge Function задеплоена через `supabase functions deploy server`.
+
+### Файлы
+- `frontend/src/features/auth/pages/LoginPage.tsx` (изменён)
+- `frontend/src/features/auth/components/ProtectedLayout.tsx` (изменён)
+- `frontend/src/features/auth/types.ts` (изменён)
+- `supabase/functions/server/index.ts` (изменён — ROLE_ACCESS, ai-stats, H-008, H-009)
+- `frontend/src/features/admin/api/adminApi.ts` (изменён)
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (изменён)
+- `netlify.toml` (изменён — H-010)
+
+---
+
 ## 2026-06-02 — Усиление безопасности: 14 исправлений (коммит `fb5bde5`)
 
 ### Контекст
