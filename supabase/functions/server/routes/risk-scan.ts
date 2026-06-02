@@ -383,6 +383,7 @@ router.post("/scan", async (c) => {
     description: string;
     location: string | null;
     source: string;
+    status: string;
     remediation: string | null;
   }> = [];
 
@@ -398,6 +399,7 @@ router.post("/scan", async (c) => {
         description: check.description,
         location: check.location ?? null,
         source: "static",
+        status: "open",
         remediation: check.remediation ?? null,
       });
     }
@@ -414,6 +416,7 @@ router.post("/scan", async (c) => {
       description: a.description,
       location: (a as any).location ?? null,
       source: "advisor",
+      status: "open",
       remediation: null,
     });
   }

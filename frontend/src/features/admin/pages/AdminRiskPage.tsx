@@ -114,7 +114,7 @@ function FindingRow({
   const [updating, setUpdating] = useState(false);
   const cfg = SEV_CONFIG[finding.severity] ?? SEV_CONFIG["low"];
   const Icon = cfg.icon;
-  const statusCfg = STATUS_CONFIG[finding.status];
+  const statusCfg = STATUS_CONFIG[finding.status] ?? STATUS_CONFIG["open"];
 
   const handleStatus = async (status: FindingStatus) => {
     setUpdating(true);
