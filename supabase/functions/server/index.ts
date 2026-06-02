@@ -878,21 +878,25 @@ const ROLE_ACCESS: Record<string, string[]> = {
   employee: ["inbox", "tasks", "settings"],
 };
 
-// ─── In-memory rate limit: IP → { count, resetAt } ───────────────────────────
-const contactRateMap = new Map<string, { count: number; resetAt: number }>();
-const CONTACT_LIMIT = 3; // 3 murojaatgacha
+// ─── DB-based rate limit: contact form ────────────────────────────────────────
+const CONTACT_LIMIT = 3;
 const CONTACT_WINDOW_MS = 60 * 60 * 1000; // 1 soat
 
-function checkContactRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = contactRateMap.get(ip);
-  if (!entry || now > entry.resetAt) {
-    contactRateMap.set(ip, { count: 1, resetAt: now + CONTACT_WINDOW_MS });
+async function checkContactRateLimit(ip: string): Promise<boolean> {
+  const windowStart = new Date(
+    Math.floor(Date.now() / CONTACT_WINDOW_MS) * CONTACT_WINDOW_MS,
+  ).toISOString();
+  const { data, error } = await supabase.rpc("check_rate_limit", {
+    p_key: `contact:${ip}`,
+    p_window_start: windowStart,
+    p_limit: CONTACT_LIMIT,
+  });
+  if (error) {
+    // DB xatosi bo'lsa — fail open (ruxsat berish)
+    console.warn("[rate-limit] DB check failed, allowing request:", error.message);
     return true;
   }
-  if (entry.count >= CONTACT_LIMIT) return false;
-  entry.count += 1;
-  return true;
+  return data === true;
 }
 
 // ─── Email helpers ────────────────────────────────────────────────────────────
@@ -1142,7 +1146,7 @@ const registerRoutes = (prefix: string) => {
   app.post(`${prefix}/contact`, async (c) => {
     const ip =
       c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-    if (!checkContactRateLimit(ip)) {
+    if (!(await checkContactRateLimit(ip))) {
       return c.json(
         {
           error: {

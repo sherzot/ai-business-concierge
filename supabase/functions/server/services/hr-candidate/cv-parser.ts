@@ -23,6 +23,37 @@ import type { CvSignals, CvRole } from "./types.ts";
 const PDF_MIME = "application/pdf";
 const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
+// ─── CV matn sanitizatsiyasi — LLM prompt injection oldini olish ─────────────
+const MAX_CV_CHARS = 16_000; // ~4000 token
+
+const CV_INJECTION_PATTERNS: RegExp[] = [
+  /ignore\s+(all\s+)?previous\s+(instructions?|prompts?|context|rules?)/gi,
+  /forget\s+(all\s+)?previous/gi,
+  /you\s+are\s+now\s+(a|an)\s/gi,
+  /act\s+as\s+(if\s+you\s+(are|were)|a\s)/gi,
+  /override\s+(your\s+)?(instructions?|guidelines?|rules?)/gi,
+  /disregard\s+(all\s+)?previous/gi,
+  /new\s+instructions?\s*:/gi,
+  /jailbreak/gi,
+  /<\s*system\s*>/gi,
+  /\[INST\]/g,
+  /\[\/INST\]/g,
+  /<\|system\|>/g,
+  /<\|user\|>/g,
+  /<\|assistant\|>/g,
+  /###\s*(system|instruction)/gi,
+  // HTML teglar (CV'da bo'lmasligi kerak)
+  /<[^>]{0,200}>/g,
+];
+
+function sanitizeCvText(text: string): string {
+  let s = text.slice(0, MAX_CV_CHARS);
+  for (const pattern of CV_INJECTION_PATTERNS) {
+    s = s.replace(pattern, "[REDACTED]");
+  }
+  return s;
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -69,21 +100,24 @@ export async function parseCv(
     };
   }
 
+  // M-004: LLM ga uzatishdan oldin prompt injection patterlarni tozalash
+  const safe = sanitizeCvText(normalised);
+
   // ---------------------------------------------------------------------------
   // 2. Heuristic regex extraction (cheap, no AI)
   // ---------------------------------------------------------------------------
   // TODO: implement extractDateRanges, extractSections, extractEmails, extractSkills
   //       Helper signatures below.
-  const dateRanges = extractDateRanges(normalised);
-  const sectionMap = extractSections(normalised);
+  const dateRanges = extractDateRanges(safe);
+  const sectionMap = extractSections(safe);
 
   // ---------------------------------------------------------------------------
   // 3. Claude Haiku post-processing (cheap structured output)
   // ---------------------------------------------------------------------------
   // TODO: call services/llm-router.ts with complexity = "simple",
-  //       feed normalised text + section hints, request JSON output.
+  //       feed sanitized text + section hints, request JSON output.
   //       Validate output against Zod schema for CvSignals.
-  const structured = await structureWithHaiku(normalised, sectionMap);
+  const structured = await structureWithHaiku(safe, sectionMap);
 
   // ---------------------------------------------------------------------------
   // 4. Compute experience_years_total from role durations
@@ -95,7 +129,7 @@ export async function parseCv(
   return {
     filename,
     format,
-    extracted_text_chars: normalised.length,
+    extracted_text_chars: safe.length,
     experience_years_total,
     roles: structured.roles,
     tech_skills: structured.tech_skills,
