@@ -698,28 +698,6 @@ app.onError((err, c) => {
 const ALLOWED_TASK_STATUSES = ["todo", "in_progress", "review", "done"];
 const ALLOWED_TASK_PRIORITIES = ["high", "medium", "low"];
 
-const getMockTasks = () => [
-  {
-    id: "t-1",
-    title: "Q4 Moliyaviy hisobotni tayyorlash",
-    status: "in_progress",
-    priority: "high",
-    assignee: { name: "Aziza M." },
-    dueDate: new Date(Date.now() + 86400000 * 2).toISOString(),
-    tags: ["Finance", "Report"],
-    comments: 3,
-  },
-  {
-    id: "t-2",
-    title: "Yangi ofis menejerini ishga olish",
-    status: "todo",
-    priority: "medium",
-    assignee: { name: "Jasur A." },
-    dueDate: new Date(Date.now() + 86400000 * 5).toISOString(),
-    tags: ["HR", "Hiring"],
-    comments: 0,
-  },
-];
 
 const getMockInbox = () => [
   {
@@ -2974,7 +2952,7 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 500, "DB_ERROR", "Tasks yuklashda xatolik.");
     }
 
-    return success(c, data?.length ? data : getMockTasks());
+    return success(c, data ?? []);
   });
 
   app.post(`${prefix}/tasks`, async (c) => {

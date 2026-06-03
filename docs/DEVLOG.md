@@ -4,6 +4,20 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-06-03 — Tasks Mock Data Bug Fix (PATCH 500 xatosi)
+
+### Kontekst
+`PATCH /tasks/t-2` → 500 xatosi. Tenant da haqiqiy task yo'q bo'lsa `GET /tasks` `getMockTasks()` qaytarardi — `t-1`, `t-2` kabi fake IDlar. User bu "task"larni update qilmoqchi bo'lganda UUID formatida bo'lmagan ID DB da type error berardi (500).
+
+### Bajarildi
+- `server/index.ts` — `getMockTasks()` funksiyasi o'chirildi; `GET /tasks` endi bo'sh array `[]` qaytaradi
+- `bright-api` redeploy edildi (version 68)
+
+### Fayllar
+- `supabase/functions/server/index.ts` (o'zgargan)
+
+---
+
 ## 2026-06-03 — Contact Form va Register Form Bug Fixes (ikki muammo)
 
 ### Kontekst

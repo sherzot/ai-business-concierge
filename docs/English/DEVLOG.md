@@ -4,6 +4,20 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-06-03 — Tasks Mock Data Bug Fix (PATCH 500 error)
+
+### Context
+`PATCH /tasks/t-2` → 500 error. When a tenant had no real tasks, `GET /tasks` returned `getMockTasks()` — fake IDs like `t-1`, `t-2`. When the user tried to update one of these "tasks", the non-UUID ID caused a PostgreSQL type error (500).
+
+### Done
+- `server/index.ts` — Removed `getMockTasks()` function; `GET /tasks` now returns empty array `[]`
+- `bright-api` redeployed (version 68)
+
+### Files
+- `supabase/functions/server/index.ts` (changed)
+
+---
+
 ## 2026-06-03 — Contact Form & Register Form Bug Fixes (two issues)
 
 ### Context

@@ -4,6 +4,20 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-06-03 — タスクモックデータのバグ修正（PATCH 500エラー）
+
+### コンテキスト
+`PATCH /tasks/t-2` → 500エラー。テナントに実タスクが存在しない場合、`GET /tasks`は`getMockTasks()`を返していた（`t-1`、`t-2`などの偽ID）。ユーザーがこれらの"タスク"を更新しようとすると、`t-2`がUUIDでないためPostgreSQLがタイプエラー（500）を発生させていた。
+
+### 実施内容
+- `server/index.ts` — `getMockTasks()`関数を削除；`GET /tasks`は空配列`[]`を返すように変更
+- `bright-api`を再デプロイ（バージョン68）
+
+### ファイル
+- `supabase/functions/server/index.ts`（変更）
+
+---
+
 ## 2026-06-03 — ContactフォームとRegisterフォームのバグ修正（2件）
 
 ### コンテキスト
