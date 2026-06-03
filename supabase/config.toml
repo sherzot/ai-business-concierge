@@ -1,5 +1,8 @@
 # Supabase Edge Functions sozlamalari
-# bright-api: JWT tekshiruv kodimizda (supabase.auth.getUser) amalga oshiriladi
+# JWT tekshiruv kodimizda (supabase.auth.getUser) amalga oshiriladi — gateway da o'chirish
+
+[functions.server]
+verify_jwt = false
 
 [functions.bright-api]
 verify_jwt = false

@@ -5,13 +5,13 @@ import { useLandingLocale } from "../hooks/useLandingLocale";
 import { landingI18n } from "../i18n";
 import { SUPPORTED_LOCALES } from "../types";
 import type { LandingLocale } from "../types";
+import { API_BASE_URL } from "../../../app/config";
 
 const LOCALE_FLAGS: Record<LandingLocale, string> = {
   uz: "🇺🇿", ru: "🇷🇺", en: "🇬🇧", ja: "🇯🇵",
 };
 
 const EMPLOYEE_COUNTS = ["1-10", "11-50", "51-200", "200+"];
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
 type FormState = {
   full_name: string;
@@ -49,7 +49,7 @@ export function ContactPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/v1/contact`, {
+      const res = await fetch(`${API_BASE_URL}/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, locale }),
