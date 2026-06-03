@@ -4,6 +4,39 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-06-03 — ContactフォームとRegisterフォームのバグ修正（2件）
+
+### コンテキスト
+`/contact`（ダブル`/v1`パスバグ）と`/register?token=...`（パスワードバリデーション＋エラーフォーマット不一致）の"Server error"を修正。両方とも本番環境でテスト済み。
+
+### 実施内容
+
+**バグ1：`/contact` → "Server error"（前セッション）：**
+- `ContactPage.tsx` — ローカル`API_BASE` + `/v1/contact`がダブルパス`/v1/v1/contact`を生成。共有`API_BASE_URL`に変更
+- `config.ts` — フォールバックURL更新
+- `config.toml` — `[functions.server] verify_jwt = false`追加
+- `bright-api`再デプロイ
+
+**バグ2：`/register` → "Server error"（本セッション）：**
+- **根本原因：** バックエンドの`password.length < 12`チェックが8〜11文字のパスワードを拒否；フロントエンドは`json?.error?.message`を読んでいたが`failure()`は`json.meta.errors[0].message`形式で返すため、すべてのエラーが"Server error"として表示されていた
+- `server/index.ts:4543` — `< 12`を`< 8`に修正
+- `RegisterCompanyPage.tsx` — 両方のエラーフォーマットをサポート
+- `RegisterCompanyPage.tsx` — パスワード入力に`minLength={8}`追加
+- `bright-api`再デプロイ
+
+**招待メールが届かない（未解決）：**
+- 原因：`RESEND_API_KEY`がSupabase Secretsに設定されていない
+- 必要な対応：`supabase secrets set RESEND_API_KEY=re_xxx` + Resendで`aibizconcierge.uz`ドメインの認証
+
+### ファイル
+- `frontend/src/features/landing/pages/ContactPage.tsx`（変更）
+- `frontend/src/features/landing/pages/RegisterCompanyPage.tsx`（変更）
+- `frontend/src/app/config.ts`（変更）
+- `supabase/config.toml`（変更）
+- `supabase/functions/server/index.ts`（変更）
+
+---
+
 ## 2026-06-03 — ダーク/ライトテーマ、管理者サイドバー拡張、ユーザー・AI統計ページ
 
 ### コンテキスト

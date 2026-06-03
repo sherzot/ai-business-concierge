@@ -4,6 +4,39 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-06-03 — Contact Form va Register Form Bug Fixes (ikki muammo)
+
+### Kontekst
+`/contact` sahifasida "Server error" (double `/v1` path bug) va `/register?token=...` sahifasida "Server error" (parol validatsiya + error format mismatch) muammolari tuzatildi. Ikkalasi production da test qilindi.
+
+### Bajarildi
+
+**Bug 1: `/contact` → "Server error" (oldingi session):**
+- `ContactPage.tsx` — lokal `API_BASE = VITE_API_BASE_URL ?? ""` + `/v1/contact` → double `/v1/contact` yaratardi. `API_BASE_URL` (shared, to'liq URL) ga o'tkazildi
+- `config.ts` — fallback URL `server` funksiyasi nomiga yangilandi
+- `config.toml` — `[functions.server] verify_jwt = false` qo'shildi (JWT bloklash tuzatildi)
+- `bright-api` redeploy — yangi kod deployed edildi
+
+**Bug 2: `/register` → "Server error" (ushbu session):**
+- **Root cause:** Backend `password.length < 12` tekshiruvi — 8-11 belgili parol kiritilsa 400 qaytarardi; lekin frontend `json?.error?.message` o'qirdi, backend `failure()` esa `json.meta.errors[0].message` formatida javob berardi → hamma xato "Server error" ko'rinardi
+- `server/index.ts:4543` — `password.length < 12` → `< 8` tuzatildi
+- `RegisterCompanyPage.tsx` — error format ikki xil formati qo'llab-quvvatlandi: `json?.error?.message ?? json?.meta?.errors?.[0]?.message`
+- `RegisterCompanyPage.tsx` — parol inputiga `minLength={8}` qo'shildi
+- `bright-api` redeploy edildi
+
+**Invite email kelmayotganligi (hal qilinmagan):**
+- Sabab: `RESEND_API_KEY` Supabase Secrets da o'rnatilmagan
+- Kerakli harakat: `supabase secrets set RESEND_API_KEY=re_xxx` + Resend da `aibizconcierge.uz` domenini verify qilish
+
+### Fayllar
+- `frontend/src/features/landing/pages/ContactPage.tsx` (o'zgargan)
+- `frontend/src/features/landing/pages/RegisterCompanyPage.tsx` (o'zgargan)
+- `frontend/src/app/config.ts` (o'zgargan)
+- `supabase/config.toml` (o'zgargan)
+- `supabase/functions/server/index.ts` (o'zgargan)
+
+---
+
 ## 2026-06-03 — Dark/Light Theme, Admin Sidebar Kengaytirish, Users va AI Stats sahifalari
 
 ### Kontekst

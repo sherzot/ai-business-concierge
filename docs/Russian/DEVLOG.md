@@ -4,6 +4,39 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-06-03 — Исправление ошибок форм Contact и Register (два бага)
+
+### Контекст
+Исправлена ошибка "Server error" на `/contact` (двойной путь `/v1`) и на `/register?token=...` (валидация пароля + несоответствие формата ошибок). Оба исправления протестированы в продакшене.
+
+### Сделано
+
+**Баг 1: `/contact` → "Server error" (предыдущая сессия):**
+- `ContactPage.tsx` — локальная `API_BASE` + `/v1/contact` создавала двойной путь `/v1/v1/contact`. Переключено на общий `API_BASE_URL`
+- `config.ts` — fallback URL обновлён
+- `config.toml` — добавлен `[functions.server] verify_jwt = false`
+- `bright-api` переразвёрнут
+
+**Баг 2: `/register` → "Server error" (текущая сессия):**
+- **Первопричина:** Backend проверка `password.length < 12` отклоняла пароли 8-11 символов; frontend читал `json?.error?.message`, но `failure()` возвращает `json.meta.errors[0].message` → все ошибки показывались как "Server error"
+- `server/index.ts:4543` — `< 12` исправлено на `< 8`
+- `RegisterCompanyPage.tsx` — оба формата ошибок теперь поддерживаются
+- `RegisterCompanyPage.tsx` — добавлен `minLength={8}` для поля пароля
+- `bright-api` переразвёрнут
+
+**Invite-email не приходит (не решено):**
+- Причина: `RESEND_API_KEY` не задан в Supabase Secrets
+- Требуемое действие: `supabase secrets set RESEND_API_KEY=re_xxx` + верификация домена `aibizconcierge.uz` в Resend
+
+### Файлы
+- `frontend/src/features/landing/pages/ContactPage.tsx` (изменён)
+- `frontend/src/features/landing/pages/RegisterCompanyPage.tsx` (изменён)
+- `frontend/src/app/config.ts` (изменён)
+- `supabase/config.toml` (изменён)
+- `supabase/functions/server/index.ts` (изменён)
+
+---
+
 ## 2026-06-03 — Тёмная/светлая тема, расширение боковой панели, страницы Users и AI Stats
 
 ### Контекст

@@ -4,6 +4,39 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-06-03 — Contact Form & Register Form Bug Fixes (two issues)
+
+### Context
+Fixed "Server error" on `/contact` (double `/v1` path bug) and on `/register?token=...` (password validation + error format mismatch). Both tested in production.
+
+### Done
+
+**Bug 1: `/contact` → "Server error" (previous session):**
+- `ContactPage.tsx` — local `API_BASE = VITE_API_BASE_URL ?? ""` + `/v1/contact` created double `/v1/contact`. Switched to shared `API_BASE_URL`
+- `config.ts` — fallback URL updated to use `server` function name
+- `config.toml` — added `[functions.server] verify_jwt = false`
+- `bright-api` redeployed
+
+**Bug 2: `/register` → "Server error" (this session):**
+- **Root cause:** Backend `password.length < 12` check rejected 8-11 char passwords; frontend read `json?.error?.message` but backend `failure()` returns `json.meta.errors[0].message` → all errors showed as "Server error"
+- `server/index.ts:4543` — `password.length < 12` → `< 8`
+- `RegisterCompanyPage.tsx` — both error formats now supported
+- `RegisterCompanyPage.tsx` — `minLength={8}` added to password input
+- `bright-api` redeployed
+
+**Invite email not arriving (unresolved):**
+- Cause: `RESEND_API_KEY` not set in Supabase Secrets
+- Action needed: `supabase secrets set RESEND_API_KEY=re_xxx` + verify `aibizconcierge.uz` domain in Resend
+
+### Files
+- `frontend/src/features/landing/pages/ContactPage.tsx` (changed)
+- `frontend/src/features/landing/pages/RegisterCompanyPage.tsx` (changed)
+- `frontend/src/app/config.ts` (changed)
+- `supabase/config.toml` (changed)
+- `supabase/functions/server/index.ts` (changed)
+
+---
+
 ## 2026-06-03 — Dark/Light Theme, Admin Sidebar Expansion, Users & AI Stats Pages
 
 ### Context
