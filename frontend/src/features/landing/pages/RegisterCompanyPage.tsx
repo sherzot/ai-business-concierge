@@ -78,7 +78,13 @@ export function RegisterCompanyPage() {
         body: JSON.stringify({ token, password, company_name: companyName, legal_form: legalForm || undefined, stir: stir || undefined, legal_address: legalAddress || undefined }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error?.message ?? "Server error");
+      if (!res.ok) {
+        const msg =
+          json?.error?.message ??
+          json?.meta?.errors?.[0]?.message ??
+          "Server error";
+        throw new Error(msg);
+      }
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Xatolik yuz berdi");
@@ -241,6 +247,7 @@ export function RegisterCompanyPage() {
                   <div className="relative">
                     <input
                       required
+                      minLength={8}
                       type={showPw ? "text" : "password"}
                       className={`${inputCls} pr-11`}
                       placeholder={t.passwordPlaceholder}

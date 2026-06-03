@@ -4540,7 +4540,7 @@ Be concise, professional, and data-driven. You can help with: user management, c
     if (!token || !password) {
       return failure(c, 400, "VALIDATION_ERROR", "token va password majburiy.");
     }
-    if (password.length < 12) {
+    if (password.length < 8) {
       return failure(
         c,
         400,
