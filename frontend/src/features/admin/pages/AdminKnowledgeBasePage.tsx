@@ -257,7 +257,7 @@ export function AdminKnowledgeBasePage() {
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-xl font-semibold text-white flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
             <BookOpen size={20} className="text-indigo-400" />
             Knowledge Base
           </h1>
@@ -351,18 +351,18 @@ export function AdminKnowledgeBasePage() {
                 </span>
 
                 {/* Category */}
-                <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-700 text-slate-300">
+                <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
                   {article.category}
                 </span>
 
                 {/* Question */}
-                <p className="flex-1 text-sm text-white truncate">{article.question}</p>
+                <p className="flex-1 text-sm text-slate-900 truncate">{article.question}</p>
 
                 {/* Tags */}
                 {article.tags?.length > 0 && (
                   <div className="hidden sm:flex items-center gap-1 shrink-0">
                     {article.tags.slice(0, 2).map((t) => (
-                      <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/60 text-slate-400">{t}</span>
+                      <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">{t}</span>
                     ))}
                     {article.tags.length > 2 && <span className="text-[10px] text-slate-500">+{article.tags.length - 2}</span>}
                   </div>
@@ -429,12 +429,12 @@ export function AdminKnowledgeBasePage() {
       {deleting && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
           <div className="bg-white border border-slate-200 rounded-xl p-6 max-w-sm w-full mx-4 shadow-xl">
-            <h3 className="text-base font-semibold text-white mb-2">Maqolani o'chirish</h3>
-            <p className="text-sm text-slate-400 mb-5">Bu amal qaytarib bo'lmaydi. Davom etasizmi?</p>
+            <h3 className="text-base font-semibold text-slate-900 mb-2">Maqolani o'chirish</h3>
+            <p className="text-sm text-slate-500 mb-5">Bu amal qaytarib bo'lmaydi. Davom etasizmi?</p>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setDeleting(null)}
-                className="px-4 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-white/8"
+                className="px-4 py-2 rounded-lg text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               >
                 Bekor
               </button>

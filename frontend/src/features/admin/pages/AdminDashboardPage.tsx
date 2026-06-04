@@ -24,24 +24,24 @@ function StatCard({
     <button
       onClick={onClick}
       disabled={!onClick}
-      className={`w-full text-left bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/8 rounded-xl p-5 flex items-start gap-4
+      className={`w-full text-left bg-white border border-slate-200 rounded-xl p-5 flex items-start gap-4
         transition-all duration-200
-        ${onClick ? "hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-slate-800/80 hover:scale-[1.01] cursor-pointer" : "cursor-default"}`}
+        ${onClick ? "hover:border-slate-300 hover:bg-slate-50 hover:scale-[1.01] cursor-pointer" : "cursor-default"}`}
     >
       <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${accent}`}>
         <Icon size={18} className="text-white" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-2xl font-bold text-white tabular-nums">{value}</p>
-        <p className="text-sm font-medium text-slate-300">{label}</p>
+        <p className="text-2xl font-bold text-slate-900 tabular-nums">{value}</p>
+        <p className="text-sm font-medium text-slate-600">{label}</p>
         {sub && <p className="text-xs text-slate-500 mt-0.5">{sub}</p>}
         {trend && (
-          <p className={`text-xs mt-1 font-medium ${trend.value >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+          <p className={`text-xs mt-1 font-medium ${trend.value >= 0 ? "text-emerald-600" : "text-red-600"}`}>
             {trend.value >= 0 ? "↑" : "↓"} {Math.abs(trend.value)} {trend.label}
           </p>
         )}
       </div>
-      {onClick && <ArrowRight size={16} className="ml-auto text-slate-600 self-center shrink-0" />}
+      {onClick && <ArrowRight size={16} className="ml-auto text-slate-400 self-center shrink-0" />}
     </button>
   );
 }
@@ -62,9 +62,8 @@ function DonutChart({ slices, size = 140 }: { slices: DonutSlice[]; size?: numbe
   );
 
   const cx = size / 2, cy = size / 2, r = size / 2 - 12;
-  const circumference = 2 * Math.PI * r;
 
-  let cumulativeAngle = -90; // Start from top
+  let cumulativeAngle = -90;
 
   const paths = slices
     .filter((s) => s.value > 0)
@@ -90,19 +89,13 @@ function DonutChart({ slices, size = 140 }: { slices: DonutSlice[]; size?: numbe
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="overflow-visible">
-      {/* Background ring */}
       <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e2e8f0" strokeWidth={18} />
-
       {paths.map((p, i) => (
         <g key={i} className="group/slice">
           <path d={p.d} fill={p.color} opacity={0.9} className="transition-opacity hover:opacity-100" />
         </g>
       ))}
-
-      {/* Center hole */}
       <circle cx={cx} cy={cy} r={r - 18} fill="white" />
-
-      {/* Center text */}
       <text x={cx} y={cy - 4} textAnchor="middle" fill="#0f172a" fontSize={20} fontWeight="bold"
         className="font-mono">{total}</text>
       <text x={cx} y={cy + 14} textAnchor="middle" fill="#94a3b8" fontSize={10}>jami</text>
@@ -127,7 +120,7 @@ function MiniBarChart({ companies }: { companies: Company[] }) {
       if (day in days) days[day]++;
     });
     return Object.entries(days).map(([date, count]) => ({
-      date: date.slice(5), // "MM-DD"
+      date: date.slice(5),
       count,
     }));
   }, [companies]);
@@ -170,11 +163,9 @@ function MiniBarChart({ companies }: { companies: Company[] }) {
 // LatencyGauge — DB latency visual
 // ─────────────────────────────────────────────────────────────────────────────
 function LatencyGauge({ ms }: { ms: number }) {
-  // 0–50ms green, 51–200ms yellow, 200+ red
   const color = ms <= 50 ? "#10b981" : ms <= 200 ? "#f59e0b" : "#ef4444";
   const label = ms <= 50 ? "A'lo" : ms <= 200 ? "Qoniqarli" : "Sekin";
-  // Arc from -140deg to 140deg (280deg total)
-  const pct = Math.min(ms / 500, 1); // 500ms = max
+  const pct = Math.min(ms / 500, 1);
   const angle = -140 + pct * 280;
   const toRad = (deg: number) => (deg * Math.PI) / 180;
   const cx = 60, cy = 55, r = 42;
@@ -185,13 +176,11 @@ function LatencyGauge({ ms }: { ms: number }) {
     <div className="flex flex-col items-center">
       <p className="text-xs text-slate-500 mb-1">DB kechikish</p>
       <svg width={120} height={75} viewBox="0 0 120 75" className="overflow-visible">
-        {/* Track arc */}
         <path
           d={`M ${cx + r * Math.cos(toRad(-140))} ${cy + r * Math.sin(toRad(-140))}
               A ${r} ${r} 0 1 1 ${cx + r * Math.cos(toRad(140))} ${cy + r * Math.sin(toRad(140))}`}
           fill="none" stroke="#e2e8f0" strokeWidth={8} strokeLinecap="round"
         />
-        {/* Value arc */}
         {pct > 0 && (
           <path
             d={`M ${cx + r * Math.cos(toRad(-140))} ${cy + r * Math.sin(toRad(-140))}
@@ -200,9 +189,7 @@ function LatencyGauge({ ms }: { ms: number }) {
             className="transition-all duration-700"
           />
         )}
-        {/* Needle dot */}
         <circle cx={x} cy={y} r={4} fill={color} className="transition-all duration-700" />
-        {/* Center value */}
         <text x={cx} y={cy + 5} textAnchor="middle" fill="#0f172a" fontSize={16} fontWeight="bold"
           className="font-mono">{ms}</text>
         <text x={cx} y={cy + 18} textAnchor="middle" fill="#64748b" fontSize={8}>ms</text>
@@ -216,13 +203,11 @@ function LatencyGauge({ ms }: { ms: number }) {
 // SecurityPosture — 14+ completed security fixes
 // ─────────────────────────────────────────────────────────────────────────────
 const SECURITY_FIXES = [
-  // Critical
   { id: "K-001", sev: "critical", title: "getTenantContext() — autentifikatsiyasiz header bekor qilindi" },
   { id: "K-002", sev: "critical", title: "/ai/chat — system_prompt injection to'sib qo'yildi" },
   { id: "K-004", sev: "critical", title: "Hardcoded credentials config.ts dan olib tashlandi" },
   { id: "K-005", sev: "critical", title: "Telegram webhook secreti majburiy qilindi" },
   { id: "K-006", sev: "critical", title: "Demo foydalanuvchi parollari hujjatlardan o'chirildi" },
-  // High
   { id: "H-001", sev: "high",     title: "CORS — wildcard '*' aniq domenlar bilan almashtirildi" },
   { id: "H-002", sev: "high",     title: "AI kvota — guardUsage() + recordUsage() ulandi" },
   { id: "H-003", sev: "high",     title: "Rate limiting — in-memory emas, DB asosiga o'tkazildi" },
@@ -230,7 +215,6 @@ const SECURITY_FIXES = [
   { id: "H-005", sev: "high",     title: "match_knowledge() — tenant izolyatsiyasi DB darajasida" },
   { id: "H-006", sev: "high",     title: "Resend webhook — imzo tekshiruvi majburiy qilindi" },
   { id: "H-007", sev: "high",     title: "apiClient.ts — anon key fallback olib tashlandi" },
-  // Medium
   { id: "M-002", sev: "medium",   title: "increment_usage() — auth.uid() tekshiruvi qo'shildi" },
   { id: "M-003", sev: "medium",   title: "Taklif tokeni — har safar yangi token generatsiya" },
   { id: "M-004", sev: "medium",   title: "CV matni — LLM ga yuborishdan oldin sanitizatsiya" },
@@ -241,9 +225,9 @@ const SECURITY_FIXES = [
 
 type SevKey = "critical" | "high" | "medium";
 const SEV_CONFIG: Record<SevKey, { label: string; dot: string; badge: string }> = {
-  critical: { label: "Kritik",   dot: "bg-red-500",    badge: "text-red-400 bg-red-500/10 border-red-500/25" },
-  high:     { label: "Yuqori",   dot: "bg-orange-500", badge: "text-orange-400 bg-orange-500/10 border-orange-500/25" },
-  medium:   { label: "O'rta",    dot: "bg-amber-400",  badge: "text-amber-400 bg-amber-500/10 border-amber-500/25" },
+  critical: { label: "Kritik",   dot: "bg-red-500",    badge: "text-red-700 bg-red-100 border-red-200" },
+  high:     { label: "Yuqori",   dot: "bg-orange-500", badge: "text-orange-700 bg-orange-100 border-orange-200" },
+  medium:   { label: "O'rta",    dot: "bg-amber-400",  badge: "text-amber-700 bg-amber-100 border-amber-200" },
 };
 
 function SecurityPosture() {
@@ -254,16 +238,16 @@ function SecurityPosture() {
   }), []);
 
   return (
-    <div className="bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-white/8 rounded-xl p-5 mb-4">
+    <div className="bg-white border border-slate-200 rounded-xl p-5 mb-4">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-9 h-9 rounded-lg bg-emerald-500/15 flex items-center justify-center shrink-0">
-          <ShieldCheck size={18} className="text-emerald-400" />
+        <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+          <ShieldCheck size={18} className="text-emerald-600" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-white">Xavfsizlik holati</h3>
+          <h3 className="text-sm font-semibold text-slate-900">Xavfsizlik holati</h3>
           <p className="text-xs text-slate-500">{SECURITY_FIXES.length} ta muammo aniqlandi va bartaraf etildi</p>
         </div>
-        <span className="ml-auto text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+        <span className="ml-auto text-xs font-semibold text-emerald-700 bg-emerald-100 border border-emerald-200 px-3 py-1 rounded-full">
           {SECURITY_FIXES.length}/{SECURITY_FIXES.length} ✓
         </span>
       </div>
@@ -282,7 +266,7 @@ function SecurityPosture() {
                 {fixes.map((f) => (
                   <li key={f.id} className="flex items-start gap-2 text-xs">
                     <CheckCircle2 size={13} className="text-emerald-500 mt-0.5 shrink-0" />
-                    <span className="text-slate-400 leading-relaxed">
+                    <span className="text-slate-600 leading-relaxed">
                       <span className="font-mono text-slate-500 mr-1">{f.id}</span>
                       {f.title}
                     </span>
@@ -341,13 +325,13 @@ function AiStatsPanel({ stats }: { stats: AiStats | null }) {
   const fmtNum  = (v: number) => v.toLocaleString("uz-UZ");
 
   return (
-    <div className="bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-white/8 rounded-xl p-5 mb-4">
+    <div className="bg-white border border-slate-200 rounded-xl p-5 mb-4">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-9 h-9 rounded-lg bg-indigo-500/15 flex items-center justify-center shrink-0">
-          <Bot size={18} className="text-indigo-400" />
+        <div className="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
+          <Bot size={18} className="text-indigo-600" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-white">AI Biznes Tahlil</h3>
+          <h3 className="text-sm font-semibold text-slate-900">AI Biznes Tahlil</h3>
           <p className="text-xs text-slate-500">So'nggi {stats?.period_days ?? 30} kun</p>
         </div>
       </div>
@@ -355,13 +339,13 @@ function AiStatsPanel({ stats }: { stats: AiStats | null }) {
       {/* Summary row */}
       <div className="grid grid-cols-3 gap-3 mb-5">
         {[
-          { icon: Zap,         label: "So'rovlar",  value: fmtNum(stats?.total_requests ?? 0),    accent: "text-indigo-400" },
-          { icon: Activity,    label: "Tokenlar",   value: fmtNum(stats?.total_tokens ?? 0),      accent: "text-sky-400" },
-          { icon: DollarSign,  label: "Xarajat",    value: fmtCost(stats?.total_cost_usd ?? 0),   accent: "text-emerald-400" },
+          { icon: Zap,         label: "So'rovlar",  value: fmtNum(stats?.total_requests ?? 0),    accent: "text-indigo-600" },
+          { icon: Activity,    label: "Tokenlar",   value: fmtNum(stats?.total_tokens ?? 0),      accent: "text-sky-600" },
+          { icon: DollarSign,  label: "Xarajat",    value: fmtCost(stats?.total_cost_usd ?? 0),   accent: "text-emerald-600" },
         ].map(({ icon: Icon, label, value, accent }) => (
-          <div key={label} className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-white/6 rounded-xl p-3 text-center">
+          <div key={label} className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
             <Icon size={16} className={`${accent} mx-auto mb-1`} />
-            <p className="text-base font-bold text-white tabular-nums">{value}</p>
+            <p className="text-base font-bold text-slate-900 tabular-nums">{value}</p>
             <p className="text-xs text-slate-500">{label}</p>
           </div>
         ))}
@@ -383,12 +367,12 @@ function AiStatsPanel({ stats }: { stats: AiStats | null }) {
               {stats.by_model.map((m) => (
                 <li key={m.model} className="flex items-center gap-2 text-xs">
                   <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0" />
-                  <span className="text-slate-300 font-mono truncate flex-1" title={m.model}>
+                  <span className="text-slate-700 font-mono truncate flex-1" title={m.model}>
                     {m.model.replace("claude-", "").replace("-20", " ")}
                   </span>
-                  <span className="text-slate-400 tabular-nums">{fmtNum(m.requests)}</span>
-                  <span className="text-slate-600">·</span>
-                  <span className="text-emerald-400 tabular-nums">{fmtCost(m.cost_usd)}</span>
+                  <span className="text-slate-600 tabular-nums">{fmtNum(m.requests)}</span>
+                  <span className="text-slate-400">·</span>
+                  <span className="text-emerald-600 tabular-nums">{fmtCost(m.cost_usd)}</span>
                 </li>
               ))}
             </ul>
@@ -404,9 +388,9 @@ function AiStatsPanel({ stats }: { stats: AiStats | null }) {
                 {stats!.top_tenants.slice(0, 5).map((t) => (
                   <li key={t.tenant_id} className="flex items-center gap-2 text-xs">
                     <span className="w-2 h-2 rounded-full bg-sky-500 shrink-0" />
-                    <span className="text-slate-300 truncate flex-1">{t.tenant_name}</span>
-                    <span className="text-slate-400 tabular-nums">{fmtNum(t.requests)}</span>
-                    <span className="text-emerald-400 tabular-nums">{fmtCost(t.cost_usd)}</span>
+                    <span className="text-slate-700 truncate flex-1">{t.tenant_name}</span>
+                    <span className="text-slate-600 tabular-nums">{fmtNum(t.requests)}</span>
+                    <span className="text-emerald-600 tabular-nums">{fmtCost(t.cost_usd)}</span>
                   </li>
                 ))}
               </ul>
@@ -428,16 +412,16 @@ function QuickLink({ to, icon: Icon, label, desc }: {
   return (
     <button
       onClick={() => navigate(to)}
-      className="flex items-center gap-3 p-4 bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-white/8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:border-slate-200 dark:hover:border-white/15 hover:scale-[1.01] transition-all text-left"
+      className="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:scale-[1.01] transition-all text-left"
     >
-      <div className="w-9 h-9 rounded-lg bg-indigo-500/15 flex items-center justify-center shrink-0">
-        <Icon size={16} className="text-indigo-400" />
+      <div className="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
+        <Icon size={16} className="text-indigo-600" />
       </div>
       <div>
-        <p className="text-sm font-medium text-white">{label}</p>
+        <p className="text-sm font-medium text-slate-900">{label}</p>
         <p className="text-xs text-slate-500">{desc}</p>
       </div>
-      <ArrowRight size={14} className="ml-auto text-slate-600" />
+      <ArrowRight size={14} className="ml-auto text-slate-400" />
     </button>
   );
 }
@@ -485,7 +469,6 @@ export function AdminDashboardPage() {
   const blocked   = companies.filter((c) => c.status === "blocked").length;
   const total     = companies.length;
 
-  // 7 kunlik yangi kompaniyalar (trend)
   const weekNew = useMemo(() => {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 7);
@@ -508,15 +491,15 @@ export function AdminDashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
-          <p className="text-slate-400 text-sm mt-0.5">
+          <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
+          <p className="text-slate-500 text-sm mt-0.5">
             {loading ? "Yuklanmoqda..." : `Oxirgi yangilanish: ${checkedAt}`}
           </p>
         </div>
         <button
           onClick={() => load(true)}
           disabled={loading || refreshing}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-700 text-slate-200 text-sm hover:bg-slate-600 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm hover:bg-slate-50 transition-colors disabled:opacity-50"
         >
           <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
           Yangilash
@@ -526,18 +509,15 @@ export function AdminDashboardPage() {
       {loading ? (
         /* ── Skeleton ── */
         <div className="space-y-4">
-          {/* Stat cards skeleton */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-28 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/8 animate-pulse" />
+              <div key={i} className="h-28 rounded-xl bg-white border border-slate-200 animate-pulse" />
             ))}
           </div>
-          {/* Chart skeleton */}
-          <div className="h-48 rounded-xl bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-white/8 animate-pulse" />
-          {/* Quick links skeleton */}
+          <div className="h-48 rounded-xl bg-white border border-slate-200 animate-pulse" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-16 rounded-xl bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-white/8 animate-pulse" />
+              <div key={i} className="h-16 rounded-xl bg-white border border-slate-200 animate-pulse" />
             ))}
           </div>
         </div>
@@ -547,8 +527,8 @@ export function AdminDashboardPage() {
           {health && (
             <div className={`mb-6 flex items-center gap-3 px-4 py-3 rounded-xl border text-sm ${
               health.status === "ok"
-                ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-300"
-                : "bg-amber-500/10 border-amber-500/25 text-amber-300"
+                ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                : "bg-amber-50 border-amber-200 text-amber-700"
             }`}>
               {health.status === "ok" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
               <span>
@@ -589,8 +569,8 @@ export function AdminDashboardPage() {
           {/* Charts row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {/* Donut chart */}
-            <div className="md:col-span-1 bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-white/8 rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-white mb-4">Kompaniyalar holati</h3>
+            <div className="md:col-span-1 bg-white border border-slate-200 rounded-xl p-5">
+              <h3 className="text-sm font-semibold text-slate-900 mb-4">Kompaniyalar holati</h3>
               <div className="flex items-center gap-6">
                 <DonutChart slices={donutSlices} size={120} />
                 <div className="space-y-2">
@@ -602,8 +582,8 @@ export function AdminDashboardPage() {
                   ].map(({ label, count, color }) => (
                     <div key={label} className="flex items-center gap-2">
                       <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${color}`} />
-                      <span className="text-xs text-slate-400">{label}</span>
-                      <span className="text-xs font-bold text-white ml-auto pl-2">{count}</span>
+                      <span className="text-xs text-slate-600">{label}</span>
+                      <span className="text-xs font-bold text-slate-900 ml-auto pl-2">{count}</span>
                     </div>
                   ))}
                 </div>
@@ -611,26 +591,26 @@ export function AdminDashboardPage() {
             </div>
 
             {/* 7 kunlik bar chart */}
-            <div className="md:col-span-1 bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-white/8 rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-white mb-4">Registratsiya dinamikasi</h3>
+            <div className="md:col-span-1 bg-white border border-slate-200 rounded-xl p-5">
+              <h3 className="text-sm font-semibold text-slate-900 mb-4">Registratsiya dinamikasi</h3>
               <MiniBarChart companies={companies} />
             </div>
 
             {/* DB latency gauge */}
-            <div className="md:col-span-1 bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-white/8 rounded-xl p-5 flex flex-col">
-              <h3 className="text-sm font-semibold text-white mb-4">Tizim ishlashi</h3>
+            <div className="md:col-span-1 bg-white border border-slate-200 rounded-xl p-5 flex flex-col">
+              <h3 className="text-sm font-semibold text-slate-900 mb-4">Tizim ishlashi</h3>
               <div className="flex-1 flex flex-col items-center justify-center gap-4">
                 {health ? (
                   <>
                     <LatencyGauge ms={health.db_latency_ms} />
                     <div className="flex gap-4 text-center">
                       <div>
-                        <p className="text-lg font-bold text-white tabular-nums">{health.users.total}</p>
+                        <p className="text-lg font-bold text-slate-900 tabular-nums">{health.users.total}</p>
                         <p className="text-xs text-slate-500">Foydalanuvchi</p>
                       </div>
-                      <div className="w-px bg-white/8" />
+                      <div className="w-px bg-slate-200" />
                       <div>
-                        <p className="text-lg font-bold text-white tabular-nums">{health.contacts.total}</p>
+                        <p className="text-lg font-bold text-slate-900 tabular-nums">{health.contacts.total}</p>
                         <p className="text-xs text-slate-500">Murojaat</p>
                       </div>
                     </div>

@@ -493,7 +493,7 @@ export function AdminRiskPage() {
               <div className="w-20 h-20 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center mb-5">
                 <ShieldCheck size={36} className="text-slate-600" />
               </div>
-              <h2 className="text-xl font-bold text-white mb-2">Skan o'tkazilmagan</h2>
+              <h2 className="text-xl font-bold text-slate-900 mb-2">Skan o'tkazilmagan</h2>
               <p className="text-sm text-slate-500 max-w-sm mb-6">
                 "Skan qilish" tugmasini bosing — tizim 15+ xavfsizlik
                 tekshiruvini avtomatik o'tkazadi va natijalarni ko'rsatadi.
@@ -519,7 +519,7 @@ export function AdminRiskPage() {
                 </div>
               </div>
               <div className="text-center">
-                <p className="text-white font-semibold">Skanlanmoqda...</p>
+                <p className="text-slate-900 font-semibold">Skanlanmoqda...</p>
                 <p className="text-sm text-slate-500 mt-1">
                   Statik tekshiruvlar + Security Advisor
                 </p>
@@ -593,8 +593,8 @@ export function AdminRiskPage() {
                       onClick={() => setStatusFilter(f.key)}
                       className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
                         statusFilter === f.key
-                          ? "bg-slate-700 text-white"
-                          : "text-slate-500 hover:text-white"
+                          ? "bg-indigo-600 text-white"
+                          : "text-slate-500 hover:text-slate-900"
                       }`}
                     >
                       {f.label}
@@ -607,7 +607,7 @@ export function AdminRiskPage() {
               {sorted.length === 0 ? (
                 <div className="text-center py-12">
                   <CheckCircle2 size={36} className="text-emerald-500 mx-auto mb-3" />
-                  <p className="text-white font-semibold">Topilma yo'q</p>
+                  <p className="text-slate-900 font-semibold">Topilma yo'q</p>
                   <p className="text-sm text-slate-500 mt-1">
                     Tanlangan filtrlar bo'yicha zaiflik aniqlanmadi
                   </p>
