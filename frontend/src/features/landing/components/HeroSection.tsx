@@ -4,6 +4,7 @@ import { Bot, ChevronRight, Zap } from "lucide-react";
 import { TELEGRAM_BOT_URL } from "../types";
 import type { landingI18n } from "../i18n";
 import type { LandingLocale } from "../types";
+import { useAuthContext } from "../../auth/context/AuthContext";
 
 type HeroT = typeof landingI18n[LandingLocale]["hero"];
 
@@ -11,6 +12,16 @@ type Props = { t: HeroT };
 
 export function HeroSection({ t }: Props) {
   const navigate = useNavigate();
+  const { session, currentTenant } = useAuthContext();
+
+  function handleLoginClick() {
+    if (session) {
+      const isAdmin = currentTenant?.role === "super_admin" || currentTenant?.role === "sub_admin";
+      navigate(isAdmin ? "/admin" : "/app");
+    } else {
+      navigate("/login");
+    }
+  }
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950">
@@ -46,7 +57,7 @@ export function HeroSection({ t }: Props) {
             {t.ctaTelegram}
           </a>
           <button
-            onClick={() => navigate("/login")}
+            onClick={handleLoginClick}
             className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-base transition-all"
           >
             {t.ctaLogin}

@@ -4,6 +4,24 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-06-04 — Исправление Dark Mode и редиректа при входе
+
+### Контекст
+1. Страницы админ-панели и дашборда отображались с мешаниной цветов — `dark:` классы Tailwind не работают без родительского элемента с классом `.dark`. `ThemeProvider` никогда не был добавлен.
+2. Когда super_admin переходил на LP будучи авторизованным и нажимал "Войти", его редиректило на `/app` вместо `/admin` — навбар отправлял на `/login`, где `currentTenant` мог быть null.
+
+### Сделано
+- `AppProviders.tsx` — Добавлен `ThemeProvider` из `next-themes` (`attribute="class"`, `defaultTheme="dark"`) — автоматически устанавливает `<html class="dark">`, все `dark:` классы Tailwind работают корректно
+- `LandingNavbar.tsx` — Кнопка "Войти" теперь проверяет состояние авторизации: если залогинен → `/admin` или `/app`, если нет → `/login`
+- `HeroSection.tsx` — Аналогичное исправление
+
+### Файлы
+- `frontend/src/app/providers/AppProviders.tsx` (изменён)
+- `frontend/src/features/landing/components/LandingNavbar.tsx` (изменён)
+- `frontend/src/features/landing/components/HeroSection.tsx` (изменён)
+
+---
+
 ## 2026-06-03 — Исправление бага с мок-данными задач (PATCH 500)
 
 ### Контекст

@@ -4,6 +4,24 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-06-04 — Dark Mode & Login Redirect Bug Fixes
+
+### Context
+1. Admin panel and dashboard pages appeared with confusing mixed colors — `dark:` Tailwind classes don't apply without a `.dark` parent element. `ThemeProvider` was never added to the app.
+2. When a super_admin navigated to LP while logged in and clicked "Login", they were redirected to `/app` instead of `/admin` — the navbar sent them to `/login`, where `currentTenant` could be null.
+
+### Done
+- `AppProviders.tsx` — Added `ThemeProvider` from `next-themes` (`attribute="class"`, `defaultTheme="dark"`) — automatically sets `<html class="dark">`, all `dark:` Tailwind classes work correctly
+- `LandingNavbar.tsx` — "Login" button now checks auth state: if logged in → `/admin` or `/app`, if not → `/login`
+- `HeroSection.tsx` — Same fix applied
+
+### Files
+- `frontend/src/app/providers/AppProviders.tsx` (changed)
+- `frontend/src/features/landing/components/LandingNavbar.tsx` (changed)
+- `frontend/src/features/landing/components/HeroSection.tsx` (changed)
+
+---
+
 ## 2026-06-03 — Tasks Mock Data Bug Fix (PATCH 500 error)
 
 ### Context

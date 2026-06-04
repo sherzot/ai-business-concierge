@@ -4,6 +4,24 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-06-04 — Dark Mode va Login Redirect Bug Fixes
+
+### Kontekst
+1. Admin panel va dashboard sahifalari ko'zni chalkashtiruvchi aralash rangda ko'rinardi — `dark:` Tailwind class'lari `.dark` parent element bo'lmasdan ishlamaydi. `ThemeProvider` umuman qo'shilmagan edi.
+2. Super_admin tizimga kirgan holda LP ga kirib, u yerdan "Kirish" tugmasini bossanda `/admin` o'rniga `/app` ga o'tardi — navbar `/login` ga yuborardi, lekin `LoginPage` da `currentTenant` null bo'lishi mumkin.
+
+### Bajarildi
+- `AppProviders.tsx` — `next-themes` dan `ThemeProvider` qo'shildi (`attribute="class"`, `defaultTheme="dark"`) — `<html class="dark">` avtomatik o'rnatiladi, barcha `dark:` Tailwind class'lari to'g'ri ishlaydi
+- `LandingNavbar.tsx` — "Kirish" tugmasi endi foydalanuvchi holati tekshiradi: login bo'lsa → `/admin` yoki `/app` ga, login bo'lmasa → `/login` ga
+- `HeroSection.tsx` — xuddi shunday tuzatish
+
+### Fayllar
+- `frontend/src/app/providers/AppProviders.tsx` (o'zgargan)
+- `frontend/src/features/landing/components/LandingNavbar.tsx` (o'zgargan)
+- `frontend/src/features/landing/components/HeroSection.tsx` (o'zgargan)
+
+---
+
 ## 2026-06-03 — Tasks Mock Data Bug Fix (PATCH 500 xatosi)
 
 ### Kontekst

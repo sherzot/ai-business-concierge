@@ -4,6 +4,24 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-06-04 — ダークモードとログインリダイレクトのバグ修正
+
+### コンテキスト
+1. 管理パネルとダッシュボードページが混乱した色で表示されていた — `dark:` Tailwindクラスは`.dark`親要素がないと適用されない。`ThemeProvider`が追加されていなかった。
+2. super_adminがログイン中にLPに移動して「ログイン」ボタンを押すと、`/admin`ではなく`/app`にリダイレクトされていた。
+
+### 実施内容
+- `AppProviders.tsx` — `next-themes`から`ThemeProvider`を追加（`attribute="class"`、`defaultTheme="dark"`）— 自動的に`<html class="dark">`を設定し、すべての`dark:`クラスが正しく動作
+- `LandingNavbar.tsx` — 「ログイン」ボタンが認証状態を確認：ログイン済みなら→`/admin`または`/app`、未ログインなら→`/login`
+- `HeroSection.tsx` — 同様の修正
+
+### ファイル
+- `frontend/src/app/providers/AppProviders.tsx`（変更）
+- `frontend/src/features/landing/components/LandingNavbar.tsx`（変更）
+- `frontend/src/features/landing/components/HeroSection.tsx`（変更）
+
+---
+
 ## 2026-06-03 — タスクモックデータのバグ修正（PATCH 500エラー）
 
 ### コンテキスト

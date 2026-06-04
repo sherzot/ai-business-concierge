@@ -1,5 +1,6 @@
 import React from "react";
 import { RouterProvider } from "react-router-dom";
+import { ThemeProvider } from "next-themes";
 import { router } from "../router";
 import { I18nProvider } from "./I18nProvider";
 import { AuthProvider, useAuthContext } from "../../features/auth/context/AuthContext";
@@ -18,12 +19,14 @@ function AppWithRealtime() {
 
 export function AppProviders() {
   return (
-    <I18nProvider>
-      <AuthProvider>
-        <TourProvider>
-          <AppWithRealtime />
-        </TourProvider>
-      </AuthProvider>
-    </I18nProvider>
+    <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
+      <I18nProvider>
+        <AuthProvider>
+          <TourProvider>
+            <AppWithRealtime />
+          </TourProvider>
+        </AuthProvider>
+      </I18nProvider>
+    </ThemeProvider>
   );
 }

@@ -5,6 +5,7 @@ import type { LandingLocale } from "../types";
 import type { landingI18n } from "../i18n";
 import { LocaleSelect } from "../../../shared/components/LocaleSelect";
 import type { Locale } from "../../../app/i18n";
+import { useAuthContext } from "../../auth/context/AuthContext";
 
 type NavT = typeof landingI18n[LandingLocale]["nav"];
 
@@ -23,11 +24,21 @@ const NAV_LINKS = [
 
 export function LandingNavbar({ locale, onLocaleChange, t }: Props) {
   const navigate = useNavigate();
+  const { session, currentTenant } = useAuthContext();
 
   function scrollTo(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
     e.preventDefault();
     const el = document.querySelector(href);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function handleLoginClick() {
+    if (session) {
+      const isAdmin = currentTenant?.role === "super_admin" || currentTenant?.role === "sub_admin";
+      navigate(isAdmin ? "/admin" : "/app");
+    } else {
+      navigate("/login");
+    }
   }
 
   return (
@@ -64,7 +75,7 @@ export function LandingNavbar({ locale, onLocaleChange, t }: Props) {
             onLocaleChange={(l) => onLocaleChange(l as LandingLocale)}
           />
           <button
-            onClick={() => navigate("/login")}
+            onClick={handleLoginClick}
             className="px-4 py-2 rounded-lg text-sm font-medium bg-white text-slate-900 hover:bg-slate-100 transition-colors"
           >
             {t.login}
