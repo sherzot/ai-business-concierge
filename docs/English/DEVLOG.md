@@ -4,6 +4,28 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-06-04 — Light theme migration completed — push & deploy
+
+### Context
+The previous session started the Light/Clean SaaS theme migration but a grep verification found remaining `text-white`, `bg-slate-700/800/900` in: AdminDashboardPage, AdminKnowledgeBasePage, AdminRiskPage, AdminCompaniesPage, AdminContactsPage.
+
+### Done
+- `AdminDashboardPage.tsx`: Full rewrite — StatCard values `text-white` → `text-slate-900`, SEV_CONFIG badges from opacity variants to solid light (`bg-red-100 text-red-700`), icon containers `bg-*-500/15` → `bg-*-100`, all dark: variants removed, Refresh button `bg-slate-700` → `bg-white border`, DB status banner `text-emerald-300` → `text-emerald-700`, skeleton bars `bg-slate-200`
+- `AdminKnowledgeBasePage.tsx`: Article category/tag badges `bg-slate-700 text-slate-300` → `bg-slate-100 text-slate-600`, question text `text-white` → `text-slate-900`, delete modal `bg-slate-900` → `bg-white`
+- `AdminRiskPage.tsx`: Empty state h2 and scanning text `text-white` → `text-slate-900`, "No findings" `text-white` → `text-slate-900`, status filter active button `bg-slate-700` → `bg-indigo-600`
+- `AdminCompaniesPage.tsx` + `AdminContactsPage.tsx`: All headings, stat counts, filter tabs, search inputs, skeletons, list items, modals — fully migrated to light palette
+- Build check: `✓ built in 3.14s` — no errors
+- Git push triggered Netlify deploy
+
+### Files
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (full rewrite)
+- `frontend/src/features/admin/pages/AdminKnowledgeBasePage.tsx` (changed)
+- `frontend/src/features/admin/pages/AdminRiskPage.tsx` (changed)
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (changed)
+- `frontend/src/features/admin/pages/AdminContactsPage.tsx` (changed)
+
+---
+
 ## 2026-06-04 — Full migration to Light/Clean Modern SaaS theme
 
 ### Context

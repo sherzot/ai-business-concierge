@@ -4,6 +4,29 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-06-04 — Light Theme migratsiyasi yakunlandi — push & deploy
+
+### Kontekst
+Oldingi sessiyada Light/Clean SaaS theme o'tishi boshlangan edi, lekin grep tekshiruvi `text-white`, `bg-slate-700/800/900` qoldiqlarini topdi: AdminDashboardPage, AdminKnowledgeBasePage, AdminRiskPage, AdminCompaniesPage, AdminContactsPage.
+
+### Bajarildi
+- `AdminDashboardPage.tsx`: To'liq qayta yozildi — StatCard `text-white` → `text-slate-900`, `text-slate-300` → `text-slate-600`, trend ranglari `text-emerald-400` → `text-emerald-600`, SEV_CONFIG badge'lar `/10 opacity` → to'liq rang (`bg-red-100 text-red-700`), SecurityPosture/AiStatsPanel icon container `bg-*-500/15` → `bg-*-100`, QuickLink dark: variant'lar olib tashlandi, Yangilash tugmasi `bg-slate-700` → `bg-white border`, DB banner `text-emerald-300` → `text-emerald-700`, skeleton `bg-slate-200` ranglar
+- `AdminKnowledgeBasePage.tsx`: Maqola category va tag badge'lari `bg-slate-700 text-slate-300` → `bg-slate-100 text-slate-600`, question matni `text-white` → `text-slate-900`, delete modal `bg-slate-900` → `bg-white`, h3 `text-white` → `text-slate-900`
+- `AdminRiskPage.tsx`: Empty state h2 `text-white` → `text-slate-900`, scanning matni `text-white` → `text-slate-900`, "Topilma yo'q" `text-white` → `text-slate-900`, status filter aktiv tugmasi `bg-slate-700` → `bg-indigo-600`
+- `AdminCompaniesPage.tsx`: h1 `text-white` → `text-slate-900`, stat card count `text-white` → `text-slate-900`, filter tabs `bg-slate-800` → `bg-white`, search input `bg-slate-800 text-white` → `bg-white text-slate-900`, skeleton `bg-slate-700` → `bg-slate-200`, company name `text-white` → `text-slate-900`, legal form badge `bg-slate-700` → `bg-slate-100`, block modal `bg-slate-800` → `bg-white`, Yangilash tugmasi `bg-slate-700` → `bg-white border`
+- `AdminContactsPage.tsx`: h1 `text-white` → `text-slate-900`, filter tabs/search/skeleton/contact name — xuddi shunday tuzatmalar
+- Build tekshiruvi: `✓ built in 3.14s` — hech qanday xato yo'q
+- Git push va Netlify deploy ishga tushirildi
+
+### Fayllar
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (to'liq qayta yozildi)
+- `frontend/src/features/admin/pages/AdminKnowledgeBasePage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminRiskPage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminContactsPage.tsx` (o'zgargan)
+
+---
+
 ## 2026-06-04 — Light/Clean Modern SaaS theme ga to'liq o'tish
 
 ### Kontekst

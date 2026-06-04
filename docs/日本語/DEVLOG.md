@@ -4,6 +4,28 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-06-04 — ライトテーマ移行完了 — push & deploy
+
+### コンテキスト
+前セッションでLight/Clean SaaSテーマ移行を開始したが、grep検証で`text-white`・`bg-slate-700/800/900`の残留を発見：AdminDashboardPage、AdminKnowledgeBasePage、AdminRiskPage、AdminCompaniesPage、AdminContactsPage。
+
+### 実施内容
+- `AdminDashboardPage.tsx`: 完全書き直し — StatCard値`text-white`→`text-slate-900`、SEV_CONFIGバッジをopacity変種から solid light（`bg-red-100 text-red-700`）へ、アイコンコンテナ`bg-*-500/15`→`bg-*-100`、dark:変種を全削除、更新ボタン`bg-slate-700`→`bg-white border`、DBステータスバナー`text-emerald-300`→`text-emerald-700`、スケルトン`bg-slate-200`
+- `AdminKnowledgeBasePage.tsx`: カテゴリ/タグバッジ`bg-slate-700 text-slate-300`→`bg-slate-100 text-slate-600`、質問テキスト`text-white`→`text-slate-900`、削除モーダル`bg-slate-900`→`bg-white`
+- `AdminRiskPage.tsx`: 空状態h2・スキャンテキスト`text-white`→`text-slate-900`、「該当なし」`text-white`→`text-slate-900`、ステータスフィルターアクティブボタン`bg-slate-700`→`bg-indigo-600`
+- `AdminCompaniesPage.tsx` + `AdminContactsPage.tsx`: 見出し・カウント・フィルタータブ・検索・スケルトン・リスト・モーダル — すべてライトパレットへ移行
+- ビルド確認：`✓ built in 3.14s` — エラーなし
+- git pushでNetlifyデプロイ起動
+
+### ファイル
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx`（完全書き直し）
+- `frontend/src/features/admin/pages/AdminKnowledgeBasePage.tsx`（変更）
+- `frontend/src/features/admin/pages/AdminRiskPage.tsx`（変更）
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx`（変更）
+- `frontend/src/features/admin/pages/AdminContactsPage.tsx`（変更）
+
+---
+
 ## 2026-06-04 — Light/Clean Modern SaaSテーマへの全面移行
 
 ### コンテキスト

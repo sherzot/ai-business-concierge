@@ -4,6 +4,28 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-06-04 — Миграция на светлую тему завершена — push & deploy
+
+### Контекст
+В предыдущей сессии начата миграция на Light/Clean SaaS тему, но grep-проверка обнаружила оставшиеся `text-white`, `bg-slate-700/800/900` в: AdminDashboardPage, AdminKnowledgeBasePage, AdminRiskPage, AdminCompaniesPage, AdminContactsPage.
+
+### Выполнено
+- `AdminDashboardPage.tsx`: Полная перезапись — значения StatCard `text-white` → `text-slate-900`, SEV_CONFIG значки с opacity-вариантов на сплошные светлые (`bg-red-100 text-red-700`), контейнеры иконок `bg-*-500/15` → `bg-*-100`, все dark:-варианты убраны, кнопка обновления `bg-slate-700` → `bg-white border`, баннер статуса БД `text-emerald-300` → `text-emerald-700`, скелеты `bg-slate-200`
+- `AdminKnowledgeBasePage.tsx`: Значки категорий/тегов `bg-slate-700 text-slate-300` → `bg-slate-100 text-slate-600`, текст вопроса `text-white` → `text-slate-900`, модальное окно удаления `bg-slate-900` → `bg-white`
+- `AdminRiskPage.tsx`: Пустое состояние h2 и текст сканирования `text-white` → `text-slate-900`, "Нет находок" `text-white` → `text-slate-900`, активная кнопка фильтра статуса `bg-slate-700` → `bg-indigo-600`
+- `AdminCompaniesPage.tsx` + `AdminContactsPage.tsx`: Все заголовки, счётчики, вкладки фильтров, поля поиска, скелеты, элементы списков, модальные окна — полностью переведены на светлую палитру
+- Проверка сборки: `✓ built in 3.14s` — ошибок нет
+- Git push запустил Netlify deploy
+
+### Файлы
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (полная перезапись)
+- `frontend/src/features/admin/pages/AdminKnowledgeBasePage.tsx` (изменён)
+- `frontend/src/features/admin/pages/AdminRiskPage.tsx` (изменён)
+- `frontend/src/features/admin/pages/AdminCompaniesPage.tsx` (изменён)
+- `frontend/src/features/admin/pages/AdminContactsPage.tsx` (изменён)
+
+---
+
 ## 2026-06-04 — Полный переход на Light/Clean Modern SaaS тему
 
 ### Контекст
