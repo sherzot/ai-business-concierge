@@ -195,7 +195,7 @@ function LatencyGauge({ ms }: { ms: number }) {
         {pct > 0 && (
           <path
             d={`M ${cx + r * Math.cos(toRad(-140))} ${cy + r * Math.sin(toRad(-140))}
-                A ${r} ${r} 0 ${pct > 0.5 ? 1 : 0} 1 ${x} ${y}`}
+                A ${r} ${r} 0 ${pct > 9 / 14 ? 1 : 0} 1 ${x} ${y}`}
             fill="none" stroke={color} strokeWidth={8} strokeLinecap="round"
             className="transition-all duration-700"
           />

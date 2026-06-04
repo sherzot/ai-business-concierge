@@ -320,7 +320,7 @@ export function AdminKnowledgeBasePage() {
         <div className="text-center py-12 text-red-400">{error}</div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
-          <BookOpen size={32} className="text-slate-700 mx-auto mb-3" />
+          <BookOpen size={32} className="text-slate-500 mx-auto mb-3" />
           <p className="text-slate-500 text-sm">Maqolalar topilmadi</p>
         </div>
       ) : (
