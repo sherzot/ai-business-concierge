@@ -4,6 +4,26 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-06-04 — Dark Mode Text Ranglari va LatencyGauge Tuzatish
+
+### Kontekst
+Dark mode da ba'zi admin sahifalarida `text-slate-900` (qora) yozuvlar ko'rinmasdi — `dark:` variantlari yo'q edi. `LatencyGauge` (DB kechikish) SVG arc'i `pct > 0.5` threshold da sakrab ketardi — 280° arc uchun to'g'ri threshold `180/280 = 9/14`.
+
+### Bajarildi
+- `AdminHealthPage.tsx` — barcha `bg-white`, `text-slate-900`, light banner'lar dark slate-800/white ranglar bilan almashtirildi
+- `AdminAIChatPage.tsx` — sarlavha, message bubble'lar, input, suggestion tugmalar dark mode uchun tuzatildi
+- `AdminDashboardPage.tsx` — `LatencyGauge` `largeArc` threshold: `pct > 0.5` → `pct > 9/14`
+- `AdminKnowledgeBasePage`, `AdminAuditPage` — icon rang `text-slate-700` → `text-slate-500`
+
+### Fayllar
+- `frontend/src/features/admin/pages/AdminHealthPage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminAIChatPage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminKnowledgeBasePage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminAuditPage.tsx` (o'zgargan)
+
+---
+
 ## 2026-06-04 — Dark Mode va Login Redirect Bug Fixes
 
 ### Kontekst
