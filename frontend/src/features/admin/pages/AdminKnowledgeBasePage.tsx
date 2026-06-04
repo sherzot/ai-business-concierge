@@ -61,13 +61,13 @@ function FormModal({ initial, onSave, onClose }: FormModalProps) {
       <motion.div
         initial={{ scale: 0.96, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-2xl bg-slate-900 border border-slate-300 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+        className="w-full max-w-2xl bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-white/8">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <div className="flex items-center gap-2.5">
-            <BookOpen size={18} className="text-indigo-400" />
-            <h2 className="text-base font-semibold text-white">
+            <BookOpen size={18} className="text-indigo-600" />
+            <h2 className="text-base font-semibold text-slate-900">
               {initial ? "Maqolani tahrirlash" : "Yangi KB maqola"}
             </h2>
           </div>
@@ -85,7 +85,7 @@ function FormModal({ initial, onSave, onClose }: FormModalProps) {
               <select
                 value={locale}
                 onChange={(e) => setLocale(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
               >
                 {LOCALES.map((l) => <option key={l} value={l}>{l.toUpperCase()}</option>)}
               </select>
@@ -95,7 +95,7 @@ function FormModal({ initial, onSave, onClose }: FormModalProps) {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
               >
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -135,7 +135,7 @@ function FormModal({ initial, onSave, onClose }: FormModalProps) {
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="soliq, QQS, hisobot"
-                className="w-full bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
               />
             </label>
             <label className="block">
@@ -289,13 +289,13 @@ export function AdminKnowledgeBasePage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Qidiruv..."
-            className="pl-8 pr-4 py-1.5 bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 w-48"
+            className="pl-8 pr-4 py-1.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 w-48"
           />
         </div>
         <select
           value={filterLocale}
           onChange={(e) => setFilterLocale(e.target.value)}
-          className="bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
+          className="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
         >
           <option value="all">Barcha tillar</option>
           {LOCALES.map((l) => <option key={l} value={l}>{l.toUpperCase()}</option>)}
@@ -303,7 +303,7 @@ export function AdminKnowledgeBasePage() {
         <select
           value={filterCategory}
           onChange={(e) => setFilterCategory(e.target.value)}
-          className="bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
+          className="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
         >
           <option value="all">Barcha kategoriyalar</option>
           {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -427,8 +427,8 @@ export function AdminKnowledgeBasePage() {
 
       {/* Delete Confirm */}
       {deleting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
-          <div className="bg-slate-900 border border-slate-300 dark:border-white/10 rounded-xl p-6 max-w-sm w-full mx-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 max-w-sm w-full mx-4 shadow-xl">
             <h3 className="text-base font-semibold text-white mb-2">Maqolani o'chirish</h3>
             <p className="text-sm text-slate-400 mb-5">Bu amal qaytarib bo'lmaydi. Davom etasizmi?</p>
             <div className="flex justify-end gap-2">

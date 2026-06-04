@@ -62,7 +62,7 @@ export function AdminAIChatPage() {
           <Sparkles size={18} className="text-white" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-white">Admin AI Yordamchisi</h1>
+          <h1 className="text-xl font-bold text-slate-900">Admin AI Yordamchisi</h1>
           <p className="text-xs text-slate-500">Platforma monitoringi va tahlil</p>
         </div>
       </div>
@@ -70,25 +70,25 @@ export function AdminAIChatPage() {
       {/* Messages */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto space-y-4 bg-slate-900/50 rounded-xl border border-white/8 p-4 mb-4"
+        className="flex-1 overflow-y-auto space-y-4 bg-slate-50 rounded-xl border border-slate-200 p-4 mb-4"
       >
         {messages.map((m) => (
           <div key={m.id} className={`flex gap-2.5 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
             <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
-              m.role === "ai" ? "bg-indigo-500/20 text-indigo-400" : "bg-slate-700 text-slate-300"
+              m.role === "ai" ? "bg-indigo-100 text-indigo-600" : "bg-slate-200 text-slate-600"
             }`}>
               {m.role === "ai" ? <Bot size={14} /> : <User size={14} />}
             </div>
             <div className={`max-w-[80%] rounded-xl px-4 py-2.5 text-sm leading-relaxed ${
               m.role === "ai"
-                ? "bg-slate-800 border border-white/10 text-slate-200"
+                ? "bg-white border border-slate-200 text-slate-700 shadow-sm"
                 : "bg-indigo-600 text-white"
             }`}>
               {m.loading ? (
                 <span className="inline-flex gap-1 items-center">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: "300ms" }} />
                 </span>
               ) : (
                 <span style={{ whiteSpace: "pre-wrap" }}>{m.content}</span>
@@ -105,7 +105,7 @@ export function AdminAIChatPage() {
             <button
               key={s}
               onClick={() => send(s)}
-              className="text-xs rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 px-3 py-1.5 hover:bg-indigo-500/20 transition"
+              className="text-xs rounded-full border border-indigo-200 bg-indigo-50 text-indigo-700 px-3 py-1.5 hover:bg-indigo-100 transition"
             >
               {s}
             </button>
@@ -123,7 +123,7 @@ export function AdminAIChatPage() {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Savol yozing…"
           disabled={pending}
-          className="flex-1 rounded-xl border border-white/10 bg-slate-800 text-slate-200 placeholder:text-slate-500 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 disabled:opacity-50"
+          className="flex-1 rounded-xl border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 disabled:opacity-50"
         />
         <button
           type="submit"

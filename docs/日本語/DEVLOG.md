@@ -4,6 +4,27 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-06-04 — Light/Clean Modern SaaSテーマへの全面移行
+
+### コンテキスト
+アプリは以前 `forcedTheme="dark"` でロックされ、全コンポーネントがハードコードされたダークカラーで記述されていた。ユーザーがNotion/Linear/Vercel風のライトクリーンデザインへの移行を要求した。
+
+### 実施内容
+- `AppProviders.tsx`: `forcedTheme="dark"` → `forcedTheme="light"` — 全 `dark:` Tailwindクラスが無効化
+- `LoginPage.tsx`: 完全書き直し — 白背景、インディゴグラデーションの左ブランディングパネル、白いフォームカード
+- 認証ページ3件（ForgotPassword、ResetPassword、SetupAccount）: ライトデザインに統一
+- `AdminHealthPage.tsx`: ダークカード → 白カード、`shadow-sm` 追加
+- `AdminAIChatPage.tsx`: チャット領域・バブル・入力欄をライトパレットに変換
+- `AdminAuditPage.tsx`: アクションバッジ色修正、入力欄 → `bg-white`
+- `AdminRiskPage.tsx`: SVGトラック `stroke="#e2e8f0"`、見出し `text-slate-900`
+- `AdminKnowledgeBasePage.tsx`: 全入力欄 `bg-white text-slate-900`、モーダル → `bg-white`
+- `AdminDashboardPage.tsx`: SVGハードコード色を全てライトモード用に変換
+
+### ファイル
+- `frontend/src/app/providers/AppProviders.tsx`
+- `frontend/src/features/auth/pages/` (4ファイル)
+- `frontend/src/features/admin/pages/` (6ファイル)
+
 ## 2026-06-04 — ダークモードとログインリダイレクトのバグ修正
 
 ### コンテキスト

@@ -66,7 +66,7 @@ function ScoreRing({ score }: { score: number }) {
   return (
     <div className="relative w-28 h-28 flex items-center justify-center">
       <svg className="absolute inset-0 -rotate-90" width="112" height="112">
-        <circle cx="56" cy="56" r={r} fill="none" stroke="#1e293b" strokeWidth="8" />
+        <circle cx="56" cy="56" r={r} fill="none" stroke="#e2e8f0" strokeWidth="8" />
         <circle
           cx="56" cy="56" r={r} fill="none"
           stroke={color} strokeWidth="8"
@@ -76,7 +76,7 @@ function ScoreRing({ score }: { score: number }) {
         />
       </svg>
       <div className="text-center z-10">
-        <p className="text-3xl font-black text-white leading-none">{score}</p>
+        <p className="text-3xl font-black text-slate-900 leading-none">{score}</p>
         <p className="text-[10px] text-slate-500 uppercase tracking-wide mt-0.5">Ball</p>
       </div>
     </div>
@@ -124,7 +124,7 @@ function FindingRow({
 
   return (
     <div className={`rounded-xl border transition-all duration-200 ${
-      expanded ? `${cfg.bg} ${cfg.border}` : "border-white/8 hover:border-slate-200 dark:hover:border-white/15"
+      expanded ? `${cfg.bg} ${cfg.border}` : "border-slate-200 hover:border-slate-300 hover:shadow-sm"
     }`}>
       {/* Summary row */}
       <button
@@ -140,7 +140,7 @@ function FindingRow({
         </span>
 
         {/* Title */}
-        <span className="flex-1 text-sm font-medium text-slate-200 text-left truncate">
+        <span className="flex-1 text-sm font-medium text-slate-900 text-left truncate">
           {finding.title}
         </span>
 
@@ -163,7 +163,7 @@ function FindingRow({
 
       {/* Expanded detail */}
       {expanded && (
-        <div className="px-4 pb-4 space-y-4 border-t border-slate-200 dark:border-white/8 pt-4">
+        <div className="px-4 pb-4 space-y-4 border-t border-slate-200 pt-4">
           {/* Description */}
           <div>
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
@@ -178,7 +178,7 @@ function FindingRow({
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
                 Joylashuv
               </p>
-              <code className="text-xs bg-slate-900 border border-slate-300 dark:border-white/10 rounded px-2.5 py-1.5 text-slate-300 font-mono block">
+              <code className="text-xs bg-slate-100 border border-slate-200 rounded px-2.5 py-1.5 text-slate-700 font-mono block">
                 {finding.location}
               </code>
             </div>
@@ -406,13 +406,13 @@ export function AdminRiskPage() {
     <div className="h-full flex flex-col">
 
       {/* ── Top header ───────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-white/8 shrink-0">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-red-500/20 flex items-center justify-center">
             <ShieldAlert size={18} className="text-red-400" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white">Xavfsizlik Skaneri</h1>
+            <h1 className="text-lg font-bold text-slate-900">Xavfsizlik Skaneri</h1>
             <p className="text-xs text-slate-500">
               Tizim zaifliklarini aniqlash va kuzatish
             </p>
@@ -438,8 +438,8 @@ export function AdminRiskPage() {
       <div className="flex flex-1 overflow-hidden">
 
         {/* ── Left sidebar — tarix ─────────────────────────────────────────── */}
-        <aside className="hidden lg:flex flex-col w-52 border-r border-slate-200 dark:border-white/8 shrink-0">
-          <div className="flex items-center gap-2 px-3 py-3 border-b border-slate-200 dark:border-white/8">
+        <aside className="hidden lg:flex flex-col w-52 border-r border-slate-200 shrink-0">
+          <div className="flex items-center gap-2 px-3 py-3 border-b border-slate-200">
             <History size={13} className="text-slate-500" />
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Tarix
@@ -490,7 +490,7 @@ export function AdminRiskPage() {
           {/* Empty state */}
           {!currentScan && !scanning && !loadingDetail && (
             <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-center px-6">
-              <div className="w-20 h-20 rounded-2xl bg-slate-800 border border-slate-200 dark:border-white/8 flex items-center justify-center mb-5">
+              <div className="w-20 h-20 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center mb-5">
                 <ShieldCheck size={36} className="text-slate-600" />
               </div>
               <h2 className="text-xl font-bold text-white mb-2">Skan o'tkazilmagan</h2>
@@ -569,7 +569,7 @@ export function AdminRiskPage() {
               {/* ── Filters ──────────────────────────────────────────────── */}
               <div className="flex flex-wrap gap-3">
                 {/* Severity filter */}
-                <div className="flex items-center gap-1 bg-slate-900 border border-slate-200 dark:border-white/8 rounded-lg p-1">
+                <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-lg p-1">
                   {SEVERITY_FILTERS.map(f => (
                     <button
                       key={f.key}
@@ -586,7 +586,7 @@ export function AdminRiskPage() {
                 </div>
 
                 {/* Status filter */}
-                <div className="flex items-center gap-1 bg-slate-900 border border-slate-200 dark:border-white/8 rounded-lg p-1">
+                <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-lg p-1">
                   {STATUS_FILTERS.map(f => (
                     <button
                       key={f.key}

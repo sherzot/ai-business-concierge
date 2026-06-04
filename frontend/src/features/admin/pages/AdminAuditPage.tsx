@@ -19,9 +19,9 @@ const ENTITY_TYPES = ["tasks", "inbox_items", "documents", "hr_cases", "tenants"
 const ACTIONS = ["create", "update", "delete"];
 
 const ACTION_COLOR: Record<string, string> = {
-  create: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-  update: "bg-blue-500/15 text-blue-300 border-blue-500/30",
-  delete: "bg-red-500/15 text-red-300 border-red-500/30",
+  create: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  update: "bg-blue-100 text-blue-700 border-blue-200",
+  delete: "bg-red-100 text-red-700 border-red-200",
 };
 
 function formatDate(iso: string) {
@@ -89,8 +89,8 @@ export function AdminAuditPage() {
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-xl font-semibold text-white flex items-center gap-2">
-            <Shield size={20} className="text-indigo-400" />
+          <h1 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
+            <Shield size={20} className="text-indigo-600" />
             Audit Log
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">
@@ -99,7 +99,7 @@ export function AdminAuditPage() {
         </div>
         <button
           onClick={load}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/8 border border-slate-200 dark:border-white/8 transition-colors shrink-0"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors shrink-0"
         >
           <RefreshCw size={13} /> Yangilash
         </button>
@@ -114,7 +114,7 @@ export function AdminAuditPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Qidiruv..."
-            className="pl-8 pr-4 py-1.5 bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 w-44"
+            className="pl-8 pr-4 py-1.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 w-44"
           />
         </div>
 
@@ -122,7 +122,7 @@ export function AdminAuditPage() {
         <select
           value={filterEntity}
           onChange={(e) => setFilterEntity(e.target.value)}
-          className="bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
+          className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
         >
           <option value="all">Barcha entity</option>
           {ENTITY_TYPES.map((e) => <option key={e} value={e}>{e}</option>)}
@@ -132,7 +132,7 @@ export function AdminAuditPage() {
         <select
           value={filterAction}
           onChange={(e) => setFilterAction(e.target.value)}
-          className="bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
+          className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
         >
           <option value="all">Barcha amal</option>
           {ACTIONS.map((a) => <option key={a} value={a}>{a}</option>)}
@@ -143,7 +143,7 @@ export function AdminAuditPage() {
           type="date"
           value={filterFrom}
           onChange={(e) => setFilterFrom(e.target.value)}
-          className="bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
+          className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
           title="Dan"
         />
         <span className="text-slate-600 text-xs">—</span>
@@ -151,7 +151,7 @@ export function AdminAuditPage() {
           type="date"
           value={filterTo}
           onChange={(e) => setFilterTo(e.target.value)}
-          className="bg-slate-800 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
+          className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
           title="Gacha"
         />
       </div>
@@ -181,15 +181,15 @@ export function AdminAuditPage() {
             <motion.div
               key={log.id}
               variants={staggerItem}
-              className="rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/8 overflow-hidden"
+              className="rounded-xl bg-white border border-slate-200 shadow-sm overflow-hidden"
             >
               {/* Row */}
               <div
-                className="flex flex-wrap items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors"
+                className="flex flex-wrap items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors"
                 onClick={() => setExpanded(expanded === log.id ? null : log.id)}
               >
                 {/* Action badge */}
-                <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded border ${ACTION_COLOR[log.action] ?? "bg-slate-700 text-slate-300 border-slate-600"}`}>
+                <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded border ${ACTION_COLOR[log.action] ?? "bg-slate-100 text-slate-600 border-slate-200"}`}>
                   {log.action.toUpperCase()}
                 </span>
 
@@ -200,7 +200,7 @@ export function AdminAuditPage() {
                 </span>
 
                 {/* Event type */}
-                <span className="flex-1 text-sm text-white truncate">{log.event_type ?? log.action}</span>
+                <span className="flex-1 text-sm text-slate-900 truncate">{log.event_type ?? log.action}</span>
 
                 {/* User */}
                 <span className="hidden sm:flex items-center gap-1 text-xs text-slate-500 shrink-0">
@@ -229,9 +229,9 @@ export function AdminAuditPage() {
 
               {/* Expanded payload */}
               {expanded === log.id && (
-                <div className="px-4 pb-4 border-t border-slate-200 dark:border-white/6">
-                  <div className="mt-3 rounded-lg bg-slate-900/60 p-3 overflow-x-auto">
-                    <pre className="text-xs text-slate-300 whitespace-pre-wrap break-all">
+                <div className="px-4 pb-4 border-t border-slate-200">
+                  <div className="mt-3 rounded-lg bg-slate-100 border border-slate-200 p-3 overflow-x-auto">
+                    <pre className="text-xs text-slate-700 whitespace-pre-wrap break-all">
                       {JSON.stringify(
                         {
                           id: log.id,

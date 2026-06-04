@@ -19,7 +19,7 @@ function AppWithRealtime() {
 
 export function AppProviders() {
   return (
-    <ThemeProvider attribute="class" forcedTheme="dark" disableTransitionOnChange>
+    <ThemeProvider attribute="class" forcedTheme="light" disableTransitionOnChange>
       <I18nProvider>
         <AuthProvider>
           <TourProvider>

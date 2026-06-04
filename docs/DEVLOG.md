@@ -4,6 +4,37 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-06-04 — Light/Clean Modern SaaS theme ga to'liq o'tish
+
+### Kontekst
+Ilgari `forcedTheme="dark"` bilan barcha sahifalar qoʻlda yozilgan qora ranglar bilan ishlangan edi. Foydalanuvchi butun loyihani zamonaviy Light/Clean SaaS koʻrinishga (Notion, Linear, Vercel uslubi) oʻtkazishni soʻradi.
+
+### Bajarildi
+- `AppProviders.tsx`: `forcedTheme="dark"` → `forcedTheme="light"` — barcha dark: Tailwind classlar avtomatik o'chadi
+- `LoginPage.tsx`: Toʻliq qayta yozildi — oq fon, chap tomonda indigo gradient branding paneli (Notion/Linear uslubi), oq forma kartasi
+- `ForgotPasswordPage.tsx`: Toʻliq qayta yozildi — `bg-slate-50` fon, oq karta, light input fieldlar
+- `ResetPasswordPage.tsx`: Toʻliq qayta yozildi — bir xil light design pattern
+- `SetupAccountPage.tsx`: Tashqi fon `bg-gradient dark` → `bg-slate-50`, LocaleSelect `variant="dark"` → `variant="light"`
+- `AdminHealthPage.tsx`: Qora komponentlar (`bg-slate-800/50`, `border-white/8`, `text-white`) → oq komponentlar (`bg-white`, `border-slate-200`, `text-slate-900`, `shadow-sm`)
+- `AdminAIChatPage.tsx`: Chat hududi, pufakchalar, inputlar — barchasi light mode ranglariga o'zgartirildi
+- `AdminAuditPage.tsx`: Action badge ranglari (`text-emerald-300` → `text-emerald-700`), inputlar `bg-white`, payload hududi `bg-slate-100`
+- `AdminRiskPage.tsx`: ScoreRing SVG `stroke="#1e293b"` → `stroke="#e2e8f0"`, `text-white` → `text-slate-900`, filter tugmalari `bg-slate-900` → `bg-slate-100`
+- `AdminKnowledgeBasePage.tsx`: Barcha input/select `bg-slate-800 text-white` → `bg-white text-slate-900`, modal `bg-slate-900` → `bg-white`
+- `AdminDashboardPage.tsx`: SVG hardcoded ranglar — track stroke `#1e293b`/`#334155` → `#e2e8f0`, center fill `#0f172a` → `white`, text `fill="white"` → `fill="#0f172a"`, boʻsh barlar `#1e293b` → `#e2e8f0`
+
+### Fayllar
+- `frontend/src/app/providers/AppProviders.tsx` (o'zgargan)
+- `frontend/src/features/auth/pages/LoginPage.tsx` (toʻliq qayta yozildi)
+- `frontend/src/features/auth/pages/ForgotPasswordPage.tsx` (toʻliq qayta yozildi)
+- `frontend/src/features/auth/pages/ResetPasswordPage.tsx` (toʻliq qayta yozildi)
+- `frontend/src/features/auth/pages/SetupAccountPage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminHealthPage.tsx` (toʻliq qayta yozildi)
+- `frontend/src/features/admin/pages/AdminAIChatPage.tsx` (toʻliq qayta yozildi)
+- `frontend/src/features/admin/pages/AdminAuditPage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminRiskPage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminKnowledgeBasePage.tsx` (o'zgargan)
+- `frontend/src/features/admin/pages/AdminDashboardPage.tsx` (SVG ranglar o'zgargan)
+
 ## 2026-06-04 — Dark Mode Text Ranglari va LatencyGauge Tuzatish
 
 ### Kontekst

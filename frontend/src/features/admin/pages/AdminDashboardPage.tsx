@@ -56,7 +56,7 @@ function DonutChart({ slices, size = 140 }: { slices: DonutSlice[]; size?: numbe
   if (total === 0) return (
     <div style={{ width: size, height: size }} className="flex items-center justify-center">
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <circle cx={size / 2} cy={size / 2} r={size / 2 - 10} fill="none" stroke="#334155" strokeWidth={18} />
+        <circle cx={size / 2} cy={size / 2} r={size / 2 - 10} fill="none" stroke="#e2e8f0" strokeWidth={18} />
       </svg>
     </div>
   );
@@ -91,7 +91,7 @@ function DonutChart({ slices, size = 140 }: { slices: DonutSlice[]; size?: numbe
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="overflow-visible">
       {/* Background ring */}
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#1e293b" strokeWidth={18} />
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e2e8f0" strokeWidth={18} />
 
       {paths.map((p, i) => (
         <g key={i} className="group/slice">
@@ -100,10 +100,10 @@ function DonutChart({ slices, size = 140 }: { slices: DonutSlice[]; size?: numbe
       ))}
 
       {/* Center hole */}
-      <circle cx={cx} cy={cy} r={r - 18} fill="#0f172a" />
+      <circle cx={cx} cy={cy} r={r - 18} fill="white" />
 
       {/* Center text */}
-      <text x={cx} y={cy - 4} textAnchor="middle" fill="white" fontSize={20} fontWeight="bold"
+      <text x={cx} y={cy - 4} textAnchor="middle" fill="#0f172a" fontSize={20} fontWeight="bold"
         className="font-mono">{total}</text>
       <text x={cx} y={cy + 14} textAnchor="middle" fill="#94a3b8" fontSize={10}>jami</text>
     </svg>
@@ -149,12 +149,12 @@ function MiniBarChart({ companies }: { companies: Company[] }) {
               <rect
                 x={x} y={y} width={barW} height={bh}
                 rx={2}
-                fill={bar.count > 0 ? "#6366f1" : "#1e293b"}
+                fill={bar.count > 0 ? "#6366f1" : "#e2e8f0"}
                 className="transition-all duration-300"
               />
               {bar.count > 0 && (
                 <text x={x + barW / 2} y={y - 3} textAnchor="middle"
-                  fill="#a5b4fc" fontSize={8}>{bar.count}</text>
+                  fill="#6366f1" fontSize={8}>{bar.count}</text>
               )}
               <text x={x + barW / 2} y={H + 13} textAnchor="middle"
                 fill="#475569" fontSize={8}>{bar.date}</text>
@@ -189,7 +189,7 @@ function LatencyGauge({ ms }: { ms: number }) {
         <path
           d={`M ${cx + r * Math.cos(toRad(-140))} ${cy + r * Math.sin(toRad(-140))}
               A ${r} ${r} 0 1 1 ${cx + r * Math.cos(toRad(140))} ${cy + r * Math.sin(toRad(140))}`}
-          fill="none" stroke="#1e293b" strokeWidth={8} strokeLinecap="round"
+          fill="none" stroke="#e2e8f0" strokeWidth={8} strokeLinecap="round"
         />
         {/* Value arc */}
         {pct > 0 && (
@@ -203,7 +203,7 @@ function LatencyGauge({ ms }: { ms: number }) {
         {/* Needle dot */}
         <circle cx={x} cy={y} r={4} fill={color} className="transition-all duration-700" />
         {/* Center value */}
-        <text x={cx} y={cy + 5} textAnchor="middle" fill="white" fontSize={16} fontWeight="bold"
+        <text x={cx} y={cy + 5} textAnchor="middle" fill="#0f172a" fontSize={16} fontWeight="bold"
           className="font-mono">{ms}</text>
         <text x={cx} y={cy + 18} textAnchor="middle" fill="#64748b" fontSize={8}>ms</text>
         <text x={cx} y={cy + 28} textAnchor="middle" fill={color} fontSize={8} fontWeight="600">{label}</text>
@@ -318,7 +318,7 @@ function AiCostBarChart({ daily }: { daily: { date: string; cost_usd: number }[]
           return (
             <g key={d.date}>
               <rect x={x} y={y} width={barW} height={bh} rx={2}
-                fill={d.cost_usd > 0 ? "#6366f1" : "#1e293b"}
+                fill={d.cost_usd > 0 ? "#6366f1" : "#e2e8f0"}
                 className="transition-all duration-300" />
               {i % 7 === 0 && (
                 <text x={x + barW / 2} y={H + 13} textAnchor="middle"

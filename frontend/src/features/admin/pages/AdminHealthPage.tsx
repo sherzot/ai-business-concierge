@@ -9,14 +9,14 @@ function StatCard({ label, value, sub, icon: Icon, accent }: {
   icon: React.ElementType; accent: string;
 }) {
   return (
-    <div className="bg-slate-800/50 rounded-xl border border-white/8 p-5 flex items-start gap-4">
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-start gap-4">
       <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${accent}`}>
         <Icon size={18} className="text-white" />
       </div>
       <div>
-        <p className="text-2xl font-bold text-white">{value}</p>
-        <p className="text-sm font-medium text-slate-300">{label}</p>
-        {sub && <p className="text-xs text-slate-500 mt-0.5">{sub}</p>}
+        <p className="text-2xl font-bold text-slate-900">{value}</p>
+        <p className="text-sm font-medium text-slate-700">{label}</p>
+        {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
       </div>
     </div>
   );
@@ -48,18 +48,18 @@ export function AdminHealthPage() {
     return (
       <div className="p-6 max-w-4xl mx-auto space-y-6 animate-pulse">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-slate-700" />
+          <div className="w-9 h-9 rounded-lg bg-slate-200" />
           <div className="space-y-1.5">
-            <div className="h-5 w-32 bg-slate-700 rounded" />
-            <div className="h-3 w-48 bg-slate-700 rounded" />
+            <div className="h-5 w-32 bg-slate-200 rounded" />
+            <div className="h-3 w-48 bg-slate-200 rounded" />
           </div>
         </div>
-        <div className="h-16 rounded-xl bg-slate-700" />
+        <div className="h-16 rounded-xl bg-slate-200" />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-white/8 p-4 space-y-2 bg-slate-800/50">
-              <div className="h-3 w-20 bg-slate-700 rounded" />
-              <div className="h-8 w-16 bg-slate-700 rounded" />
+            <div key={i} className="rounded-xl border border-slate-200 p-4 space-y-2 bg-white">
+              <div className="h-3 w-20 bg-slate-200 rounded" />
+              <div className="h-8 w-16 bg-slate-200 rounded" />
             </div>
           ))}
         </div>
@@ -76,9 +76,9 @@ export function AdminHealthPage() {
             <Activity size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">Tizim holati</h1>
+            <h1 className="text-xl font-bold text-slate-900">Tizim holati</h1>
             {data && (
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-400">
                 Tekshirildi: {new Date(data.checked_at).toLocaleTimeString()}
               </p>
             )}
@@ -87,7 +87,7 @@ export function AdminHealthPage() {
         <button
           onClick={load}
           disabled={refreshing}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg border border-white/10 text-slate-300 hover:bg-slate-800 hover:text-white disabled:opacity-50 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50 transition-colors"
         >
           <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
           Yangilash
@@ -95,7 +95,7 @@ export function AdminHealthPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-rose-500/10 border border-rose-500/20 px-4 py-3 flex items-center gap-2 text-sm text-rose-400">
+        <div className="rounded-lg bg-rose-50 border border-rose-200 px-4 py-3 flex items-center gap-2 text-sm text-rose-700">
           <AlertCircle size={16} />
           {error}
         </div>
@@ -106,16 +106,16 @@ export function AdminHealthPage() {
           {/* Status banner */}
           <div className={`rounded-xl border px-5 py-4 flex items-center gap-3 ${
             data.db_latency_ms < 500
-              ? "bg-emerald-500/10 border-emerald-500/20"
-              : "bg-amber-500/10 border-amber-500/20"
+              ? "bg-emerald-50 border-emerald-200"
+              : "bg-amber-50 border-amber-200"
           }`}>
-            <CheckCircle2 size={20} className={data.db_latency_ms < 500 ? "text-emerald-400" : "text-amber-400"} />
+            <CheckCircle2 size={20} className={data.db_latency_ms < 500 ? "text-emerald-600" : "text-amber-600"} />
             <div>
-              <p className={`font-semibold text-sm ${data.db_latency_ms < 500 ? "text-emerald-300" : "text-amber-300"}`}>
+              <p className={`font-semibold text-sm ${data.db_latency_ms < 500 ? "text-emerald-700" : "text-amber-700"}`}>
                 {data.db_latency_ms < 500 ? "Tizim normal ishlayapti" : "Kechikish sezilmoqda"}
               </p>
-              <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-                <Clock size={11} /> DB javob vaqti: <strong className="text-slate-200">{data.db_latency_ms} ms</strong>
+              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
+                <Clock size={11} /> DB javob vaqti: <strong className="text-slate-700">{data.db_latency_ms} ms</strong>
               </p>
             </div>
           </div>
@@ -134,7 +134,7 @@ export function AdminHealthPage() {
               value={data.tenants.pending_approval}
               sub="Kompaniyalar"
               icon={AlertCircle}
-              accent={data.tenants.pending_approval > 0 ? "bg-amber-500" : "bg-slate-600"}
+              accent={data.tenants.pending_approval > 0 ? "bg-amber-500" : "bg-slate-400"}
             />
             <StatCard
               label="Jami foydalanuvchilar"

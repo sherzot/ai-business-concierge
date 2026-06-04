@@ -4,6 +4,27 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-06-04 — Полный переход на Light/Clean Modern SaaS тему
+
+### Контекст
+Приложение было зафиксировано на `forcedTheme="dark"`, все компоненты были написаны с жёсткими тёмными цветами. Пользователь попросил перейти на светлый стиль (в духе Notion/Linear/Vercel).
+
+### Выполнено
+- `AppProviders.tsx`: `forcedTheme="dark"` → `forcedTheme="light"` — все `dark:` классы Tailwind деактивированы
+- `LoginPage.tsx`: Полная перепись — белый фон, индиго-градиент на левой панели, белая карточка формы
+- `ForgotPasswordPage.tsx`, `ResetPasswordPage.tsx`, `SetupAccountPage.tsx`: Светлый дизайн, `bg-slate-50`, белые карточки и инпуты
+- `AdminHealthPage.tsx`: Карточки `bg-slate-800/50` → `bg-white shadow-sm`, тексты `text-white` → `text-slate-900`
+- `AdminAIChatPage.tsx`: Область чата, пузыри, инпут — всё переведено в светлую палитру
+- `AdminAuditPage.tsx`: Бейджи действий `text-emerald-300` → `text-emerald-700`, инпуты → `bg-white`, область payload → `bg-slate-100`
+- `AdminRiskPage.tsx`: SVG `stroke="#1e293b"` → `stroke="#e2e8f0"`, заголовки `text-white` → `text-slate-900`
+- `AdminKnowledgeBasePage.tsx`: Все инпуты `bg-slate-800 text-white` → `bg-white text-slate-900`, модал → `bg-white`
+- `AdminDashboardPage.tsx`: SVG — треки `#e2e8f0`, центр донута белый, тексты тёмные, пустые бары `#e2e8f0`
+
+### Файлы
+- `frontend/src/app/providers/AppProviders.tsx`
+- `frontend/src/features/auth/pages/` (4 файла)
+- `frontend/src/features/admin/pages/` (6 файлов)
+
 ## 2026-06-04 — Исправление Dark Mode и редиректа при входе
 
 ### Контекст

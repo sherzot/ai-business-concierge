@@ -4,6 +4,28 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-06-04 — Full migration to Light/Clean Modern SaaS theme
+
+### Context
+The app was previously locked to `forcedTheme="dark"`, with all components hand-coded in dark colors. The user requested a full switch to a Light/Clean SaaS aesthetic (Notion/Linear/Vercel style).
+
+### Done
+- `AppProviders.tsx`: `forcedTheme="dark"` → `forcedTheme="light"` — all `dark:` Tailwind variants now deactivate
+- `LoginPage.tsx`: Complete rewrite — white background, indigo gradient branding panel on left (split layout), white form card
+- `ForgotPasswordPage.tsx`, `ResetPasswordPage.tsx`: Full light rewrites — `bg-slate-50` outer, white card, light inputs
+- `SetupAccountPage.tsx`: Outer bg from dark gradient → `bg-slate-50`, LocaleSelect `variant="dark"` → `variant="light"`
+- `AdminHealthPage.tsx`: All dark card colors (`bg-slate-800/50`, `border-white/8`, `text-white`) → light (`bg-white`, `border-slate-200`, `text-slate-900`, `shadow-sm`)
+- `AdminAIChatPage.tsx`: Chat area, bubbles, input — all converted to light palette
+- `AdminAuditPage.tsx`: Action badge colors (`text-emerald-300` → `text-emerald-700`), inputs → `bg-white`, payload area → `bg-slate-100`
+- `AdminRiskPage.tsx`: ScoreRing SVG `stroke="#1e293b"` → `stroke="#e2e8f0"`, `text-white` → `text-slate-900`, filter tabs → `bg-slate-100`
+- `AdminKnowledgeBasePage.tsx`: All `bg-slate-800 text-white` inputs/selects → `bg-white text-slate-900`, modal → `bg-white`
+- `AdminDashboardPage.tsx`: SVG track strokes `#1e293b`/`#334155` → `#e2e8f0`, donut center fill → `white`, SVG text `fill="white"` → `fill="#0f172a"`, empty bars → `#e2e8f0`
+
+### Files
+- `frontend/src/app/providers/AppProviders.tsx`
+- `frontend/src/features/auth/pages/LoginPage.tsx`, `ForgotPasswordPage.tsx`, `ResetPasswordPage.tsx`, `SetupAccountPage.tsx`
+- `frontend/src/features/admin/pages/AdminHealthPage.tsx`, `AdminAIChatPage.tsx`, `AdminAuditPage.tsx`, `AdminRiskPage.tsx`, `AdminKnowledgeBasePage.tsx`, `AdminDashboardPage.tsx`
+
 ## 2026-06-04 — Dark Mode & Login Redirect Bug Fixes
 
 ### Context

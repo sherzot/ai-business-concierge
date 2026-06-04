@@ -105,18 +105,18 @@ export function SetupAccountPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 relative px-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 relative px-4">
       <div className="absolute top-4 right-4">
-        <LocaleSelect variant="dark" />
+        <LocaleSelect variant="light" />
       </div>
 
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
-          <div className="inline-flex w-16 h-16 rounded-xl bg-indigo-500 items-center justify-center mb-4 shadow-lg shadow-indigo-500/30">
+          <div className="inline-flex w-16 h-16 rounded-xl bg-indigo-600 items-center justify-center mb-4 shadow-sm">
             <span className="font-bold text-2xl text-white">C</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">{translate("setup.title")}</h1>
-          <p className="text-slate-300 mt-1 text-sm">{translate("setup.subtitle")}</p>
+          <h1 className="text-2xl font-bold text-slate-900">{translate("setup.title")}</h1>
+          <p className="text-slate-500 mt-1 text-sm">{translate("setup.subtitle")}</p>
           <p className="text-xs text-slate-400 mt-2">
             {session.user.email}
           </p>
