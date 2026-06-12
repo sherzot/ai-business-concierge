@@ -21,7 +21,7 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
   if (loading || !data) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full" />
+        <div className="animate-spin w-10 h-10 border-2 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -47,7 +47,7 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
         animate="visible"
       >
         <KpiCard
-          icon={<Mail size={20} className="text-blue-600" />}
+          icon={<Mail size={20} className="text-status-info" />}
           title={translate("dashboard.kpi.inbox")}
           value={inboxCount}
           trend="↑ 12% kecha nisbatan"
@@ -55,7 +55,7 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
           onClick={() => onNavigate?.("inbox")}
         />
         <KpiCard
-          icon={<CheckSquare size={20} className="text-indigo-600" />}
+          icon={<CheckSquare size={20} className="text-primary" />}
           title={translate("dashboard.kpi.activeTasks")}
           value={activeTasks}
           trend="↓ 5% kecha nisbatan"
@@ -63,13 +63,13 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
           onClick={() => onNavigate?.("tasks")}
         />
         <KpiCard
-          icon={<FileText size={20} className="text-amber-600" />}
+          icon={<FileText size={20} className="text-status-warning" />}
           title={translate("dashboard.kpi.docsReview")}
           value={docsReviewCount}
           onClick={() => onNavigate?.("docs")}
         />
         <KpiCard
-          icon={<Zap size={20} className="text-emerald-600" />}
+          icon={<Zap size={20} className="text-status-success" />}
           title={translate("dashboard.kpi.aiTasks")}
           value={aiHandledCount}
           trend="↑ 25% kecha nisbatan"
@@ -80,33 +80,33 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Unified Inbox */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="font-semibold text-slate-800">{translate("dashboard.unifiedInbox")}</h3>
+        <div className="lg:col-span-2 bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+          <div className="p-4 border-b border-border flex items-center justify-between">
+            <h3 className="font-semibold text-card-foreground">{translate("dashboard.unifiedInbox")}</h3>
             <div className="flex items-center gap-2">
               {unreadInbox > 0 && (
-                <span className="px-2 py-0.5 text-xs font-medium bg-rose-100 text-rose-700 rounded-full">
+                <span className="px-2 py-0.5 text-xs font-medium bg-[var(--status-danger-soft)] text-[var(--status-danger-fg)] rounded-full">
                   {translate("dashboard.newCount", { count: String(unreadInbox) })}
                 </span>
               )}
-              <button onClick={() => onNavigate?.("inbox")} className="text-sm text-indigo-600 font-medium hover:underline">
+              <button onClick={() => onNavigate?.("inbox")} className="text-sm text-primary font-medium hover:underline">
                 {translate("dashboard.all")} →
               </button>
             </div>
           </div>
-          <div className="max-h-[320px] overflow-y-auto divide-y divide-slate-100">
+          <div className="max-h-[320px] overflow-y-auto divide-y divide-border">
             {(recentInbox as any[]).map((item) => <InboxRow key={item.id} item={item} />)}
             {recentInbox.length === 0 && (
-              <div className="p-8 text-center text-slate-500 text-sm">{translate("inbox.empty")}</div>
+              <div className="p-8 text-center text-muted-foreground text-sm">{translate("inbox.empty")}</div>
             )}
           </div>
         </div>
 
         {/* AI Tahlil */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="font-semibold text-slate-800">{translate("dashboard.aiAnalysis")}</h3>
-            <button onClick={() => onNavigate?.("reports")} className="text-sm text-indigo-600 font-medium hover:underline">
+        <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+          <div className="p-4 border-b border-border flex items-center justify-between">
+            <h3 className="font-semibold text-card-foreground">{translate("dashboard.aiAnalysis")}</h3>
+            <button onClick={() => onNavigate?.("reports")} className="text-sm text-primary font-medium hover:underline">
               {translate("dashboard.all")} →
             </button>
           </div>
@@ -120,41 +120,41 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Faol vazifalar */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="font-semibold text-slate-800">{translate("dashboard.activeTasks")}</h3>
+        <div className="lg:col-span-2 bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+          <div className="p-4 border-b border-border flex items-center justify-between">
+            <h3 className="font-semibold text-card-foreground">{translate("dashboard.activeTasks")}</h3>
             <div className="flex items-center gap-2">
               {overdueTasks > 0 && (
-                <span className="px-2 py-0.5 text-xs font-medium bg-rose-100 text-rose-700 rounded-full">
+                <span className="px-2 py-0.5 text-xs font-medium bg-[var(--status-danger-soft)] text-[var(--status-danger-fg)] rounded-full">
                   {translate("dashboard.overdueCount", { count: String(overdueTasks) })}
                 </span>
               )}
-              <button onClick={() => onNavigate?.("tasks")} className="text-sm text-indigo-600 font-medium hover:underline">
+              <button onClick={() => onNavigate?.("tasks")} className="text-sm text-primary font-medium hover:underline">
                 {translate("dashboard.all")} →
               </button>
             </div>
           </div>
-          <div className="max-h-[280px] overflow-y-auto divide-y divide-slate-100">
+          <div className="max-h-[280px] overflow-y-auto divide-y divide-border">
             {(recentTasks as any[]).map((task) => <TaskRow key={task.id} task={task} />)}
             {recentTasks.length === 0 && (
-              <div className="p-8 text-center text-slate-500 text-sm">{translate("tasks.empty")}</div>
+              <div className="p-8 text-center text-muted-foreground text-sm">{translate("tasks.empty")}</div>
             )}
           </div>
         </div>
 
         {/* Biznes holati */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-          <h3 className="font-semibold text-slate-800 mb-2">{translate("dashboard.businessStatus")}</h3>
-          <p className="text-xs text-slate-500 mb-4">{translate("dashboard.updated", { time: "2 soat" })}</p>
+        <div className="bg-card rounded-xl border border-border shadow-sm p-6">
+          <h3 className="font-semibold text-card-foreground mb-2">{translate("dashboard.businessStatus")}</h3>
+          <p className="text-xs text-muted-foreground mb-4">{translate("dashboard.updated", { time: "2 soat" })}</p>
           <div className="flex flex-col items-center mb-6">
             <div className="relative w-28 h-28">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e2e8f0" strokeWidth="2.5" />
-                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeDasharray={`${healthScore}, 100`} strokeLinecap="round" className="transition-all duration-500" />
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--border)" strokeWidth="2.5" />
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke={healthScoreStroke(scoreColor)} strokeWidth="2.5" strokeDasharray={`${healthScore}, 100`} strokeLinecap="round" className="transition-all duration-500" />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className={`text-2xl font-bold text-${scoreColor}-600`}>{healthScore}</span>
-                <span className="text-xs text-slate-500">{translate("dashboard.good")}</span>
+                <span className={`text-2xl font-bold ${healthScoreTextClass(scoreColor)}`}>{healthScore}</span>
+                <span className="text-xs text-muted-foreground">{translate("dashboard.good")}</span>
               </div>
             </div>
           </div>
@@ -165,9 +165,9 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
               { label: translate("nav.docsTitle"), value: deptScores.docs },
               { label: "Sotuv", value: deptScores.sales },
             ].map((d) => (
-              <div key={d.label} className="p-3 bg-slate-50 rounded-lg">
-                <p className="text-xs text-slate-500">{d.label}</p>
-                <p className="text-sm font-semibold text-slate-800">{d.value}%</p>
+              <div key={d.label} className="p-3 bg-secondary rounded-lg">
+                <p className="text-xs text-muted-foreground">{d.label}</p>
+                <p className="text-sm font-semibold text-foreground">{d.value}%</p>
               </div>
             ))}
           </div>
@@ -191,19 +191,19 @@ function KpiCard({ icon, title, value, trend, trendUp, onClick }: {
       tabIndex={onClick ? 0 : undefined}
       onClick={onClick}
       onKeyDown={onClick ? (e) => e.key === "Enter" && onClick() : undefined}
-      className={`bg-white p-5 rounded-xl border border-slate-200 shadow-sm ${onClick ? "cursor-pointer" : ""}`}
+      className={`bg-card p-5 rounded-xl border border-border shadow-sm ${onClick ? "cursor-pointer" : ""}`}
       style={{ transformOrigin: "center" }}
     >
       <motion.div variants={cardHover}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-slate-500">{title}</p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{value}</p>
+          <p className="text-sm text-muted-foreground">{title}</p>
+          <p className="text-2xl font-bold text-card-foreground mt-1">{value}</p>
         </div>
-        <div className="p-2 rounded-lg bg-slate-100">{icon}</div>
+        <div className="p-2 rounded-lg bg-secondary">{icon}</div>
       </div>
       {trend && (
-        <p className={`text-sm mt-3 font-medium ${trendUp ? "text-emerald-600" : "text-rose-600"}`}>{trend}</p>
+        <p className={`text-sm mt-3 font-medium ${trendUp ? "text-status-success" : "text-status-danger"}`}>{trend}</p>
       )}
       </motion.div>
     </motion.div>
@@ -215,27 +215,27 @@ function InboxRow({ item }: { item: any }) {
   const sender = item.sender?.name ?? item.sender?.email ?? "—";
   const category = item.category ?? "General";
   const categoryColors: Record<string, string> = {
-    HR: "bg-purple-100 text-purple-700",
-    Docs: "bg-emerald-100 text-emerald-700",
-    Sales: "bg-blue-100 text-blue-700",
-    Support: "bg-amber-100 text-amber-700",
-    General: "bg-slate-100 text-slate-600",
+    HR: "bg-accent text-accent-foreground",
+    Docs: "bg-[var(--status-success-soft)] text-[var(--status-success-fg)]",
+    Sales: "bg-[var(--status-info-soft)] text-[var(--status-info-fg)]",
+    Support: "bg-[var(--status-warning-soft)] text-[var(--status-warning-fg)]",
+    General: "bg-secondary text-muted-foreground",
   };
   return (
-    <div className="p-4 hover:bg-slate-50/50 transition-colors">
+    <div className="p-4 hover:bg-secondary/70 transition-colors">
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-          <Mail size={14} className="text-slate-500" />
+        <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
+          <Mail size={14} className="text-muted-foreground" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-medium text-slate-800">{sender}</span>
+            <span className="font-medium text-foreground">{sender}</span>
             <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${categoryColors[category] ?? categoryColors.General}`}>
               {category}
             </span>
           </div>
-          <p className="text-sm text-slate-600 line-clamp-2 mt-0.5">{item.subject ?? item.preview}</p>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">{item.subject ?? item.preview}</p>
+          <p className="text-xs text-muted-foreground/70 mt-1">
             {item.timestamp ? formatDistanceToNow(new Date(item.timestamp), { addSuffix: true, locale: uz }) : ""}
           </p>
         </div>
@@ -259,15 +259,15 @@ function TaskRow({ task }: { task: any }) {
       })()
     : "—";
   return (
-    <div className="p-4 hover:bg-slate-50/50 transition-colors flex items-center gap-3">
+    <div className="p-4 hover:bg-secondary/70 transition-colors flex items-center gap-3">
       {overdue
-        ? <AlertTriangle size={18} className="text-rose-500 shrink-0" />
-        : <Clock size={18} className="text-blue-500 shrink-0" />}
+        ? <AlertTriangle size={18} className="text-status-danger shrink-0" />
+        : <Clock size={18} className="text-status-info shrink-0" />}
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-slate-800 truncate">{task.title}</p>
-        <p className="text-xs text-slate-500">{task.assignee?.name ?? "Barcha"}</p>
+        <p className="font-medium text-foreground truncate">{task.title}</p>
+        <p className="text-xs text-muted-foreground">{task.assignee?.name ?? "Barcha"}</p>
       </div>
-      <span className={`px-2 py-0.5 text-xs font-medium rounded ${overdue ? "bg-rose-100 text-rose-700" : "bg-blue-100 text-blue-700"}`}>
+      <span className={`px-2 py-0.5 text-xs font-medium rounded ${overdue ? "bg-[var(--status-danger-soft)] text-[var(--status-danger-fg)]" : "bg-[var(--status-info-soft)] text-[var(--status-info-fg)]"}`}>
         {dueLabel}
       </span>
     </div>
@@ -284,24 +284,41 @@ function parseDateOnly(value: string): Date | null {
   return new Date(year, month - 1, day);
 }
 
+function healthScoreTextClass(color: ReturnType<typeof healthScoreColor>) {
+  if (color === "emerald") return "text-status-success";
+  if (color === "amber") return "text-status-warning";
+  return "text-status-danger";
+}
+
+function healthScoreStroke(color: ReturnType<typeof healthScoreColor>) {
+  if (color === "emerald") return "var(--status-success)";
+  if (color === "amber") return "var(--status-warning)";
+  return "var(--status-danger)";
+}
+
 function InsightCard({ type, title, desc }: { type: InsightType; title: string; desc: string }) {
   const styles: Record<InsightType, string> = {
-    danger: "bg-rose-50 border-rose-100",
-    warning: "bg-amber-50 border-amber-100",
-    info: "bg-blue-50 border-blue-100",
+    danger: "bg-[var(--status-danger-soft)] border-status-danger/25",
+    warning: "bg-[var(--status-warning-soft)] border-status-warning/25",
+    info: "bg-[var(--status-info-soft)] border-status-info/25",
   };
   const icons: Record<InsightType, React.ReactNode> = {
-    danger: <AlertTriangle size={18} className="text-rose-600" />,
-    warning: <TrendingUp size={18} className="text-amber-600" />,
-    info: <Lightbulb size={18} className="text-blue-600" />,
+    danger: <AlertTriangle size={18} className="text-status-danger" />,
+    warning: <TrendingUp size={18} className="text-status-warning" />,
+    info: <Lightbulb size={18} className="text-status-info" />,
+  };
+  const textStyles: Record<InsightType, string> = {
+    danger: "text-[var(--status-danger-fg)]",
+    warning: "text-[var(--status-warning-fg)]",
+    info: "text-[var(--status-info-fg)]",
   };
   return (
     <div className={`p-3 rounded-lg border ${styles[type]}`}>
       <div className="flex items-start gap-2">
         {icons[type]}
         <div>
-          <h4 className="text-sm font-semibold text-slate-800">{title}</h4>
-          <p className="text-xs text-slate-600 mt-1">{desc}</p>
+          <h4 className={`text-sm font-semibold ${textStyles[type]}`}>{title}</h4>
+          <p className={`text-xs mt-1 ${textStyles[type]} opacity-90`}>{desc}</p>
         </div>
       </div>
     </div>

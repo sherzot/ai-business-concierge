@@ -1,122 +1,146 @@
 /* ============================================================================
-   Indigo + Slate brand tema — AI Business Concierge
-   Phase 0 design refresh — 2026-04-29
+   Blue + Teal operational theme — AI Business Concierge
 
-   Maqsad:
-     • Asosiy rang: Indigo 600 (#4f46e5) — ishonchli, professional, fintech ko'rinishi.
-     • Neutrallar: Slate (oklab-clean grey, ko'k undertone) — aniqlik va toza kontrast.
-     • Mavjud theme.css ni buzmaydi — bu fayl uning ustiga import qilinadi.
-
-   Ishlatish:
-     globals.css yoki main.tsx da quyidagi tartibda import qiling:
-       @import "./tailwind.css";
-       @import "./theme.css";
-       @import "./theme-indigo-slate.css";   // <-- bu eng oxirida
-
-   Tailwind uchun:
-     `bg-indigo-600`, `text-slate-900` to'g'ridan ishlaydi.
-     Brand tokens ham: bg-[var(--brand-primary)] yoki shadcn "primary" classlari.
+   Product fit:
+     - Dashboards are daily work surfaces, so neutrals carry most of the UI.
+     - Blue is the trust/action color.
+     - Teal is the secondary AI/automation accent.
+     - Status colors are explicit tokens, not ad hoc component colors.
 ============================================================================ */
 
 :root {
-  /* ------------------------------------------------------------------------
-   * Brand primary — Indigo 600 oilasi
-   * ------------------------------------------------------------------------ */
-  --brand-primary:        #4f46e5;   /* indigo-600 */
-  --brand-primary-hover:  #4338ca;   /* indigo-700 */
-  --brand-primary-active: #3730a3;   /* indigo-800 */
-  --brand-primary-soft:   #eef2ff;   /* indigo-50 */
+  color-scheme: light;
+
+  --brand-primary:        #2563eb;
+  --brand-primary-hover:  #1d4ed8;
+  --brand-primary-active: #1e40af;
+  --brand-primary-soft:   #dbeafe;
   --brand-primary-fg:     #ffffff;
-  --brand-primary-ring:   rgba(79, 70, 229, 0.35);
+  --brand-primary-ring:   rgba(37, 99, 235, 0.32);
 
-  /* ------------------------------------------------------------------------
-   * Neutral — Slate
-   * ------------------------------------------------------------------------ */
-  --brand-bg:             #ffffff;
-  --brand-bg-soft:        #f8fafc;   /* slate-50 */
+  --brand-accent:         #0d9488;
+  --brand-accent-hover:   #0f766e;
+  --brand-accent-soft:    #ccfbf1;
+  --brand-accent-fg:      #042f2e;
+
+  --brand-bg:             #f8fafc;
+  --brand-bg-soft:        #eef2f7;
   --brand-surface:        #ffffff;
-  --brand-surface-alt:    #f1f5f9;   /* slate-100 */
-  --brand-border:         #e2e8f0;   /* slate-200 */
-  --brand-border-strong:  #cbd5e1;   /* slate-300 */
+  --brand-surface-alt:    #f1f5f9;
+  --brand-border:         #e2e8f0;
+  --brand-border-strong:  #cbd5e1;
 
-  --brand-text:           #0f172a;   /* slate-900 */
-  --brand-text-muted:     #475569;   /* slate-600 */
-  --brand-text-soft:      #94a3b8;   /* slate-400 */
+  --brand-text:           #0f172a;
+  --brand-text-muted:     #64748b;
+  --brand-text-soft:      #94a3b8;
 
-  /* ------------------------------------------------------------------------
-   * Status palette (success / warning / danger / info)
-   * ------------------------------------------------------------------------ */
-  --brand-success:        #10b981;   /* emerald-500 */
-  --brand-success-soft:   #d1fae5;
-  --brand-warning:        #f59e0b;   /* amber-500 */
-  --brand-warning-soft:   #fef3c7;
-  --brand-danger:         #e11d48;   /* rose-600 */
-  --brand-danger-soft:    #ffe4e6;
-  --brand-info:           #0ea5e9;   /* sky-500 */
-  --brand-info-soft:      #e0f2fe;
+  --status-success:       #16a34a;
+  --status-success-soft:  #dcfce7;
+  --status-success-fg:    #14532d;
+  --status-warning:       #d97706;
+  --status-warning-soft:  #fef3c7;
+  --status-warning-fg:    #78350f;
+  --status-danger:        #dc2626;
+  --status-danger-soft:   #fee2e2;
+  --status-danger-fg:     #7f1d1d;
+  --status-info:          #0284c7;
+  --status-info-soft:     #e0f2fe;
+  --status-info-fg:       #075985;
 
-  /* ------------------------------------------------------------------------
-   * shadcn token override — `--primary` ni Indigo ga ulaymiz
-   * ------------------------------------------------------------------------ */
+  --background:           var(--brand-bg);
+  --foreground:           var(--brand-text);
+  --card:                 var(--brand-surface);
+  --card-foreground:      var(--brand-text);
+  --popover:              var(--brand-surface);
+  --popover-foreground:   var(--brand-text);
   --primary:              var(--brand-primary);
   --primary-foreground:   var(--brand-primary-fg);
+  --secondary:            var(--brand-surface-alt);
+  --secondary-foreground: var(--brand-text);
+  --muted:                var(--brand-surface-alt);
+  --muted-foreground:     var(--brand-text-muted);
+  --accent:               var(--brand-primary-soft);
+  --accent-foreground:    var(--brand-primary-active);
+  --destructive:          var(--status-danger);
+  --destructive-foreground: #ffffff;
+  --border:               var(--brand-border);
+  --input:                var(--brand-border);
+  --input-background:     var(--brand-surface);
+  --switch-background:    var(--brand-border-strong);
   --ring:                 var(--brand-primary-ring);
 
-  /* Sidebar — yengil indigo accent */
-  --sidebar:              var(--brand-bg-soft);
+  --sidebar:              var(--brand-surface);
+  --sidebar-foreground:   var(--brand-text);
   --sidebar-primary:      var(--brand-primary);
+  --sidebar-primary-foreground: var(--brand-primary-fg);
   --sidebar-accent:       var(--brand-primary-soft);
+  --sidebar-accent-foreground: var(--brand-primary-active);
   --sidebar-border:       var(--brand-border);
+  --sidebar-ring:         var(--brand-primary-ring);
 
-  /* Chart akkordi — indigo asoslangan turli tonlar */
-  --chart-1: #4f46e5;   /* indigo-600 */
-  --chart-2: #6366f1;   /* indigo-500 */
-  --chart-3: #818cf8;   /* indigo-400 */
-  --chart-4: #0ea5e9;   /* sky-500 — kontrast */
-  --chart-5: #10b981;   /* emerald-500 — pozitiv */
+  --chart-1: #2563eb;
+  --chart-2: #0d9488;
+  --chart-3: #16a34a;
+  --chart-4: #d97706;
+  --chart-5: #dc2626;
 
-  /* Burchak radiuslari — yumshoqroq, modernroq */
   --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 
-  /* Shadow ladder — yengil, fintech uslubi */
   --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
   --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.06), 0 1px 3px 0 rgba(15, 23, 42, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
 }
 
-/* ============================================================================
-   Dark mode — chuqur slate fond, Indigo aksent
-============================================================================ */
 .dark {
-  --brand-bg:             #0f172a;   /* slate-900 */
-  --brand-bg-soft:        #1e293b;   /* slate-800 */
-  --brand-surface:        #1e293b;
-  --brand-surface-alt:    #334155;   /* slate-700 */
+  color-scheme: dark;
+
+  --brand-primary:        #60a5fa;
+  --brand-primary-hover:  #93c5fd;
+  --brand-primary-active: #bfdbfe;
+  --brand-primary-soft:   rgba(37, 99, 235, 0.18);
+  --brand-primary-fg:     #082f49;
+  --brand-primary-ring:   rgba(96, 165, 250, 0.38);
+
+  --brand-accent:         #2dd4bf;
+  --brand-accent-hover:   #5eead4;
+  --brand-accent-soft:    rgba(13, 148, 136, 0.18);
+  --brand-accent-fg:      #ccfbf1;
+
+  --brand-bg:             #0b1120;
+  --brand-bg-soft:        #0f172a;
+  --brand-surface:        #111827;
+  --brand-surface-alt:    #1f2937;
   --brand-border:         #334155;
   --brand-border-strong:  #475569;
 
-  --brand-text:           #f8fafc;   /* slate-50 */
-  --brand-text-muted:     #cbd5e1;   /* slate-300 */
+  --brand-text:           #f8fafc;
+  --brand-text-muted:     #cbd5e1;
   --brand-text-soft:      #94a3b8;
 
-  --brand-primary:        #818cf8;   /* indigo-400 — dark da bright primary */
-  --brand-primary-hover:  #a5b4fc;
-  --brand-primary-active: #c7d2fe;
-  --brand-primary-soft:   #1e1b4b;   /* indigo-950 */
-  --brand-primary-fg:     #0f172a;
-
-  --primary:              var(--brand-primary);
-  --primary-foreground:   var(--brand-primary-fg);
-  --ring:                 rgba(165, 180, 252, 0.35);
+  --status-success:       #4ade80;
+  --status-success-soft:  rgba(22, 163, 74, 0.18);
+  --status-success-fg:    #bbf7d0;
+  --status-warning:       #fbbf24;
+  --status-warning-soft:  rgba(217, 119, 6, 0.18);
+  --status-warning-fg:    #fde68a;
+  --status-danger:        #f87171;
+  --status-danger-soft:   rgba(220, 38, 38, 0.18);
+  --status-danger-fg:     #fecaca;
+  --status-info:          #38bdf8;
+  --status-info-soft:     rgba(2, 132, 199, 0.18);
+  --status-info-fg:       #bae6fd;
 }
 
-/* ============================================================================
-   Yordamchi class lar — komponentlarda tezda ishlatish uchun
-============================================================================ */
+@theme inline {
+  --color-brand-accent: var(--brand-accent);
+  --color-status-success: var(--status-success);
+  --color-status-warning: var(--status-warning);
+  --color-status-danger: var(--status-danger);
+  --color-status-info: var(--status-info);
+}
 
 .bc-btn-primary {
   background-color: var(--brand-primary);
@@ -126,7 +150,7 @@
   padding: 0.625rem 1rem;
   transition: background-color 150ms ease;
 }
-.bc-btn-primary:hover  { background-color: var(--brand-primary-hover); }
+.bc-btn-primary:hover { background-color: var(--brand-primary-hover); }
 .bc-btn-primary:active { background-color: var(--brand-primary-active); }
 .bc-btn-primary:disabled {
   background-color: var(--brand-text-soft);
@@ -134,23 +158,24 @@
 }
 
 .bc-card {
-  background: var(--brand-surface);
-  border: 1px solid var(--brand-border);
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+  color: var(--card-foreground);
 }
 
 .bc-input {
-  background: var(--brand-bg-soft);
-  border: 1px solid var(--brand-border);
+  background: var(--input-background);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 0.625rem 0.875rem;
-  color: var(--brand-text);
+  color: var(--foreground);
 }
 .bc-input:focus {
-  outline: 2px solid var(--brand-primary-ring);
+  outline: 2px solid var(--ring);
   outline-offset: 1px;
-  border-color: var(--brand-primary);
+  border-color: var(--primary);
 }
 
 .bc-chip {
@@ -159,7 +184,7 @@
   padding: 0.125rem 0.5rem;
   font-size: 0.75rem;
   border-radius: 9999px;
-  background: var(--brand-primary-soft);
-  color: var(--brand-primary);
+  background: var(--accent);
+  color: var(--accent-foreground);
   font-weight: 500;
 }

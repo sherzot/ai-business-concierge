@@ -23,15 +23,15 @@ export function LandingFooter({ t }: Props) {
   }
 
   return (
-    <footer className="py-10 bg-slate-950 border-t border-white/10">
+    <footer className="py-10 bg-white border-t border-slate-200">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
           {/* Brand */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-              <Sparkles size={14} className="text-indigo-400" aria-hidden="true" />
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+              <Sparkles size={14} className="text-indigo-600" aria-hidden="true" />
             </div>
-            <span className="text-slate-400 text-sm">{t.tagline}</span>
+            <span className="text-slate-600 text-sm">{t.tagline}</span>
           </div>
 
           {/* Nav links */}
@@ -41,7 +41,7 @@ export function LandingFooter({ t }: Props) {
                 key={link.href}
                 href={link.href}
                 onClick={(e) => scrollTo(e, link.href)}
-                className="px-3 py-1 text-sm text-slate-500 hover:text-slate-300 transition-colors rounded-lg hover:bg-white/5"
+                className="px-3 py-1 text-sm text-slate-500 hover:text-slate-900 transition-colors rounded-lg hover:bg-slate-50"
               >
                 {link.label(t)}
               </a>
@@ -49,7 +49,7 @@ export function LandingFooter({ t }: Props) {
           </nav>
         </div>
 
-        <p className="text-slate-600 text-xs text-center mt-6">{t.rights}</p>
+        <p className="text-slate-400 text-xs text-center mt-6">{t.rights}</p>
       </div>
     </footer>
   );

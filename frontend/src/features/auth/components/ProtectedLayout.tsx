@@ -30,8 +30,8 @@ export function ProtectedLayout() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="animate-pulse text-slate-500">{translate("common.loading")}</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-pulse text-muted-foreground">{translate("common.loading")}</div>
       </div>
     );
   }
@@ -43,10 +43,10 @@ export function ProtectedLayout() {
   if (error) {
     const isJwtError = /invalid|token|jwt|noto'g'ri/i.test(error);
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center max-w-md p-6">
-          <p className="text-red-600 mb-4">{error}</p>
-          <p className="text-sm text-slate-500">
+          <p className="text-status-danger mb-4">{error}</p>
+          <p className="text-sm text-muted-foreground">
             {isJwtError
               ? "JWT_SECRET Edge Function secrets da sozlanganligini tekshiring (Supabase → Project Settings → API → JWT Secret)."
               : "Sizning hisobingiz user_tenants jadvalida yo'q. Administrator bilan bog'laning."}
@@ -58,10 +58,10 @@ export function ProtectedLayout() {
 
   if (!profile?.tenants?.length) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center max-w-md p-6">
-          <p className="text-slate-700 mb-2">Profil topilmadi</p>
-          <p className="text-sm text-slate-500">
+          <p className="text-foreground mb-2">Profil topilmadi</p>
+          <p className="text-sm text-muted-foreground">
             Sizga hali tenant va rol berilmagan. Administrator bilan bog'laning.
           </p>
         </div>
@@ -71,9 +71,9 @@ export function ProtectedLayout() {
 
   if (!currentTenant) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center max-w-md p-6">
-          <p className="text-slate-700">Tenant tanlang</p>
+          <p className="text-foreground">Tenant tanlang</p>
         </div>
       </div>
     );

@@ -42,16 +42,16 @@ export function LandingNavbar({ locale, onLocaleChange, t }: Props) {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/85 backdrop-blur-md">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+          <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center">
             <Sparkles size={18} className="text-white" />
           </div>
-          <span className="font-bold text-white text-lg hidden sm:block">
+          <span className="font-bold text-slate-900 text-lg hidden sm:block">
             AI Business Concierge
           </span>
-          <span className="font-bold text-white text-lg sm:hidden">ABC</span>
+          <span className="font-bold text-slate-900 text-lg sm:hidden">ABC</span>
         </div>
 
         {/* Anchor nav — hidden on mobile */}
@@ -61,7 +61,7 @@ export function LandingNavbar({ locale, onLocaleChange, t }: Props) {
               key={link.href}
               href={link.href}
               onClick={(e) => scrollTo(e, link.href)}
-              className="px-3 py-1.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
             >
               {link.label(t)}
             </a>
@@ -70,13 +70,13 @@ export function LandingNavbar({ locale, onLocaleChange, t }: Props) {
 
         <div className="flex items-center gap-3">
           <LocaleSelect
-            variant="dark"
+            variant="light"
             locale={locale as Locale}
             onLocaleChange={(l) => onLocaleChange(l as LandingLocale)}
           />
           <button
             onClick={handleLoginClick}
-            className="px-4 py-2 rounded-lg text-sm font-medium bg-white text-slate-900 hover:bg-slate-100 transition-colors"
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
           >
             {t.login}
           </button>

@@ -7,7 +7,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="p-2 rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
+      className="p-2 rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
       aria-label={theme === "dark" ? "Yorug' rejim" : "Qorong'i rejim"}
       title={theme === "dark" ? "Yorug' rejim" : "Qorong'i rejim"}
     >

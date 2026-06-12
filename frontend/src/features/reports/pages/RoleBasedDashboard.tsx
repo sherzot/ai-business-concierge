@@ -73,13 +73,13 @@ function RoleHeader({
   const greeting = translate("dashboard.role.greeting", { name: firstName, role: roleLabel });
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50 via-white to-white p-5">
+    <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-sm">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
           {roleLabel}
         </p>
-        <h1 className="mt-1 text-xl font-bold text-slate-900">{greeting}</h1>
-        <p className="mt-0.5 text-sm text-slate-600">
+        <h1 className="mt-1 text-xl font-bold text-foreground">{greeting}</h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">
           {translate(`dashboard.role.${role}.tagline`)}
         </p>
       </div>
@@ -89,8 +89,8 @@ function RoleHeader({
 }
 
 function RoleIcon({ role }: { role: string }) {
-  const iconClass = "w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center";
-  const adminClass = "w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center";
+  const iconClass = "w-12 h-12 rounded-xl bg-accent text-primary flex items-center justify-center";
+  const adminClass = "w-12 h-12 rounded-xl bg-[var(--status-warning-soft)] text-[var(--status-warning-fg)] flex items-center justify-center";
   switch (role) {
     case "super_admin":     return <div className={adminClass}><Sparkles size={24} /></div>;
     case "leader":          return <div className={iconClass}><TrendingUp size={24} /></div>;
@@ -119,7 +119,7 @@ function RoleQuickActions({
 
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
         {translate("dashboard.role.quickActions")}
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -127,12 +127,12 @@ function RoleQuickActions({
           <button
             key={a.module}
             onClick={() => onNavigate?.(a.module)}
-            className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left transition hover:border-indigo-300 hover:bg-indigo-50/50"
+            className="group flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-left transition hover:border-primary/40 hover:bg-accent/60"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-primary">
               {a.icon}
             </div>
-            <span className="text-sm font-medium text-slate-800">
+            <span className="text-sm font-medium text-card-foreground">
               {translate(a.labelKey)}
             </span>
           </button>
@@ -193,13 +193,13 @@ function RoleHighlight({
   translate: (k: string) => string;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-      <AlertTriangle size={20} className="text-amber-600 mt-0.5 shrink-0" />
+    <div className="flex items-start gap-3 rounded-xl border border-status-warning/30 bg-[var(--status-warning-soft)] p-4">
+      <AlertTriangle size={20} className="text-status-warning mt-0.5 shrink-0" />
       <div>
-        <p className="text-sm font-semibold text-amber-900">
+        <p className="text-sm font-semibold text-[var(--status-warning-fg)]">
           {translate(`dashboard.role.${role}.highlight.title`)}
         </p>
-        <p className="mt-1 text-sm text-amber-800">
+        <p className="mt-1 text-sm text-[var(--status-warning-fg)] opacity-90">
           {translate(`dashboard.role.${role}.highlight.body`)}
         </p>
       </div>
