@@ -28,11 +28,13 @@ beforeEach(() => {
 
 describe('useTasks', () => {
   it("boshlang'ich holat: loading=true, tasks bo'sh", () => {
-    vi.mocked(tasksApi.getTasks).mockResolvedValue([]);
-    const { result } = renderHook(() => useTasks('tenant-1'));
+    vi.mocked(tasksApi.getTasks).mockImplementation(() => new Promise(() => {}));
+    vi.mocked(tasksApi.getMembers).mockImplementation(() => new Promise(() => {}));
+    const { result, unmount } = renderHook(() => useTasks('tenant-1'));
     expect(result.current.loading).toBe(true);
     expect(result.current.tasks).toEqual([]);
     expect(result.current.error).toBeNull();
+    unmount();
   });
 
   it("ma'lumot kelgandan keyin loading=false, tasks to'ladi", async () => {
