@@ -1,0 +1,10 @@
+.git
+.env
+.env.*
+.agents
+.codex
+.DS_Store
+frontend/node_modules
+frontend/dist
+frontend/coverage
+supabase/.temp
