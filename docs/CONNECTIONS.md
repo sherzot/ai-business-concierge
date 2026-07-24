@@ -1,7 +1,7 @@
 # CONNECTIONS.md — Tashqi xizmatlar va integratsiyalar
 
 > AI Business Concierge — barcha tashqi connectionlarni sozlash bo'yicha qo'llanma
-> Version: 1.0 · Yangilandi: 2026-04-29 (Phase 0 yakunlash)
+> Version: 1.1 · Yangilandi: 2026-07-24 (production audit)
 > Owner: Sher (PM/PL)
 
 ---
@@ -23,19 +23,19 @@
 
 ## 1. Holatlar matritsasi
 
-| Servis | Phase | Holati (2026-04-29) | Kerakli secrets | Foydalanuvchi qadam |
+| Servis | Phase | Holati (2026-07-24) | Kerakli secrets | Foydalanuvchi qadam |
 |---|---|---|---|---|
-| Supabase | 0 | ✅ Sozlangan | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET` | — |
-| Anthropic Claude | 0 | ❌ Key kerak | `ANTHROPIC_API_KEY` | §3 ga qarang |
-| OpenAI (embedding) | 0 | ❌ Key kerak | `OPENAI_API_KEY` | §4 ga qarang |
-| Telegram bot | 1 | ❌ Bot kerak | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` | §5 ga qarang |
+| Supabase | 0 | ✅ ACTIVE_HEALTHY | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET` | — |
+| Anthropic Claude | 0 | ✅ Secret mavjud | `ANTHROPIC_API_KEY` | Smoke test kerak |
+| OpenAI (embedding) | 0 | ✅ Secret mavjud | `OPENAI_API_KEY` | KB seed/search smoke test kerak |
+| Telegram bot | 1 | ⚠️ Function ACTIVE, webhook secret yo'q | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` | Secret o'rnatish va webhookni yangilash |
 | Sentry | 0 | ⚠️ ixtiyoriy | `SENTRY_DSN` (frontend + backend alohida) | §8 ga qarang |
-| Resend | 1 | ❌ keyinroq | `RESEND_API_KEY` | §7 ga qarang |
+| Resend | 1 | ⚠️ Secretlar mavjud, delivery tasdiqlanmagan | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_WEBHOOK_SECRET` | Domain/email smoke test |
 | Click | 3 | ❌ keyinroq | `CLICK_MERCHANT_ID`, `CLICK_SERVICE_ID`, `CLICK_SECRET_KEY` | §6 ga qarang |
 | Payme | 3 | ❌ keyinroq | `PAYME_MERCHANT_ID`, `PAYME_KEY` | §6 ga qarang |
 | Netlify | 0 | ✅ avval sozlangan | — | §9 ga qarang |
 
-**Bugun tezkor priorit:** Anthropic + OpenAI keys (Phase 0 ni ishga tushirish uchun).
+**Bugun tezkor priorit:** `TELEGRAM_WEBHOOK_SECRET` o'rnatish, Telegram webhookni shu secret bilan qayta ulash va Resend domain/delivery smoke test.
 
 ---
 

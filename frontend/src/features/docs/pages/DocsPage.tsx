@@ -14,7 +14,7 @@ import { normalizeError, getTraceIdFromError } from "../../../shared/lib/errorHa
 type DocsTab = "my-docs" | "templates";
 
 export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
-  const { translate } = useI18n();
+  const { translate, locale } = useI18n();
   const [activeTab, setActiveTab] = React.useState<DocsTab>("my-docs");
   const [query, setQuery] = React.useState("");
   const [docs, setDocs] = React.useState<DocItem[]>([]);
@@ -23,6 +23,7 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
   const [error, setError] = React.useState<unknown>(null);
   const [createOpen, setCreateOpen] = React.useState(false);
   const [editOpen, setEditOpen] = React.useState(false);
+  const [generatedNotice, setGeneratedNotice] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (activeTab === "my-docs") loadDocs();
@@ -61,6 +62,18 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
 
   return (
     <div className="space-y-4">
+      {generatedNotice && (
+        <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <span>{generatedNotice}</span>
+          <button
+            onClick={() => setGeneratedNotice(null)}
+            className="text-xs font-semibold hover:text-emerald-900"
+          >
+            Yopish
+          </button>
+        </div>
+      )}
+
       {/* Tab switcher */}
       <div className="flex w-fit rounded-lg border border-slate-200 bg-white p-1">
         {(["my-docs", "templates"] as DocsTab[]).map((tab) => (
@@ -79,7 +92,16 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
       </div>
 
       {activeTab === "templates" ? (
-        <TemplatesLibrary />
+        <TemplatesLibrary
+          tenantId={tenant.id}
+          locale={locale === "ru" ? "ru" : "uz"}
+          onGenerated={(result) => {
+            setGeneratedNotice(
+              `"${result.title}" qoralama sifatida saqlandi.`,
+            );
+            setActiveTab("my-docs");
+          }}
+        />
       ) : (
         <div className="flex h-[calc(100vh-12rem)] bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
           <div className="w-full md:w-1/3 border-r border-slate-200 flex flex-col bg-slate-50">

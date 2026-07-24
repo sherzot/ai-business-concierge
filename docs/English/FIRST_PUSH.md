@@ -231,7 +231,7 @@ Real values are never shown (security), only the list. `ANTHROPIC_API_KEY` and `
 ### 3.8 Edge Function smoke test
 
 ```bash
-curl "https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/health"
+curl "https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/health"
 ```
 
 **Expected:** `{"data":{"ok":true}}` or `{"status":"ok"}`.
@@ -283,7 +283,7 @@ Typical errors:
 ### 5.1 Backend health
 
 ```bash
-curl https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/health
+curl https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/health
 # expected: {"status":"ok"}
 ```
 
@@ -299,7 +299,7 @@ supabase db remote sql --query "select count(*) from phase0_rls_health where ins
 Get JWT from Supabase Auth, then:
 
 ```bash
-curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/chat \
+curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/ai/chat \
   -H "Authorization: Bearer <USER_JWT>" \
   -H "X-Tenant-Id: <TENANT_ID>" \
   -H "Content-Type: application/json" \
@@ -311,7 +311,7 @@ curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/
 ### 5.4 AI feedback
 
 ```bash
-curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/feedback \
+curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/ai/feedback \
   -H "Authorization: Bearer <USER_JWT>" \
   -H "X-Tenant-Id: <TENANT_ID>" \
   -H "Content-Type: application/json" \
@@ -323,7 +323,7 @@ curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/
 ### 5.5 HR candidate stub
 
 ```bash
-curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/hr/candidates/analyze
+curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/hr/candidates/analyze
 ```
 
 **Expected:** `501 NOT_IMPLEMENTED` error — this is the **correct** result (skeleton connected, implementation coming later).

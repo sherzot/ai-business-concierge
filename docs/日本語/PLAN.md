@@ -22,8 +22,8 @@
 ```
 Phase 0:   準備 ........................ 第1-2週    ✅ 完了
 Phase 1:   Telegram MVP ............... 第3-5週    ✅ 完了
-Phase 1.5: 企業認証・管理 .............. 第6-8週    ⚡ 緊急 — ビリング必須
-Phase 2:   書類メーカー + ランディング . 第9-12週   (4週間)
+Phase 1.5: 企業認証・管理 .............. 第6-8週    ✅ 完了
+Phase 2:   書類メーカー + ランディング . 第9-12週   🚧 開始済み
 Phase 3:   販売ボット + 決済 .......... 第13-16週  (4週間)
 Phase 4:   Admin AI + 仕上げ .......... 第17-20週  (4週間)
 Phase 5:   スケール .................... 第21-27週  (7週間)
@@ -87,7 +87,7 @@ Phase 5:   スケール .................... 第21-27週  (7週間)
 
 ---
 
-## Phase 1.5: 企業認証・管理（第6-8週）⚡ 緊急
+## Phase 1.5: 企業認証・管理（第6-8週）✅ 完了
 
 **目標:** 企業オンボーディング、従業員オンボーディング、ロールシステム、ビリング基盤
 **今すぐの理由:** ビリングが機能するには、企業が適切に登録されて明確なロールを持つ必要があります。
@@ -221,8 +221,9 @@ POST /v1/invite/set-password              — パスワード設定
 **目標:** 書類生成、ランディングページ
 
 ### 2.1 AI書類メーカー（モジュール2）
-- [ ] 15テンプレート: 契約書（賃貸、雇用、サービス）、申請書、その他
-- [ ] 生成パイプライン: テンプレート → AI質問 → 入力 → PDF/DOCX
+- [x] 15テンプレート: seed migrationをproductionへdeploy済み
+- [x] 下書きpipeline: template → dynamic fields → `documents` + `doc_generated`
+- [ ] AI質問/polish → 実際のPDF/DOCX binary
 - [ ] Noto Sansフォント（ウズベク語/ロシア語文字）
 - [ ] Supabase Storageとの統合
 
@@ -317,8 +318,8 @@ POST /v1/invite/set-password              — パスワード設定
 
 | ID | タスク | フェーズ | 工数 | ステータス |
 |---|---|---|---|---|
-| B-018 | Contact requests（フォーム + admin CRM） | Phase 1.5 | M | TODO |
-| B-019 | Company registration flow | Phase 1.5 | L | TODO |
+| B-018 | Contact requests（フォーム + admin CRM） | Phase 1.5 | M | DONE |
+| B-019 | Company registration flow | Phase 1.5 | L | DONE |
 | B-020 | Employee onboarding | Phase 1.5 | L | DONE |
 | B-021 | Login page UX（ステータスメッセージ） | Phase 1.5 | S | DONE |
 | B-022 | Forgot/Reset password pages | Phase 1.5 | S | DONE |
@@ -330,19 +331,19 @@ POST /v1/invite/set-password              — パスワード設定
 | B-028 | /admin/health — システムモニタリング | Phase 1.5 | M | DONE |
 | B-029 | Admin AIチャット（基本） | Phase 1.5 | M | DONE |
 | B-030 | Admin AIエージェント（KB、Support、Analytics、Health） | Phase 4 | L | TODO |
-| B-001 | Unit tests（Vitest） | Phase 2 | M | TODO |
+| B-001 | Unit tests（Vitest） | Phase 2 | M | 部分的（89件成功） |
 | B-002 | E2E tests（Playwright） | Phase 4 | L | TODO |
 | B-003 | Async AI jobパターン | Phase 3 | M | TODO |
 | B-004 | Rate limiting（sliding window） | Phase 3 | M | 部分的 |
-| B-005 | DB最適化（deleted_at + インデックス） | Phase 0 | S | TODO |
-| B-006 | Audit logトリガー | Phase 0 | M | TODO |
-| B-007 | Prompt injection保護 | Phase 1 | M | TODO |
-| B-008 | AIコストダッシュボード | Phase 1 | S | 部分的 |
-| B-009 | PWA実装 | Phase 5 | L | TODO |
+| B-005 | DB最適化（deleted_at + インデックス） | Phase 0 | S | DONE |
+| B-006 | Audit logトリガー | Phase 0 | M | DONE |
+| B-007 | Prompt injection保護 | Phase 1 | M | DONE |
+| B-008 | AIコストダッシュボード | Phase 1 | S | DONE |
+| B-009 | PWA実装 | Phase 5 | L | 部分的（manifest + offline shell） |
 | B-010 | 使用量ベースビリング | Phase 3 | L | 部分的 |
-| B-011 | 構造化ログミドルウェア | Phase 0 | S | 部分的 |
+| B-011 | 構造化ログミドルウェア | Phase 0 | S | DONE |
 | B-012 | ヘルスチェック（拡張） | Phase 2 | S | 部分的 |
-| B-013 | OpenAPI自動生成 | Phase 2 | M | TODO |
+| B-013 | OpenAPI自動生成 | Phase 2 | M | DONE |
 | B-014 | セマンティック検索（RAG） | Phase 1 | S | DONE |
 | B-015 | Multi-turn AI記憶 | Phase 4 | M | TODO |
 | B-016 | GDPRデータエクスポート | Phase 4 | M | TODO |
@@ -370,10 +371,11 @@ POST /v1/invite/set-password              — パスワード設定
 
 | 日付 | バージョン | 変更 |
 |---|---|---|
+| 2026-07-24 | v3.1 | Phase 1.5完了とPhase 2開始を確認し、backlogをコードおよびDEVLOGと同期。 |
 | 2026-05-06 | v3.0 | Phase 1.5追加（Company Auth）。B-018..B-030バックログ。 |
 | 2026-04-30 | v2.1 | 17の戦略的要件をフェーズに分配（B-001..B-017） |
 | 2026-04-16 | v2.0 | SQB競合分析 + Telegram MVPタイムライン加速 |
 
 ---
 
-*PLAN.md — AI Business Concierge v3.0 · 2026-05-06*
+*PLAN.md — AI Business Concierge v3.1 · 2026-07-24*

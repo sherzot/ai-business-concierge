@@ -4,6 +4,54 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-07-24 — Loyihani davom ettirish auditi va testlar tiklandi
+
+### Kontekst
+Hujjatlar, git tarixi va joriy kod solishtirildi. `DEVLOG.md` 2026-06-04 da tugagan, koddagi oxirgi commit esa 2026-06-12 bo'lgan.
+
+### Bajarildi
+- Landing testlarida `LandingNavbar` va `HeroSection` ishlatadigan auth kontekst mock qilindi
+- `npm run test:run`: 16/16 test fayli, 89/89 test muvaffaqiyatli
+- `npm run build`: production build muvaffaqiyatli
+- Phase 1.5 yakunlangani, Phase 2 landing qismi boshlanganligi va HR Candidate Analysis hali 501 skeleton ekanligi tasdiqlandi
+- Production Supabase `ACTIVE_HEALTHY`; Anthropic/OpenAI/Resend secretlari mavjudligi tasdiqlandi
+- `TELEGRAM_WEBHOOK_SECRET` yo'qligi va Telegram POST webhook shu sabab 503 qaytarishi aniqlandi
+- Frontend API fallback ishlamaydigan `server/...` URLdan canonical `bright-api/...` URLga tuzatildi
+- Phase 2 AI Hujjatchi birinchi slice: 15 shablon seed migration, template/generate API, dinamik frontend forma va oylik usage limit
+- Migration drift xavfsiz tekislandi: lokal `h003`/`m002` fayl timestamplari production tarixiga moslandi
+- Production Supabase'ga `h005_match_knowledge_tenant` va 15 shablon seed migration deploy qilindi
+- `bright-api` v69 deploy qilindi; health smoke-test `200`, himoyalangan template endpoint authsiz `401`
+- Yakuniy tekshiruv: 17/17 test fayli, 92/92 test va production build muvaffaqiyatli
+
+### Fayllar
+- `frontend/src/features/landing/__tests__/LandingPage.test.tsx`
+- `frontend/src/features/docs/`
+- `frontend/src/app/config.ts`
+- `supabase/functions/server/services/document-generator.ts`
+- `supabase/migrations/20260724051655_seed_phase2_document_templates.sql`
+- `docs/{DEVLOG,PLAN,ROADMAP,REQUIREMENTS}.md` va tarjimalari
+
+---
+
+## 2026-06-12 — Frontend UI, layout va theme polishing
+
+### Kontekst
+Light/Clean SaaS migratsiyasidan keyin landing, auth, admin va kompaniya dashboardlarida vizual izchillik yaxshilandi. Bu ish `2ae377a` commitida bajarilgan, lekin DEVLOG ga kiritilmagan edi.
+
+### Bajarildi
+- Landing sectionlari va umumiy theme tokenlari yangilandi
+- Admin/kompaniya layoutlari, sidebar/topbar va dashboard sahifalari yaxshilandi
+- Login va protected route komponentlaridagi UI/yo'naltirish holatlari takomillashtirildi
+
+### Fayllar
+- `frontend/src/features/landing/`
+- `frontend/src/features/admin/components/AdminLayout.tsx`
+- `frontend/src/features/reports/`
+- `frontend/src/features/auth/`
+- `frontend/src/styles/theme-indigo-slate.css`
+
+---
+
 ## 2026-06-04 — Light Theme migratsiyasi yakunlandi — push & deploy
 
 ### Kontekst

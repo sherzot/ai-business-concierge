@@ -2,6 +2,8 @@
 
 このドキュメントはプロジェクトの要件と今後の方向性を定義します。新機能を追加する際はこのドキュメントを参照してください。
 
+> ステータスは2026-07-24時点のコードとDEVLOGに同期済み。
+
 ---
 
 ## 1. 現状（MVP）
@@ -9,7 +11,7 @@
 ### 1.1 認証・ロール
 - [x] Supabase Auth（メール/パスワード）
 - [x] マルチテナント: `tenants`、`user_tenants`
-- [x] ロール: leader、hr、accounting、department_head、employee
+- [x] ロール: super_admin、sub_admin、company_admin、leader、hr、accounting/accountant、department_head/manager、employee
 - [x] ロールベースアクセス: `canAccess(module)`
 - [x] テナント切り替え
 
@@ -40,7 +42,7 @@
 | R-002 | リアルタイム更新 | Supabase Realtime – inbox、tasks ✅ | Inbox、Tasks |
 | R-015 | タスク割り当て通知 | リーダーが割り当てた際の担当者への通知、確認、ステータスの透明性 ✅ | Tasks |
 | R-003 | 課金/支払い | サブスクリプション、プラン、支払い履歴 | 新規 |
-| R-004 | 監査ログ表示 | 管理者向け監査ログページ | Settings |
+| R-004 | 監査ログ表示 | Admin audit logページとbackend endpoint ✅ | Settings |
 | R-005 | エクスポート/インポート | Excel、CSVエクスポート、一括インポート | Reports、Tasks |
 
 ### 2.2 中優先度

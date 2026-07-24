@@ -4,6 +4,54 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-07-24 — プロジェクト再開監査とテスト復旧
+
+### コンテキスト
+ドキュメント、Git履歴、現在のコードを比較した。`DEVLOG.md`は2026-06-04で終了していたが、最新コードcommitは2026-06-12だった。
+
+### 実施内容
+- Landingテストで`LandingNavbar`と`HeroSection`用auth contextをmock化
+- `npm run test:run`: 16/16 test files、89/89 tests成功
+- `npm run build`: production build成功
+- Phase 1.5完了、Phase 2 landing開始済み、HR Candidate Analysisは501 skeletonのままと確認
+- Production Supabaseは`ACTIVE_HEALTHY`、Anthropic/OpenAI/Resend secretsの存在を確認
+- `TELEGRAM_WEBHOOK_SECRET`不足を検出し、Telegram POST webhookが503になることを確認
+- Frontend API fallbackを無効な`server/...`からcanonical `bright-api/...`へ修正
+- Phase 2 AI書類メーカー開始: 15 template seed migration、template/generate API、動的frontend form、月次usage limit
+- Migration driftを安全に整合し、ローカル`h003`/`m002`ファイルのtimestampをproduction historyに合わせた
+- `h005_match_knowledge_tenant`と15 template seed migrationをproduction Supabaseへdeploy
+- `bright-api` v69をdeployし、health smoke-testは`200`、保護されたtemplate endpointはauthなしで`401`
+- 最終確認: 17/17 test files、92/92 tests、production build成功
+
+### ファイル
+- `frontend/src/features/landing/__tests__/LandingPage.test.tsx`
+- `frontend/src/features/docs/`
+- `frontend/src/app/config.ts`
+- `supabase/functions/server/services/document-generator.ts`
+- `supabase/migrations/20260724051655_seed_phase2_document_templates.sql`
+- `docs/{DEVLOG,PLAN,ROADMAP,REQUIREMENTS}.md`および翻訳
+
+---
+
+## 2026-06-12 — Frontend UI・layout・themeの改善
+
+### コンテキスト
+Light/Clean SaaS移行後、landing、auth、admin、company dashboard全体の視覚的一貫性を改善した。作業はcommit `2ae377a`に含まれていたが、DEVLOGには未記録だった。
+
+### 実施内容
+- Landing sectionsと共通theme tokensを更新
+- Admin/company layouts、sidebar/topbar、dashboard pagesを改善
+- Loginおよびprotected routeのUI・ナビゲーション状態を改善
+
+### ファイル
+- `frontend/src/features/landing/`
+- `frontend/src/features/admin/components/AdminLayout.tsx`
+- `frontend/src/features/reports/`
+- `frontend/src/features/auth/`
+- `frontend/src/styles/theme-indigo-slate.css`
+
+---
+
 ## 2026-06-04 — ライトテーマ移行完了 — push & deploy
 
 ### コンテキスト

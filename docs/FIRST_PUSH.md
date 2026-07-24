@@ -241,8 +241,6 @@ Hech qachon real qiymatlar ko'rsatilmaydi (xavfsizlik), faqat ro'yxat. `ANTHROPI
 
 ```bash
 # Health endpoint
-curl "https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/health"
-# Agar function nomi bright-api bo'lsa:
 curl "https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/health"
 ```
 
@@ -310,7 +308,7 @@ Netlify URL'i (masalan `https://your-site.netlify.app`) ni oching va:
 ### 5.1 Backend health
 
 ```bash
-curl https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/health
+curl https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/health
 # kutilgan: {"status":"ok"}
 ```
 
@@ -326,7 +324,7 @@ supabase db remote sql --query "select count(*) from phase0_rls_health where ins
 Supabase Auth'dan JWT olib, keyin:
 
 ```bash
-curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/chat \
+curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/ai/chat \
   -H "Authorization: Bearer <USER_JWT>" \
   -H "X-Tenant-Id: <TENANT_ID>" \
   -H "Content-Type: application/json" \
@@ -338,7 +336,7 @@ curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/
 ### 5.4 AI feedback
 
 ```bash
-curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/feedback \
+curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/ai/feedback \
   -H "Authorization: Bearer <USER_JWT>" \
   -H "X-Tenant-Id: <TENANT_ID>" \
   -H "Content-Type: application/json" \
@@ -350,7 +348,7 @@ curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/
 ### 5.5 HR candidate stub
 
 ```bash
-curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/hr/candidates/analyze
+curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/hr/candidates/analyze
 ```
 
 **Kutilgan:** `501 NOT_IMPLEMENTED` xatosi (skeleton ulangan, lekin implementatsiya kelajakda) — bu **to'g'ri** natija.

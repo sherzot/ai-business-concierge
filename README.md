@@ -5,7 +5,7 @@
 **O'zbekistondagi kichik biznes egalari uchun kundalik operatsion AI yordamchisi**
 
 [![Stack](https://img.shields.io/badge/stack-Supabase%20%2B%20React%20%2B%20Hono-4f46e5)](#technical-stack)
-[![Status](https://img.shields.io/badge/status-Phase%201.5%20Company%20Onboarding-f59e0b)](docs/PLAN.md)
+[![Status](https://img.shields.io/badge/status-Phase%202%20Started-4f46e5)](docs/PLAN.md)
 [![License](https://img.shields.io/badge/license-Proprietary-64748b)](#license)
 
 🇺🇿 [O'zbekcha](#-ozbekcha) · 🇷🇺 [Русский](#-русский) · 🇬🇧 [English](#-english) · 🇯🇵 [日本語](#-日本語)

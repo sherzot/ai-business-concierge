@@ -22,8 +22,8 @@
 ```
 Phase 0:   Подготовка ................. Недели 1-2   ✅ ЗАВЕРШЁН
 Phase 1:   Telegram MVP ............... Недели 3-5   ✅ ЗАВЕРШЁН
-Phase 1.5: Company Auth & Management .. Недели 6-8   ⚡ СРОЧНО — ОБЯЗАТЕЛЬНО для биллинга
-Phase 2:   Документовед + Лендинг .... Недели 9-12  (4 недели)
+Phase 1.5: Company Auth & Management .. Недели 6-8   ✅ ЗАВЕРШЁН
+Phase 2:   Документовед + Лендинг .... Недели 9-12  🚧 НАЧАТ
 Phase 3:   Бот продаж + Платежи ...... Недели 13-16 (4 недели)
 Phase 4:   Admin AI + Полировка ...... Недели 17-20 (4 недели)
 Phase 5:   Масштабирование ............ Недели 21-27 (7 недель)
@@ -87,7 +87,7 @@ Phase 5:   Масштабирование ............ Недели 21-27 (7 н�
 
 ---
 
-## PHASE 1.5: COMPANY AUTH & MANAGEMENT (Недели 6-8) ⚡ СРОЧНО
+## PHASE 1.5: COMPANY AUTH & MANAGEMENT (Недели 6-8) ✅ ЗАВЕРШЁН
 
 **Цель:** Онбординг компаний, онбординг сотрудников, система ролей, основа для биллинга
 **Почему сейчас:** Для работы биллинга компании ДОЛЖНЫ быть правильно зарегистрированы и иметь чёткие роли.
@@ -221,8 +221,9 @@ POST /v1/invite/set-password              — установка пароля
 **Цель:** Генерация документов, лендинговая страница
 
 ### 2.1 AI Документовед (Модуль 2)
-- [ ] 15 шаблонов: Договоры (аренда, трудовой, услуги), Заявления, Другие
-- [ ] Pipeline генерации: шаблон → AI-вопросы → заполнение → PDF/DOCX
+- [x] 15 шаблонов: seed migration задеплоен в production
+- [x] Pipeline черновика: шаблон → динамические поля → `documents` + `doc_generated`
+- [ ] AI-вопросы/polish → настоящий PDF/DOCX binary
 - [ ] Шрифт Noto Sans (узбекские/русские символы)
 - [ ] Интеграция Supabase Storage
 
@@ -317,8 +318,8 @@ POST /v1/invite/set-password              — установка пароля
 
 | ID | Задача | Фаза | Усилие | Статус |
 |---|---|---|---|---|
-| B-018 | Contact requests (форма + admin CRM) | Phase 1.5 | M | TODO |
-| B-019 | Company registration flow | Phase 1.5 | L | TODO |
+| B-018 | Contact requests (форма + admin CRM) | Phase 1.5 | M | DONE |
+| B-019 | Company registration flow | Phase 1.5 | L | DONE |
 | B-020 | Employee onboarding | Phase 1.5 | L | DONE |
 | B-021 | Login page UX (статусные сообщения) | Phase 1.5 | S | DONE |
 | B-022 | Forgot/Reset password pages | Phase 1.5 | S | DONE |
@@ -330,19 +331,19 @@ POST /v1/invite/set-password              — установка пароля
 | B-028 | /admin/health — мониторинг системы | Phase 1.5 | M | DONE |
 | B-029 | Admin AI chat (базовый) | Phase 1.5 | M | DONE |
 | B-030 | Admin AI Агенты (KB, Support, Analytics, Health) | Phase 4 | L | TODO |
-| B-001 | Unit tests (Vitest) | Phase 2 | M | TODO |
+| B-001 | Unit tests (Vitest) | Phase 2 | M | Частично (89 успешно) |
 | B-002 | E2E tests (Playwright) | Phase 4 | L | TODO |
 | B-003 | Async AI job pattern | Phase 3 | M | TODO |
 | B-004 | Rate limiting (sliding window) | Phase 3 | M | Частично |
-| B-005 | Оптимизация БД (deleted_at + индексы) | Phase 0 | S | TODO |
-| B-006 | Триггеры audit log | Phase 0 | M | TODO |
-| B-007 | Защита от prompt injection | Phase 1 | M | TODO |
-| B-008 | Дашборд стоимости AI | Phase 1 | S | Частично |
-| B-009 | PWA реализация | Phase 5 | L | TODO |
+| B-005 | Оптимизация БД (deleted_at + индексы) | Phase 0 | S | DONE |
+| B-006 | Триггеры audit log | Phase 0 | M | DONE |
+| B-007 | Защита от prompt injection | Phase 1 | M | DONE |
+| B-008 | Дашборд стоимости AI | Phase 1 | S | DONE |
+| B-009 | PWA реализация | Phase 5 | L | Частично (manifest + offline shell) |
 | B-010 | Биллинг на основе использования | Phase 3 | L | Частично |
-| B-011 | Middleware структурированного логирования | Phase 0 | S | Частично |
+| B-011 | Middleware структурированного логирования | Phase 0 | S | DONE |
 | B-012 | Health check (расширенный) | Phase 2 | S | Частично |
-| B-013 | Авто-генерация OpenAPI | Phase 2 | M | TODO |
+| B-013 | Авто-генерация OpenAPI | Phase 2 | M | DONE |
 | B-014 | Семантический поиск (RAG) | Phase 1 | S | DONE |
 | B-015 | Multi-turn память AI | Phase 4 | M | TODO |
 | B-016 | GDPR / экспорт данных | Phase 4 | M | TODO |
@@ -370,10 +371,11 @@ POST /v1/invite/set-password              — установка пароля
 
 | Дата | Версия | Изменение |
 |---|---|---|
+| 2026-07-24 | v3.1 | Подтверждены завершение Phase 1.5 и старт Phase 2; бэклог синхронизирован с кодом и DEVLOG. |
 | 2026-05-06 | v3.0 | Добавлен Phase 1.5 (Company Auth). Бэклог B-018..B-030. |
 | 2026-04-30 | v2.1 | 17 стратегических требований распределены по фазам (B-001..B-017) |
 | 2026-04-16 | v2.0 | Конкурентный анализ SQB + ускорение Telegram MVP |
 
 ---
 
-*PLAN.md — AI Business Concierge v3.0 · 2026-05-06*
+*PLAN.md — AI Business Concierge v3.1 · 2026-07-24*

@@ -2,6 +2,8 @@
 
 Bu hujjat loyiha talablarini va kelajakdagi yo‘nalishlarni belgilaydi. Yangi funksiyalar qo‘shishda shu hujjatga murojaat qiling.
 
+> Holat 2026-07-24 dagi kod va DEVLOG bilan sinxronlangan.
+
 ---
 
 ## 1. Hozirgi holat (MVP)
@@ -9,7 +11,7 @@ Bu hujjat loyiha talablarini va kelajakdagi yo‘nalishlarni belgilaydi. Yangi f
 ### 1.1 Auth va rollar
 - [x] Supabase Auth (email/password)
 - [x] Multi-tenant: `tenants`, `user_tenants`
-- [x] Rollar: leader, hr, accounting, department_head, employee
+- [x] Rollar: super_admin, sub_admin, company_admin, leader, hr, accounting/accountant, department_head/manager, employee
 - [x] Rol bo‘yicha kirish: `canAccess(module)`
 - [x] Tenant switcher
 
@@ -45,7 +47,7 @@ Bu hujjat loyiha talablarini va kelajakdagi yo‘nalishlarni belgilaydi. Yangi f
 | R-019 | Vector Search (RAG) | `pgvector` doc_chunks, `match_documents()` semantic search ✅ migration | Docs |
 | R-020 | Admin Dashboard | super_admin/sub_admin: contacts, health, AI chat — Phase 4'da to'liq | Admin |
 | R-003 | Billing/To‘lovlar | Subscription, planlar, to‘lov tarixi | Yangi |
-| R-004 | Audit log ko‘rinishi | Admin uchun audit loglar sahifasi | Settings |
+| R-004 | Audit log ko‘rinishi | Admin audit log sahifasi va backend endpoint ✅ | Settings |
 | R-005 | Export/Import | Excel, CSV export; bulk import | Reports, Tasks |
 
 ### 2.2 O‘rta prioritet

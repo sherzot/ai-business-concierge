@@ -4,6 +4,16 @@ Requirements and roadmap are interconnected. `docs/REQUIREMENTS.md` contains req
 
 ---
 
+## Current Working Point (2026-07-24)
+
+- Phase 0, Phase 1, and Phase 1.5 are complete
+- Phase 2 has started: web landing, FAQ, and SEO are ready
+- Next product task: AI Document Maker (document generation)
+- HR Candidate Analysis remains a skeleton; the endpoint returns `501 NOT_IMPLEMENTED`
+- Phase 3 billing/payments and Phase 4 advanced Admin AI have not started
+
+---
+
 ## Phase 1: Foundation (completed) ✅
 
 - Auth, roles, tenant
@@ -68,4 +78,5 @@ Requirements and roadmap are interconnected. `docs/REQUIREMENTS.md` contains req
 
 | Date | Change |
 |------|--------|
+| 2026-07-24 | Synchronized Phase 1.5 completion and the Phase 2 starting point with code and DEVLOG |
 | 2026-02-05 | Initial roadmap, Phase 1 completed |

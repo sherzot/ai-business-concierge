@@ -4,6 +4,54 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-07-24 — Project resumption audit and test suite restored
+
+### Context
+The documentation, Git history, and current code were compared. `DEVLOG.md` ended on 2026-06-04, while the latest code commit was from 2026-06-12.
+
+### Done
+- Mocked the auth context used by `LandingNavbar` and `HeroSection` in landing tests
+- `npm run test:run`: 16/16 test files and 89/89 tests passing
+- `npm run build`: production build passing
+- Confirmed Phase 1.5 completion, Phase 2 landing work started, and HR Candidate Analysis remains a 501 skeleton
+- Confirmed production Supabase `ACTIVE_HEALTHY` and Anthropic/OpenAI/Resend secrets present
+- Found missing `TELEGRAM_WEBHOOK_SECRET`; Telegram POST webhook therefore returns 503
+- Fixed frontend API fallback from the invalid `server/...` URL to canonical `bright-api/...`
+- Started Phase 2 AI Document Maker: 15-template seed migration, template/generate API, dynamic frontend form, and monthly usage limit
+- Safely reconciled migration drift by matching local `h003`/`m002` filenames to production history timestamps
+- Deployed `h005_match_knowledge_tenant` and the 15-template seed migration to production Supabase
+- Deployed `bright-api` v69; health smoke test returned `200`, while the protected template endpoint returned `401` without auth
+- Final verification: 17/17 test files, 92/92 tests, and production build passing
+
+### Files
+- `frontend/src/features/landing/__tests__/LandingPage.test.tsx`
+- `frontend/src/features/docs/`
+- `frontend/src/app/config.ts`
+- `supabase/functions/server/services/document-generator.ts`
+- `supabase/migrations/20260724051655_seed_phase2_document_templates.sql`
+- `docs/{DEVLOG,PLAN,ROADMAP,REQUIREMENTS}.md` and translations
+
+---
+
+## 2026-06-12 — Frontend UI, layout, and theme polish
+
+### Context
+After the Light/Clean SaaS migration, visual consistency across landing, auth, admin, and company dashboards was refined. This work was committed as `2ae377a` but was missing from the DEVLOG.
+
+### Done
+- Updated landing sections and shared theme tokens
+- Improved admin/company layouts, sidebar/topbar, and dashboard pages
+- Refined login and protected-route UI/navigation states
+
+### Files
+- `frontend/src/features/landing/`
+- `frontend/src/features/admin/components/AdminLayout.tsx`
+- `frontend/src/features/reports/`
+- `frontend/src/features/auth/`
+- `frontend/src/styles/theme-indigo-slate.css`
+
+---
+
 ## 2026-06-04 — Light theme migration completed — push & deploy
 
 ### Context

@@ -22,8 +22,8 @@ SQB davlat banki 2026 yilda "AI Maslahatchi" mahsulotini chiqardi. Bu:
 ```
 Phase 0:   Tayyorgarlik ............... Hafta 1-2    ✅ YAKUNLANDI
 Phase 1:   Telegram MVP ............... Hafta 3-5    ✅ YAKUNLANDI
-Phase 1.5: Company Auth & Management .. Hafta 6-8    ⚡ DARHOL — billing uchun SHART
-Phase 2:   Hujjatchi + Web Landing .... Hafta 9-12   (4 hafta)
+Phase 1.5: Company Auth & Management .. Hafta 6-8    ✅ YAKUNLANDI
+Phase 2:   Hujjatchi + Web Landing .... Hafta 9-12   🚧 BOSHLANDI
 Phase 3:   Savdo Bot + To'lov ......... Hafta 13-16  (4 hafta)
 Phase 4:   Admin AI + Polish .......... Hafta 17-20  (4 hafta)
 Phase 5:   Scale ...................... Hafta 21-27  (7 hafta)
@@ -146,7 +146,7 @@ Phase 5:   Scale ...................... Hafta 21-27  (7 hafta)
 
 ---
 
-## PHASE 1.5: COMPANY AUTH & MANAGEMENT (Hafta 6-8) ⚡ DARHOL
+## PHASE 1.5: COMPANY AUTH & MANAGEMENT (Hafta 6-8) ✅ YAKUNLANDI
 
 **Maqsad:** Kompaniya onboarding, xodim onboarding, rol tizimi, login/auth UX — billing uchun SHART
 **Nima uchun hozir:** Billing ishlashi uchun kompaniyalar to'g'ri ro'yxatda bo'lishi, rollari aniq bo'lishi kerak.
@@ -373,11 +373,12 @@ Xodim uchun:
 **Differensiator:** SQB faqat kredit hujjati — biz 15+ turdagi kundalik hujjat
 
 ### 2.1 AI Hujjatchi (Module 2)
-- [ ] 15 ta shablon:
+- [x] 15 ta shablon (seed migration production'ga deploy qilindi):
   - **Shartnomalar:** Ijara (turar-joy), Ijara (tijorat), Mehnat, Xizmat, Oldi-sotdi, Pudrat
   - **Arizalar:** YaTT ro'yxat, Soliq organiga, Ishga olish buyrug'i, Bo'shatish buyrug'i, Ta'til
   - **Boshqa:** Ishonchnoma, Tilxat, Qarz shartnomasi, Hamkorlik
-- [ ] Generatsiya pipeline: shablon → AI savollar → to'ldirish → PDF/DOCX
+- [x] Qoralama pipeline: shablon → dinamik maydonlar → `documents` + `doc_generated`
+- [ ] AI savollar/polish → haqiqiy PDF/DOCX binary
 - [ ] Noto Sans font (O'zbek/Rus harflar)
 - [ ] Supabase Storage integratsiya
 
@@ -387,10 +388,10 @@ Xodim uchun:
 - [ ] Hujjat yuborish (Telegram document message)
 
 ### 2.3 Landing Page
-- [ ] Hero: "Biznesingiz allaqachon ishlayaptimi? AI yordamchingiz shu yerda."
-- [ ] 3 modul tushuntirish
-- [ ] Narxlar, FAQ
-- [ ] Mobile-first, UZ/RU, SEO
+- [x] Hero: "Biznesingiz allaqachon ishlayaptimi? AI yordamchingiz shu yerda."
+- [x] 3 modul tushuntirish
+- [x] Narxlar, FAQ
+- [x] Mobile-first, UZ/RU, SEO
 
 **Natija:** 15 shablon, landing live
 **O'lchov:** Hujjat gen <10s, landing 90+ Lighthouse
@@ -655,7 +656,7 @@ Xodim uchun:
 
 | ID | Vazifa | Phase | Effort | Status |
 |---|---|---|---|---|
-| B-018 | Contact requests (murojaat forma + admin CRM) | Phase 1.5 | M | TODO |
+| B-018 | Contact requests (murojaat forma + admin CRM) | Phase 1.5 | M | DONE |
 | B-019 | Company registration flow (invite → register → approve) | Phase 1.5 | L | DONE |
 | B-020 | Employee onboarding (HR creates → email → password → HR confirms) | Phase 1.5 | L | DONE |
 | B-021 | Login page UX (status xabarlari, murojaat havolasi) | Phase 1.5 | S | DONE |
@@ -668,19 +669,19 @@ Xodim uchun:
 | B-028 | /admin/health — tizim holati monitoring | Phase 1.5 | M | DONE |
 | B-029 | Admin AI chat (/admin/ai-chat — basic) | Phase 1.5 | M | DONE |
 | B-030 | Admin AI Agents (KB, Support, Analytics, Health) | Phase 4 | L | TODO |
-| B-001 | Unit tests (Vitest) | Phase 2 | M | TODO |
+| B-001 | Unit tests (Vitest) | Phase 2 | M | Partial (89 test yashil) |
 | B-002 | E2E tests (Playwright) | Phase 4 | L | TODO |
 | B-003 | Async AI job pattern | Phase 3 | M | TODO |
 | B-004 | Rate limiting | Phase 3 | M | Partial (usage-tracking mavjud) |
-| B-005 | DB optimization | Phase 0 | S | TODO |
-| B-006 | Audit log triggers | Phase 0 | M | TODO |
-| B-007 | Prompt injection protection | Phase 1 | M | TODO |
-| B-008 | AI cost dashboard | Phase 1 | S | Partial (cost tracking mavjud) |
-| B-009 | PWA | Phase 5 | L | TODO |
+| B-005 | DB optimization | Phase 0 | S | DONE |
+| B-006 | Audit log triggers | Phase 0 | M | DONE |
+| B-007 | Prompt injection protection | Phase 1 | M | DONE |
+| B-008 | AI cost dashboard | Phase 1 | S | DONE |
+| B-009 | PWA | Phase 5 | L | Partial (manifest + offline shell) |
 | B-010 | Usage-based billing | Phase 3 | L | Partial |
-| B-011 | Structured logging | Phase 0 | S | Partial |
+| B-011 | Structured logging | Phase 0 | S | DONE |
 | B-012 | Health check | Phase 2 | S | Partial (`/health` mavjud) |
-| B-013 | OpenAPI auto-gen | Phase 2 | M | TODO |
+| B-013 | OpenAPI auto-gen | Phase 2 | M | DONE |
 | B-014 | Semantic search RAG | Phase 1 | S | Done (Phase 0.2) |
 | B-015 | Multi-turn AI memory | Phase 4 | M | TODO |
 | B-016 | GDPR data export | Phase 4 | M | TODO |
@@ -717,7 +718,7 @@ Yakshanba:   Dam olish + Feedback o'qish
 ---
 
 *PLAN.md — AI Business Concierge v3.0*
-*Yangilandi: 2026-05-06 — Phase 1.5 (Company Auth & Management) qo'shildi, B-018..B-030 backlog*
+*Yangilandi: 2026-07-24 — Phase 1.5 yakuni, Phase 2 starti va backlog holatlari kod/DEVLOG bilan sinxronlandi*
 *Avvalgi: v2.1 (2026-04-30) — 17 strategik talab, v2.0 (2026-04-16) — SQB raqobati*
 
 ---
@@ -726,6 +727,7 @@ Yakshanba:   Dam olish + Feedback o'qish
 
 | Sana | Versiya | O'zgarish |
 |---|---|---|
+| 2026-07-24 | v3.1 | Phase 1.5 yakuni va Phase 2 starti tasdiqlandi; backlog kod va DEVLOG bilan sinxronlandi. |
 | 2026-05-06 | v3.0 | Phase 1.5 qo'shildi (Company Auth & Management — DARHOL). Rol arxitekturasi: super_admin/sub_admin/company_admin. B-018..B-030 backlog. Phase 4 Admin AI kengaytirildi. |
 | 2026-04-30 | v2.1 | 17 strategik talab phase'larga taqsimlandi (B-001..B-017) |
 | 2026-04-29 | v2.0+ | Phase 0 yakuni: 12 jadval, LLM Router, KB pgvector |

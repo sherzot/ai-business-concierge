@@ -4,6 +4,16 @@ Requirements va roadmap bir-biriga bog‘liq. `docs/REQUIREMENTS.md` da talablar
 
 ---
 
+## Joriy ish nuqtasi (2026-07-24)
+
+- Phase 0, Phase 1 va Phase 1.5 yakunlangan
+- Phase 2 boshlangan: web landing, FAQ va SEO tayyor
+- Keyingi mahsulot vazifasi: AI Hujjatchi (hujjat generatsiyasi)
+- HR Candidate Analysis skeleton holatida; endpoint hozircha `501 NOT_IMPLEMENTED`
+- Phase 3 billing/to'lov va Phase 4 advanced Admin AI hali boshlanmagan
+
+---
+
 ## Bosqich 1: Tayanch (tugallangan) ✅
 
 - Auth, rollar, tenant
@@ -68,4 +78,5 @@ Requirements va roadmap bir-biriga bog‘liq. `docs/REQUIREMENTS.md` da talablar
 
 | Sana | O‘zgarish |
 |------|-----------|
+| 2026-07-24 | Phase 1.5 yakuni va Phase 2 start nuqtasi kod/DEVLOG bilan sinxronlandi |
 | 2026-02-05 | Initial roadmap, Bosqich 1 tugallangan |

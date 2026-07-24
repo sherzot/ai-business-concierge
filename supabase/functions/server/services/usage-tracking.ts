@@ -29,8 +29,8 @@ export type Resource = "ai_requests" | "docs_generated";
 type Limits = Record<Resource, number>; // -1 = cheksiz
 
 const PLAN_LIMITS: Record<Plan, Limits> = {
-  free:    { ai_requests: 5,    docs_generated: 2 / 30  },   // 2/oy ≈ 0.067/kun
-  starter: { ai_requests: 50,   docs_generated: 20 / 30 },   // 20/oy ≈ 0.67/kun
+  free:    { ai_requests: 5,    docs_generated: 2  },  // AI: kunlik, hujjat: oylik
+  starter: { ai_requests: 50,   docs_generated: 20 },  // AI: kunlik, hujjat: oylik
   pro:     { ai_requests: -1,   docs_generated: -1     },
   company: { ai_requests: -1,   docs_generated: -1     },
 };
@@ -62,8 +62,13 @@ export async function checkLimit(args: CheckArgs): Promise<CheckResult> {
     return { allowed: true, remaining: Number.POSITIVE_INFINITY, plan };
   }
 
-  const used = await getTodayUsage(args.supabase, args.tenantId, args.userId, args.resource);
-  const remaining = Math.max(0, Math.floor(limit) - used);
+  const used = await getPeriodUsage(
+    args.supabase,
+    args.tenantId,
+    args.userId,
+    args.resource,
+  );
+  const remaining = Math.max(0, limit - used);
 
   if (remaining <= 0) {
     return {
@@ -119,21 +124,26 @@ async function getActivePlan(supabase: SupabaseClient, tenantId: string): Promis
   return plan;
 }
 
-async function getTodayUsage(
+async function getPeriodUsage(
   supabase: SupabaseClient,
   tenantId: string,
   userId: string | null,
   resource: Resource,
 ): Promise<number> {
   const today = new Date().toISOString().slice(0, 10);
-
   const column = resource === "ai_requests" ? "ai_requests" : "docs_generated";
 
   let query = supabase
     .from("usage_tracking")
     .select(column)
-    .eq("tenant_id", tenantId)
-    .eq("date", today);
+    .eq("tenant_id", tenantId);
+
+  if (resource === "ai_requests") {
+    query = query.eq("date", today);
+  } else {
+    const monthStart = `${today.slice(0, 7)}-01`;
+    query = query.gte("date", monthStart).lte("date", today);
+  }
 
   if (userId) {
     query = query.eq("user_id", userId);
@@ -141,14 +151,17 @@ async function getTodayUsage(
     query = query.is("user_id", null);
   }
 
-  const { data, error } = await query.maybeSingle();
+  const { data, error } = await query;
 
   if (error) {
     console.error("usage-tracking: getTodayUsage failed", error.message);
     return 0;
   }
 
-  return (data?.[column] as number) ?? 0;
+  return (data ?? []).reduce(
+    (sum, row) => sum + Number(row?.[column] ?? 0),
+    0,
+  );
 }
 
 // ---------------------------------------------------------------------------

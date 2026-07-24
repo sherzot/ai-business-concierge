@@ -2,6 +2,8 @@
 
 This document defines project requirements and future directions. Refer to this document when adding new features.
 
+> Status synchronized with the code and DEVLOG as of 2026-07-24.
+
 ---
 
 ## 1. Current Status (MVP)
@@ -9,7 +11,7 @@ This document defines project requirements and future directions. Refer to this 
 ### 1.1 Auth & Roles
 - [x] Supabase Auth (email/password)
 - [x] Multi-tenant: `tenants`, `user_tenants`
-- [x] Roles: leader, hr, accounting, department_head, employee
+- [x] Roles: super_admin, sub_admin, company_admin, leader, hr, accounting/accountant, department_head/manager, employee
 - [x] Role-based access: `canAccess(module)`
 - [x] Tenant switcher
 
@@ -40,7 +42,7 @@ This document defines project requirements and future directions. Refer to this 
 | R-002 | Real-time updates | Supabase Realtime – inbox, tasks ✅ | Inbox, Tasks |
 | R-015 | Task assignment notifications | Alert assignee when leader assigns, acknowledgement, status transparency ✅ | Tasks |
 | R-003 | Billing/Payments | Subscription, plans, payment history | New |
-| R-004 | Audit log view | Audit logs page for admin | Settings |
+| R-004 | Audit log view | Admin audit log page and backend endpoint ✅ | Settings |
 | R-005 | Export/Import | Excel, CSV export; bulk import | Reports, Tasks |
 
 ### 2.2 Medium Priority

@@ -1,7 +1,7 @@
 # CONNECTIONS.md — 外部サービスとインテグレーション
 
 > AI Business Concierge — すべての外部接続設定ガイド
-> バージョン: 1.0 · 更新: 2026-04-29
+> バージョン: 1.1 · 更新: 2026-07-24（production audit）
 > オーナー: Sher（PM/PL）
 
 ---
@@ -23,14 +23,14 @@
 
 ## 1. ステータスマトリクス
 
-| サービス | フェーズ | ステータス (2026-04-29) | 必要なシークレット |
+| サービス | フェーズ | ステータス (2026-07-24) | 必要なシークレット |
 |---|---|---|---|
-| Supabase | 0 | ✅ 設定済み | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET` |
-| Anthropic Claude | 0 | ❌ キーが必要 | `ANTHROPIC_API_KEY` |
-| OpenAI (embedding) | 0 | ❌ キーが必要 | `OPENAI_API_KEY` |
-| Telegram bot | 1 | ❌ ボットが必要 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` |
+| Supabase | 0 | ✅ ACTIVE_HEALTHY | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET` |
+| Anthropic Claude | 0 | ✅ Secretあり、smoke test未実施 | `ANTHROPIC_API_KEY` |
+| OpenAI (embedding) | 0 | ✅ Secretあり、KB smoke test未実施 | `OPENAI_API_KEY` |
+| Telegram bot | 1 | ⚠️ Function ACTIVE、webhook secretなし | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` |
 | Sentry | 0 | ⚠️ 任意 | `SENTRY_DSN` |
-| Resend | 1 | ❌ 後で | `RESEND_API_KEY` |
+| Resend | 1 | ⚠️ Secretsあり、delivery未確認 | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_WEBHOOK_SECRET` |
 | Click | 3 | ❌ 後で | `CLICK_MERCHANT_ID`, `CLICK_SERVICE_ID`, `CLICK_SECRET_KEY` |
 | Payme | 3 | ❌ 後で | `PAYME_MERCHANT_ID`, `PAYME_KEY` |
 | Netlify | 0 | ✅ 設定済み | — |

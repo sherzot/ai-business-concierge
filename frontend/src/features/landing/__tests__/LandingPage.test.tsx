@@ -11,6 +11,13 @@ vi.mock("../hooks/useLandingLocale", () => ({
   useLandingLocale: () => ({ locale: DEFAULT_LOCALE, setLocale: vi.fn() }),
 }));
 
+vi.mock("../../auth/context/AuthContext", () => ({
+  useAuthContext: () => ({
+    session: null,
+    currentTenant: null,
+  }),
+}));
+
 function renderLanding() {
   return render(
     <MemoryRouter>

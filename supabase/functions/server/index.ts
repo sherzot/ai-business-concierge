@@ -12,6 +12,14 @@ import {
 import { checkAiSafety, wrapUserMessage } from "./services/ai-safety.ts";
 import riskScanRoutes from "./routes/risk-scan.ts";
 import { guardUsage, recordUsage } from "./services/usage-tracking.ts";
+import {
+  DocumentValidationError,
+  localizeTemplate,
+  renderDocumentTemplate,
+  type DocumentFormat,
+  type DocumentLocale,
+  type DocumentTemplateRow,
+} from "./services/document-generator.ts";
 
 const app = new Hono();
 const BASE_PATH = "/make-server-6c2837d6";
@@ -3527,6 +3535,226 @@ const registerRoutes = (prefix: string) => {
       },
       501,
     );
+  });
+
+  // ─── Phase 2: AI Hujjatchi ──────────────────────────────────────────────
+  app.get(`${prefix}/doc-templates`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const locale: DocumentLocale =
+      c.req.query("locale") === "ru" ? "ru" : "uz";
+    const category = c.req.query("category")?.trim();
+    const allowedCategories = ["shartnoma", "ariza", "buyruq", "boshqa"];
+
+    if (category && !allowedCategories.includes(category)) {
+      return failure(
+        c,
+        422,
+        "VALIDATION_ERROR",
+        "category noto'g'ri.",
+      );
+    }
+
+    let query = supabase
+      .from("doc_templates")
+      .select(
+        "id, slug, category, title_uz, title_ru, description_uz, description_ru, fields, template_uz, template_ru",
+      )
+      .eq("is_active", true)
+      .order("category", { ascending: true })
+      .order("title_uz", { ascending: true });
+
+    if (category) query = query.eq("category", category);
+
+    const { data, error } = await query;
+    if (error) {
+      console.error("Doc templates list error", error);
+      return failure(
+        c,
+        500,
+        "DB_ERROR",
+        "Hujjat shablonlarini yuklab bo'lmadi.",
+        { details: error.message },
+      );
+    }
+
+    return success(
+      c,
+      (data ?? []).map((template) =>
+        localizeTemplate(template as DocumentTemplateRow, locale)
+      ),
+    );
+  });
+
+  app.post(`${prefix}/docs/generate`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+
+    const body = await c.req.json().catch(() => ({}));
+    const templateId =
+      typeof body?.template_id === "string" ? body.template_id.trim() : "";
+    const templateSlug =
+      typeof body?.template_slug === "string" ? body.template_slug.trim() : "";
+    const locale: DocumentLocale = body?.locale === "ru" ? "ru" : "uz";
+    const format: DocumentFormat =
+      body?.format === "pdf" ? "pdf" : "docx";
+
+    if (!templateId && !templateSlug) {
+      return failure(
+        c,
+        422,
+        "VALIDATION_ERROR",
+        "template_id yoki template_slug majburiy.",
+      );
+    }
+    if (body?.locale && !["uz", "ru"].includes(body.locale)) {
+      return failure(c, 422, "VALIDATION_ERROR", "locale uz yoki ru bo'lishi kerak.");
+    }
+    if (body?.format && !["pdf", "docx"].includes(body.format)) {
+      return failure(c, 422, "VALIDATION_ERROR", "format pdf yoki docx bo'lishi kerak.");
+    }
+
+    let templateQuery = supabase
+      .from("doc_templates")
+      .select("*")
+      .eq("is_active", true);
+    templateQuery = templateId
+      ? templateQuery.eq("id", templateId)
+      : templateQuery.eq("slug", templateSlug);
+
+    const { data: templateData, error: templateError } =
+      await templateQuery.maybeSingle();
+    if (templateError || !templateData) {
+      if (templateError) console.error("Doc template fetch error", templateError);
+      return failure(c, 404, "NOT_FOUND", "Hujjat shabloni topilmadi.");
+    }
+
+    const usageGate = await guardUsage({
+      supabase,
+      tenantId: (ctx as any).tenantId,
+      userId: (ctx as any).userId ?? null,
+      resource: "docs_generated",
+    });
+    if (!usageGate.ok) return c.json(usageGate.body, 429);
+
+    const template = templateData as DocumentTemplateRow;
+    let rendered: ReturnType<typeof renderDocumentTemplate>;
+    try {
+      rendered = renderDocumentTemplate(template, body?.fields_data, locale);
+    } catch (error) {
+      if (error instanceof DocumentValidationError) {
+        return failure(c, 422, "VALIDATION_ERROR", error.message, {
+          missing_fields: error.missingFields,
+        });
+      }
+      throw error;
+    }
+
+    const localized = localizeTemplate(template, locale);
+    const generatedTitle =
+      typeof body?.title === "string" && body.title.trim()
+        ? body.title.trim().slice(0, 200)
+        : `${localized.title} — ${new Date().toISOString().slice(0, 10)}`;
+    const metadata = {
+      owner: "AI Hujjatchi",
+      status: "draft",
+      generated: true,
+      template_id: template.id,
+      template_slug: template.slug,
+      requested_locale: locale,
+      applied_locale: rendered.appliedLocale,
+      format,
+    };
+
+    const { data: document, error: documentError } = await supabase
+      .from("documents")
+      .insert({
+        tenant_id: (ctx as any).tenantId,
+        title: generatedTitle,
+        content: rendered.content,
+        metadata,
+      })
+      .select("id")
+      .single();
+
+    if (documentError || !document) {
+      console.error("Generated document insert error", documentError);
+      return failure(c, 500, "DB_ERROR", "Hujjatni saqlab bo'lmadi.", {
+        details: documentError?.message,
+      });
+    }
+
+    const { data: generated, error: generatedError } = await supabase
+      .from("doc_generated")
+      .insert({
+        tenant_id: (ctx as any).tenantId,
+        user_id: (ctx as any).userId ?? null,
+        template_id: template.id,
+        title: generatedTitle,
+        locale: rendered.appliedLocale,
+        fields_data: rendered.fieldsData,
+        format,
+        storage_path: null,
+      })
+      .select("id")
+      .single();
+
+    if (generatedError || !generated) {
+      console.error("doc_generated insert error", generatedError);
+      await supabase
+        .from("documents")
+        .delete()
+        .eq("id", document.id)
+        .eq("tenant_id", (ctx as any).tenantId);
+      return failure(c, 500, "DB_ERROR", "Generatsiya tarixini saqlab bo'lmadi.", {
+        details: generatedError?.message,
+      });
+    }
+
+    const chunks = rendered.content
+      .split("\n\n")
+      .map((content, index) => ({
+        tenant_id: (ctx as any).tenantId,
+        document_id: document.id,
+        section: `p${index + 1}`,
+        content: content.trim(),
+      }))
+      .filter((chunk) => chunk.content.length > 0);
+    if (chunks.length) await supabase.from("doc_chunks").insert(chunks);
+
+    await recordUsage(
+      supabase,
+      (ctx as any).tenantId,
+      (ctx as any).userId ?? null,
+      { docs_generated: 1 },
+    );
+    await writeAuditLog(ctx as TenantContext, {
+      event_type: "doc_generate",
+      entity_type: "document",
+      entity_id: document.id,
+      trace_id: getTraceId(c),
+      payload: {
+        document_id: document.id,
+        generated_id: generated.id,
+        template_slug: template.slug,
+        format,
+      },
+    });
+
+    return success(c, {
+      document_id: document.id,
+      generated_id: generated.id,
+      title: generatedTitle,
+      content: rendered.content,
+      format,
+      requested_locale: locale,
+      applied_locale: rendered.appliedLocale,
+      file_ready: false,
+      remaining: usageGate.remaining === Number.POSITIVE_INFINITY
+        ? null
+        : Math.max(0, usageGate.remaining - 1),
+    });
   });
 
   app.get(`${prefix}/docs`, async (c) => {

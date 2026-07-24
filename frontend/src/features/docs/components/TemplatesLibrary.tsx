@@ -1,128 +1,224 @@
-import React, { useState } from "react";
-import { FileText, Lock } from "lucide-react";
+import React from "react";
+import { FileText, RefreshCw, Sparkles } from "lucide-react";
+import {
+  getDocTemplates,
+  type DocumentTemplate,
+  type GenerateDocumentResult,
+} from "../api/docsApi";
+import { TemplateGenerateModal } from "./TemplateGenerateModal";
 
-type Template = {
-  id: string;
-  title: string;
-  category: string;
-  fields: number;
-  icon: string;
+type Props = {
+  tenantId: string;
+  locale: "uz" | "ru";
+  onGenerated: (result: GenerateDocumentResult) => void;
 };
 
-const TEMPLATES: Template[] = [
-  // Shartnomalar
-  { id: "ijara-turar", title: "Ijara shartnomasi (turar-joy)", category: "Shartnoma", fields: 12, icon: "🏠" },
-  { id: "ijara-tijorat", title: "Ijara shartnomasi (tijorat)", category: "Shartnoma", fields: 14, icon: "🏢" },
-  { id: "mehnat", title: "Mehnat shartnomasi", category: "Shartnoma", fields: 16, icon: "💼" },
-  { id: "xizmat", title: "Xizmat ko'rsatish shartnomasi", category: "Shartnoma", fields: 10, icon: "🤝" },
-  { id: "oldi-sotdi", title: "Oldi-sotdi shartnomasi", category: "Shartnoma", fields: 9, icon: "🛒" },
-  { id: "pudrat", title: "Pudrat shartnomasi", category: "Shartnoma", fields: 13, icon: "🔨" },
-  { id: "qarz", title: "Qarz shartnomasi", category: "Shartnoma", fields: 8, icon: "💰" },
-  { id: "hamkorlik", title: "Hamkorlik shartnomasi", category: "Shartnoma", fields: 11, icon: "🔗" },
-  // Arizalar
-  { id: "yatt-royxat", title: "YaTT ro'yxatdan o'tish arizasi", category: "Ariza", fields: 7, icon: "📋" },
-  { id: "soliq-organ", title: "Soliq organiga ariza", category: "Ariza", fields: 6, icon: "📊" },
-  { id: "ishga-olish", title: "Ishga olish buyrug'i", category: "Buyruq", fields: 8, icon: "✅" },
-  { id: "boshatish", title: "Ishdan bo'shatish buyrug'i", category: "Buyruq", fields: 7, icon: "❌" },
-  { id: "tatil", title: "Ta'til buyrug'i", category: "Buyruq", fields: 6, icon: "🏖️" },
-  // Boshqa
-  { id: "ishonchnoma", title: "Ishonchnoma", category: "Boshqa", fields: 5, icon: "📜" },
-  { id: "tilxat", title: "Tilxat", category: "Boshqa", fields: 4, icon: "✍️" },
+const CATEGORIES: Array<{
+  value: "all" | DocumentTemplate["category"];
+  label: string;
+}> = [
+  { value: "all", label: "Hammasi" },
+  { value: "shartnoma", label: "Shartnoma" },
+  { value: "ariza", label: "Ariza" },
+  { value: "buyruq", label: "Buyruq" },
+  { value: "boshqa", label: "Boshqa" },
 ];
 
-const CATEGORIES = ["Hammasi", "Shartnoma", "Ariza", "Buyruq", "Boshqa"];
-
-const CAT_COLORS: Record<string, string> = {
-  Shartnoma: "bg-blue-50 text-blue-700 border-blue-100",
-  Ariza:     "bg-green-50 text-green-700 border-green-100",
-  Buyruq:    "bg-purple-50 text-purple-700 border-purple-100",
-  Boshqa:    "bg-slate-50 text-slate-600 border-slate-200",
+const CATEGORY_LABELS: Record<DocumentTemplate["category"], string> = {
+  shartnoma: "Shartnoma",
+  ariza: "Ariza",
+  buyruq: "Buyruq",
+  boshqa: "Boshqa",
 };
 
-export function TemplatesLibrary() {
-  const [cat, setCat] = useState("Hammasi");
-  const [search, setSearch] = useState("");
+const CATEGORY_COLORS: Record<DocumentTemplate["category"], string> = {
+  shartnoma: "bg-blue-50 text-blue-700 border-blue-100",
+  ariza: "bg-green-50 text-green-700 border-green-100",
+  buyruq: "bg-purple-50 text-purple-700 border-purple-100",
+  boshqa: "bg-slate-50 text-slate-600 border-slate-200",
+};
 
-  const shown = TEMPLATES.filter((t) => {
-    if (cat !== "Hammasi" && t.category !== cat) return false;
-    if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false;
+const CATEGORY_ICONS: Record<DocumentTemplate["category"], string> = {
+  shartnoma: "🤝",
+  ariza: "📋",
+  buyruq: "✅",
+  boshqa: "📜",
+};
+
+export function TemplatesLibrary({
+  tenantId,
+  locale,
+  onGenerated,
+}: Props) {
+  const [templates, setTemplates] = React.useState<DocumentTemplate[]>([]);
+  const [category, setCategory] = React.useState<
+    "all" | DocumentTemplate["category"]
+  >("all");
+  const [search, setSearch] = React.useState("");
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [selected, setSelected] = React.useState<DocumentTemplate | null>(null);
+
+  const loadTemplates = React.useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setTemplates(await getDocTemplates(tenantId, locale));
+    } catch (err) {
+      setTemplates([]);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Shablonlarni yuklab bo'lmadi.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [tenantId, locale]);
+
+  React.useEffect(() => {
+    loadTemplates();
+  }, [loadTemplates]);
+
+  const shown = templates.filter((template) => {
+    if (category !== "all" && template.category !== category) return false;
+    if (
+      search &&
+      !template.title.toLowerCase().includes(search.trim().toLowerCase())
+    ) {
+      return false;
+    }
     return true;
   });
 
   return (
     <div className="space-y-4">
-      {/* Info banner */}
-      <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700 flex items-center gap-2">
-        <Lock size={14} className="shrink-0" />
-        AI generatsiya kreditlar kelgandan keyin faollashadi. Hozir shablonlarni ko'rishingiz mumkin.
+      <div className="flex items-start gap-3 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-800">
+        <Sparkles size={16} className="mt-0.5 shrink-0" />
+        <div>
+          <p className="font-semibold">AI Hujjatchi — Phase 2 beta</p>
+          <p className="mt-0.5 text-xs text-indigo-700">
+            Shablonni tanlab, maydonlarni to'ldiring. Natija “Mening
+            hujjatlarim”ga tahrirlanadigan qoralama sifatida saqlanadi.
+          </p>
+        </div>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap items-center gap-2">
         <input
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(event) => setSearch(event.target.value)}
           placeholder="Shablon nomi..."
-          className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 min-w-48"
+          className="min-w-48 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
-        <div className="flex gap-1 flex-wrap">
-          {CATEGORIES.map((c) => (
+        <div className="flex flex-wrap gap-1">
+          {CATEGORIES.map((item) => (
             <button
-              key={c}
-              onClick={() => setCat(c)}
-              className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                cat === c
-                  ? "bg-indigo-600 border-indigo-600 text-white"
-                  : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+              key={item.value}
+              onClick={() => setCategory(item.value)}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                category === item.value
+                  ? "border-indigo-600 bg-indigo-600 text-white"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
               }`}
             >
-              {c}
+              {item.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Grid */}
-      {shown.length === 0 ? (
-        <div className="py-10 text-center text-sm text-slate-400">Shablon topilmadi</div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {shown.map((t) => (
+      {loading && (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
             <div
-              key={t.id}
-              className="bg-white border border-slate-200 rounded-xl p-4 hover:border-indigo-300 hover:shadow-sm transition-all group cursor-default"
+              key={index}
+              className="h-40 animate-pulse rounded-xl border border-slate-200 bg-white"
+            />
+          ))}
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-center">
+          <p className="text-sm text-rose-700">{error}</p>
+          <button
+            onClick={loadTemplates}
+            className="mx-auto mt-3 flex items-center gap-1.5 text-xs font-semibold text-rose-700 hover:text-rose-900"
+          >
+            <RefreshCw size={13} />
+            Qayta urinish
+          </button>
+        </div>
+      )}
+
+      {!loading && !error && shown.length === 0 && (
+        <div className="py-10 text-center text-sm text-slate-400">
+          Shablon topilmadi
+        </div>
+      )}
+
+      {!loading && !error && shown.length > 0 && (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {shown.map((template) => (
+            <article
+              key={template.id}
+              className="group rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-indigo-300 hover:shadow-sm"
             >
               <div className="flex items-start gap-3">
-                <span className="text-2xl leading-none">{t.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-800 leading-snug">{t.title}</p>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${CAT_COLORS[t.category]}`}>
-                      {t.category}
+                <span className="text-2xl leading-none">
+                  {CATEGORY_ICONS[template.category]}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-medium leading-snug text-slate-800">
+                    {template.title}
+                  </h3>
+                  {template.description && (
+                    <p className="mt-1 line-clamp-2 text-xs text-slate-500">
+                      {template.description}
+                    </p>
+                  )}
+                  <div className="mt-2 flex items-center gap-2">
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-xs font-medium ${CATEGORY_COLORS[template.category]}`}
+                    >
+                      {CATEGORY_LABELS[template.category]}
                     </span>
-                    <span className="text-xs text-slate-400 flex items-center gap-1">
+                    <span className="flex items-center gap-1 text-xs text-slate-400">
                       <FileText size={10} />
-                      {t.fields} maydon
+                      {template.fields.length} maydon
                     </span>
                   </div>
                 </div>
               </div>
               <button
-                disabled
-                className="mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
-                title="AI kreditlar kerak"
+                onClick={() => setSelected(template)}
+                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 transition-colors hover:border-indigo-300 hover:bg-indigo-100"
               >
-                <Lock size={11} />
-                Yaratish (tez orada)
+                <Sparkles size={12} />
+                Qoralama yaratish
               </button>
-            </div>
+            </article>
           ))}
         </div>
       )}
 
-      <p className="text-xs text-slate-400 text-center">
-        {shown.length} ta shablon · Jami {TEMPLATES.length} ta
-      </p>
+      {!loading && !error && (
+        <p className="text-center text-xs text-slate-400">
+          {shown.length} ta shablon · Jami {templates.length} ta
+        </p>
+      )}
+
+      <TemplateGenerateModal
+        tenantId={tenantId}
+        template={selected}
+        open={Boolean(selected)}
+        onClose={() => setSelected(null)}
+        onGenerated={(result) => {
+          setSelected(null);
+          onGenerated(result);
+        }}
+      />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 # CONNECTIONS.md — External Services and Integrations
 
 > AI Business Concierge — guide to setting up all external connections
-> Version: 1.0 · Updated: 2026-04-29
+> Version: 1.1 · Updated: 2026-07-24 (production audit)
 > Owner: Sher (PM/PL)
 
 ---
@@ -23,14 +23,14 @@
 
 ## 1. Status Matrix
 
-| Service | Phase | Status (2026-04-29) | Required Secrets |
+| Service | Phase | Status (2026-07-24) | Required Secrets |
 |---|---|---|---|
-| Supabase | 0 | ✅ Configured | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET` |
-| Anthropic Claude | 0 | ❌ Key needed | `ANTHROPIC_API_KEY` |
-| OpenAI (embedding) | 0 | ❌ Key needed | `OPENAI_API_KEY` |
-| Telegram bot | 1 | ❌ Bot needed | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` |
+| Supabase | 0 | ✅ ACTIVE_HEALTHY | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET` |
+| Anthropic Claude | 0 | ✅ Secret present; smoke test pending | `ANTHROPIC_API_KEY` |
+| OpenAI (embedding) | 0 | ✅ Secret present; KB smoke test pending | `OPENAI_API_KEY` |
+| Telegram bot | 1 | ⚠️ Function ACTIVE; webhook secret missing | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` |
 | Sentry | 0 | ⚠️ optional | `SENTRY_DSN` |
-| Resend | 1 | ❌ later | `RESEND_API_KEY` |
+| Resend | 1 | ⚠️ Secrets present; delivery unverified | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_WEBHOOK_SECRET` |
 | Click | 3 | ❌ later | `CLICK_MERCHANT_ID`, `CLICK_SERVICE_ID`, `CLICK_SECRET_KEY` |
 | Payme | 3 | ❌ later | `PAYME_MERCHANT_ID`, `PAYME_KEY` |
 | Netlify | 0 | ✅ already configured | — |

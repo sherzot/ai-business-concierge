@@ -7,10 +7,10 @@ export const OPENAPI_SPEC = {
   openapi: "3.1.0",
   info: {
     title: "AI Business Concierge API",
-    version: "1.0.0",
+    version: "1.1.0",
     description:
       "Multi-tenant SaaS API for daily business operations in Uzbekistan. " +
-      "Includes AI chat, task management, inbox, HR, knowledge base, audit log, and analytics.",
+      "Includes AI chat, document generation, task management, inbox, HR, knowledge base, audit log, and analytics.",
     contact: {
       name: "AI Business Concierge",
       url: "https://ai-business-concierge1.netlify.app",
@@ -18,7 +18,7 @@ export const OPENAPI_SPEC = {
   },
   servers: [
     {
-      url: "https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/make-server-6c2837d6/v1",
+      url: "https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1",
       description: "Production (Supabase Edge Functions)",
     },
   ],
@@ -98,6 +98,39 @@ export const OPENAPI_SPEC = {
           version:    { type: "integer" },
           created_at: { type: "string", format: "date-time" },
           updated_at: { type: "string", format: "date-time" },
+        },
+      },
+      DocumentTemplateField: {
+        type: "object",
+        required: ["name", "label", "type", "required"],
+        properties: {
+          name: { type: "string", example: "employee" },
+          label: { type: "string", example: "Xodim F.I.Sh." },
+          type: {
+            type: "string",
+            enum: ["text", "textarea", "date", "number"],
+          },
+          required: { type: "boolean" },
+        },
+      },
+      DocumentTemplate: {
+        type: "object",
+        required: ["id", "slug", "category", "title", "fields"],
+        properties: {
+          id: { type: "string", format: "uuid" },
+          slug: { type: "string", example: "mehnat-shartnomasi" },
+          category: {
+            type: "string",
+            enum: ["shartnoma", "ariza", "buyruq", "boshqa"],
+          },
+          title: { type: "string" },
+          description: { type: "string" },
+          fields: {
+            type: "array",
+            items: { $ref: "#/components/schemas/DocumentTemplateField" },
+          },
+          requested_locale: { type: "string", enum: ["uz", "ru"] },
+          applied_locale: { type: "string", enum: ["uz", "ru"] },
         },
       },
       AuditLog: {
@@ -203,6 +236,102 @@ export const OPENAPI_SPEC = {
                 },
               },
             },
+          },
+        },
+      },
+    },
+
+    // ── AI Hujjatchi ─────────────────────────────────────────────────────────
+    "/doc-templates": {
+      get: {
+        tags: ["Documents"],
+        summary: "List active document templates",
+        parameters: [
+          {
+            name: "locale",
+            in: "query",
+            schema: { type: "string", enum: ["uz", "ru"], default: "uz" },
+          },
+          {
+            name: "category",
+            in: "query",
+            schema: {
+              type: "string",
+              enum: ["shartnoma", "ariza", "buyruq", "boshqa"],
+            },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Active templates",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: { $ref: "#/components/schemas/DocumentTemplate" },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/docs/generate": {
+      post: {
+        tags: ["Documents"],
+        summary: "Generate and save an editable document draft",
+        description:
+          "Renders a seeded template with validated fields and stores it in documents/doc_generated. Binary PDF/DOCX export is a later Phase 2 slice.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["fields_data"],
+                properties: {
+                  template_id: { type: "string", format: "uuid" },
+                  template_slug: { type: "string" },
+                  title: { type: "string", maxLength: 200 },
+                  locale: {
+                    type: "string",
+                    enum: ["uz", "ru"],
+                    default: "uz",
+                  },
+                  format: {
+                    type: "string",
+                    enum: ["pdf", "docx"],
+                    default: "docx",
+                  },
+                  fields_data: {
+                    type: "object",
+                    additionalProperties: {
+                      oneOf: [{ type: "string" }, { type: "number" }],
+                    },
+                  },
+                },
+                oneOf: [
+                  { required: ["template_id"] },
+                  { required: ["template_slug"] },
+                ],
+              },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Generated draft and IDs",
+          },
+          "422": {
+            description: "Missing template fields or invalid input",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Error" },
+              },
+            },
+          },
+          "429": {
+            description: "Plan document generation limit reached",
           },
         },
       },

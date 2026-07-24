@@ -4,6 +4,54 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-07-24 — Аудит возобновления проекта и восстановление тестов
+
+### Контекст
+Сопоставлены документация, история Git и текущий код. `DEVLOG.md` заканчивался 2026-06-04, а последний commit кода был сделан 2026-06-12.
+
+### Сделано
+- В landing-тестах добавлен mock auth-контекста для `LandingNavbar` и `HeroSection`
+- `npm run test:run`: успешно 16/16 файлов и 89/89 тестов
+- `npm run build`: production build успешен
+- Подтверждено: Phase 1.5 завершён, landing-часть Phase 2 начата, HR Candidate Analysis остаётся 501 skeleton
+- Production Supabase имеет статус `ACTIVE_HEALTHY`; secrets Anthropic/OpenAI/Resend присутствуют
+- Обнаружен отсутствующий `TELEGRAM_WEBHOOK_SECRET`; поэтому Telegram POST webhook возвращает 503
+- Frontend API fallback исправлен с нерабочего `server/...` на canonical `bright-api/...`
+- Начат Phase 2 AI Документовед: seed migration на 15 шаблонов, template/generate API, динамическая frontend-форма и месячный usage limit
+- Migration drift безопасно выровнен: timestamps локальных файлов `h003`/`m002` синхронизированы с production history
+- В production Supabase задеплоены `h005_match_knowledge_tenant` и seed migration на 15 шаблонов
+- `bright-api` v69 задеплоен; health smoke-test вернул `200`, защищённый template endpoint без auth вернул `401`
+- Финальная проверка: 17/17 test files, 92/92 tests и production build успешны
+
+### Файлы
+- `frontend/src/features/landing/__tests__/LandingPage.test.tsx`
+- `frontend/src/features/docs/`
+- `frontend/src/app/config.ts`
+- `supabase/functions/server/services/document-generator.ts`
+- `supabase/migrations/20260724051655_seed_phase2_document_templates.sql`
+- `docs/{DEVLOG,PLAN,ROADMAP,REQUIREMENTS}.md` и переводы
+
+---
+
+## 2026-06-12 — Улучшение frontend UI, layout и theme
+
+### Контекст
+После миграции на Light/Clean SaaS улучшена визуальная согласованность landing, auth, admin и company dashboard. Работа находилась в commit `2ae377a`, но отсутствовала в DEVLOG.
+
+### Сделано
+- Обновлены landing sections и общие theme tokens
+- Улучшены admin/company layouts, sidebar/topbar и dashboard pages
+- Доработаны UI и навигационные состояния login/protected routes
+
+### Файлы
+- `frontend/src/features/landing/`
+- `frontend/src/features/admin/components/AdminLayout.tsx`
+- `frontend/src/features/reports/`
+- `frontend/src/features/auth/`
+- `frontend/src/styles/theme-indigo-slate.css`
+
+---
+
 ## 2026-06-04 — Миграция на светлую тему завершена — push & deploy
 
 ### Контекст

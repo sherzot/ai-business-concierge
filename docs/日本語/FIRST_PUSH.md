@@ -231,7 +231,7 @@ supabase secrets list --project-ref ufhepwdkjqptjvxrmpjn
 ### 3.8 Edge Functionスモークテスト
 
 ```bash
-curl "https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/health"
+curl "https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/health"
 ```
 
 **期待:** `{"data":{"ok":true}}` または `{"status":"ok"}`.
@@ -283,7 +283,7 @@ git push
 ### 5.1 バックエンドヘルス
 
 ```bash
-curl https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/health
+curl https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/health
 # 期待: {"status":"ok"}
 ```
 
@@ -299,7 +299,7 @@ supabase db remote sql --query "select count(*) from phase0_rls_health where ins
 Supabase AuthからJWTを取得し:
 
 ```bash
-curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/chat \
+curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/ai/chat \
   -H "Authorization: Bearer <USER_JWT>" \
   -H "X-Tenant-Id: <TENANT_ID>" \
   -H "Content-Type: application/json" \
@@ -311,7 +311,7 @@ curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/
 ### 5.4 AIフィードバック
 
 ```bash
-curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/feedback \
+curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/ai/feedback \
   -H "Authorization: Bearer <USER_JWT>" \
   -H "X-Tenant-Id: <TENANT_ID>" \
   -H "Content-Type: application/json" \
@@ -323,7 +323,7 @@ curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/
 ### 5.5 HR candidateスタブ
 
 ```bash
-curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/hr/candidates/analyze
+curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/hr/candidates/analyze
 ```
 
 **期待:** `501 NOT_IMPLEMENTED` エラー — これが **正しい** 結果（スケルトン接続済み、実装は後で）。

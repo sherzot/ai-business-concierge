@@ -231,7 +231,7 @@ supabase secrets list --project-ref ufhepwdkjqptjvxrmpjn
 ### 3.8 Smoke test Edge Function
 
 ```bash
-curl "https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/health"
+curl "https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/health"
 ```
 
 **Ожидается:** `{"data":{"ok":true}}` или `{"status":"ok"}`.
@@ -283,7 +283,7 @@ git push
 ### 5.1 Backend health
 
 ```bash
-curl https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/health
+curl https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/health
 # ожидается: {"status":"ok"}
 ```
 
@@ -299,7 +299,7 @@ supabase db remote sql --query "select count(*) from phase0_rls_health where ins
 Получите JWT из Supabase Auth, затем:
 
 ```bash
-curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/chat \
+curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/ai/chat \
   -H "Authorization: Bearer <USER_JWT>" \
   -H "X-Tenant-Id: <TENANT_ID>" \
   -H "Content-Type: application/json" \
@@ -311,7 +311,7 @@ curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/
 ### 5.4 AI feedback
 
 ```bash
-curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/feedback \
+curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/ai/feedback \
   -H "Authorization: Bearer <USER_JWT>" \
   -H "X-Tenant-Id: <TENANT_ID>" \
   -H "Content-Type: application/json" \
@@ -323,7 +323,7 @@ curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/ai/
 ### 5.5 HR candidate stub
 
 ```bash
-curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/server/v1/hr/candidates/analyze
+curl -X POST https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1/hr/candidates/analyze
 ```
 
 **Ожидается:** ошибка `501 NOT_IMPLEMENTED` — это **правильный** результат (скелет подключён, реализация позже).

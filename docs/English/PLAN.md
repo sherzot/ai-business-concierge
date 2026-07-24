@@ -22,8 +22,8 @@ State bank SQB launched "AI Advisor" product in 2026. This:
 ```
 Phase 0:   Preparation ................ Weeks 1-2    ✅ COMPLETE
 Phase 1:   Telegram MVP ............... Weeks 3-5    ✅ COMPLETE
-Phase 1.5: Company Auth & Management .. Weeks 6-8    ⚡ URGENT — REQUIRED for billing
-Phase 2:   Document Maker + Landing ... Weeks 9-12   (4 weeks)
+Phase 1.5: Company Auth & Management .. Weeks 6-8    ✅ COMPLETE
+Phase 2:   Document Maker + Landing ... Weeks 9-12   🚧 STARTED
 Phase 3:   Sales Bot + Payments ....... Weeks 13-16  (4 weeks)
 Phase 4:   Admin AI + Polish .......... Weeks 17-20  (4 weeks)
 Phase 5:   Scale ...................... Weeks 21-27  (7 weeks)
@@ -87,7 +87,7 @@ Phase 5:   Scale ...................... Weeks 21-27  (7 weeks)
 
 ---
 
-## PHASE 1.5: COMPANY AUTH & MANAGEMENT (Weeks 6-8) ⚡ URGENT
+## PHASE 1.5: COMPANY AUTH & MANAGEMENT (Weeks 6-8) ✅ COMPLETE
 
 **Goal:** Company onboarding, employee onboarding, role system, billing foundation
 **Why now:** For billing to work, companies MUST be properly registered and have clear roles.
@@ -221,8 +221,9 @@ POST /v1/invite/set-password              — set password
 **Goal:** Document generation, landing page
 
 ### 2.1 AI Document Maker (Module 2)
-- [ ] 15 templates: Contracts (rental, employment, services), Applications, Others
-- [ ] Generation pipeline: template → AI questions → fill → PDF/DOCX
+- [x] 15 templates: seed migration deployed to production
+- [x] Draft pipeline: template → dynamic fields → `documents` + `doc_generated`
+- [ ] AI questions/polish → real PDF/DOCX binary
 - [ ] Noto Sans font (Uzbek/Russian chars)
 - [ ] Supabase Storage integration
 
@@ -317,8 +318,8 @@ POST /v1/invite/set-password              — set password
 
 | ID | Task | Phase | Effort | Status |
 |---|---|---|---|---|
-| B-018 | Contact requests (form + admin CRM) | Phase 1.5 | M | TODO |
-| B-019 | Company registration flow | Phase 1.5 | L | TODO |
+| B-018 | Contact requests (form + admin CRM) | Phase 1.5 | M | DONE |
+| B-019 | Company registration flow | Phase 1.5 | L | DONE |
 | B-020 | Employee onboarding | Phase 1.5 | L | DONE |
 | B-021 | Login page UX (status messages) | Phase 1.5 | S | DONE |
 | B-022 | Forgot/Reset password pages | Phase 1.5 | S | DONE |
@@ -330,19 +331,19 @@ POST /v1/invite/set-password              — set password
 | B-028 | /admin/health — system monitoring | Phase 1.5 | M | DONE |
 | B-029 | Admin AI chat (basic) | Phase 1.5 | M | DONE |
 | B-030 | Admin AI Agents (KB, Support, Analytics, Health) | Phase 4 | L | TODO |
-| B-001 | Unit tests (Vitest) | Phase 2 | M | TODO |
+| B-001 | Unit tests (Vitest) | Phase 2 | M | Partial (89 passing) |
 | B-002 | E2E tests (Playwright) | Phase 4 | L | TODO |
 | B-003 | Async AI job pattern | Phase 3 | M | TODO |
 | B-004 | Rate limiting (sliding window) | Phase 3 | M | Partial |
-| B-005 | DB optimization (deleted_at + indexes) | Phase 0 | S | TODO |
-| B-006 | Audit log triggers | Phase 0 | M | TODO |
-| B-007 | Prompt injection protection | Phase 1 | M | TODO |
-| B-008 | AI cost dashboard | Phase 1 | S | Partial |
-| B-009 | PWA implementation | Phase 5 | L | TODO |
+| B-005 | DB optimization (deleted_at + indexes) | Phase 0 | S | DONE |
+| B-006 | Audit log triggers | Phase 0 | M | DONE |
+| B-007 | Prompt injection protection | Phase 1 | M | DONE |
+| B-008 | AI cost dashboard | Phase 1 | S | DONE |
+| B-009 | PWA implementation | Phase 5 | L | Partial (manifest + offline shell) |
 | B-010 | Usage-based billing | Phase 3 | L | Partial |
-| B-011 | Structured logging middleware | Phase 0 | S | Partial |
+| B-011 | Structured logging middleware | Phase 0 | S | DONE |
 | B-012 | Health check (extended) | Phase 2 | S | Partial |
-| B-013 | OpenAPI auto-generation | Phase 2 | M | TODO |
+| B-013 | OpenAPI auto-generation | Phase 2 | M | DONE |
 | B-014 | Semantic search (RAG) | Phase 1 | S | DONE |
 | B-015 | Multi-turn AI memory | Phase 4 | M | TODO |
 | B-016 | GDPR / data export | Phase 4 | M | TODO |
@@ -370,10 +371,11 @@ POST /v1/invite/set-password              — set password
 
 | Date | Version | Change |
 |---|---|---|
+| 2026-07-24 | v3.1 | Confirmed Phase 1.5 completion and Phase 2 start; synchronized backlog with code and DEVLOG. |
 | 2026-05-06 | v3.0 | Phase 1.5 added (Company Auth). B-018..B-030 backlog. |
 | 2026-04-30 | v2.1 | 17 strategic requirements distributed across phases (B-001..B-017) |
 | 2026-04-16 | v2.0 | SQB competitive analysis + Telegram MVP timeline accelerated |
 
 ---
 
-*PLAN.md — AI Business Concierge v3.0 · 2026-05-06*
+*PLAN.md — AI Business Concierge v3.1 · 2026-07-24*

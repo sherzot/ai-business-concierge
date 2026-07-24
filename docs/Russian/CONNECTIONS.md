@@ -1,7 +1,7 @@
 # CONNECTIONS.md — Внешние сервисы и интеграции
 
 > AI Business Concierge — руководство по настройке всех внешних соединений
-> Версия: 1.0 · Обновлено: 2026-04-29
+> Версия: 1.1 · Обновлено: 2026-07-24 (production audit)
 > Владелец: Sher (PM/PL)
 
 ---
@@ -23,14 +23,14 @@
 
 ## 1. Матрица статусов
 
-| Сервис | Фаза | Статус (2026-04-29) | Необходимые секреты |
+| Сервис | Фаза | Статус (2026-07-24) | Необходимые секреты |
 |---|---|---|---|
-| Supabase | 0 | ✅ Настроен | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET` |
-| Anthropic Claude | 0 | ❌ Нужен ключ | `ANTHROPIC_API_KEY` |
-| OpenAI (embedding) | 0 | ❌ Нужен ключ | `OPENAI_API_KEY` |
-| Telegram bot | 1 | ❌ Нужен бот | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` |
+| Supabase | 0 | ✅ ACTIVE_HEALTHY | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET` |
+| Anthropic Claude | 0 | ✅ Secret есть; smoke test не выполнен | `ANTHROPIC_API_KEY` |
+| OpenAI (embedding) | 0 | ✅ Secret есть; KB smoke test не выполнен | `OPENAI_API_KEY` |
+| Telegram bot | 1 | ⚠️ Function ACTIVE; webhook secret отсутствует | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` |
 | Sentry | 0 | ⚠️ опционально | `SENTRY_DSN` |
-| Resend | 1 | ❌ позже | `RESEND_API_KEY` |
+| Resend | 1 | ⚠️ Secrets есть; delivery не подтверждён | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_WEBHOOK_SECRET` |
 | Click | 3 | ❌ позже | `CLICK_MERCHANT_ID`, `CLICK_SERVICE_ID`, `CLICK_SECRET_KEY` |
 | Payme | 3 | ❌ позже | `PAYME_MERCHANT_ID`, `PAYME_KEY` |
 | Netlify | 0 | ✅ уже настроен | — |
