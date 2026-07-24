@@ -1550,3 +1550,11 @@ Bir React state, real-time sinxronizatsiya, sahifa yangilanishsiz ishlaydi.
 - `next-themes` yagona theme manbasi qilindi; majburiy light theme olib tashlandi va eski utility ranglari uchun dark-mode kontrast qatlami qo'shildi.
 - Umumiy navigatsiya, bildirishnomalar, sozlamalar, kompaniya profili, analytics, AI chat va command palette mayda matnlari locale tizimiga o'tkazildi.
 - Tekshiruv: frontend build muvaffaqiyatli, 95/95 test o'tdi, backend bundle muvaffaqiyatli; production DB tekshiruvida `15/15` title, body va field locale to'liq.
+
+## 2026-07-24 — Code review tuzatishlari
+
+- Bildirishnoma turlari, admin navigatsiyasi, auth konfiguratsiya xatolari va xodim profilining barcha mayda UI matnlari `uz`, `ru`, `en`, `ja` tarjima kalitlariga o'tkazildi.
+- Dark-mode compatibility qatlami endi komponentlarning aniq `dark:*` klasslarini bosib ketmaydi; background, matn, border va placeholder kontrasti saqlanadi.
+- Shablonlar kutubxonasida locale tez almashgandagi async race yopildi: eskirgan javob yangi til natijasini almashtirmaydi va ochiq eski shablon modali yopiladi.
+- Parolni ko'rsatish tugmasi klaviatura fokusiga qaytarildi, icon-only tugmalarga tarjima qilinadigan `aria-label` qo'shildi.
+- Regressiya testi qo'shildi; yakuniy tekshiruv: 19/19 test fayli, 96/96 test va production build muvaffaqiyatli.

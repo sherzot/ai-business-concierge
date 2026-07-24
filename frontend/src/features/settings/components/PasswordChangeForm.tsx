@@ -31,7 +31,6 @@ function PasswordInput({
         type="button"
         onClick={() => setShow((s) => !s)}
         className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-        tabIndex={-1}
         aria-label={translate(show ? "settings.hidePassword" : "settings.showPassword")}
       >
         {show ? <EyeOff size={15} /> : <Eye size={15} />}

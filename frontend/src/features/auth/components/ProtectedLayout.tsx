@@ -48,8 +48,8 @@ export function ProtectedLayout() {
           <p className="text-status-danger mb-4">{error}</p>
           <p className="text-sm text-muted-foreground">
             {isJwtError
-              ? "JWT_SECRET Edge Function secrets da sozlanganligini tekshiring (Supabase → Project Settings → API → JWT Secret)."
-              : "Sizning hisobingiz user_tenants jadvalida yo'q. Administrator bilan bog'laning."}
+              ? translate("auth.jwtConfigurationError")
+              : translate("auth.membershipMissingError")}
           </p>
         </div>
       </div>

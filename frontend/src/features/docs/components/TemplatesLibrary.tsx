@@ -60,13 +60,18 @@ export function TemplatesLibrary({
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [selected, setSelected] = React.useState<DocumentTemplate | null>(null);
+  const requestSequence = React.useRef(0);
 
   const loadTemplates = React.useCallback(async () => {
+    const requestId = ++requestSequence.current;
     setLoading(true);
     setError(null);
     try {
-      setTemplates(await getDocTemplates(tenantId, locale));
+      const nextTemplates = await getDocTemplates(tenantId, locale);
+      if (requestId !== requestSequence.current) return;
+      setTemplates(nextTemplates);
     } catch (err) {
+      if (requestId !== requestSequence.current) return;
       setTemplates([]);
       setError(
         err instanceof Error
@@ -74,13 +79,22 @@ export function TemplatesLibrary({
           : translate("docs.templates.loadError"),
       );
     } finally {
-      setLoading(false);
+      if (requestId === requestSequence.current) {
+        setLoading(false);
+      }
     }
   }, [tenantId, locale, translate]);
 
   React.useEffect(() => {
-    loadTemplates();
+    void loadTemplates();
+    return () => {
+      requestSequence.current += 1;
+    };
   }, [loadTemplates]);
+
+  React.useEffect(() => {
+    setSelected(null);
+  }, [tenantId, locale]);
 
   const shown = templates.filter((template) => {
     if (category !== "all" && template.category !== category) return false;

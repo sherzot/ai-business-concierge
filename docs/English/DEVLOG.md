@@ -1262,3 +1262,11 @@ verify_jwt = false
 - `next-themes` is now the single theme source, forced light mode was removed, and a dark-mode compatibility layer keeps legacy utility colors readable.
 - Shared navigation, notifications, settings, company profile, analytics, AI chat, and command palette details were moved into the locale system.
 - Verification: frontend build passed, 95/95 tests passed, backend bundle passed, and production DB checks report `15/15` complete titles, bodies, and field locales.
+
+## 2026-07-24 — Code review fixes
+
+- Notification types, admin navigation, auth configuration errors, and all employee-profile interface details now use `uz`, `ru`, `en`, and `ja` translation keys.
+- The dark-mode compatibility layer no longer overrides explicit component `dark:*` classes, preserving background, text, border, and placeholder contrast.
+- The Templates Library locale race is fixed: stale responses cannot replace the newest locale result, and an open template from the previous locale is closed.
+- Password visibility is keyboard-focusable again, and icon-only controls received localized `aria-label` values.
+- Added regression coverage; final verification passed 19/19 test files, 96/96 tests, and the production build.

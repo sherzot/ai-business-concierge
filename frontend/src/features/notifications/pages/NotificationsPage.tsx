@@ -6,13 +6,13 @@ import { getNotifications, markNotificationRead, type Notification } from "../ap
 import { useRealtimeNotifications } from "../hooks/useRealtimeNotifications";
 import { useI18n } from "../../../app/providers/I18nProvider";
 
-const TYPE_LABELS: Record<string, string> = {
-  hr_employee_confirmed:   "HR",
-  hr_password_set:         "HR",
-  task_assigned:           "Vazifa",
-  task_completed:          "Vazifa",
-  inbox_message:           "Xabar",
-  system:                  "Tizim",
+const TYPE_LABEL_KEYS: Record<string, string> = {
+  hr_employee_confirmed: "notifications.type.hr",
+  hr_password_set: "notifications.type.hr",
+  task_assigned: "notifications.type.task",
+  task_completed: "notifications.type.task",
+  inbox_message: "notifications.type.message",
+  system: "notifications.type.system",
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -103,6 +103,7 @@ export function NotificationsPage({ tenantId, userId }: Props) {
             onClick={() => { setLoading(true); load(); }}
             disabled={loading}
             className="p-2 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors disabled:opacity-50"
+            aria-label={translate("common.retry")}
           >
             <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
           </button>
@@ -157,7 +158,9 @@ export function NotificationsPage({ tenantId, userId }: Props) {
         <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
           {filtered.map((n, i) => {
             const isUnread = !n.read_at;
-            const typeLabel = TYPE_LABELS[n.type] ?? n.type;
+            const typeLabel = TYPE_LABEL_KEYS[n.type]
+              ? translate(TYPE_LABEL_KEYS[n.type])
+              : n.type;
             const typeColor = TYPE_COLORS[n.type] ?? "bg-slate-100 text-slate-600";
             return (
               <div

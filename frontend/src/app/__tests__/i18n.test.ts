@@ -10,8 +10,16 @@ describe("application locale contract", () => {
     }
   });
 
-  it("provides every Templates Library and theme label in every locale", () => {
-    const requiredPrefixes = ["docs.", "theme."];
+  it("provides every reviewed interface label in every locale", () => {
+    const requiredPrefixes = [
+      "docs.",
+      "theme.",
+      "notifications.type.",
+      "admin.",
+      "employeeProfile.",
+      "auth.jwt",
+      "auth.membership",
+    ];
     const requiredKeys = Object.keys(translations.uz).filter((key) =>
       requiredPrefixes.some((prefix) => key.startsWith(prefix)),
     );

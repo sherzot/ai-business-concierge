@@ -8,14 +8,15 @@ import {
 import { useAuthContext } from "../../auth/context/AuthContext";
 import { apiRequest } from "../../../shared/lib/apiClient";
 import { ThemeToggle } from "../../../shared/components/ThemeToggle";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 type NavGroup = {
-  label?: string;
+  labelKey?: string;
   items: NavEntry[];
 };
 type NavEntry = {
   to: string;
-  label: string;
+  labelKey: string;
   icon: React.ElementType;
   exact?: boolean;
   badge?: boolean;
@@ -24,31 +25,31 @@ type NavEntry = {
 const NAV_GROUPS: NavGroup[] = [
   {
     items: [
-      { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+      { to: "/admin", labelKey: "nav.dashboard", icon: LayoutDashboard, exact: true },
     ],
   },
   {
-    label: "Boshqaruv",
+    labelKey: "admin.group.management",
     items: [
-      { to: "/admin/contacts",  label: "Murojaatlar",     icon: Users,    badge: true },
-      { to: "/admin/companies", label: "Kompaniyalar",    icon: Building2 },
-      { to: "/admin/users",     label: "Foydalanuvchilar",icon: Users2    },
+      { to: "/admin/contacts", labelKey: "admin.contacts", icon: Users, badge: true },
+      { to: "/admin/companies", labelKey: "admin.companies", icon: Building2 },
+      { to: "/admin/users", labelKey: "admin.users", icon: Users2 },
     ],
   },
   {
-    label: "Monitoring",
+    labelKey: "admin.group.monitoring",
     items: [
-      { to: "/admin/health",    label: "Tizim holati",  icon: Activity   },
-      { to: "/admin/risk",      label: "Xavfsizlik",    icon: ShieldAlert },
-      { to: "/admin/audit",     label: "Audit Log",     icon: Shield     },
-      { to: "/admin/ai-stats",  label: "AI Statistika", icon: BarChart3  },
+      { to: "/admin/health", labelKey: "health.title", icon: Activity },
+      { to: "/admin/risk", labelKey: "admin.security", icon: ShieldAlert },
+      { to: "/admin/audit", labelKey: "admin.audit", icon: Shield },
+      { to: "/admin/ai-stats", labelKey: "admin.aiStats", icon: BarChart3 },
     ],
   },
   {
-    label: "Kontent",
+    labelKey: "admin.group.content",
     items: [
-      { to: "/admin/knowledge-base", label: "Knowledge Base", icon: BookOpen    },
-      { to: "/admin/ai-chat",        label: "AI Chat",        icon: MessageSquare },
+      { to: "/admin/knowledge-base", labelKey: "admin.knowledgeBase", icon: BookOpen },
+      { to: "/admin/ai-chat", labelKey: "admin.aiChat", icon: MessageSquare },
     ],
   },
 ];
@@ -155,6 +156,7 @@ function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" }) {
 
 // ─── AdminLayout ──────────────────────────────────────────────────────────────
 export function AdminLayout() {
+  const { translate } = useI18n();
   const { logout, profile } = useAuthContext();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -188,14 +190,14 @@ export function AdminLayout() {
         </div>
         {!collapsed && (
           <div className="min-w-0 flex-1 overflow-hidden">
-            <p className="text-sm font-semibold text-sidebar-foreground truncate">Admin Panel</p>
+            <p className="text-sm font-semibold text-sidebar-foreground truncate">{translate("admin.panel")}</p>
             <p className="text-xs text-muted-foreground truncate">AI Business Concierge</p>
           </div>
         )}
         <button
           onClick={() => setSidebarOpen((v) => !v)}
           className="hidden lg:flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors shrink-0"
-          aria-label={collapsed ? "Kengaytirish" : "Yig'ish"}
+          aria-label={translate(collapsed ? "admin.expandSidebar" : "admin.collapseSidebar")}
         >
           {collapsed ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}
         </button>
@@ -203,18 +205,19 @@ export function AdminLayout() {
 
       {/* Nav */}
       <nav className="flex-1 px-2 py-3 overflow-y-auto space-y-4">
-        {NAV_GROUPS.map((group, gi) => (
-          <div key={gi}>
-            {group.label && !collapsed && (
+        {NAV_GROUPS.map((group) => (
+          <div key={group.labelKey ?? group.items[0]?.to}>
+            {group.labelKey && !collapsed && (
               <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                {group.label}
+                {translate(group.labelKey)}
               </p>
             )}
             <div className="space-y-0.5">
-              {group.items.map((item) => (
+              {group.items.map(({ labelKey, ...item }) => (
                 <NavItem
                   key={item.to}
                   {...item}
+                  label={translate(labelKey)}
                   contactBadge={contactBadge}
                   collapsed={collapsed}
                 />
@@ -248,11 +251,11 @@ export function AdminLayout() {
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
           >
             <Globe size={15} className="shrink-0" />
-            {!collapsed && <span>Asosiy sayt</span>}
+            {!collapsed && <span>{translate("admin.mainSite")}</span>}
           </button>
           {collapsed && (
             <div className="absolute left-14 top-1/2 -translate-y-1/2 hidden group-hover/home:flex items-center bg-popover border border-border text-popover-foreground text-xs font-medium px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap z-[200] pointer-events-none">
-              Asosiy sayt
+              {translate("admin.mainSite")}
             </div>
           )}
         </div>
@@ -264,11 +267,11 @@ export function AdminLayout() {
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-status-danger hover:bg-[var(--status-danger-soft)] transition-colors"
           >
             <LogOut size={15} className="shrink-0" />
-            {!collapsed && <span>Chiqish</span>}
+            {!collapsed && <span>{translate("nav.logout")}</span>}
           </button>
           {collapsed && (
             <div className="absolute left-14 top-1/2 -translate-y-1/2 hidden group-hover/logout:flex items-center bg-popover border border-border text-status-danger text-xs font-medium px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap z-[200] pointer-events-none">
-              Chiqish ({displayName})
+              {translate("nav.logout")} ({displayName})
             </div>
           )}
         </div>
@@ -304,6 +307,7 @@ export function AdminLayout() {
         <button
           onClick={() => setMobileOpen(false)}
           className="absolute top-3 right-3 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary"
+          aria-label={translate("common.close")}
         >
           <X size={16} />
         </button>
@@ -317,16 +321,18 @@ export function AdminLayout() {
           <button
             onClick={() => setMobileOpen(true)}
             className="lg:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-            aria-label="Menu"
+            aria-label={translate("admin.menu")}
           >
             <Menu size={18} />
           </button>
 
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-sm font-semibold text-foreground">Super Admin</span>
+            <span className="text-sm font-semibold text-foreground">
+              {translate("auth.role.super_admin")}
+            </span>
             {contactBadge > 0 && (
               <span className="bg-[var(--status-danger-soft)] text-[var(--status-danger-fg)] text-xs font-medium px-2 py-0.5 rounded-full border border-status-danger/25">
-                {contactBadge} yangi murojaat
+                {translate("admin.newRequests", { count: String(contactBadge) })}
               </span>
             )}
           </div>

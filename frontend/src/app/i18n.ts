@@ -1,3 +1,5 @@
+import { reviewFixTranslations } from "./reviewFixTranslations";
+
 export const defaultLocale = "uz";
 export const supportedLocales = ["uz", "ru", "en", "ja"] as const;
 export type Locale = (typeof supportedLocales)[number];
@@ -2282,6 +2284,10 @@ export const translations: Record<Locale, Dictionary> = {
     "employees.hardDelete.submit": "完全に削除",
   },
 };
+
+for (const locale of supportedLocales) {
+  Object.assign(translations[locale], reviewFixTranslations[locale]);
+}
 
 export function t(locale: Locale, key: string, vars?: Record<string, string>) {
   const dict = translations[locale] ?? translations[defaultLocale];
