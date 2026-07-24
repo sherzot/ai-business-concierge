@@ -44,11 +44,17 @@ export async function listKbArticles(params?: {
 }
 
 export async function createKbArticle(input: CreateKbInput): Promise<KbArticle> {
-  return apiRequest<KbArticle>("/admin/kb", { method: "POST", body: input });
+  return apiRequest<KbArticle>("/admin/kb", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 }
 
 export async function updateKbArticle(id: string, input: UpdateKbInput): Promise<KbArticle> {
-  return apiRequest<KbArticle>(`/admin/kb/${id}`, { method: "PUT", body: input });
+  return apiRequest<KbArticle>(`/admin/kb/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(input),
+  });
 }
 
 export async function deleteKbArticle(id: string): Promise<void> {

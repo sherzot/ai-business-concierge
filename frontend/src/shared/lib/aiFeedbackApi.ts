@@ -54,7 +54,13 @@ export async function sendAiFeedback(input: SendAiFeedbackInput): Promise<SendAi
       };
     }
 
-    return { ok: true, saved: Boolean(json.data?.saved) };
+    if (json.data?.saved !== true) {
+      return {
+        ok: false,
+        error: { code: "INVALID_RESPONSE", message: "Feedback saqlanmadi." },
+      };
+    }
+    return { ok: true, saved: true };
   } catch (err) {
     return {
       ok: false,

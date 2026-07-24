@@ -264,7 +264,7 @@ export default function App() {
       case "hr-cases":
         return <HrCasesPage tenant={tenant} />;
       case "hr-surveys":
-        return <HrSurveysPage tenant={tenant} />;
+        return <HrSurveysPage />;
       case "hr-candidates":
         return <CandidateAnalysisPage />;
       case "hr-add-employee":
@@ -283,6 +283,8 @@ export default function App() {
         return <DashboardPage tenant={tenant} />;
     }
   };
+
+  if (!currentTenant) return null;
 
   const userName = currentTenant?.fullName?.split(" ")[0] ?? profile?.user?.email?.split("@")[0] ?? "User";
 

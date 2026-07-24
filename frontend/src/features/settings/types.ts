@@ -4,6 +4,7 @@ export type UserProfile = {
   id: string;
   fullName: string;
   email: string;
+  phone?: string;
   company?: string;
   language: Language;
   avatarUrl?: string;

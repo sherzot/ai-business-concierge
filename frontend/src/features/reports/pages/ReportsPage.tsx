@@ -224,7 +224,7 @@ export function ReportsPage({ tenant }: ReportsPageProps) {
               <option>{translate("reports.last30")}</option>
             </select>
           </div>
-          {error && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
+          {Boolean(error) && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={stats?.chartData ?? []}>

@@ -6,8 +6,11 @@
  *   1. Prompt injection patterlarni aniqlash va bloklash
  *   2. HTML/script teglarni olib tashlash
  *   3. Input uzunligini cheklash (~4000 token ≈ 16 000 belgi)
- *   4. Per-user rate limit: 10 xabar/daqiqa (in-memory sliding window)
- *   5. User xabarini xavfsiz "User message:" blokiga o'rash
+ *   4. User xabarini xavfsiz "User message:" blokiga o'rash
+ *
+ * Rate limit bu modulda saqlanmaydi: Edge instance xotirasi barqaror emas.
+ * Persistent limit server/index.ts orqali PostgreSQL'dagi check_rate_limit()
+ * funksiyasida bajariladi.
  */
 
 // ---------------------------------------------------------------------------
@@ -69,21 +72,12 @@ const INJECTION_PATTERNS: RegExp[] = [
 const MAX_INPUT_CHARS = 16_000;
 
 // ---------------------------------------------------------------------------
-// Per-user rate limit — 10 xabar / 1 daqiqa (in-memory sliding window)
-// ---------------------------------------------------------------------------
-
-const _userRateMap = new Map<string, { count: number; resetAt: number }>();
-const USER_RATE_LIMIT = 10;
-const USER_RATE_WINDOW_MS = 60_000;
-
-// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 export type SafetyViolation =
   | "INJECTION_DETECTED"
-  | "INPUT_TOO_LONG"
-  | "RATE_LIMITED";
+  | "INPUT_TOO_LONG";
 
 export type SafetyResult =
   | { safe: true;  sanitized: string }
@@ -117,16 +111,11 @@ function stripHtml(input: string): string {
  *   1. Uzunlik → INPUT_TOO_LONG
  *   2. HTML strip
  *   3. Injection pattern → INJECTION_DETECTED
- *   4. Per-user rate limit → RATE_LIMITED
- *   5. OK → { safe: true, sanitized }
+ *   4. OK → { safe: true, sanitized }
  *
  * @param rawInput  Foydalanuvchi xabari (tekshirilmagan)
- * @param userId    auth user ID yoki null (anonymous)
  */
-export function checkAiSafety(
-  rawInput: string,
-  userId: string | null,
-): SafetyResult {
+export function checkAiSafety(rawInput: string): SafetyResult {
   const input = (rawInput ?? "").trim();
 
   // 1. Uzunlik
@@ -155,26 +144,6 @@ export function checkAiSafety(
           "Сообщение выглядит как попытка изменить системные инструкции. " +
           "Пожалуйста, задайте обычный вопрос.",
       };
-    }
-  }
-
-  // 4. Per-user rate limit
-  if (userId) {
-    const now = Date.now();
-    const entry = _userRateMap.get(userId);
-
-    if (!entry || now >= entry.resetAt) {
-      _userRateMap.set(userId, { count: 1, resetAt: now + USER_RATE_WINDOW_MS });
-    } else {
-      entry.count += 1;
-      if (entry.count > USER_RATE_LIMIT) {
-        return {
-          safe: false,
-          code: "RATE_LIMITED",
-          message: `Bir daqiqada ${USER_RATE_LIMIT} ta xabardan ko'p yuborib bo'lmaydi. Biroz kuting.`,
-          messageRu: `Нельзя отправлять более ${USER_RATE_LIMIT} сообщений в минуту. Подождите немного.`,
-        };
-      }
     }
   }
 

@@ -36,7 +36,7 @@ export function useUserSettings(): UseUserSettingsResult {
       try {
         const body: Record<string, string> = {};
         if (input.fullName !== undefined) body.full_name = input.fullName;
-        if ((input as any).phone !== undefined) body.phone = (input as any).phone;
+        if (input.phone !== undefined) body.phone = input.phone;
         await apiRequest("/settings/profile", {
           method: "PATCH",
           body: JSON.stringify(body),

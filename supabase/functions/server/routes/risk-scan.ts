@@ -101,11 +101,7 @@ const STATIC_CHECKS: StaticCheck[] = [
     description: "getTenantContext() funksiyasida JWT tekshiruvisiz x-tenant-id headerini qabul qiluvchi fallback kodi mavjud. Tajovuzkor istalgan tenant ID'sini header orqali yuborib boshqa kompaniya ma'lumotlariga kirishi mumkin.",
     location: "supabase/functions/server/index.ts (~337-349-qatorlar)",
     remediation: "getTenantContext() ning oxiridagi header fallback bloqini to'liq o'chiring. tenant_id faqat tekshirilgan JWT payloaddan kelishi kerak.",
-    test: async () => {
-      // Bu statik kod tahlili — hozirgi runtime'da doim topilgan deb belgilanadi
-      // Production'da bu tekshiruv Edge Function kodini skanerlashi kerak
-      return true; // Dastlabki auditda tasdiqlangan
-    },
+    test: async () => false, // K-001: header faqat verified JWT + DB membership bilan qabul qilinadi
   },
 
   // ── C-003: system_prompt injection ───────────────────────────────────────
@@ -116,7 +112,7 @@ const STATIC_CHECKS: StaticCheck[] = [
     description: "POST /v1/ai/chat endpointi body'dan kelgan system_prompt ni ai-safety.ts filtrisiz to'g'ridan LLM ga uzatadi. Bu to'liq prompt injection imkonini beradi.",
     location: "supabase/functions/server/index.ts (~2461-2543-qatorlar)",
     remediation: "Body'dan system_prompt ni olib tashlang. System promptlar faqat server tomonida aniqlanishi kerak. Body'da system_prompt kelsa 422 qaytaring.",
-    test: async () => true, // Tasdiqlangan
+    test: async () => false, // Body'dagi system_prompt 422 bilan rad etiladi
   },
 
   // ── C-004: HR route auth yo'q ─────────────────────────────────────────────
@@ -127,7 +123,7 @@ const STATIC_CHECKS: StaticCheck[] = [
     description: "POST /v1/hr/candidates/analyze endpointida auth middleware TODO sifatida qolgan. Route index.ts ga ulanishi bilanoq autentifikatsiyasiz foydalanuvchilar qimmat GitHub API + LLM chaqiruvlarini ishga tushira oladi.",
     location: "supabase/functions/server/routes/hr-candidate.ts (~27-29-qatorlar)",
     remediation: "Route boshiga requireTenant() + rol tekshiruvini qo'shing. Faqat hr, manager, leader, super_admin rollari kirishi mumkin.",
-    test: async () => true, // Tasdiqlangan
+    test: async () => false, // Route production index.ts ga ulanmagan (501 skeleton)
   },
 
   // ── H-001: CORS wildcard ──────────────────────────────────────────────────
@@ -137,8 +133,8 @@ const STATIC_CHECKS: StaticCheck[] = [
     title: "CORS origin wildcard (*) — credentials bilan xavfli",
     description: "origin: '*' va Authorization headeriga ruxsat kombinatsiyasi zararli saytlarga jabrlanuvchining JWT'sidan foydalanib cross-origin so'rovlar yuborishga imkon beradi.",
     location: "supabase/functions/server/index.ts (~48-qator)",
-    remediation: "origin: '*' ni aniq ruxsat etilgan domenlar ro'yxati bilan almashtiring: ['https://aibizconcierge.uz', 'https://ai-business-concierge1.netlify.app']",
-    test: async () => true, // Tasdiqlangan
+    remediation: "origin: '*' ni production Netlify origin va local development originlari bilan almashtiring.",
+    test: async () => false, // H-001: explicit allowlist ishlatilmoqda
   },
 
   // ── H-002: Telegram webhook secret ixtiyoriy ─────────────────────────────
@@ -174,7 +170,7 @@ const STATIC_CHECKS: StaticCheck[] = [
     description: "POST /v1/ai/chat Claude/OpenAI ga chaqiruvdan oldin subscription limitini tekshirmaydi. Free-tarif tenant cheksiz AI so'rovlar yuborib platformaga katta xarajat keltirishi mumkin.",
     location: "supabase/functions/server/index.ts (~2748-qator — TODO comment)",
     remediation: "guardUsage() funksiyasini implement qiling. Har AI chaqiruvdan oldin usage_tracking jadvalini tekshiring. Limit oshganda 429 qaytaring.",
-    test: async () => true, // Tasdiqlangan
+    test: async () => false, // guardUsage() AI chaqiruvidan oldin ishlaydi
   },
 
   // ── H-004: Demo parollar ochiq repoda ─────────────────────────────────────
@@ -185,7 +181,7 @@ const STATIC_CHECKS: StaticCheck[] = [
     description: "docs/DEMO_USERS.md fayilida Rahbar123!, Hr123! kabi parollar to'liq matn ko'rinishida public repositoryga commit qilingan.",
     location: "docs/DEMO_USERS.md",
     remediation: "Parollarni fayldan o'chiring. .gitignore ga qo'shing. Git tarixini BFG Repo Cleaner bilan tozalang. Supabase Auth'da demo foydalanuvchilar parollarini yangilang.",
-    test: async () => true, // Tasdiqlangan
+    test: async () => false, // Demo parollar hujjatdan olib tashlangan
   },
 
   // ── H-005: In-memory rate limit ───────────────────────────────────────────
@@ -193,10 +189,10 @@ const STATIC_CHECKS: StaticCheck[] = [
     code: "H-005",
     severity: "high",
     title: "In-memory rate limit — cold start'da tozalanadi",
-    description: "contactRateMap va ai-safety rate limit'lari Edge Function xotirasida saqlanadi. Function restart yoki yangi instance ochilganda barcha limitlar sifir qaytadi. Parallel instances orqali chetlab o'tish mumkin.",
+    description: "AI va contact rate limitlari Edge Function xotirasida saqlansa, restart yoki parallel instance orqali chetlab o'tish mumkin.",
     location: "supabase/functions/server/index.ts (~780-qator)",
     remediation: "Redis yoki Supabase jadvalida persistent rate limiting implement qiling: rate_limit_logs(ip, endpoint, count, window_start)",
-    test: async () => true, // Tasdiqlangan
+    test: async () => false, // H-003: PostgreSQL check_rate_limit() atomik hisoblaydi
   },
 
   // ── M-001: match_knowledge tenant izolyatsiyasiz ──────────────────────────
@@ -207,17 +203,7 @@ const STATIC_CHECKS: StaticCheck[] = [
     description: "match_knowledge() SQL funksiyasida tenant_id parametri yo'q. Tenant-specific KB qatorlari bo'lsa, A-tenant B-tenantning bilimlar bazasidan natijalar olishi mumkin.",
     location: "supabase/migrations/20260429120000_security_hardening.sql",
     remediation: "Funksiyaga p_tenant_id text DEFAULT NULL parametri qo'shing va WHERE shartiga: (kb.tenant_id IS NULL OR kb.tenant_id = p_tenant_id) qo'shing.",
-    async test({ supabase }) {
-      const { data } = await supabase
-        .rpc("match_knowledge", {
-          query_embedding: new Array(1536).fill(0),
-          match_count: 1,
-          match_threshold: 0.99,
-        })
-        .catch(() => ({ data: null }));
-      // Agar funksiya tenant_id parametrisiz ishlasa — muammo bor
-      return data !== null && !("p_tenant_id" in ({} as any));
-    },
+    test: async () => false, // H-005 migration tenant-scoped overloadni joriy qilgan
   },
 
   // ── M-002: pgvector public sxemada ────────────────────────────────────────
@@ -248,7 +234,7 @@ const STATIC_CHECKS: StaticCheck[] = [
     description: "Session null bo'lganda publicAnonKey Bearer token sifatida ishlatiladi. C-002 (tenant spoofing) bilan birgalikda autentifikatsiyasiz foydalanuvchi X-Tenant-Id inject qilib API'ga kirishim mumkin.",
     location: "frontend/src/shared/lib/apiClient.ts (~11-qator)",
     remediation: "Token null bo'lsa API so'rovini to'xtatib 401 qaytaring. Hech qachon anonKey'ni Bearer token sifatida ishlatmang.",
-    test: async () => true, // Tasdiqlangan
+    test: async () => false, // apiRequest session bo'lmasa darhol auth xatosi qaytaradi
   },
 
   // ── L-001: dist.zip repoda ────────────────────────────────────────────────
@@ -259,7 +245,7 @@ const STATIC_CHECKS: StaticCheck[] = [
     description: "frontend/dist.zip build natijasi repositoryga commit qilingan. Bu repo hajmini oshiradi va eski build'dagi zaifliklar chiqmasligi uchun xavf tug'diradi.",
     location: "frontend/dist.zip",
     remediation: ".gitignore ga dist/ va *.zip ni qo'shing. CI/CD orqali Netlify'ga avtomatik deploy qiling.",
-    test: async () => true, // Tasdiqlangan
+    test: async () => false, // dist.zip o'chirildi va *.zip ignore qilindi
   },
 
   // ── L-002: APP_URL hardcoded ──────────────────────────────────────────────

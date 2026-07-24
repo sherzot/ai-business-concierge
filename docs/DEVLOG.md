@@ -4,6 +4,27 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-07-24 — Netlify + Supabase security hardening
+
+### Bajarildi
+- Netlify CSP'dan `script-src 'unsafe-inline'` olib tashlandi; print oynasidagi inline script xavfsiz JS callback bilan almashtirildi
+- HSTS, Permissions Policy, COOP/CORP, MIME/frame/referrer himoyasi va asset/PWA cache siyosatlari kuchaytirildi
+- Authenticated API javoblarini PWA cache'iga yozish to'xtatildi; preview buildlar `noindex` va `no-store` header oladi
+- Egalik qilinmaydigan `aibizconcierge.uz` runtime CORS/CSP/canonical va email fallbacklaridan olib tashlandi
+- AI rate limit Edge xotirasidan atomik PostgreSQL `check_rate_limit()` ga ko'chirildi; IP/user kalitlari SHA-256 bilan xeshlanadi
+- Internal `SECURITY DEFINER` RPC va trigger helperlar `anon`/`authenticated` uchun yopildi, `search_path` qotirildi
+- Production migration qo'llandi va `bright-api` v72 deploy qilindi; health smoke-test `200`
+- React Router, Vite, Vitest va transitive dependencylar yangilandi; to'liq `npm audit` — 0 zaiflik
+- CI ga type-check, 96 unit test, production audit, build va bundle/security gate qo'shildi
+- Eski `frontend/dist.zip` o'chirildi va `*.zip` ignore qilindi
+
+### Platformada qo'lda qolgan ishlar
+- Netlify Personal rejasida non-production Team Login API `422` qaytardi
+- Supabase'da Leaked Password Protection'ni Dashboard orqali yoqish kerak
+- `vector` extensionini `public` sxemadan ko'chirish alohida, ehtiyotkor migratsiya talab qiladi
+
+---
+
 ## 2026-07-24 — Loyihani davom ettirish auditi va testlar tiklandi
 
 ### Kontekst

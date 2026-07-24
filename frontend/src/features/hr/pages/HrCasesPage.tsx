@@ -75,7 +75,7 @@ export function HrCasesPage({ tenant }: { tenant: { id: string; name: string } }
           </p>
         </div>
         {loading && <div className="p-6 text-sm text-slate-400">{translate("common.loading")}</div>}
-        {!loading && error && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
+        {!loading && Boolean(error) && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
         {!loading && !error && <HrCaseList cases={cases} selectedId={selected?.id} onSelect={setSelected} />}
       </div>
 

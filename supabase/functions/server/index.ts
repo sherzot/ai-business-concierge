@@ -69,7 +69,6 @@ app.use(
   "/*",
   cors({
     origin: [
-      "https://aibizconcierge.uz",
       "https://ai-business-concierge1.netlify.app",
       "http://localhost:5173",
       "http://localhost:4173",
@@ -94,9 +93,11 @@ app.use("*", async (c, next) => {
   c.header("X-Content-Type-Options", "nosniff");
   c.header("X-Frame-Options", "DENY");
   c.header("Referrer-Policy", "strict-origin-when-cross-origin");
-  c.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  c.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   c.header("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'");
-  c.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  c.header("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=()");
+  c.header("X-Permitted-Cross-Domain-Policies", "none");
+  c.header("Cache-Control", "private, no-store");
 });
 
 type TenantContext = {
@@ -122,8 +123,7 @@ const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") ?? "gpt-4o-mini";
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
 const RESEND_WEBHOOK_SECRET = Deno.env.get("RESEND_WEBHOOK_SECRET") ?? "";
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
-const RESEND_FROM_EMAIL =
-  Deno.env.get("RESEND_FROM_EMAIL") ?? "noreply@aibizconcierge.uz";
+const RESEND_FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") ?? "";
 const APP_URL =
   Deno.env.get("APP_URL") ?? "https://ai-business-concierge1.netlify.app";
 const ADMIN_NOTIFY_EMAIL = Deno.env.get("ADMIN_NOTIFY_EMAIL") ?? "";
@@ -867,13 +867,24 @@ const ROLE_ACCESS: Record<string, string[]> = {
 // ─── DB-based rate limit: contact form ────────────────────────────────────────
 const CONTACT_LIMIT = 3;
 const CONTACT_WINDOW_MS = 60 * 60 * 1000; // 1 soat
+const AI_LIMIT = 10;
+const AI_WINDOW_MS = 60 * 1000; // 1 daqiqa
+
+async function hashRateLimitKey(scope: string, value: string): Promise<string> {
+  const bytes = new TextEncoder().encode(`${scope}:${value}`);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  const hash = Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+  return `${scope}:${hash}`;
+}
 
 async function checkContactRateLimit(ip: string): Promise<boolean> {
   const windowStart = new Date(
     Math.floor(Date.now() / CONTACT_WINDOW_MS) * CONTACT_WINDOW_MS,
   ).toISOString();
   const { data, error } = await supabase.rpc("check_rate_limit", {
-    p_key: `contact:${ip}`,
+    p_key: await hashRateLimitKey("contact", ip),
     p_window_start: windowStart,
     p_limit: CONTACT_LIMIT,
   });
@@ -885,15 +896,34 @@ async function checkContactRateLimit(ip: string): Promise<boolean> {
   return data === true;
 }
 
+async function checkAiRateLimit(
+  tenantId: string,
+  userId: string,
+): Promise<"allowed" | "limited" | "unavailable"> {
+  const windowStart = new Date(
+    Math.floor(Date.now() / AI_WINDOW_MS) * AI_WINDOW_MS,
+  ).toISOString();
+  const { data, error } = await supabase.rpc("check_rate_limit", {
+    p_key: await hashRateLimitKey("ai", `${tenantId}:${userId}`),
+    p_window_start: windowStart,
+    p_limit: AI_LIMIT,
+  });
+  if (error) {
+    console.error("[rate-limit] AI DB check failed:", error.message);
+    return "unavailable";
+  }
+  return data === true ? "allowed" : "limited";
+}
+
 // ─── Email helpers ────────────────────────────────────────────────────────────
 async function sendCompanyInviteEmail(
   to: string,
   name: string,
   token: string,
 ): Promise<void> {
-  if (!RESEND_API_KEY) {
+  if (!RESEND_API_KEY || !RESEND_FROM_EMAIL) {
     console.warn(
-      "[invite] RESEND_API_KEY yo'q, email yuborilmadi. Link:",
+      "[invite] RESEND_API_KEY yoki RESEND_FROM_EMAIL yo'q, email yuborilmadi. Link:",
       `${APP_URL}/register?token=${token}`,
     );
     return;
@@ -942,8 +972,10 @@ async function sendResendEmail(
   html: string,
   tag: string,
 ): Promise<void> {
-  if (!RESEND_API_KEY) {
-    console.warn(`[${tag}] RESEND_API_KEY yo'q, email yuborilmadi.`);
+  if (!RESEND_API_KEY || !RESEND_FROM_EMAIL) {
+    console.warn(
+      `[${tag}] RESEND_API_KEY yoki RESEND_FROM_EMAIL yo'q, email yuborilmadi.`,
+    );
     return;
   }
   try {
@@ -975,7 +1007,7 @@ function emailLayout(content: string): string {
   </div>
   ${content}
   <div style="margin-top:32px;padding-top:20px;border-top:1px solid #1e293b;font-size:12px;color:#475569">
-    © 2026 AI Business Concierge · <a href="${APP_URL}" style="color:#6366f1;text-decoration:none">aibizconcierge.uz</a>
+    © 2026 AI Business Concierge · <a href="${APP_URL}" style="color:#6366f1;text-decoration:none">Web ilova</a>
   </div>
 </div>`;
 }
@@ -997,7 +1029,7 @@ async function sendCompanyRegisteredEmail(
       <p style="color:#cbd5e1;margin:0;font-size:14px">⏳ <strong>Holat:</strong> Admin ko'rib chiqmoqda</p>
       <p style="color:#64748b;margin:8px 0 0;font-size:13px">Odatda 1–2 ish kuni ichida javob beramiz. Tasdiqlangach email orqali xabardor qilinasiz.</p>
     </div>
-    <p style="color:#64748b;font-size:13px">Savol bo'lsa: <a href="mailto:support@aibizconcierge.uz" style="color:#6366f1">support@aibizconcierge.uz</a></p>
+    <p style="color:#64748b;font-size:13px">Savol bo'lsa, ilovadagi aloqa sahifasi orqali yozing.</p>
   `);
   await sendResendEmail(
     to,
@@ -1019,7 +1051,6 @@ async function sendCompanyRejectedEmail(
     ${reason ? `<div style="background:#1e293b;border-radius:12px;padding:16px;margin:16px 0"><p style="color:#94a3b8;margin:0;font-size:14px"><strong>Sabab:</strong> ${reason}</p></div>` : ""}
     <p style="color:#94a3b8;line-height:1.6">Agar savol yoki murojaat bo'lsa, biz bilan bog'laning:</p>
     ${emailBtn(`${APP_URL}/contact`, "Qayta murojaat qilish")}
-    <p style="color:#64748b;font-size:13px">Yoki: <a href="mailto:support@aibizconcierge.uz" style="color:#6366f1">support@aibizconcierge.uz</a></p>
   `);
   await sendResendEmail(
     to,
@@ -3200,6 +3231,10 @@ const registerRoutes = (prefix: string) => {
   app.post(`${prefix}/ai/chat`, async (c) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
+    const userId = (ctx as any).userId as string | undefined;
+    if (!userId) {
+      return failure(c, 401, "AUTH_REQUIRED", "Tizimga kirish kerak.");
+    }
 
     const body = await c.req.json().catch(() => ({}));
     if (body.system_prompt !== undefined) {
@@ -3208,6 +3243,25 @@ const registerRoutes = (prefix: string) => {
     const { message, context, locale: reqLocale } = body;
     if (!message || typeof message !== "string") {
       return failure(c, 422, "VALIDATION_ERROR", "message majburiy.");
+    }
+
+    // ── Persistent per-user rate limit (barcha Edge instance'lar uchun) ──────
+    const aiRateLimit = await checkAiRateLimit((ctx as any).tenantId, userId);
+    if (aiRateLimit === "limited") {
+      return failure(
+        c,
+        429,
+        "RATE_LIMITED",
+        `Bir daqiqada ${AI_LIMIT} ta xabardan ko'p yuborib bo'lmaydi. Biroz kuting.`,
+      );
+    }
+    if (aiRateLimit === "unavailable") {
+      return failure(
+        c,
+        503,
+        "RATE_LIMIT_UNAVAILABLE",
+        "Xavfsizlik tekshiruvi vaqtincha ishlamayapti. Keyinroq urinib ko'ring.",
+      );
     }
 
     // ── Kvota tekshiruvi (tarif limiti) ──────────────────────────────────────
@@ -3220,13 +3274,12 @@ const registerRoutes = (prefix: string) => {
     if (!usageGate.ok) return c.json(usageGate.body, 429);
 
     // ── AI Safety: injection himoya + sanitizatsiya + rate limit ─────────────
-    const safety = checkAiSafety(message, (ctx as any).userId ?? null);
+    const safety = checkAiSafety(message);
     if (!safety.safe) {
       const isRu = (reqLocale ?? "uz") === "ru";
       const errMsg =
         isRu && safety.messageRu ? safety.messageRu : safety.message;
-      const httpStatus = safety.code === "RATE_LIMITED" ? 429 : 422;
-      return failure(c, httpStatus, safety.code, errMsg);
+      return failure(c, 422, safety.code, errMsg);
     }
     // Sanitizatsiya qilingan va xavfsiz xabar ishlatiladi
     const safeMessage = safety.sanitized;

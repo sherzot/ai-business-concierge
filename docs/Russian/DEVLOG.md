@@ -4,6 +4,27 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-07-24 — Усиление безопасности Netlify + Supabase
+
+### Сделано
+- Из CSP Netlify удалён `script-src 'unsafe-inline'`; inline script окна печати заменён безопасным JS callback
+- Усилены HSTS, Permissions Policy, COOP/CORP, защита MIME/frame/referrer и cache-правила assets/PWA
+- Authenticated API responses больше не кэшируются PWA; preview build получает `noindex` и `no-store`
+- Не принадлежащий проекту домен `aibizconcierge.uz` удалён из runtime CORS/CSP/canonical и email fallback
+- AI rate limit перенесён из памяти Edge в атомарный PostgreSQL `check_rate_limit()`; IP/user keys хешируются SHA-256
+- Internal `SECURITY DEFINER` RPC и trigger helpers закрыты для `anon`/`authenticated`, `search_path` зафиксирован
+- Production migration применена, `bright-api` v72 задеплоен; health smoke-test вернул `200`
+- Обновлены React Router, Vite, Vitest и transitive dependencies; полный `npm audit` — 0 уязвимостей
+- В CI добавлены type-check, 96 unit tests, production audit, build и bundle/security gate
+- Старый `frontend/dist.zip` удалён, будущие `*.zip` добавлены в ignore
+
+### Оставшиеся ручные настройки платформ
+- Non-production Team Login вернул `422` на Netlify Personal
+- Supabase Leaked Password Protection нужно включить через Dashboard
+- Перенос extension `vector` из `public` требует отдельной осторожной migration
+
+---
+
 ## 2026-07-24 — Аудит возобновления проекта и восстановление тестов
 
 ### Контекст

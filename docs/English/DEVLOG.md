@@ -4,6 +4,27 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-07-24 — Netlify + Supabase security hardening
+
+### Done
+- Removed `script-src 'unsafe-inline'` from Netlify CSP and replaced the print popup's inline script with a safe JS callback
+- Strengthened HSTS, Permissions Policy, COOP/CORP, MIME/frame/referrer protection, and asset/PWA cache rules
+- Stopped caching authenticated API responses in the PWA; preview builds now emit `noindex` and `no-store`
+- Removed the unowned `aibizconcierge.uz` domain from runtime CORS/CSP/canonical and email fallbacks
+- Moved AI rate limiting from Edge memory to atomic PostgreSQL `check_rate_limit()`; IP/user keys are SHA-256 hashed
+- Closed internal `SECURITY DEFINER` RPCs and trigger helpers to `anon`/`authenticated`, and fixed their `search_path`
+- Applied the production migration and deployed `bright-api` v72; health smoke test returned `200`
+- Updated React Router, Vite, Vitest, and transitive dependencies; full `npm audit` reports 0 vulnerabilities
+- Added type-check, 96 unit tests, production audit, build, and bundle/security checks to CI
+- Removed stale `frontend/dist.zip` and ignored future `*.zip` artifacts
+
+### Remaining manual platform settings
+- Non-production Team Login returned `422` on the Netlify Personal plan
+- Supabase Leaked Password Protection must be enabled in the Dashboard
+- Moving the `vector` extension out of `public` requires a separate careful migration
+
+---
+
 ## 2026-07-24 — Project resumption audit and test suite restored
 
 ### Context

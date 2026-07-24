@@ -1,8 +1,27 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+
+function netlifyPreviewHeaders(): Plugin {
+  return {
+    name: 'netlify-preview-security-headers',
+    generateBundle() {
+      const context = process.env.CONTEXT
+      if (context !== 'deploy-preview' && context !== 'branch-deploy') return
+
+      this.emitFile({
+        type: 'asset',
+        fileName: '_headers',
+        source: `/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store
+`,
+      })
+    },
+  }
+}
 
 export default defineConfig({
   plugins: [
@@ -39,22 +58,9 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
-        runtimeCaching: [
-          {
-            // Cache API calls for 5 minutes (stale-while-revalidate)
-            urlPattern: /\/make-server-[^/]+\/v1\//,
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 5 * 60,
-              },
-            },
-          },
-        ],
       },
     }),
+    netlifyPreviewHeaders(),
   ],
   resolve: {
     alias: {

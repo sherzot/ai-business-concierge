@@ -5,6 +5,8 @@
 
 [build.environment]
   NODE_VERSION = "22"
+  SECRETS_SCAN_ENABLED = "true"
+  SECRETS_SCAN_SMART_DETECTION_ENABLED = "true"
 
 [[redirects]]
   from = "/*"
@@ -15,9 +17,37 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Content-Type-Options    = "nosniff"
-    X-Frame-Options           = "DENY"
-    Referrer-Policy           = "strict-origin-when-cross-origin"
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
-    Permissions-Policy        = "camera=(), microphone=(), geolocation=()"
-    Content-Security-Policy   = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://aibizconcierge.uz; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    X-Content-Type-Options            = "nosniff"
+    X-Frame-Options                   = "DENY"
+    Referrer-Policy                   = "strict-origin-when-cross-origin"
+    Strict-Transport-Security         = "max-age=31536000; includeSubDomains"
+    Permissions-Policy                = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    Cross-Origin-Opener-Policy        = "same-origin-allow-popups"
+    Cross-Origin-Resource-Policy      = "same-origin"
+    X-Permitted-Cross-Domain-Policies = "none"
+    Content-Security-Policy           = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://ufhepwdkjqptjvxrmpjn.supabase.co wss://ufhepwdkjqptjvxrmpjn.supabase.co; font-src 'self' data:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/registerSW.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

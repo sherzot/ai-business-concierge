@@ -66,7 +66,7 @@ export function IntegrationsPage({ tenant }: { tenant: { id: string; name: strin
         </div>
         <div className="flex-1 overflow-y-auto">
           {loading && <div className="p-6 text-sm text-slate-400">{translate("common.loading")}</div>}
-          {!loading && error && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
+          {!loading && Boolean(error) && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
           {!loading && !error && (
             <IntegrationList integrations={integrations} selectedId={selected?.id} onSelect={setSelected} />
           )}

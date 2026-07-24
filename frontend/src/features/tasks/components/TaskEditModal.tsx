@@ -18,22 +18,12 @@ import {
 } from "../../../shared/ui/select";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { updateTask, createTask } from "../api/tasksApi";
-
-type TaskStatus = "todo" | "in_progress" | "review" | "done";
-type TaskPriority = "high" | "medium" | "low";
-
-type Task = {
-  id: string;
-  title: string;
-  description?: string | null;
-  status: TaskStatus;
-  priority: TaskPriority;
-  assignee?: { id?: string; name: string };
-  dueDate?: string;
-  tags: string[];
-};
-
-type Member = { id: string; name: string };
+import type {
+  Member,
+  Task,
+  TaskPriority,
+  TaskStatus,
+} from "../types";
 
 const UNSET_ASSIGNEE = "__none__";
 

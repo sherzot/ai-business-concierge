@@ -4,6 +4,27 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-07-24 — Netlify + Supabase セキュリティ強化
+
+### 実施内容
+- Netlify CSPから`script-src 'unsafe-inline'`を削除し、印刷popupのinline scriptを安全なJS callbackへ置換
+- HSTS、Permissions Policy、COOP/CORP、MIME/frame/referrer保護、asset/PWA cacheルールを強化
+- Authenticated API responseのPWA cacheを停止し、preview buildに`noindex`と`no-store`を追加
+- 所有していない`aibizconcierge.uz`をruntime CORS/CSP/canonicalおよびemail fallbackから削除
+- AI rate limitをEdge memoryからatomic PostgreSQL `check_rate_limit()`へ移行し、IP/user keyをSHA-256でhash化
+- Internal `SECURITY DEFINER` RPCとtrigger helperを`anon`/`authenticated`から閉じ、`search_path`を固定
+- Production migrationを適用し、`bright-api` v72をdeploy。health smoke-testは`200`
+- React Router、Vite、Vitest、transitive dependenciesを更新し、完全な`npm audit`は0 vulnerabilities
+- CIにtype-check、96 unit tests、production audit、build、bundle/security gateを追加
+- 古い`frontend/dist.zip`を削除し、今後の`*.zip`をignore
+
+### 手動で残るplatform設定
+- Netlify Personal planではnon-production Team Login APIが`422`を返した
+- Supabase DashboardでLeaked Password Protectionを有効化する必要がある
+- `vector` extensionを`public`から移動するには別途慎重なmigrationが必要
+
+---
+
 ## 2026-07-24 — プロジェクト再開監査とテスト復旧
 
 ### コンテキスト

@@ -304,7 +304,7 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
                               {tab === "active" && (
                                 <>
                                   {/* password_pending: taklif kutilmoqda */}
-                                  {emp.status === "password_pending" && (
+                                  {emp.account_status === "password_pending" && (
                                     <button
                                       disabled={busyId === emp.id}
                                       onClick={async () => {
@@ -321,7 +321,7 @@ export function EmployeesPage({ tenant, onAddEmployee, onViewEmployee }: Props) 
                                     </button>
                                   )}
                                   {/* password_set: xodim parol qo'ydi, HR tasdiqlash kerak */}
-                                  {emp.status === "password_set" && (
+                                  {emp.account_status === "password_set" && (
                                     <button
                                       disabled={busyId === emp.id}
                                       onClick={async () => {

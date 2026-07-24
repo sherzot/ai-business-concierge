@@ -61,7 +61,7 @@ export function InboxPage({ tenant }: { tenant: { id: string; name: string } }) 
 
         <div className="flex-1 overflow-y-auto">
           {loading && <div className="p-6 text-sm text-slate-400">{translate("common.loading")}</div>}
-          {!loading && error && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
+          {!loading && Boolean(error) && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
           {!loading && !error && filteredItems.length === 0 && (
             <div className="p-6 text-sm text-slate-400">{translate("inbox.empty")}</div>
           )}

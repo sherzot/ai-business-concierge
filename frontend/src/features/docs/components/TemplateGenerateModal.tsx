@@ -56,6 +56,7 @@ export function TemplateGenerateModal({
   if (!template) return null;
 
   async function handleGenerate() {
+    if (!template) return;
     const missing = template.fields.filter(
       (field) => field.required && !values[field.name]?.trim(),
     );
