@@ -23,6 +23,7 @@ import {
   type DocumentTemplate,
   type GenerateDocumentResult,
 } from "../api/docsApi";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 type Props = {
   tenantId: string;
@@ -39,6 +40,7 @@ export function TemplateGenerateModal({
   onClose,
   onGenerated,
 }: Props) {
+  const { translate } = useI18n();
   const [values, setValues] = React.useState<Record<string, string>>({});
   const [format, setFormat] = React.useState<"pdf" | "docx">("docx");
   const [saving, setSaving] = React.useState(false);
@@ -59,9 +61,9 @@ export function TemplateGenerateModal({
     );
     if (missing.length) {
       setError(
-        `Majburiy maydonlarni to'ldiring: ${missing
-          .map((field) => field.label)
-          .join(", ")}`,
+        translate("docs.templates.requiredFields", {
+          fields: missing.map((field) => field.label).join(", "),
+        }),
       );
       return;
     }
@@ -80,7 +82,7 @@ export function TemplateGenerateModal({
       setError(
         err instanceof Error
           ? err.message
-          : "Hujjatni generatsiya qilib bo'lmadi.",
+          : translate("docs.templates.generateError"),
       );
     } finally {
       setSaving(false);
@@ -93,14 +95,15 @@ export function TemplateGenerateModal({
         <DialogHeader>
           <DialogTitle>{template.title}</DialogTitle>
           <DialogDescription>
-            {template.description || "Shablon maydonlarini to'ldiring."}
+            {template.description || translate("docs.templates.defaultDescription")}
           </DialogDescription>
         </DialogHeader>
 
         {template.applied_locale !== template.requested_locale && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-            Bu shablonning ruscha matni hali tayyor emas; o'zbekcha qoralama
-            yaratiladi.
+            {translate("docs.templates.fallbackWarning", {
+              locale: template.applied_locale.toUpperCase(),
+            })}
           </div>
         )}
 
@@ -147,7 +150,7 @@ export function TemplateGenerateModal({
           })}
 
           <div className="grid gap-2 sm:col-span-2">
-            <Label>Kelajakdagi fayl formati</Label>
+            <Label>{translate("docs.templates.formatLabel")}</Label>
             <Select
               value={format}
               onValueChange={(value) => setFormat(value as "pdf" | "docx")}
@@ -160,9 +163,8 @@ export function TemplateGenerateModal({
                 <SelectItem value="pdf">PDF</SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-xs text-slate-500">
-              Hozir matnli qoralama yaratiladi. Binary PDF/DOCX va Storage
-              keyingi Phase 2 slice'da qo'shiladi.
+            <p className="text-xs text-muted-foreground">
+              {translate("docs.templates.formatHint")}
             </p>
           </div>
         </div>
@@ -171,10 +173,12 @@ export function TemplateGenerateModal({
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={saving}>
-            Bekor qilish
+            {translate("docs.templates.cancel")}
           </Button>
           <Button onClick={handleGenerate} disabled={saving}>
-            {saving ? "Yaratilmoqda..." : "Qoralama yaratish"}
+            {saving
+              ? translate("docs.templates.creating")
+              : translate("docs.templates.createDraft")}
           </Button>
         </DialogFooter>
       </DialogContent>

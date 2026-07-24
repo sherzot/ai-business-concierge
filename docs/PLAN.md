@@ -727,6 +727,7 @@ Yakshanba:   Dam olish + Feedback o'qish
 
 | Sana | Versiya | O'zgarish |
 |---|---|---|
+| 2026-07-24 | v3.2 | 15 ta hujjat shabloni 4 tilda yakunlandi; theme kontrasti va umumiy locale qatlami tuzatildi. |
 | 2026-07-24 | v3.1 | Phase 1.5 yakuni va Phase 2 starti tasdiqlandi; backlog kod va DEVLOG bilan sinxronlandi. |
 | 2026-05-06 | v3.0 | Phase 1.5 qo'shildi (Company Auth & Management — DARHOL). Rol arxitekturasi: super_admin/sub_admin/company_admin. B-018..B-030 backlog. Phase 4 Admin AI kengaytirildi. |
 | 2026-04-30 | v2.1 | 17 strategik talab phase'larga taqsimlandi (B-001..B-017) |

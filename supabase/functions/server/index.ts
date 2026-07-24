@@ -14,6 +14,8 @@ import riskScanRoutes from "./routes/risk-scan.ts";
 import { guardUsage, recordUsage } from "./services/usage-tracking.ts";
 import {
   DocumentValidationError,
+  documentMessage,
+  isDocumentLocale,
   localizeTemplate,
   renderDocumentTemplate,
   type DocumentFormat,
@@ -3542,8 +3544,10 @@ const registerRoutes = (prefix: string) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
 
-    const locale: DocumentLocale =
-      c.req.query("locale") === "ru" ? "ru" : "uz";
+    const requestedLocale = c.req.query("locale");
+    const locale: DocumentLocale = isDocumentLocale(requestedLocale)
+      ? requestedLocale
+      : "uz";
     const category = c.req.query("category")?.trim();
     const allowedCategories = ["shartnoma", "ariza", "buyruq", "boshqa"];
 
@@ -3552,14 +3556,14 @@ const registerRoutes = (prefix: string) => {
         c,
         422,
         "VALIDATION_ERROR",
-        "category noto'g'ri.",
+        documentMessage(locale, "invalidCategory"),
       );
     }
 
     let query = supabase
       .from("doc_templates")
       .select(
-        "id, slug, category, title_uz, title_ru, description_uz, description_ru, fields, template_uz, template_ru",
+        "id, slug, category, title_uz, title_ru, title_en, title_ja, description_uz, description_ru, description_en, description_ja, fields, template_uz, template_ru, template_en, template_ja",
       )
       .eq("is_active", true)
       .order("category", { ascending: true })
@@ -3574,7 +3578,7 @@ const registerRoutes = (prefix: string) => {
         c,
         500,
         "DB_ERROR",
-        "Hujjat shablonlarini yuklab bo'lmadi.",
+        documentMessage(locale, "loadTemplates"),
         { details: error.message },
       );
     }
@@ -3596,7 +3600,9 @@ const registerRoutes = (prefix: string) => {
       typeof body?.template_id === "string" ? body.template_id.trim() : "";
     const templateSlug =
       typeof body?.template_slug === "string" ? body.template_slug.trim() : "";
-    const locale: DocumentLocale = body?.locale === "ru" ? "ru" : "uz";
+    const locale: DocumentLocale = isDocumentLocale(body?.locale)
+      ? body.locale
+      : "uz";
     const format: DocumentFormat =
       body?.format === "pdf" ? "pdf" : "docx";
 
@@ -3605,14 +3611,24 @@ const registerRoutes = (prefix: string) => {
         c,
         422,
         "VALIDATION_ERROR",
-        "template_id yoki template_slug majburiy.",
+        documentMessage(locale, "templateRequired"),
       );
     }
-    if (body?.locale && !["uz", "ru"].includes(body.locale)) {
-      return failure(c, 422, "VALIDATION_ERROR", "locale uz yoki ru bo'lishi kerak.");
+    if (body?.locale && !isDocumentLocale(body.locale)) {
+      return failure(
+        c,
+        422,
+        "VALIDATION_ERROR",
+        documentMessage(locale, "invalidLocale"),
+      );
     }
     if (body?.format && !["pdf", "docx"].includes(body.format)) {
-      return failure(c, 422, "VALIDATION_ERROR", "format pdf yoki docx bo'lishi kerak.");
+      return failure(
+        c,
+        422,
+        "VALIDATION_ERROR",
+        documentMessage(locale, "invalidFormat"),
+      );
     }
 
     let templateQuery = supabase
@@ -3627,7 +3643,12 @@ const registerRoutes = (prefix: string) => {
       await templateQuery.maybeSingle();
     if (templateError || !templateData) {
       if (templateError) console.error("Doc template fetch error", templateError);
-      return failure(c, 404, "NOT_FOUND", "Hujjat shabloni topilmadi.");
+      return failure(
+        c,
+        404,
+        "NOT_FOUND",
+        documentMessage(locale, "templateNotFound"),
+      );
     }
 
     const usageGate = await guardUsage({

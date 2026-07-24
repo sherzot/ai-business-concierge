@@ -27,6 +27,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { listEmployees, type Employee } from "../../features/hr/api/employeesApi";
+import { useI18n } from "../../app/providers/I18nProvider";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -74,25 +75,21 @@ function highlight(text: string, query: string): React.ReactNode {
 
 // ── Static page items ──────────────────────────────────────────────────────────
 
-const PAGE_ITEMS: PaletteItem[] = [
-  { id: "page-dashboard",   kind: "page", label: "Dashboard",     icon: <LayoutDashboard size={16} />, module: "dashboard" },
-  { id: "page-inbox",       kind: "page", label: "Inbox",         icon: <Inbox size={16} />,           module: "inbox" },
-  { id: "page-tasks",       kind: "page", label: "Tasks",         icon: <CheckSquare size={16} />,     module: "tasks" },
-  { id: "page-docs",        kind: "page", label: "Documents",     icon: <FileText size={16} />,        module: "docs" },
-  { id: "page-employees",   kind: "page", label: "Employees",     icon: <Users size={16} />,           module: "hr" },
-  { id: "page-surveys",     kind: "page", label: "HR Surveys",    icon: <ClipboardList size={16} />,   module: "hr-surveys" },
-  { id: "page-hr-cases",    kind: "page", label: "HR Cases",      icon: <Briefcase size={16} />,       module: "hr-cases" },
-  { id: "page-candidates",  kind: "page", label: "Candidates",    icon: <UserPlus size={16} />,        module: "hr-candidates" },
-  { id: "page-reports",    kind: "page", label: "Reports",      icon: <BarChart3 size={16} />,       module: "reports" },
-  { id: "page-analytics",  kind: "page", label: "Analytics",    icon: <BarChart3 size={16} />,       module: "analytics" },
-  { id: "page-health",      kind: "page", label: "System Health", icon: <HeartPulse size={16} />,      module: "health" },
-  { id: "page-integrations",kind: "page", label: "Integrations",  icon: <Plug size={16} />,            module: "integrations" },
-  { id: "page-settings",    kind: "page", label: "Settings",      icon: <Settings size={16} />,        module: "settings" },
-  { id: "page-notifications",kind:"page", label: "Notifications", icon: <Bell size={16} />,            module: "notifications" },
-];
-
-const ACTION_ITEMS: PaletteItem[] = [
-  { id: "action-add-employee", kind: "action", label: "Add Employee",  sublabel: "HR → Add", icon: <Plus size={16} />, module: "hr-add-employee" },
+const PAGE_ITEMS: Array<Omit<PaletteItem, "label"> & { labelKey: string }> = [
+  { id: "page-dashboard",   kind: "page", labelKey: "nav.dashboard",     icon: <LayoutDashboard size={16} />, module: "dashboard" },
+  { id: "page-inbox",       kind: "page", labelKey: "nav.inbox",         icon: <Inbox size={16} />,           module: "inbox" },
+  { id: "page-tasks",       kind: "page", labelKey: "nav.tasksTitle",    icon: <CheckSquare size={16} />,     module: "tasks" },
+  { id: "page-docs",        kind: "page", labelKey: "nav.docsTitle",     icon: <FileText size={16} />,        module: "docs" },
+  { id: "page-employees",   kind: "page", labelKey: "nav.hrEmployees",   icon: <Users size={16} />,           module: "hr" },
+  { id: "page-surveys",     kind: "page", labelKey: "nav.hrSurveys",     icon: <ClipboardList size={16} />,   module: "hr-surveys" },
+  { id: "page-hr-cases",    kind: "page", labelKey: "nav.hrIssues",      icon: <Briefcase size={16} />,       module: "hr-cases" },
+  { id: "page-candidates",  kind: "page", labelKey: "nav.hrCandidates",  icon: <UserPlus size={16} />,        module: "hr-candidates" },
+  { id: "page-reports",     kind: "page", labelKey: "nav.reports",       icon: <BarChart3 size={16} />,       module: "reports" },
+  { id: "page-analytics",   kind: "page", labelKey: "analytics.title",   icon: <BarChart3 size={16} />,       module: "analytics" },
+  { id: "page-health",      kind: "page", labelKey: "health.title",      icon: <HeartPulse size={16} />,      module: "health" },
+  { id: "page-integrations",kind: "page", labelKey: "nav.integrations",  icon: <Plug size={16} />,            module: "integrations" },
+  { id: "page-settings",    kind: "page", labelKey: "nav.settings",      icon: <Settings size={16} />,        module: "settings" },
+  { id: "page-notifications",kind:"page", labelKey: "notifications.title", icon: <Bell size={16} />,          module: "notifications" },
 ];
 
 // ── Props ──────────────────────────────────────────────────────────────────────
@@ -114,12 +111,25 @@ export function CommandPalette({
   tenantId,
   canAccess,
 }: CommandPaletteProps) {
+  const { translate } = useI18n();
   const [query, setQuery] = useState("");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loadingEmp, setLoadingEmp] = useState(false);
   const [cursor, setCursor] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const localizedPages: PaletteItem[] = PAGE_ITEMS.map(({ labelKey, ...item }) => ({
+    ...item,
+    label: translate(labelKey),
+  }));
+  const actionItems: PaletteItem[] = [{
+    id: "action-add-employee",
+    kind: "action",
+    label: translate("command.addEmployee"),
+    sublabel: translate("command.addEmployeeSub"),
+    icon: <Plus size={16} />,
+    module: "hr-add-employee",
+  }];
 
   // Load employees once when palette opens (if HR access)
   useEffect(() => {
@@ -139,7 +149,7 @@ export function CommandPalette({
   const employeeItems: PaletteItem[] = employees.map((e) => ({
     id: `emp-${e.id}`,
     kind: "employee",
-    label: e.name ?? e.email ?? "Employee",
+    label: e.name ?? e.email ?? translate("command.employees"),
     sublabel: e.email ?? undefined,
     icon: <User size={16} />,
     module: `employee-detail:${e.id}`,
@@ -147,8 +157,8 @@ export function CommandPalette({
 
   // Combine + filter
   const allItems: PaletteItem[] = [
-    ...PAGE_ITEMS,
-    ...ACTION_ITEMS,
+    ...localizedPages,
+    ...actionItems,
     ...employeeItems,
   ];
 
@@ -283,7 +293,7 @@ export function CommandPalette({
                 ref={inputRef}
                 value={query}
                 onChange={(e) => { setQuery(e.target.value); setCursor(0); }}
-                placeholder="Search pages, employees, actions…"
+                placeholder={translate("command.search")}
                 className="flex-1 bg-transparent outline-none text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600"
               />
               {loadingEmp && <Loader2 size={14} className="animate-spin text-gray-400" />}
@@ -299,22 +309,22 @@ export function CommandPalette({
             >
               {flat.length === 0 ? (
                 <div className="py-8 text-center text-sm text-gray-400 dark:text-gray-600">
-                  No results for "{query}"
+                  {translate("command.noResultsFor", { query })}
                 </div>
               ) : (
                 <>
-                  {renderGroup("Pages", pages, 0)}
-                  {renderGroup("Quick Actions", actions, pages.length)}
-                  {renderGroup("Employees", empItems, pages.length + actions.length)}
+                  {renderGroup(translate("command.pages"), pages, 0)}
+                  {renderGroup(translate("command.quickActions"), actions, pages.length)}
+                  {renderGroup(translate("command.employees"), empItems, pages.length + actions.length)}
                 </>
               )}
             </div>
 
             {/* Footer hint */}
             <div className="flex items-center gap-3 px-4 py-2 border-t border-gray-100 dark:border-gray-800 text-[11px] text-gray-400 dark:text-gray-600">
-              <span><kbd className="font-mono bg-gray-100 dark:bg-gray-800 rounded px-1">↑↓</kbd> navigate</span>
-              <span><kbd className="font-mono bg-gray-100 dark:bg-gray-800 rounded px-1">↵</kbd> open</span>
-              <span><kbd className="font-mono bg-gray-100 dark:bg-gray-800 rounded px-1">ESC</kbd> close</span>
+              <span><kbd className="font-mono bg-gray-100 dark:bg-gray-800 rounded px-1">↑↓</kbd> {translate("common.navigate")}</span>
+              <span><kbd className="font-mono bg-gray-100 dark:bg-gray-800 rounded px-1">↵</kbd> {translate("common.open")}</span>
+              <span><kbd className="font-mono bg-gray-100 dark:bg-gray-800 rounded px-1">ESC</kbd> {translate("common.close")}</span>
             </div>
           </motion.div>
         </motion.div>

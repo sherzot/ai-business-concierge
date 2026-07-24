@@ -1539,3 +1539,14 @@ Bir React state, real-time sinxronizatsiya, sahifa yangilanishsiz ishlaydi.
 | Embedding model | `text-embedding-3-small` (OpenAI) |
 | Rate limit | 5 so'rov/kun (free) |
 | Til fallback (KB) | `ja` → `en` (KB faqat uz/ru/en) |
+
+---
+
+## 2026-07-24 — 4 til va theme yakuniy tuzatishi
+
+- `uz`, `ru`, `en`, `ja` uchun Shablonlar kutubxonasi, tablar, qidiruv, kategoriyalar, modal, validatsiya va format matnlari to'liq locale kontraktiga o'tkazildi.
+- Production bazadagi 15 ta aktiv shablonning sarlavha, tavsif, barcha maydon labeli va hujjat tanasi 4 tilda to'ldirildi (`20260724065619_localize_document_templates_four_languages.sql`).
+- Hujjat API si va OpenAPI locale enumlari 4 tilni qabul qiladi; locale endi frontendda `uz`ga qisqartirilmaydi.
+- `next-themes` yagona theme manbasi qilindi; majburiy light theme olib tashlandi va eski utility ranglari uchun dark-mode kontrast qatlami qo'shildi.
+- Umumiy navigatsiya, bildirishnomalar, sozlamalar, kompaniya profili, analytics, AI chat va command palette mayda matnlari locale tizimiga o'tkazildi.
+- Tekshiruv: frontend build muvaffaqiyatli, 95/95 test o'tdi, backend bundle muvaffaqiyatli; production DB tekshiruvida `15/15` title, body va field locale to'liq.

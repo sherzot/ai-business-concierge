@@ -1251,3 +1251,14 @@ verify_jwt = false
 | Embedding model | `text-embedding-3-small` (OpenAI) |
 | Rate limit | 5 requests/day (free) |
 | Language fallback (KB) | `ja` → `en` (KB only covers uz/ru/en) |
+
+---
+
+## 2026-07-24 — Four-language and theme completion
+
+- The Templates Library, tabs, search, categories, modal, validation, and format labels now use the shared `uz`, `ru`, `en`, `ja` locale contract.
+- All 15 active production templates now have localized titles, descriptions, field labels, and document bodies (`20260724065619_localize_document_templates_four_languages.sql`).
+- The document API and OpenAPI locale enums accept all four locales; the frontend no longer collapses `en` and `ja` to `uz`.
+- `next-themes` is now the single theme source, forced light mode was removed, and a dark-mode compatibility layer keeps legacy utility colors readable.
+- Shared navigation, notifications, settings, company profile, analytics, AI chat, and command palette details were moved into the locale system.
+- Verification: frontend build passed, 95/95 tests passed, backend bundle passed, and production DB checks report `15/15` complete titles, bodies, and field locales.

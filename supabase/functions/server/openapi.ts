@@ -129,8 +129,8 @@ export const OPENAPI_SPEC = {
             type: "array",
             items: { $ref: "#/components/schemas/DocumentTemplateField" },
           },
-          requested_locale: { type: "string", enum: ["uz", "ru"] },
-          applied_locale: { type: "string", enum: ["uz", "ru"] },
+          requested_locale: { type: "string", enum: ["uz", "ru", "en", "ja"] },
+          applied_locale: { type: "string", enum: ["uz", "ru", "en", "ja"] },
         },
       },
       AuditLog: {
@@ -295,7 +295,7 @@ export const OPENAPI_SPEC = {
                   title: { type: "string", maxLength: 200 },
                   locale: {
                     type: "string",
-                    enum: ["uz", "ru"],
+                    enum: ["uz", "ru", "en", "ja"],
                     default: "uz",
                   },
                   format: {

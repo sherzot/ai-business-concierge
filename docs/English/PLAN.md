@@ -371,6 +371,7 @@ POST /v1/invite/set-password              — set password
 
 | Date | Version | Change |
 |---|---|---|
+| 2026-07-24 | v3.2 | Completed 15 document templates in four languages; fixed theme contrast and shared locale coverage. |
 | 2026-07-24 | v3.1 | Confirmed Phase 1.5 completion and Phase 2 start; synchronized backlog with code and DEVLOG. |
 | 2026-05-06 | v3.0 | Phase 1.5 added (Company Auth). B-018..B-030 backlog. |
 | 2026-04-30 | v2.1 | 17 strategic requirements distributed across phases (B-001..B-017) |

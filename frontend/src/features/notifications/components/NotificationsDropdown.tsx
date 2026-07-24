@@ -10,6 +10,8 @@ import {
 import { getNotifications, markNotificationRead, type Notification } from "../api/notificationsApi";
 import { useRealtimeNotifications } from "../hooks/useRealtimeNotifications";
 import { formatDistanceToNow } from "date-fns";
+import { enUS, ja, ru, uz } from "date-fns/locale";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 // Icon per notification type
 const TYPE_ICON: Record<string, string> = {
@@ -26,6 +28,7 @@ type Props = {
 };
 
 export function NotificationsDropdown({ tenantId, userId, onViewAll }: Props) {
+  const { locale, translate } = useI18n();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
 
@@ -64,7 +67,7 @@ export function NotificationsDropdown({ tenantId, userId, onViewAll }: Props) {
       <DropdownMenuTrigger asChild>
         <button
           className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors"
-          aria-label="Bildirishnomalar"
+          aria-label={translate("notifications.title")}
         >
           <Bell size={20} />
           {unreadCount > 0 && (
@@ -82,14 +85,14 @@ export function NotificationsDropdown({ tenantId, userId, onViewAll }: Props) {
       <DropdownMenuContent align="end" className="w-80 p-0 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-          <span className="text-sm font-semibold text-slate-800">Bildirishnomalar</span>
+          <span className="text-sm font-semibold text-foreground">{translate("notifications.title")}</span>
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllRead}
               className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
             >
               <CheckCheck size={13} />
-              Barchasini o&apos;qi
+              {translate("notifications.markAllRead")}
             </button>
           )}
         </div>
@@ -99,7 +102,7 @@ export function NotificationsDropdown({ tenantId, userId, onViewAll }: Props) {
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center px-4 py-8 gap-2 text-slate-400">
               <BellOff size={28} className="opacity-40" />
-              <p className="text-sm text-slate-500">Bildirishnomalar yo&apos;q</p>
+              <p className="text-sm text-muted-foreground">{translate("notifications.empty")}</p>
             </div>
           ) : (
             notifications.map((n) => (
@@ -127,7 +130,10 @@ export function NotificationsDropdown({ tenantId, userId, onViewAll }: Props) {
                     <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{n.message}</p>
                   )}
                   <p className="text-[10px] text-slate-400 mt-1">
-                    {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(n.created_at), {
+                      addSuffix: true,
+                      locale: { uz, ru, en: enUS, ja }[locale],
+                    })}
                   </p>
                 </div>
               </DropdownMenuItem>
@@ -142,7 +148,7 @@ export function NotificationsDropdown({ tenantId, userId, onViewAll }: Props) {
               onClick={() => { setOpen(false); onViewAll(); }}
               className="w-full text-xs text-indigo-600 font-medium hover:bg-indigo-50 rounded-md py-1.5 transition-colors"
             >
-              Barchasini ko&apos;rish
+              {translate("notifications.viewAll")}
             </button>
           </div>
         )}

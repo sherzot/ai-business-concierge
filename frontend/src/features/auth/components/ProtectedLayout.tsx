@@ -60,9 +60,9 @@ export function ProtectedLayout() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center max-w-md p-6">
-          <p className="text-foreground mb-2">Profil topilmadi</p>
+          <p className="text-foreground mb-2">{translate("auth.profileMissing")}</p>
           <p className="text-sm text-muted-foreground">
-            Sizga hali tenant va rol berilmagan. Administrator bilan bog'laning.
+            {translate("auth.profileMissingBody")}
           </p>
         </div>
       </div>
@@ -73,7 +73,7 @@ export function ProtectedLayout() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center max-w-md p-6">
-          <p className="text-foreground">Tenant tanlang</p>
+          <p className="text-foreground">{translate("auth.selectTenant")}</p>
         </div>
       </div>
     );

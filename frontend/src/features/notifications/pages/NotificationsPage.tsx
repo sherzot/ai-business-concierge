@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Bell, Check, CheckCheck, RefreshCw, Filter } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { enUS, ja, ru, uz } from "date-fns/locale";
 import { getNotifications, markNotificationRead, type Notification } from "../api/notificationsApi";
 import { useRealtimeNotifications } from "../hooks/useRealtimeNotifications";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 const TYPE_LABELS: Record<string, string> = {
   hr_employee_confirmed:   "HR",
@@ -27,6 +29,7 @@ type FilterType = "all" | "unread" | "read";
 type Props = { tenantId: string; userId?: string };
 
 export function NotificationsPage({ tenantId, userId }: Props) {
+  const { locale, translate } = useI18n();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>("all");
@@ -78,9 +81,11 @@ export function NotificationsPage({ tenantId, userId }: Props) {
           <Bell size={18} className="text-indigo-600" />
         </div>
         <div className="flex-1">
-          <h2 className="text-lg font-semibold text-slate-800">Bildirishnomalar</h2>
+          <h2 className="text-lg font-semibold text-foreground">{translate("notifications.title")}</h2>
           <p className="text-xs text-slate-400">
-            {unreadCount > 0 ? `${unreadCount} ta o'qilmagan` : "Hammasi o'qilgan"}
+            {unreadCount > 0
+              ? translate("notifications.unreadCount", { count: String(unreadCount) })
+              : translate("notifications.allRead")}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -91,7 +96,7 @@ export function NotificationsPage({ tenantId, userId }: Props) {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50"
             >
               <CheckCheck size={13} />
-              Hammasini o'qi
+              {translate("notifications.markAllRead")}
             </button>
           )}
           <button
@@ -108,7 +113,11 @@ export function NotificationsPage({ tenantId, userId }: Props) {
       <div className="flex items-center gap-2">
         <Filter size={14} className="text-slate-400" />
         {(["all", "unread", "read"] as FilterType[]).map((f) => {
-          const labels = { all: "Barchasi", unread: "O'qilmagan", read: "O'qilgan" };
+          const labelKeys = {
+            all: "notifications.filterAll",
+            unread: "notifications.filterUnread",
+            read: "notifications.filterRead",
+          };
           return (
             <button
               key={f}
@@ -119,7 +128,7 @@ export function NotificationsPage({ tenantId, userId }: Props) {
                   : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
               }`}
             >
-              {labels[f]}
+              {translate(labelKeys[f])}
               {f === "unread" && unreadCount > 0 && (
                 <span className="ml-1.5 bg-white/20 rounded-full px-1">{unreadCount}</span>
               )}
@@ -131,13 +140,17 @@ export function NotificationsPage({ tenantId, userId }: Props) {
       {/* List */}
       {loading ? (
         <div className="flex items-center justify-center py-12 text-slate-400">
-          <RefreshCw size={18} className="animate-spin mr-2" /> Yuklanmoqda...
+          <RefreshCw size={18} className="animate-spin mr-2" /> {translate("common.loading")}
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-xl p-10 text-center">
           <Bell size={32} className="text-slate-200 mx-auto mb-3" />
           <p className="text-sm text-slate-400">
-            {filter === "unread" ? "O'qilmagan bildirishnomalar yo'q" : "Bildirishnomalar yo'q"}
+            {translate(
+              filter === "unread"
+                ? "notifications.noUnread"
+                : "notifications.empty",
+            )}
           </p>
         </div>
       ) : (
@@ -176,7 +189,10 @@ export function NotificationsPage({ tenantId, userId }: Props) {
                     <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{n.message}</p>
                   )}
                   <p className="text-xs text-slate-400 mt-1">
-                    {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(n.created_at), {
+                      addSuffix: true,
+                      locale: { uz, ru, en: enUS, ja }[locale],
+                    })}
                   </p>
                 </div>
               </div>

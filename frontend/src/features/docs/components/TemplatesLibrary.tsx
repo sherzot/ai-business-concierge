@@ -6,29 +6,30 @@ import {
   type GenerateDocumentResult,
 } from "../api/docsApi";
 import { TemplateGenerateModal } from "./TemplateGenerateModal";
+import { useI18n } from "../../../app/providers/I18nProvider";
+import type { Locale } from "../../../app/i18n";
 
 type Props = {
   tenantId: string;
-  locale: "uz" | "ru";
+  locale: Locale;
   onGenerated: (result: GenerateDocumentResult) => void;
 };
 
 const CATEGORIES: Array<{
   value: "all" | DocumentTemplate["category"];
-  label: string;
 }> = [
-  { value: "all", label: "Hammasi" },
-  { value: "shartnoma", label: "Shartnoma" },
-  { value: "ariza", label: "Ariza" },
-  { value: "buyruq", label: "Buyruq" },
-  { value: "boshqa", label: "Boshqa" },
+  { value: "all" },
+  { value: "shartnoma" },
+  { value: "ariza" },
+  { value: "buyruq" },
+  { value: "boshqa" },
 ];
 
-const CATEGORY_LABELS: Record<DocumentTemplate["category"], string> = {
-  shartnoma: "Shartnoma",
-  ariza: "Ariza",
-  buyruq: "Buyruq",
-  boshqa: "Boshqa",
+const CATEGORY_LABEL_KEYS: Record<DocumentTemplate["category"], string> = {
+  shartnoma: "docs.templates.category.shartnoma",
+  ariza: "docs.templates.category.ariza",
+  buyruq: "docs.templates.category.buyruq",
+  boshqa: "docs.templates.category.boshqa",
 };
 
 const CATEGORY_COLORS: Record<DocumentTemplate["category"], string> = {
@@ -50,6 +51,7 @@ export function TemplatesLibrary({
   locale,
   onGenerated,
 }: Props) {
+  const { translate } = useI18n();
   const [templates, setTemplates] = React.useState<DocumentTemplate[]>([]);
   const [category, setCategory] = React.useState<
     "all" | DocumentTemplate["category"]
@@ -69,12 +71,12 @@ export function TemplatesLibrary({
       setError(
         err instanceof Error
           ? err.message
-          : "Shablonlarni yuklab bo'lmadi.",
+          : translate("docs.templates.loadError"),
       );
     } finally {
       setLoading(false);
     }
-  }, [tenantId, locale]);
+  }, [tenantId, locale, translate]);
 
   React.useEffect(() => {
     loadTemplates();
@@ -93,13 +95,12 @@ export function TemplatesLibrary({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start gap-3 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-800">
+      <div className="flex items-start gap-3 rounded-xl border border-primary/30 bg-accent px-4 py-3 text-sm text-accent-foreground">
         <Sparkles size={16} className="mt-0.5 shrink-0" />
         <div>
-          <p className="font-semibold">AI Hujjatchi — Phase 2 beta</p>
-          <p className="mt-0.5 text-xs text-indigo-700">
-            Shablonni tanlab, maydonlarni to'ldiring. Natija “Mening
-            hujjatlarim”ga tahrirlanadigan qoralama sifatida saqlanadi.
+          <p className="font-semibold">{translate("docs.templates.betaTitle")}</p>
+          <p className="mt-0.5 text-xs text-accent-foreground/80">
+            {translate("docs.templates.betaDescription")}
           </p>
         </div>
       </div>
@@ -108,8 +109,8 @@ export function TemplatesLibrary({
         <input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Shablon nomi..."
-          className="min-w-48 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          placeholder={translate("docs.templates.searchPlaceholder")}
+          className="min-w-48 rounded-lg border border-border bg-card px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
         <div className="flex flex-wrap gap-1">
           {CATEGORIES.map((item) => (
@@ -119,10 +120,14 @@ export function TemplatesLibrary({
               className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                 category === item.value
                   ? "border-indigo-600 bg-indigo-600 text-white"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                  : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"
               }`}
             >
-              {item.label}
+              {translate(
+                item.value === "all"
+                  ? "docs.templates.category.all"
+                  : CATEGORY_LABEL_KEYS[item.value],
+              )}
             </button>
           ))}
         </div>
@@ -133,7 +138,7 @@ export function TemplatesLibrary({
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
-              className="h-40 animate-pulse rounded-xl border border-slate-200 bg-white"
+              className="h-40 animate-pulse rounded-xl border border-border bg-card"
             />
           ))}
         </div>
@@ -147,14 +152,14 @@ export function TemplatesLibrary({
             className="mx-auto mt-3 flex items-center gap-1.5 text-xs font-semibold text-rose-700 hover:text-rose-900"
           >
             <RefreshCw size={13} />
-            Qayta urinish
+            {translate("docs.templates.retry")}
           </button>
         </div>
       )}
 
       {!loading && !error && shown.length === 0 && (
-        <div className="py-10 text-center text-sm text-slate-400">
-          Shablon topilmadi
+        <div className="py-10 text-center text-sm text-muted-foreground">
+          {translate("docs.templates.empty")}
         </div>
       )}
 
@@ -163,18 +168,18 @@ export function TemplatesLibrary({
           {shown.map((template) => (
             <article
               key={template.id}
-              className="group rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-indigo-300 hover:shadow-sm"
+              className="group rounded-xl border border-border bg-card p-4 text-card-foreground transition-all hover:border-primary/40 hover:shadow-sm"
             >
               <div className="flex items-start gap-3">
                 <span className="text-2xl leading-none">
                   {CATEGORY_ICONS[template.category]}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-medium leading-snug text-slate-800">
+                  <h3 className="text-sm font-medium leading-snug text-foreground">
                     {template.title}
                   </h3>
                   {template.description && (
-                    <p className="mt-1 line-clamp-2 text-xs text-slate-500">
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
                       {template.description}
                     </p>
                   )}
@@ -182,21 +187,23 @@ export function TemplatesLibrary({
                     <span
                       className={`rounded-full border px-2 py-0.5 text-xs font-medium ${CATEGORY_COLORS[template.category]}`}
                     >
-                      {CATEGORY_LABELS[template.category]}
+                      {translate(CATEGORY_LABEL_KEYS[template.category])}
                     </span>
-                    <span className="flex items-center gap-1 text-xs text-slate-400">
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
                       <FileText size={10} />
-                      {template.fields.length} maydon
+                      {translate("docs.templates.fieldCount", {
+                        count: String(template.fields.length),
+                      })}
                     </span>
                   </div>
                 </div>
               </div>
               <button
                 onClick={() => setSelected(template)}
-                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 transition-colors hover:border-indigo-300 hover:bg-indigo-100"
+                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-primary/30 bg-accent px-3 py-2 text-xs font-semibold text-accent-foreground transition-colors hover:border-primary/50 hover:bg-accent/80"
               >
                 <Sparkles size={12} />
-                Qoralama yaratish
+                {translate("docs.templates.createDraft")}
               </button>
             </article>
           ))}
@@ -204,8 +211,11 @@ export function TemplatesLibrary({
       )}
 
       {!loading && !error && (
-        <p className="text-center text-xs text-slate-400">
-          {shown.length} ta shablon · Jami {templates.length} ta
+        <p className="text-center text-xs text-muted-foreground">
+          {translate("docs.templates.totalCount", {
+            shown: String(shown.length),
+            total: String(templates.length),
+          })}
         </p>
       )}
 

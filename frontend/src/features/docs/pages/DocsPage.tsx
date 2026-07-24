@@ -69,13 +69,13 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
             onClick={() => setGeneratedNotice(null)}
             className="text-xs font-semibold hover:text-emerald-900"
           >
-            Yopish
+            {translate("docs.noticeClose")}
           </button>
         </div>
       )}
 
       {/* Tab switcher */}
-      <div className="flex w-fit rounded-lg border border-slate-200 bg-white p-1">
+      <div className="flex w-fit rounded-lg border border-border bg-card p-1">
         {(["my-docs", "templates"] as DocsTab[]).map((tab) => (
           <button
             key={tab}
@@ -83,10 +83,10 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
               activeTab === tab
                 ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-600 hover:text-slate-900"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            {tab === "my-docs" ? "Mening hujjatlarim" : "Shablonlar kutubxonasi"}
+            {translate(tab === "my-docs" ? "docs.tabs.myDocs" : "docs.tabs.templates")}
           </button>
         ))}
       </div>
@@ -94,37 +94,37 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
       {activeTab === "templates" ? (
         <TemplatesLibrary
           tenantId={tenant.id}
-          locale={locale === "ru" ? "ru" : "uz"}
+          locale={locale}
           onGenerated={(result) => {
             setGeneratedNotice(
-              `"${result.title}" qoralama sifatida saqlandi.`,
+              translate("docs.generatedNotice", { title: result.title }),
             );
             setActiveTab("my-docs");
           }}
         />
       ) : (
-        <div className="flex h-[calc(100vh-12rem)] bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-          <div className="w-full md:w-1/3 border-r border-slate-200 flex flex-col bg-slate-50">
-            <div className="p-4 border-b border-slate-200 bg-white">
+        <div className="flex h-[calc(100vh-12rem)] overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+          <div className="flex w-full flex-col border-r border-border bg-muted md:w-1/3">
+            <div className="border-b border-border bg-card p-4">
               <div className="flex items-center gap-3">
                 <DocSearchBar value={query} onChange={setQuery} onClear={() => setQuery("")} />
                 <Button onClick={() => setCreateOpen(true)} className="shrink-0">
                   {translate("docs.createAction")}
                 </Button>
               </div>
-              <p className="text-xs text-slate-400 mt-2">
+              <p className="mt-2 text-xs text-muted-foreground">
                 {translate("common.tenant")}: {tenant.name}
               </p>
             </div>
             <div className="flex-1 overflow-y-auto">
-              {loading && <div className="p-6 text-sm text-slate-400">{translate("common.loading")}</div>}
+              {loading && <div className="p-6 text-sm text-muted-foreground">{translate("common.loading")}</div>}
               {!loading && error && <ErrorState message={normalizeError(error)} traceId={getTraceIdFromError(error)} />}
               {!loading && !error && (
                 <DocList docs={docs} selectedId={selected?.id} onSelect={setSelected} />
               )}
             </div>
           </div>
-          <div className="hidden md:flex flex-1 flex-col bg-white">
+          <div className="hidden flex-1 flex-col bg-card md:flex">
             <DocDetail
               doc={selected}
               onEdit={() => setEditOpen(true)}

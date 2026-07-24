@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Save, RefreshCw, Building2 } from "lucide-react";
 import { apiRequest } from "../../../shared/lib/apiClient";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 type TenantProfile = {
   id: string; name: string; status: string;
@@ -15,12 +16,7 @@ type TenantProfile = {
 
 type FormData = Omit<TenantProfile, "id" | "status" | "created_at" | "updated_at">;
 
-const LEGAL_FORMS = [
-  { value: "yatt", label: "YaTT (Yakka tartibli tadbirkor)" },
-  { value: "llc",  label: "MChJ (Mas'uliyati cheklangan jamiyat)" },
-  { value: "jsc",  label: "AJ (Aksiyadorlik jamiyati)" },
-  { value: "other",label: "Boshqa" },
-];
+const LEGAL_FORMS = ["yatt", "llc", "jsc", "other"] as const;
 
 const EMP_RANGES = ["1-10", "11-50", "51-200", "200+"];
 
@@ -38,6 +34,7 @@ const inputCls = "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 t
 const selectCls = inputCls + " cursor-pointer";
 
 export function TenantSettingsPage({ tenant }: { tenant: { id: string; name: string } }) {
+  const { locale, translate } = useI18n();
   const [profile, setProfile] = useState<TenantProfile | null>(null);
   const [form, setForm] = useState<FormData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -85,7 +82,7 @@ export function TenantSettingsPage({ tenant }: { tenant: { id: string; name: str
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Saqlashda xatolik");
+      setError(e instanceof Error ? e.message : translate("tenant.saveError"));
     } finally {
       setSaving(false);
     }
@@ -98,7 +95,7 @@ export function TenantSettingsPage({ tenant }: { tenant: { id: string; name: str
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20 text-slate-400">
-        <RefreshCw size={18} className="animate-spin mr-2" /> Yuklanmoqda...
+        <RefreshCw size={18} className="animate-spin mr-2" /> {translate("common.loading")}
       </div>
     );
   }
@@ -106,7 +103,7 @@ export function TenantSettingsPage({ tenant }: { tenant: { id: string; name: str
   if (!form) {
     return (
       <div className="py-10 text-center text-slate-500 text-sm">
-        {error ?? "Profil topilmadi"}
+        {error ?? translate("auth.profileMissing")}
       </div>
     );
   }
@@ -119,11 +116,11 @@ export function TenantSettingsPage({ tenant }: { tenant: { id: string; name: str
           <Building2 size={20} className="text-indigo-600" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-slate-800">Kompaniya profili</h2>
+          <h2 className="text-lg font-semibold text-slate-800">{translate("tenant.profileTitle")}</h2>
           <p className="text-xs text-slate-400">
-            Status: <span className="font-medium text-slate-600">{profile?.status ?? "—"}</span>
+            {translate("tenant.status")}: <span className="font-medium text-slate-600">{profile?.status ?? "—"}</span>
             {profile?.updated_at && (
-              <> · Yangilangan: {new Date(profile.updated_at).toLocaleDateString("uz-UZ")}</>
+              <> · {translate("tenant.updated")}: {new Date(profile.updated_at).toLocaleDateString(locale)}</>
             )}
           </p>
         </div>
@@ -136,60 +133,60 @@ export function TenantSettingsPage({ tenant }: { tenant: { id: string; name: str
       )}
       {success && (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 font-medium">
-          Profil muvaffaqiyatli saqlandi
+          {translate("tenant.saved")}
         </div>
       )}
 
       {/* Asosiy ma'lumotlar */}
       <div className="bg-white border border-slate-200 rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-slate-700 mb-4">Asosiy ma'lumotlar</h3>
+        <h3 className="text-sm font-semibold text-slate-700 mb-4">{translate("tenant.mainInfo")}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Kompaniya nomi *">
-            <input required value={form.name ?? ""} onChange={(e) => set("name", e.target.value)} className={inputCls} placeholder="Masalan: Bahor Savdo MChJ" />
+          <Field label={`${translate("tenant.companyName")} *`}>
+            <input required value={form.name ?? ""} onChange={(e) => set("name", e.target.value)} className={inputCls} placeholder={translate("tenant.companyNamePlaceholder")} />
           </Field>
-          <Field label="Yuridik shakl">
+          <Field label={translate("tenant.legalForm")}>
             <select value={form.legal_form ?? ""} onChange={(e) => set("legal_form", e.target.value)} className={selectCls}>
-              <option value="">Tanlanmagan</option>
-              {LEGAL_FORMS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
+              <option value="">{translate("tenant.notSelected")}</option>
+              {LEGAL_FORMS.map((formName) => <option key={formName} value={formName}>{translate(`tenant.legalForm.${formName}`)}</option>)}
             </select>
           </Field>
-          <Field label="STIR" hint="Soliq to'lovchi identifikatsiya raqami">
+          <Field label="STIR" hint={translate("tenant.taxIdHint")}>
             <input value={form.stir ?? ""} onChange={(e) => set("stir", e.target.value)} className={inputCls} placeholder="123456789" maxLength={9} />
           </Field>
-          <Field label="Xodimlar soni">
+          <Field label={translate("tenant.employeeCount")}>
             <select value={form.employee_count_range ?? ""} onChange={(e) => set("employee_count_range", e.target.value)} className={selectCls}>
-              <option value="">Tanlanmagan</option>
-              {EMP_RANGES.map((r) => <option key={r} value={r}>{r} kishi</option>)}
+              <option value="">{translate("tenant.notSelected")}</option>
+              {EMP_RANGES.map((r) => <option key={r} value={r}>{r} {translate("tenant.people")}</option>)}
             </select>
           </Field>
-          <Field label="Faoliyat turi">
-            <input value={form.activity_type ?? ""} onChange={(e) => set("activity_type", e.target.value)} className={inputCls} placeholder="Masalan: Savdo, Ishlab chiqarish..." />
+          <Field label={translate("tenant.activityType")}>
+            <input value={form.activity_type ?? ""} onChange={(e) => set("activity_type", e.target.value)} className={inputCls} placeholder={translate("tenant.activityPlaceholder")} />
           </Field>
-          <Field label="Ro'yxatdan o'tgan sana">
+          <Field label={translate("tenant.registrationDate")}>
             <input type="date" value={form.reg_date ?? ""} onChange={(e) => set("reg_date", e.target.value)} className={inputCls} />
           </Field>
-          <Field label="Yuridik manzil" >
-            <input value={form.legal_address ?? ""} onChange={(e) => set("legal_address", e.target.value)} className={inputCls} placeholder="Shahar, ko'cha, uy" />
+          <Field label={translate("tenant.legalAddress")} >
+            <input value={form.legal_address ?? ""} onChange={(e) => set("legal_address", e.target.value)} className={inputCls} placeholder={translate("tenant.addressPlaceholder")} />
           </Field>
-          <Field label="Veb-sayt">
+          <Field label={translate("tenant.website")}>
             <input type="url" value={form.website ?? ""} onChange={(e) => set("website", e.target.value)} className={inputCls} placeholder="https://example.uz" />
           </Field>
         </div>
         <div className="mt-4">
-          <Field label="Tavsif">
-            <textarea value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} className={inputCls + " resize-none"} rows={2} placeholder="Kompaniya haqida qisqacha" />
+          <Field label={translate("tenant.description")}>
+            <textarea value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} className={inputCls + " resize-none"} rows={2} placeholder={translate("tenant.descriptionPlaceholder")} />
           </Field>
         </div>
       </div>
 
       {/* Aloqa */}
       <div className="bg-white border border-slate-200 rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-slate-700 mb-4">Aloqa ma'lumotlari</h3>
+        <h3 className="text-sm font-semibold text-slate-700 mb-4">{translate("tenant.contactInfo")}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Telefon">
+          <Field label={translate("tenant.phone")}>
             <input type="tel" value={form.contact_phone ?? ""} onChange={(e) => set("contact_phone", e.target.value)} className={inputCls} placeholder="+998 90 000 00 00" />
           </Field>
-          <Field label="Email">
+          <Field label={translate("common.email")}>
             <input type="email" value={form.contact_email ?? ""} onChange={(e) => set("contact_email", e.target.value)} className={inputCls} placeholder="info@company.uz" />
           </Field>
         </div>
@@ -197,12 +194,12 @@ export function TenantSettingsPage({ tenant }: { tenant: { id: string; name: str
 
       {/* Bank */}
       <div className="bg-white border border-slate-200 rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-slate-700 mb-4">Bank rekvizitlari</h3>
+        <h3 className="text-sm font-semibold text-slate-700 mb-4">{translate("tenant.bankDetails")}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Bank nomi">
-            <input value={form.bank_name ?? ""} onChange={(e) => set("bank_name", e.target.value)} className={inputCls} placeholder="Masalan: Kapitalbank" />
+          <Field label={translate("tenant.bankName")}>
+            <input value={form.bank_name ?? ""} onChange={(e) => set("bank_name", e.target.value)} className={inputCls} placeholder={translate("tenant.bankPlaceholder")} />
           </Field>
-          <Field label="Hisob raqami">
+          <Field label={translate("tenant.accountNumber")}>
             <input value={form.bank_account ?? ""} onChange={(e) => set("bank_account", e.target.value)} className={inputCls} placeholder="2020 8000 ..." />
           </Field>
         </div>
@@ -216,7 +213,7 @@ export function TenantSettingsPage({ tenant }: { tenant: { id: string; name: str
           className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50"
         >
           <Save size={15} />
-          {saving ? "Saqlanmoqda..." : "Saqlash"}
+          {saving ? translate("common.saving") : translate("common.save")}
         </button>
         <button
           type="button"
@@ -224,7 +221,7 @@ export function TenantSettingsPage({ tenant }: { tenant: { id: string; name: str
           disabled={saving}
           className="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
         >
-          Bekor qilish
+          {translate("common.cancel")}
         </button>
       </div>
     </form>

@@ -350,7 +350,7 @@ export default function App() {
                   ))
               ) : (
                 <div className="py-3 px-4 text-center text-sm text-muted-foreground">
-                  Boshqa tashkilot yo&apos;q
+                  {translate("nav.noOtherTenant")}
                 </div>
               )}
             </div>
@@ -423,7 +423,7 @@ export default function App() {
           {(currentTenant.role === "company_admin" || currentTenant.role === "leader") && (
             <NavItem
               icon={<Building2 size={20} />}
-              label="Kompaniya profili"
+              label={translate("nav.companyProfile")}
               active={activeModule === "company-profile"}
               onClick={() => setActiveModule("company-profile")}
             />
@@ -497,8 +497,8 @@ export default function App() {
             <button
               onClick={() => startTour(DASHBOARD_TOUR)}
               className="p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors"
-              title="Yo'riqnoma turini boshlash"
-              aria-label="Yo'riqnoma"
+              title={translate("nav.startTour")}
+              aria-label={translate("nav.tour")}
             >
               <HelpCircle size={20} />
             </button>
@@ -518,7 +518,7 @@ export default function App() {
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => logout()}>
                   <LogOut size={16} className="mr-2" />
-                  Chiqish
+                  {translate("nav.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -535,7 +535,7 @@ export default function App() {
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => logout()}>
                   <LogOut size={16} className="mr-2" />
-                  Chiqish
+                  {translate("nav.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

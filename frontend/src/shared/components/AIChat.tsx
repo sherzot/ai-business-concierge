@@ -94,19 +94,19 @@ export function AIChat({ tenantId, onClose }: { tenantId: string; onClose: () =>
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: '100%', opacity: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="fixed inset-y-0 right-0 w-full sm:w-[400px] bg-white shadow-2xl z-50 border-l border-slate-200 flex flex-col"
+      className="fixed inset-y-0 right-0 w-full sm:w-[400px] bg-card shadow-2xl z-50 border-l border-border flex flex-col"
     >
       {/* Header */}
-      <div className="h-16 px-6 border-b border-slate-200 flex items-center justify-between bg-white">
+      <div className="h-16 px-6 border-b border-border flex items-center justify-between bg-card">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
             <Bot size={18} className="text-white" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800">Concierge AI</h3>
+            <h3 className="font-bold text-foreground">{translate("aiChat.title")}</h3>
             <div className="flex items-center gap-1.5">
                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-               <p className="text-xs text-slate-500">Online • Shadow CFO</p>
+               <p className="text-xs text-muted-foreground">{translate("aiChat.status")}</p>
             </div>
           </div>
         </div>
@@ -202,8 +202,8 @@ export function AIChat({ tenantId, onClose }: { tenantId: string; onClose: () =>
             <Send size={18} />
           </button>
         </div>
-        <p className="text-[10px] text-center text-slate-400 mt-2">
-          AI can make mistakes. Please verify sensitive financial data.
+        <p className="text-[10px] text-center text-muted-foreground mt-2">
+          {translate("aiChat.disclaimer")}
         </p>
       </div>
     </motion.div>

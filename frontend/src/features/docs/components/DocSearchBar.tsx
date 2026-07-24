@@ -19,13 +19,13 @@ export function DocSearchBar({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={translate("docs.searchPlaceholder")}
-        className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+        className="w-full rounded-lg border border-border bg-card py-2 pl-9 pr-8 text-sm text-foreground focus:ring-2 focus:ring-primary"
       />
       {value && (
         <button
           onClick={onClear}
           className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600"
-          aria-label="Clear search"
+          aria-label={translate("common.clearSearch")}
         >
           <X size={14} />
         </button>

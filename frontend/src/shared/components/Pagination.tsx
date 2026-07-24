@@ -1,5 +1,6 @@
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useI18n } from "../../app/providers/I18nProvider";
 
 type Props = {
   page: number;           // 1-indexed
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export function Pagination({ page, totalPages, onPageChange, pageSize, totalItems, className = "" }: Props) {
+  const { translate } = useI18n();
   if (totalPages <= 1) return null;
 
   // Show at most 5 page buttons: current ± 2
@@ -31,7 +33,7 @@ export function Pagination({ page, totalPages, onPageChange, pageSize, totalItem
       {/* Info */}
       {from !== null && to !== null && totalItems !== undefined ? (
         <p className="text-xs text-slate-500">
-          {from}–{to} / {totalItems} ta
+          {from}–{to} / {totalItems}
         </p>
       ) : (
         <span />
@@ -43,7 +45,7 @@ export function Pagination({ page, totalPages, onPageChange, pageSize, totalItem
           onClick={() => onPageChange(page - 1)}
           disabled={page === 1}
           className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          aria-label="Oldingi"
+          aria-label={translate("common.previous")}
         >
           <ChevronLeft size={16} />
         </button>
@@ -70,7 +72,7 @@ export function Pagination({ page, totalPages, onPageChange, pageSize, totalItem
           onClick={() => onPageChange(page + 1)}
           disabled={page === totalPages}
           className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          aria-label="Keyingi"
+          aria-label={translate("common.next")}
         >
           <ChevronRight size={16} />
         </button>

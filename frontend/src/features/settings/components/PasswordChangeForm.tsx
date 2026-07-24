@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Lock, Eye, EyeOff } from "lucide-react";
 import { supabase } from "../../../shared/lib/supabase";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 const inputCls =
   "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors pr-10";
@@ -14,6 +15,7 @@ function PasswordInput({
   onChange: (v: string) => void;
   placeholder?: string;
 }) {
+  const { translate } = useI18n();
   const [show, setShow] = useState(false);
   return (
     <div className="relative">
@@ -30,6 +32,7 @@ function PasswordInput({
         onClick={() => setShow((s) => !s)}
         className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
         tabIndex={-1}
+        aria-label={translate(show ? "settings.hidePassword" : "settings.showPassword")}
       >
         {show ? <EyeOff size={15} /> : <Eye size={15} />}
       </button>
@@ -38,6 +41,7 @@ function PasswordInput({
 }
 
 export function PasswordChangeForm() {
+  const { translate } = useI18n();
   const [newPassword, setNewPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [saving, setSaving] = useState(false);
@@ -50,11 +54,11 @@ export function PasswordChangeForm() {
     setSuccess(false);
 
     if (newPassword.length < 8) {
-      setError("Parol kamida 8 ta belgidan iborat bo'lishi kerak");
+      setError(translate("settings.passwordTooShort"));
       return;
     }
     if (newPassword !== confirm) {
-      setError("Parollar mos kelmaydi");
+      setError(translate("settings.passwordMismatch"));
       return;
     }
 
@@ -67,7 +71,7 @@ export function PasswordChangeForm() {
       setConfirm("");
       setTimeout(() => setSuccess(false), 4000);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Xatolik yuz berdi");
+      setError(e instanceof Error ? e.message : translate("common.error"));
     } finally {
       setSaving(false);
     }
@@ -77,24 +81,24 @@ export function PasswordChangeForm() {
     <div className="bg-white border border-slate-200 rounded-xl p-5">
       <div className="flex items-center gap-2 mb-4">
         <Lock size={16} className="text-indigo-500" />
-        <h3 className="text-sm font-semibold text-slate-700">Parolni o'zgartirish</h3>
+        <h3 className="text-sm font-semibold text-slate-700">{translate("settings.changePassword")}</h3>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label className="block text-xs text-slate-500 mb-1">Yangi parol</label>
+          <label className="block text-xs text-slate-500 mb-1">{translate("settings.newPassword")}</label>
           <PasswordInput
             value={newPassword}
             onChange={setNewPassword}
-            placeholder="Kamida 8 ta belgi"
+            placeholder={translate("settings.passwordPlaceholder")}
           />
         </div>
         <div>
-          <label className="block text-xs text-slate-500 mb-1">Parolni tasdiqlang</label>
+          <label className="block text-xs text-slate-500 mb-1">{translate("settings.confirmPassword")}</label>
           <PasswordInput
             value={confirm}
             onChange={setConfirm}
-            placeholder="Yangi parolni qayta kiriting"
+            placeholder={translate("settings.confirmPasswordPlaceholder")}
           />
         </div>
 
@@ -105,7 +109,7 @@ export function PasswordChangeForm() {
         )}
         {success && (
           <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 font-medium">
-            Parol muvaffaqiyatli o'zgartirildi
+            {translate("settings.passwordSaved")}
           </p>
         )}
 
@@ -114,7 +118,7 @@ export function PasswordChangeForm() {
           disabled={saving || !newPassword || !confirm}
           className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50"
         >
-          {saving ? "Saqlanmoqda..." : "O'zgartirish"}
+          {saving ? translate("common.saving") : translate("settings.changePassword")}
         </button>
       </form>
     </div>

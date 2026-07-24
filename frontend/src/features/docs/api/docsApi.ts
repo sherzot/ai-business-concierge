@@ -1,4 +1,5 @@
 import { apiRequest } from "../../../shared/lib/apiClient";
+import type { Locale } from "../../../app/i18n";
 
 export type DocApiItem = {
   id: string;
@@ -29,15 +30,15 @@ export type DocumentTemplate = {
   title: string;
   description: string;
   fields: DocumentTemplateField[];
-  requested_locale: "uz" | "ru";
-  applied_locale: "uz" | "ru";
+  requested_locale: Locale;
+  applied_locale: Locale;
 };
 
 export type GenerateDocumentInput = {
   templateId?: string;
   templateSlug?: string;
   title?: string;
-  locale: "uz" | "ru";
+  locale: Locale;
   format: "pdf" | "docx";
   fieldsData: Record<string, string | number>;
 };
@@ -48,15 +49,15 @@ export type GenerateDocumentResult = {
   title: string;
   content: string;
   format: "pdf" | "docx";
-  requested_locale: "uz" | "ru";
-  applied_locale: "uz" | "ru";
+  requested_locale: Locale;
+  applied_locale: Locale;
   file_ready: boolean;
   remaining: number | null;
 };
 
 export async function getDocTemplates(
   tenantId: string,
-  locale: "uz" | "ru" = "uz",
+  locale: Locale = "uz",
   category?: DocumentTemplate["category"],
 ) {
   const params = new URLSearchParams({ locale });

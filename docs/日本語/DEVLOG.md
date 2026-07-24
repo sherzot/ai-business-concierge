@@ -1138,3 +1138,14 @@ verify_jwt = false
 | 埋め込みモデル | `text-embedding-3-small`（OpenAI）|
 | レート制限 | 5リクエスト/日（無料）|
 | 言語フォールバック（KB）| `ja` → `en`（KBはuz/ru/enのみカバー）|
+
+---
+
+## 2026-07-24 — 4言語対応とテーマ修正の完了
+
+- テンプレートライブラリ、タブ、検索、カテゴリ、モーダル、検証、形式ラベルを共通の `uz`、`ru`、`en`、`ja` ロケール契約へ移行。
+- Production上の15件の有効テンプレートについて、タイトル、説明、全フィールドラベル、書類本文を4言語で整備（`20260724065619_localize_document_templates_four_languages.sql`）。
+- 書類APIとOpenAPIのlocale enumが4言語すべてを受け付け、frontendで`en`と`ja`が`uz`へ置換される問題を解消。
+- `next-themes`を唯一のテーマソースとし、強制ライトテーマを削除。既存utilityカラー向けのdark-mode互換レイヤーを追加。
+- 共通ナビゲーション、通知、設定、会社プロフィール、分析、AIチャット、command paletteの細部をlocaleシステムへ移行。
+- 検証: frontend build成功、95/95テスト成功、backend bundle成功。Production DBでtitle、body、field localeが`15/15`完全であることを確認。

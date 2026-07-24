@@ -14,6 +14,7 @@ import {
 import { CheckSquare, Inbox, Users, AlertTriangle, Loader2, RefreshCw } from "lucide-react";
 import { getAnalytics, type AnalyticsData } from "../api/analyticsApi";
 import { staggerContainer, staggerItem } from "../../../shared/lib/motionVariants";
+import { useI18n } from "../../../app/providers/I18nProvider";
 
 // ── Palette ────────────────────────────────────────────────────────────────────
 
@@ -65,6 +66,7 @@ interface Props {
 }
 
 export function AnalyticsPage({ tenant }: Props) {
+  const { locale, translate } = useI18n();
   const [data, setData]     = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]   = useState("");
@@ -76,7 +78,7 @@ export function AnalyticsPage({ tenant }: Props) {
       const res = await getAnalytics(tenant.id);
       setData(res);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Xato");
+      setError(e instanceof Error ? e.message : translate("common.error"));
     } finally {
       setLoading(false);
     }
@@ -96,9 +98,9 @@ export function AnalyticsPage({ tenant }: Props) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[300px] gap-3">
         <AlertTriangle size={28} className="text-amber-500" />
-        <p className="text-slate-500 text-sm">{error || "Ma'lumot yuklanmadi"}</p>
+        <p className="text-slate-500 text-sm">{error || translate("analytics.loadError")}</p>
         <button onClick={load} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-indigo-600 hover:bg-indigo-50 transition-colors">
-          <RefreshCw size={14} /> Qayta urinish
+          <RefreshCw size={14} /> {translate("common.retry")}
         </button>
       </div>
     );
@@ -108,10 +110,10 @@ export function AnalyticsPage({ tenant }: Props) {
 
   // Task pie data
   const taskPie = [
-    { name: "Yangi", value: taskStats.todo,        fill: TASK_COLORS.todo },
-    { name: "Jarayonda", value: taskStats.in_progress, fill: TASK_COLORS.in_progress },
-    { name: "Bajarildi", value: taskStats.done,     fill: TASK_COLORS.done },
-    { name: "Muddati o'tdi", value: taskStats.overdue, fill: TASK_COLORS.overdue },
+    { name: translate("tasks.status.todo"), value: taskStats.todo, fill: TASK_COLORS.todo },
+    { name: translate("tasks.status.in_progress"), value: taskStats.in_progress, fill: TASK_COLORS.in_progress },
+    { name: translate("tasks.status.done"), value: taskStats.done, fill: TASK_COLORS.done },
+    { name: translate("analytics.overdue"), value: taskStats.overdue, fill: TASK_COLORS.overdue },
   ].filter((d) => d.value > 0);
 
   return (
@@ -119,16 +121,16 @@ export function AnalyticsPage({ tenant }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-slate-800 dark:text-white">Analitika</h2>
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-white">{translate("analytics.title")}</h2>
           <p className="text-sm text-slate-500 mt-0.5">
-            So'nggi 30 kun · {new Date(data.generatedAt).toLocaleString("uz-UZ")}
+            {translate("analytics.subtitle")} · {new Date(data.generatedAt).toLocaleString(locale)}
           </p>
         </div>
         <button
           onClick={load}
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-700"
         >
-          <RefreshCw size={14} /> Yangilash
+          <RefreshCw size={14} /> {translate("analytics.refresh")}
         </button>
       </div>
 
@@ -141,30 +143,30 @@ export function AnalyticsPage({ tenant }: Props) {
       >
         <StatCard
           icon={<CheckSquare size={18} />}
-          label="Jami vazifalar"
+          label={translate("analytics.totalTasks")}
           value={taskStats.total}
-          sub={`${taskStats.done} bajarildi`}
+          sub={translate("analytics.completedCount", { count: String(taskStats.done) })}
           color="indigo"
         />
         <StatCard
           icon={<AlertTriangle size={18} />}
-          label="Muddati o'tgan"
+          label={translate("analytics.overdue")}
           value={taskStats.overdue}
-          sub={taskStats.overdue === 0 ? "Hammasi tartibda!" : "Zudlik bilan ko'ring"}
+          sub={translate(taskStats.overdue === 0 ? "analytics.allGood" : "analytics.urgent")}
           color={taskStats.overdue > 0 ? "rose" : "emerald"}
         />
         <StatCard
           icon={<Inbox size={18} />}
-          label="Inbox (30 kun)"
+          label={translate("analytics.inbox")}
           value={inboxCategories.reduce((s, c) => s + c.count, 0)}
-          sub={`${inboxCategories.length} ta kategoriya`}
+          sub={translate("analytics.categoriesCount", { count: String(inboxCategories.length) })}
           color="amber"
         />
         <StatCard
           icon={<Users size={18} />}
-          label="Xodimlar"
+          label={translate("analytics.employees")}
           value={employeeStats.active}
-          sub={`${employeeStats.recent_joins} ta yangi (7 kun)`}
+          sub={translate("analytics.newEmployees", { count: String(employeeStats.recent_joins) })}
           color="emerald"
         />
       </motion.div>
@@ -174,7 +176,7 @@ export function AnalyticsPage({ tenant }: Props) {
         {/* Task trend — Area chart (7 days) */}
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">
-            Vazifalar (so'nggi 7 kun)
+            {translate("analytics.tasks7")}
           </h3>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={taskTrend} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
@@ -196,8 +198,8 @@ export function AnalyticsPage({ tenant }: Props) {
                 labelStyle={{ color: "#94a3b8" }}
                 itemStyle={{ color: "#e2e8f0" }}
               />
-              <Area type="monotone" dataKey="created" name="Yaratildi" stroke="#6366f1" strokeWidth={2} fill="url(#gradCreated)" dot={false} />
-              <Area type="monotone" dataKey="done"    name="Bajarildi" stroke="#10b981" strokeWidth={2} fill="url(#gradDone)"    dot={false} />
+              <Area type="monotone" dataKey="created" name={translate("analytics.created")} stroke="#6366f1" strokeWidth={2} fill="url(#gradCreated)" dot={false} />
+              <Area type="monotone" dataKey="done" name={translate("analytics.completed")} stroke="#10b981" strokeWidth={2} fill="url(#gradDone)" dot={false} />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
             </AreaChart>
           </ResponsiveContainer>
@@ -206,11 +208,11 @@ export function AnalyticsPage({ tenant }: Props) {
         {/* Task status donut */}
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">
-            Vazifa holatlari
+            {translate("analytics.taskStatuses")}
           </h3>
           {taskPie.length === 0 ? (
             <div className="flex items-center justify-center h-[200px] text-slate-400 text-sm">
-              Hozircha vazifalar yo'q
+              {translate("analytics.noTasks")}
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={200}>
@@ -243,7 +245,7 @@ export function AnalyticsPage({ tenant }: Props) {
       {inboxCategories.length > 0 && (
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">
-            Inbox kategoriyalari (so'nggi 30 kun)
+            {translate("analytics.inbox30")}
           </h3>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={inboxCategories} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
@@ -254,7 +256,7 @@ export function AnalyticsPage({ tenant }: Props) {
                 contentStyle={{ background: "#1e293b", border: "none", borderRadius: 8, fontSize: 12 }}
                 itemStyle={{ color: "#e2e8f0" }}
               />
-              <Bar dataKey="count" name="Xabarlar" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="count" name={translate("analytics.messages")} radius={[4, 4, 0, 0]}>
                 {inboxCategories.map((_, i) => (
                   <Cell key={i} fill={INBOX_COLORS[i % INBOX_COLORS.length]} />
                 ))}
@@ -266,13 +268,13 @@ export function AnalyticsPage({ tenant }: Props) {
 
       {/* Employee stats */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Xodimlar holati</h3>
+        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">{translate("analytics.employeeStatus")}</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { label: "Jami", value: employeeStats.total, color: "text-indigo-600" },
-            { label: "Faol", value: employeeStats.active, color: "text-emerald-600" },
-            { label: "Kutilmoqda", value: employeeStats.pending, color: "text-amber-600" },
-            { label: "So'nggi 7 kun", value: employeeStats.recent_joins, color: "text-blue-600" },
+            { label: translate("analytics.total"), value: employeeStats.total, color: "text-indigo-600" },
+            { label: translate("analytics.active"), value: employeeStats.active, color: "text-emerald-600" },
+            { label: translate("analytics.pending"), value: employeeStats.pending, color: "text-amber-600" },
+            { label: translate("analytics.last7"), value: employeeStats.recent_joins, color: "text-blue-600" },
           ].map((s) => (
             <div key={s.label} className="text-center p-3 rounded-lg bg-slate-50 dark:bg-slate-900/40">
               <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>

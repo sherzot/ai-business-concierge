@@ -30,6 +30,24 @@ describe("getDocTemplates", () => {
       { tenantId: "tenant-1" },
     );
   });
+
+  it("English va Japanese locale qiymatlarini o'zgartirmasdan yuboradi", async () => {
+    mockApiRequest.mockResolvedValue([]);
+
+    await getDocTemplates("tenant-1", "ja");
+    await getDocTemplates("tenant-1", "en");
+
+    expect(mockApiRequest).toHaveBeenNthCalledWith(
+      1,
+      "/doc-templates?locale=ja",
+      { tenantId: "tenant-1" },
+    );
+    expect(mockApiRequest).toHaveBeenNthCalledWith(
+      2,
+      "/doc-templates?locale=en",
+      { tenantId: "tenant-1" },
+    );
+  });
 });
 
 describe("generateDoc", () => {

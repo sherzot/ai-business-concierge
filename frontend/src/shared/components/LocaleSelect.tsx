@@ -64,7 +64,7 @@ export function LocaleSelect({ variant = "dark", locale: propLocale, onLocaleCha
         value={locale}
         onChange={(e) => setLocale(e.target.value as Locale)}
         className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-        aria-label="Select language"
+        aria-label={ctx.translate("common.selectLanguage")}
       >
         {LOCALES.map((opt) => (
           <option key={opt.id} value={opt.id}>

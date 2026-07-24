@@ -15,6 +15,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, ArrowRight } from "lucide-react";
+import { useI18n } from "../../app/providers/I18nProvider";
 
 export type TourStep = {
   target: string;       // CSS selector
@@ -121,6 +122,7 @@ function TourOverlay({ step, stepIdx, totalSteps, rect, onNext, onClose }: {
   onNext: () => void;
   onClose: () => void;
 }) {
+  const { translate } = useI18n();
   const placement = step.placement ?? "bottom";
 
   // ── compute card position ──────────────────────────────────────────────────
@@ -217,16 +219,16 @@ function TourOverlay({ step, stepIdx, totalSteps, rect, onNext, onClose }: {
             onClick={onClose}
             className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
           >
-            O'tkazib yuborish
+            {translate("common.skip")}
           </button>
           <button
             onClick={onNext}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition-colors"
           >
             {stepIdx + 1 < totalSteps ? (
-              <><ArrowRight size={12} /> Keyingi</>
+              <><ArrowRight size={12} /> {translate("common.next")}</>
             ) : (
-              "Tayyor ✓"
+              `${translate("common.done")} ✓`
             )}
           </button>
         </div>
