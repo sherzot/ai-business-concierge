@@ -42,9 +42,10 @@
 ### 2.1 Getting Project Credentials
 
 1. https://supabase.com → Dashboard → Projects → your project
-2. **Settings → API** page:
+2. **Settings → API Keys / Connect** page:
    - `Project URL` → `SUPABASE_URL`
-   - `anon public` key → `SUPABASE_ANON_KEY` (for frontend)
+   - Publishable key (`sb_publishable_...`) → frontend `VITE_SUPABASE_PUBLISHABLE_KEY`
+   - Legacy `anon` → `SUPABASE_ANON_KEY` only for transition-time backend/Edge Function JWT compatibility
    - `service_role` key → `SUPABASE_SERVICE_ROLE_KEY` (**secret!**)
    - `JWT Secret` → `JWT_SECRET`
 

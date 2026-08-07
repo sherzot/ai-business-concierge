@@ -120,7 +120,9 @@ supabase functions deploy bright-api
 | Key | Value |
 |-----|-------|
 | `VITE_SUPABASE_PROJECT_ID` | `ufhepwdkjqptjvxrmpjn` |
-| `VITE_SUPABASE_ANON_KEY` | anon ключ Supabase |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase `sb_publishable_...`, только build scope |
+
+С префиксом `VITE_` допустим только publishable key. `sb_secret_...` и `service_role` запрещены во frontend environment.
 
 ### 5.4 Деплой
 

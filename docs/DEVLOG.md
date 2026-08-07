@@ -4,6 +4,50 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-08 — Publishable-key frontend contract lokal implementatsiya qilindi
+
+### Kontekst va qaror
+
+- Supabase joriy changelog va API-key migration hujjatlari tekshirildi: browser uchun `sb_publishable_...` tavsiya qilinadi; legacy `anon` 2026 oxirigacha deprecate qilinadi.
+- Production Supabase loyihasida `default` publishable key borligi qiymatini chiqarmasdan tasdiqlandi.
+- Zero-downtime rollout tanlandi: frontend yangi `VITE_SUPABASE_PUBLISHABLE_KEY`ni birinchi ishlatadi, local/rollback uchun legacy anon fallback vaqtincha qoladi. Edge Function `SUPABASE_ANON_KEY`/JWT oqimi bu slice'da o'zgarmadi.
+- Netlify connector upsert muvaffaqiyatli deb javob berdi, ammo keyingi metadata list yangi keyni ko'rsatmadi. Shuning uchun Netlify env holati production bundle tekshirilguncha `UNKNOWN`; legacy env olib tashlanmadi.
+
+### Bajarildi
+
+- Config, TypeScript env contract, CI placeholder va `.env.example` publishable-key nomiga o'tkazildi.
+- HR Candidate request session yo'q bo'lsa legacy public keyni `Authorization: Bearer`da yubormaydi; request fail-fast qiladi.
+- Foydalanilmaydigan hardcoded legacy public key fayli olib tashlandi.
+- Security gate frontendda `supabase.from/rpc/storage/functions` business-data bypasslarini va hardcoded Supabase credential literalini taqiqlaydi.
+- `CLAUDE`, `DEPLOY_SETUP` va `CONNECTIONS`ning 4 til nusxasi yangi frontend contractga moslandi.
+
+### Verifikatsiya
+
+- Targeted: 2/2 test fayli, 5/5 test o'tdi.
+- `npm run typecheck` — muvaffaqiyatli.
+- `npm run test:run` — 21/21 test fayli, 101/101 test muvaffaqiyatli.
+- `npm run build` — muvaffaqiyatli; oldingi chunk/mixed-import/Browserslist warninglari bloklamaydi.
+- `npm run security:check` — 9 build/Netlify fayli va yangi source boundary gate muvaffaqiyatli.
+- `npm run audit:production` — exception'dan tashqari high/critical advisory 0; GHSA-qwww vaqtinchalik metadata exceptioni 2026-08-21gacha.
+
+### Keyingi qadam
+
+O'zgarishlarni commit/push qilish, GitHub CI va Netlify deployni tekshirish, production bundle haqiqatan `sb_publishable_...` ishlatayotganini credentialni chiqarmasdan tasdiqlash, so'ng Auth/Realtime smoke-test o'tkazish. Faqat shundan keyin legacy frontend env/fallbackni olib tashlash mumkin.
+
+### Fayllar
+
+- `.github/workflows/ci.yml`
+- `frontend/.env.example`, `frontend/src/env.d.ts`
+- `frontend/src/app/config.ts`, `frontend/src/shared/lib/supabase.ts`
+- `frontend/src/features/hr/candidates/api/candidatesApi.ts`
+- `frontend/scripts/security-check.mjs`
+- `frontend/src/app/__tests__/config.test.ts`
+- `frontend/src/features/hr/__tests__/candidatesApi.test.ts`
+- `frontend/src/utils/supabase/info.tsx` (olib tashlandi)
+- `docs/{STATUS,PLAN,DEVLOG,CLAUDE,DEPLOY_SETUP,CONNECTIONS}.md` va tarjimalari
+
+---
+
 ## 2026-08-07 — P0 commitlari push qilindi va yangi CI green
 
 - Lokal `55ec941`, `a088fef` va `06b5756` commitlari `origin/main`ga push qilindi (`730b3bd..06b5756`).

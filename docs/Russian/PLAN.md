@@ -15,9 +15,9 @@
 ## P1 — завершить Supabase/Netlify security handoff
 
 - [ ] Пересмотреть/удалить GHSA-qwww metadata exception до 2026-08-21.
-- [ ] Безопасно перейти на env-контракт `VITE_SUPABASE_PUBLISHABLE_KEY`.
-- [ ] Синхронизировать config, env example, Vitest, CI и Netlify names.
-- [ ] Ограничить direct browser Supabase только Auth/Realtime и добавить regression gate.
+- [x] Подтвердить production publishable key; перевести config, env type/example и CI, сохранив temporary rollout fallback.
+- [ ] Проверить Netlify env/deploy через production bundle и Auth/Realtime smoke-test, затем удалить legacy frontend env/fallback.
+- [x] Ограничить direct browser Supabase только Auth/Realtime и добавить `from/rpc/storage/functions` regression gate.
 - [ ] Проверить public RLS/grants/RPC и отказ cross-tenant CRUD.
 - [ ] Проверить service-role и `SECURITY DEFINER` authorization boundaries.
 - [ ] Решить разделение production/preview env и secrets.

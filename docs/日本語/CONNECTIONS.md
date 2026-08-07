@@ -42,9 +42,10 @@
 ### 2.1 プロジェクト情報の取得
 
 1. https://supabase.com → Dashboard → Projects → あなたのプロジェクト
-2. **Settings → API**ページ:
+2. **Settings → API Keys / Connect**ページ:
    - `Project URL` → `SUPABASE_URL`
-   - `anon public`キー → `SUPABASE_ANON_KEY`（フロントエンド用）
+   - Publishable key (`sb_publishable_...`) → frontend `VITE_SUPABASE_PUBLISHABLE_KEY`
+   - Legacy `anon` → transition中のbackend/Edge Function JWT compatibility用`SUPABASE_ANON_KEY`のみ
    - `service_role`キー → `SUPABASE_SERVICE_ROLE_KEY`（**秘密！**）
    - `JWT Secret` → `JWT_SECRET`
 

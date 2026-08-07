@@ -151,9 +151,9 @@ supabase functions deploy bright-api
 | Key | Value | Scopes |
 |-----|-------|--------|
 | `VITE_SUPABASE_PROJECT_ID` | `ufhepwdkjqptjvxrmpjn` | All |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anon key (Project Settings → API) | All |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase `sb_publishable_...` key (Settings → API Keys) | Builds |
 
-**Eslatma:** `VITE_` prefixi Vite build da o'zgaruvchini expose qiladi.
+**Eslatma:** `VITE_` prefixi qiymatni browser bundle'ga chiqaradi. Bu yerga faqat publishable key yoziladi; `sb_secret_...` va `service_role` qat'iyan taqiqlanadi.
 
 ### 5.4 Deploy
 

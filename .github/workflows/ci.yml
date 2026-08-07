@@ -17,7 +17,7 @@ jobs:
       # Public, non-production placeholders. Tests mock all network calls;
       # these values only let config.ts initialize on a clean CI runner.
       VITE_SUPABASE_PROJECT_ID: ci-test-project
-      VITE_SUPABASE_ANON_KEY: ci-public-anon-key
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_test
       VITE_SUPABASE_URL: https://ci-test-project.supabase.co
       VITE_API_BASE_URL: https://ci-test-project.supabase.co/functions/v1/bright-api/make-server-6c2837d6/v1
     defaults:

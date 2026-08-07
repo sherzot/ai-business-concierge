@@ -46,9 +46,10 @@
 ### 2.1 Project ma'lumotlari olish
 
 1. https://supabase.com → Dashboard → Projects → loyihangiz
-2. **Settings → API** sahifasi:
+2. **Settings → API Keys / Connect** sahifasi:
    - `Project URL` → `SUPABASE_URL` ga
-   - `anon public` key → `SUPABASE_ANON_KEY` (frontend uchun) va `VITE_SUPABASE_ANON_KEY`
+   - `Publishable key` (`sb_publishable_...`) → frontend uchun `VITE_SUPABASE_PUBLISHABLE_KEY`
+   - Legacy `anon` → faqat o'tish davridagi backend/Edge Function JWT compatibility uchun `SUPABASE_ANON_KEY`; frontendga yangi contract bilan berilmaydi
    - `service_role` key → `SUPABASE_SERVICE_ROLE_KEY` (backend only, **maxfiy!**)
    - `JWT Secret` → `JWT_SECRET`
 

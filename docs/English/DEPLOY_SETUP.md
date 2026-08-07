@@ -120,7 +120,9 @@ Create the accounts shown in [DEMO_USERS.md](DEMO_USERS.md) and add them to `use
 | Key | Value |
 |-----|-------|
 | `VITE_SUPABASE_PROJECT_ID` | `ufhepwdkjqptjvxrmpjn` |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anon key |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase `sb_publishable_...` key, build scope only |
+
+Only publishable keys may use the `VITE_` prefix. Never place `sb_secret_...` or `service_role` in the frontend environment.
 
 ### 5.4 Deploy
 

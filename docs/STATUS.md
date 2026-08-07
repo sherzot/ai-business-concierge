@@ -3,6 +3,7 @@
 > Kod/platforma bo'yicha oxirgi tasdiqlangan snapshot: **2026-08-07**
 > Hujjatlar tartiblangan sana: **2026-08-07**
 > Lokal runtime, production health/auth va remote GitHub Actions baseline'i 2026-08-07 kuni qayta tekshirildi. P0 commitlari push qilindi va yangi CI run to'liq green yakunlandi.
+> 2026-08-08: publishable-key frontend contract lokal implementatsiya va verifikatsiya qilindi; production deploy/smoke-test hali bajarilmagan.
 
 ## Hozir qayerdamiz
 
@@ -27,6 +28,7 @@
 | Security check | 9 ta build/Netlify fayli muvaffaqiyatli |
 | Production dependency audit | Scoped gate o'tdi: unexcepted high/critical 0; GHSA-qwww metadata exceptioni 2026-08-21 gacha |
 | Remote GitHub Actions | Run `31188866507`, commit `06b5756`: `success`; barcha `frontend-security-gate` qadamlari green |
+| Frontend Supabase key contract | Lokal: publishable primary + vaqtinchalik legacy fallback; production rollout **pending** |
 
 ## Mahsulot va integratsiyalar holati
 
@@ -56,9 +58,9 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. 2026-08-21gacha GHSA-qwww npm metadata exceptionini qayta ko'rish; registry tuzatilsa exceptionni olib tashlash.
-2. Legacy anon-key env nomidan `VITE_SUPABASE_PUBLISHABLE_KEY` kontraktiga xavfsiz o'tish.
-3. Browser-to-Supabase, DB grants/RLS va cross-tenant authorization auditini tugatish.
+1. Publishable-key commitini push qilish, GitHub CI/Netlify deploy va production Auth/Realtime/bundle verifikatsiyasini yopish; legacy frontend env/fallbackni faqat keyin olib tashlash.
+2. 2026-08-21gacha GHSA-qwww npm metadata exceptionini qayta ko'rish; registry tuzatilsa exceptionni olib tashlash.
+3. DB grants/RLS va cross-tenant authorization auditini tugatish.
 4. AI Hujjatchi uchun PDF/DOCX, Noto Sans, private Storage va signed URL oqimini yozish.
 5. Telegram webhook secret va Resend receiving/delivery smoke-testlarini yopish.
 6. Keyin HR Candidate Analysis implementatsiyasiga o'tish.

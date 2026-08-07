@@ -4,6 +4,18 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — Локально реализован frontend contract publishable key
+
+- Проверены актуальные Supabase changelog/migration guidance и наличие production `default` publishable key без раскрытия значения.
+- Реализован zero-downtime contract: `VITE_SUPABASE_PUBLISHABLE_KEY` основной, legacy anon временно остаётся local/rollback fallback. Edge Function JWT/server legacy variables не менялись.
+- Netlify сообщил успешный additive env upsert, но последующий metadata list не показал key; состояние Netlify остаётся `UNKNOWN` до проверки production bundle, legacy env не удалён.
+- Обновлены config, env types/example, CI, Supabase client, operational docs и security regression gate; удалён неиспользуемый файл с hardcoded legacy public key.
+- HR Candidate теперь требует реальный user access token и не отправляет public key как Bearer authorization.
+- Проверка успешна: targeted 5/5 tests; type-check; 21/21 files и 101/101 tests; production build; security check; production audit без unexcepted high/critical advisory.
+- Далее: commit/push, GitHub CI и Netlify deploy, безопасная проверка production bundle, Auth/Realtime smoke-test, затем удаление legacy frontend env/fallback.
+
+---
+
 ## 2026-08-07 — P0 commits отправлены, новый CI green
 
 - Local commits `55ec941`, `a088fef` и `06b5756` отправлены в `origin/main` (`730b3bd..06b5756`).

@@ -4,6 +4,18 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — Publishable-key frontend contract implemented locally
+
+- Verified current Supabase changelog/migration guidance and the existence of a production `default` publishable key without exposing its value.
+- Implemented a zero-downtime frontend contract: `VITE_SUPABASE_PUBLISHABLE_KEY` is primary and legacy anon remains a temporary local/rollback fallback. Edge Function JWT/legacy server variables were intentionally unchanged.
+- Netlify reported the additive env upsert as successful, but its subsequent metadata list did not show the key; Netlify state remains `UNKNOWN` until production-bundle verification, and the legacy env was not removed.
+- Updated config, env types/example, CI, Supabase client, operational docs, and security regression checks. Removed an unused hardcoded legacy public-key file.
+- HR Candidate now requires a real user access token instead of sending a public key as Bearer authorization.
+- Verification passed: targeted 5/5 tests; type-check; 21/21 files and 101/101 tests; production build; security check; production audit with zero unexcepted high/critical advisories.
+- Next: commit/push, verify GitHub CI and Netlify deploy, inspect the production bundle without emitting credentials, smoke-test Auth/Realtime, then remove the legacy frontend env/fallback.
+
+---
+
 ## 2026-08-07 — P0 commits pushed and new CI green
 
 - Pushed local commits `55ec941`, `a088fef`, and `06b5756` to `origin/main` (`730b3bd..06b5756`).

@@ -1,15 +1,17 @@
 const projectIdEnv = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-const anonKeyEnv = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const publishableKeyEnv = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const legacyAnonKeyEnv = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const publicApiKeyEnv = publishableKeyEnv || legacyAnonKeyEnv;
 
-if (!projectIdEnv || !anonKeyEnv) {
+if (!projectIdEnv || !publicApiKeyEnv) {
   throw new Error(
-    "VITE_SUPABASE_PROJECT_ID va VITE_SUPABASE_ANON_KEY muhit o'zgaruvchilari sozlanmagan. " +
+    "VITE_SUPABASE_PROJECT_ID va VITE_SUPABASE_PUBLISHABLE_KEY muhit o'zgaruvchilari sozlanmagan. " +
     "frontend/.env faylini .env.example asosida yarating."
   );
 }
 
 export const projectId = projectIdEnv;
-export const publicAnonKey = anonKeyEnv;
+export const publicSupabaseKey = publicApiKeyEnv;
 export const supabaseUrl =
   import.meta.env.VITE_SUPABASE_URL ?? `https://${projectId}.supabase.co`;
 export const API_BASE_URL =

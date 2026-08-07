@@ -23,9 +23,9 @@
 ## P1 — Supabase/Netlify security handoffini yakunlash
 
 - [ ] 2026-08-21gacha GHSA-qwww metadata exceptionini qayta tekshirish va npm advisory yangilansa exceptionni olib tashlash.
-- [ ] `sb_publishable_...` mavjudligini tekshirish va `VITE_SUPABASE_PUBLISHABLE_KEY` env kontraktiga bosqichma-bosqich o'tish.
-- [ ] `config.ts`, `.env.example`, Vitest, CI va Netlify env nomlarini bir xil qilish.
-- [ ] Frontend direct Supabase chaqiruvlarini audit qilish; Auth/Realtimedan boshqa operatsiyalarga regressiya gate qo'shish.
+- [x] Productionda `sb_publishable_...` mavjudligini tekshirish; `config.ts`, env type/example va CI'ni yangi contractga o'tkazish, legacy fallbackni rollout uchun vaqtincha saqlash.
+- [ ] Netlify env/deployni production bundle orqali tasdiqlash, Auth/Realtime smoke-test qilish, keyin legacy frontend env/fallbackni olib tashlash.
+- [x] Frontend direct Supabase chaqiruvlarini audit qilish; Auth/Realtimedan boshqa `from/rpc/storage/functions` operatsiyalariga regressiya gate qo'shish.
 - [ ] Public table/view/functionlar uchun RLS va `anon`/`authenticated` grantlarini inventarizatsiya qilish.
 - [ ] Cross-tenant SELECT/INSERT/UPDATE/DELETE va role `403` testlarini yozish/ishlatish.
 - [ ] `SECURITY DEFINER` funksiyalarning `search_path`, EXECUTE grant va internal authorizationini tekshirish.

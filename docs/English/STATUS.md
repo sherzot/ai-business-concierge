@@ -3,6 +3,7 @@
 > Last code/platform snapshot verified: **2026-08-07**
 > Documentation normalized: **2026-08-07**
 > The local runtime, production health/auth, and remote GitHub Actions baseline were re-verified on 2026-08-07. The P0 commits were pushed and the new CI run completed fully green.
+> 2026-08-08: the publishable-key frontend contract was implemented and verified locally; production deploy/smoke verification is pending.
 
 ## Current phase
 
@@ -26,6 +27,7 @@
 | Production build/security check | Passed |
 | Production dependency audit | Scoped gate passed: 0 unexcepted high/critical; GHSA-qwww metadata exception expires 2026-08-21 |
 | Remote GitHub Actions | Run `31188866507`, commit `06b5756`: success; every `frontend-security-gate` step passed |
+| Frontend Supabase key contract | Local: publishable primary + temporary legacy fallback; production rollout pending |
 
 ## Capability status
 
@@ -43,9 +45,9 @@
 
 ## Immediate order
 
-1. Re-review/remove the GHSA-qwww metadata exception by 2026-08-21.
-2. Safely migrate the frontend env contract to `VITE_SUPABASE_PUBLISHABLE_KEY`.
-3. Complete browser Supabase, RLS/grants and cross-tenant authorization audits.
+1. Push the publishable-key change, verify GitHub CI/Netlify deploy and production bundle/Auth/Realtime, then remove the legacy frontend env/fallback.
+2. Re-review/remove the GHSA-qwww metadata exception by 2026-08-21.
+3. Complete RLS/grants and cross-tenant authorization audits.
 4. Finish PDF/DOCX, private Storage and signed URLs for the Document Assistant.
 5. Close Telegram/Resend operational verification, then implement HR Candidate Analysis.
 

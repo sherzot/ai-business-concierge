@@ -42,9 +42,10 @@
 ### 2.1 Получение данных проекта
 
 1. https://supabase.com → Dashboard → Projects → ваш проект
-2. Страница **Settings → API**:
+2. Страница **Settings → API Keys / Connect**:
    - `Project URL` → `SUPABASE_URL`
-   - Ключ `anon public` → `SUPABASE_ANON_KEY` (для фронтенда)
+   - Publishable key (`sb_publishable_...`) → frontend `VITE_SUPABASE_PUBLISHABLE_KEY`
+   - Legacy `anon` → `SUPABASE_ANON_KEY` только для переходной JWT compatibility backend/Edge Functions
    - Ключ `service_role` → `SUPABASE_SERVICE_ROLE_KEY` (**секретный!**)
    - `JWT Secret` → `JWT_SECRET`
 

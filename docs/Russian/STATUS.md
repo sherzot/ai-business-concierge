@@ -3,6 +3,7 @@
 > Последний подтверждённый snapshot кода/platform: **2026-08-07**
 > Документация упорядочена: **2026-08-07**
 > Local runtime, production health/auth и remote GitHub Actions baseline повторно проверены 2026-08-07. P0 commits отправлены, новый CI run завершён полностью green.
+> 2026-08-08: frontend contract publishable key реализован и проверен локально; production deploy/smoke verification ещё не выполнен.
 
 ## Текущая фаза
 
@@ -26,6 +27,7 @@
 | Production build/security check | Успешно |
 | Production dependency audit | Scoped gate: 0 unexcepted high/critical; GHSA-qwww metadata exception до 2026-08-21 |
 | Remote GitHub Actions | Run `31188866507`, commit `06b5756`: success; все шаги `frontend-security-gate` green |
+| Frontend Supabase key contract | Local: publishable primary + temporary legacy fallback; production rollout pending |
 
 ## Состояние возможностей
 
@@ -43,9 +45,9 @@
 
 ## Ближайший порядок
 
-1. До 2026-08-21 пересмотреть/удалить GHSA-qwww metadata exception.
-2. Безопасно перейти на `VITE_SUPABASE_PUBLISHABLE_KEY`.
-3. Завершить browser Supabase, RLS/grants и cross-tenant authorization audit.
+1. Push publishable-key change, проверить GitHub CI/Netlify deploy и production bundle/Auth/Realtime, затем удалить legacy frontend env/fallback.
+2. До 2026-08-21 пересмотреть/удалить GHSA-qwww metadata exception.
+3. Завершить RLS/grants и cross-tenant authorization audit.
 4. Завершить PDF/DOCX, private Storage и signed URL для Документолога.
 5. Закрыть Telegram/Resend verification, затем реализовать HR Candidate Analysis.
 

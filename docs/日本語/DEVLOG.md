@@ -4,6 +4,18 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-08 — Publishable-key frontend contractをlocal実装
+
+- Current Supabase changelog/migration guidanceとproduction `default` publishable keyの存在をvalue非表示で確認。
+- Zero-downtime contractを実装: `VITE_SUPABASE_PUBLISHABLE_KEY`をprimary、legacy anonをtemporary local/rollback fallbackとして保持。Edge Function JWT/server legacy variableは変更なし。
+- Netlifyはadditive env upsert成功を返したがsubsequent metadata listにkeyが出ないため、production bundle確認までNetlify stateは`UNKNOWN`。Legacy envは削除していない。
+- Config、env types/example、CI、Supabase client、operational docs、security regression gateを更新し、unused hardcoded legacy public-key fileを削除。
+- HR Candidateはreal user access token必須となり、public keyをBearer authorizationに送らない。
+- Verification成功: targeted 5/5 tests、type-check、21/21 files・101/101 tests、production build、security check、unexcepted high/critical 0のproduction audit。
+- 次: commit/push、GitHub CI、Netlify deploy、credential非表示のproduction bundle確認、Auth/Realtime smoke-test後にlegacy frontend env/fallbackを削除。
+
+---
+
 ## 2026-08-07 — P0 commitsをpushしnew CI green
 
 - Local commits `55ec941`、`a088fef`、`06b5756`を`origin/main`へpush (`730b3bd..06b5756`)。

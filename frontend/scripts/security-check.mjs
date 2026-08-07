@@ -26,6 +26,13 @@ const docDetailSource = await readFile(
   join(frontendDir, "src/features/docs/components/DocDetail.tsx"),
   "utf8",
 );
+const sourceFiles = (await walk(join(frontendDir, "src"))).filter((file) =>
+  [".ts", ".tsx"].includes(extname(file)),
+);
+const sourceEntries = await Promise.all(
+  sourceFiles.map(async (file) => ({ file, text: await readFile(file, "utf8") })),
+);
+const sourceText = sourceEntries.map(({ text }) => text).join("\n");
 const distFiles = await walk(distDir);
 const textFiles = distFiles.filter((file) =>
   [".html", ".js", ".css", ".json", ".webmanifest"].includes(extname(file)),
@@ -78,6 +85,23 @@ assert(
 assert(
   !distFiles.some((file) => file.endsWith(".map")),
   "Production build source map chiqarmasligi kerak.",
+);
+
+const directBusinessDataCalls = sourceEntries.filter(({ text }) =>
+  /\bsupabase\.(?:from|rpc|storage|functions)\b/.test(text),
+);
+assert(
+  directBusinessDataCalls.length === 0,
+  "Frontend business-data Supabase chaqiruvlari bright-api chegarasini chetlab o'tmoqda.",
+);
+
+const hardcodedSupabaseCredential =
+  /\bsb_(?:publishable|secret)_[A-Za-z0-9_-]{20,}\b/;
+const hardcodedJwt =
+  /\beyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\b/;
+assert(
+  !hardcodedSupabaseCredential.test(sourceText) && !hardcodedJwt.test(sourceText),
+  "Frontend source ichida hardcoded Supabase credential topildi.",
 );
 
 const forbiddenServerSecrets = [

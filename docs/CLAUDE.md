@@ -229,7 +229,7 @@ feat(db): add subscriptions and payments migration
 ### Frontend (.env)
 ```
 VITE_SUPABASE_PROJECT_ID=
-VITE_SUPABASE_ANON_KEY=
+VITE_SUPABASE_PUBLISHABLE_KEY=
 VITE_API_BASE_URL=
 VITE_SENTRY_DSN=
 VITE_APP_URL=

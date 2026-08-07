@@ -6,7 +6,7 @@
  *       o'zining default 30s timeoutiga ega.
  */
 
-import { API_BASE_URL, publicAnonKey } from "../../../../app/config";
+import { API_BASE_URL } from "../../../../app/config";
 import { supabase } from "../../../../shared/lib/supabase";
 import type { AnalyzeFormInput, CandidateAnalysisResult } from "../types";
 
@@ -20,14 +20,16 @@ export async function analyzeCandidate(
     throw new Error("CV file is required");
   }
 
-  // Auth token (loyiha pattern: session yo'q bo'lsa anon key)
-  let token = publicAnonKey;
+  let accessToken: string | undefined;
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.access_token) token = session.access_token;
-  } catch (e) {
-    // Session olishda xato — anon key bilan davom etamiz
-    console.warn("[candidates] getSession failed, using anon key", e);
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (!error) accessToken = session?.access_token;
+  } catch {
+    // Provider/session details are intentionally hidden from the caller.
+  }
+
+  if (!accessToken) {
+    throw new Error("Authentication required");
   }
 
   const form = new FormData();
@@ -38,28 +40,17 @@ export async function analyzeCandidate(
   form.append("analysis_depth", input.analysisDepth);
 
   const headers: Record<string, string> = {
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${accessToken}`,
     "Accept-Language": input.locale,
     // Note: Content-Type yozilmaydi — multipart boundary'ni browser belgilaydi
   };
   if (tenantId) headers["X-Tenant-Id"] = tenantId;
-
-  // Diagnostic log (console'da Network bilan birga ko'rasiz)
-  console.info("[candidates] POST", ENDPOINT, {
-    tenantId,
-    locale: input.locale,
-    depth: input.analysisDepth,
-    hasFile: !!input.cvFile,
-    fileSize: input.cvFile.size,
-  });
 
   const res = await fetch(ENDPOINT, {
     method: "POST",
     headers,
     body: form,
   });
-
-  console.info("[candidates] response", res.status, res.statusText);
 
   // 501 ham JSON qaytaradi
   const json = (await res.json().catch(() => ({}))) as CandidateAnalysisResult;
