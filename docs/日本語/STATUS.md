@@ -1,9 +1,9 @@
 # AI Business Concierge — 現在の状態
 
-> 最終確認済みcode/platform snapshot: **2026-08-07**
+> 最終確認済みcode/platform snapshot: **2026-08-08**
 > ドキュメント整理日: **2026-08-07**
 > 2026-08-07にlocal runtime、production health/auth、remote GitHub Actions baselineを再確認。P0 commitsをpushし、new CI runはfully greenで完了。
-> 2026-08-08: publishable-key frontend contractをlocal実装・検証。Production deploy/smoke verificationはpending。
+> 2026-08-08: publishable-key commitをpushしCI/Netlify deploy成功。ただしproduction bundleはまだlegacy fallbackを使用。Risk scanner tablesへのdirect browser Data API accessをproductionで閉鎖。
 
 ## 現在のPhase
 
@@ -18,16 +18,17 @@
 
 | Check | 状態 |
 |---|---|
-| Git | P0 commit set `55ec941` → `a088fef` → `06b5756`を`origin/main`へpush済み |
+| Git | Publishable-key commit `35d4b91`を`origin/main`へpush済み。Current RLS hardeningは未commit |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Backend | Supabase Edge Function `bright-api` v72 |
 | Health | `200` |
 | Type-check | 成功 |
-| Unit tests | 19/19 files、96/96 tests |
+| Unit tests | 21/21 files、101/101 tests |
 | Production build/security check | 成功 |
 | Production dependency audit | Scoped gate: unexcepted high/critical 0; GHSA-qwww exceptionは2026-08-21まで |
-| Remote GitHub Actions | Run `31188866507`、commit `06b5756`: success。全`frontend-security-gate` stepがgreen |
-| Frontend Supabase key contract | Local: publishable primary + temporary legacy fallback。Production rollout pending |
+| Remote GitHub Actions | Run `31192041119`、commit `35d4b91`: success。全`frontend-security-gate` stepがgreen |
+| Frontend Supabase key contract | Code/deployはpublishable primary + temporary fallback。Production bundleはlegacy anon fallback使用、Netlify env/login pending |
+| DB security | 32/32 public tablesでRLS、8/8 viewsが`security_invoker`、6/6 `SECURITY DEFINER` functionsはbrowser EXECUTE不可、risk tablesは`anon/authenticated` CRUD不可 |
 
 ## Capability状態
 
@@ -45,9 +46,9 @@
 
 ## 直近の順序
 
-1. Publishable-key changeをpushし、GitHub CI/Netlify deployとproduction bundle/Auth/Realtimeを確認後、legacy frontend env/fallbackを削除。
-2. 2026-08-21までにGHSA-qwww metadata exceptionを再確認/削除。
-3. RLS/grants、cross-tenant authorization auditを完了。
+1. Netlify CLI loginを復旧しproduction `VITE_SUPABASE_PUBLISHABLE_KEY`を設定、redeployとAuth/Realtime smoke-test後にlegacy frontend env/fallbackを削除。
+2. Cross-tenant CRUD/role fixturesを追加し、`user_tenants`依存RLSと全service-role route authorizationを検証。
+3. 2026-08-21までにGHSA-qwww metadata exceptionを再確認/削除。
 4. 文書作成のPDF/DOCX、private Storage、signed URLを完了。
 5. Telegram/Resend verification後、HR Candidate Analysisを実装。
 

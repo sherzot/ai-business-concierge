@@ -4,6 +4,42 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-08 — Risk scanner uchun to'g'ridan-to'g'ri Data API kirishi yopildi
+
+### Kontekst va qaror
+
+- Production inventarizatsiyasi 32/32 public tableda RLS, 8/8 viewda `security_invoker` va 6/6 `SECURITY DEFINER` funksiyada fixed `search_path` hamda `anon/authenticated` uchun yopiq EXECUTE grantlarini tasdiqladi.
+- `risk_scans` va `risk_findings` faqat `bright-api`ning service-role clienti orqali ishlatiladi; API `super_admin/sub_admin` rolini tekshiradi. DBdagi eski `auth.role() = 'authenticated'` SELECT siyosati esa istalgan login qilgan foydalanuvchiga bevosita Data API o'qishini ochib qo'ygan edi.
+- Productionda `20260724132314_harden_internal_functions_and_rpc_grants`, repoda esa aynan shu SQL `20260724130852_...` nomida bo'lgan. SQL matni production history bilan tengligi tekshirilib, lokal fayl production timestampiga nomlandi; migration history `repair` qilinmadi.
+
+### Bajarildi
+
+- `20260807153154_lock_down_risk_scanner_tables.sql` yaratildi va productionga qo'llandi.
+- Ikkala risk jadvalidagi eski read/service policylar olib tashlandi; `anon` va `authenticated` uchun barcha table privilege'lar bekor qilindi; `service_role` CRUD saqlandi va RLS yoqilgan holda qoldi.
+- Publishable-key commit `35d4b91` uchun GitHub CI run `31192041119` green, Netlify production deploy `ready` ekanligi tasdiqlandi. Production bundle hali legacy anon fallback ishlatadi: Netlify CLI login/env rollout qolgan, eski env/fallback olib tashlanmadi.
+
+### Verifikatsiya
+
+- Production metadata: risk jadvallarida RLS `true`, policy soni `0`; `anon/authenticated` SELECT/INSERT/UPDATE/DELETE barchasi `false`; `service_role` CRUD `true`.
+- Migration history lokal va remote versiyalar uchun to'liq mos.
+- Security Advisor: error `0`; ma'lum warninglar — `vector` public schema va Leaked Password Protection o'chiq. Policy'siz jadvallar INFO/default-deny bo'lib qoladi.
+- Production `bright-api` health `200`; autentifikatsiyasiz risk scans endpoint `401`; publishable key bilan anonim `risk_scans` Data API SELECT ham `401`.
+- `npm run typecheck` — muvaffaqiyatli; `npm run test:run` — 21/21 fayl, 101/101 test; build va 9-file security gate — muvaffaqiyatli; production audit — exceptiondan tashqari high/critical `0`.
+
+### Keyingi qadam
+
+1. Netlify CLI login, production publishable env, redeploy va Auth/Realtime smoke-testni yopish.
+2. Test tenant/user fixturelari bilan cross-tenant CRUD/role denial va `user_tenants`ga bog'liq Realtime/RLS oqimini tekshirish.
+3. Har bir service-role Edge route ichki authorizationini audit qilish.
+
+### Fayllar
+
+- `supabase/migrations/20260724132314_harden_internal_functions_and_rpc_grants.sql` (production timestampiga nomlandi)
+- `supabase/migrations/20260807153154_lock_down_risk_scanner_tables.sql` (yangi)
+- `docs/{STATUS,PLAN,DEVLOG}.md` va uchta tarjima to'plami
+
+---
+
 ## 2026-08-08 — Publishable-key frontend contract lokal implementatsiya qilindi
 
 ### Kontekst va qaror

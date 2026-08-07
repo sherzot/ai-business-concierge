@@ -4,6 +4,23 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — Closed direct Data API access to risk-scanner data
+
+- Production inventory confirmed RLS on 32/32 public tables, `security_invoker` on 8/8 views, and fixed `search_path` plus no `anon/authenticated` EXECUTE on all 6 `SECURITY DEFINER` functions.
+- `risk_scans` and `risk_findings` are used only through the `bright-api` service-role client after a `super_admin/sub_admin` check. Their old `auth.role() = 'authenticated'` SELECT policies nevertheless allowed any signed-in user to read them directly through the Data API.
+- Reconciled a harmless migration-name drift by verifying that production `20260724132314_harden_internal_functions_and_rpc_grants` exactly matched local `20260724130852_...`, then renaming the local file to the real production timestamp without altering migration history.
+- Created and applied `20260807153154_lock_down_risk_scanner_tables.sql`: removed old policies, revoked all `anon/authenticated` table privileges, retained service-role CRUD, and kept RLS enabled.
+- Production verification: both risk tables have RLS enabled, zero policies, no browser-role CRUD grants, and service-role CRUD. Migration histories match; Security Advisor has 0 errors. Known warnings remain for `vector` in `public` and disabled Leaked Password Protection; no-policy tables remain default-deny INFO findings.
+- Smoke tests: production health `200`; unauthenticated risk endpoint `401`; anonymous `risk_scans` Data API SELECT with the publishable key also returned `401`.
+- Regression verification passed: type-check; 21/21 test files and 101/101 tests; production build; 9-file security gate; 0 unexcepted high/critical dependency advisories.
+- Publishable-key commit `35d4b91` has green GitHub run `31192041119` and a ready Netlify production deploy, but the bundle still uses the legacy fallback. Netlify CLI login/env rollout remains; the old env/fallback was not removed.
+
+Next: authenticate Netlify CLI and finish the publishable env/Auth/Realtime rollout; then add cross-tenant fixtures for `user_tenants`-dependent RLS/Realtime and audit every service-role Edge route.
+
+Files: renamed `supabase/migrations/20260724132314_harden_internal_functions_and_rpc_grants.sql`; added `supabase/migrations/20260807153154_lock_down_risk_scanner_tables.sql`; synchronized STATUS/PLAN/DEVLOG in four languages.
+
+---
+
 ## 2026-08-08 — Publishable-key frontend contract implemented locally
 
 - Verified current Supabase changelog/migration guidance and the existence of a production `default` publishable key without exposing its value.

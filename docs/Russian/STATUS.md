@@ -1,9 +1,9 @@
 # AI Business Concierge — текущее состояние
 
-> Последний подтверждённый snapshot кода/platform: **2026-08-07**
+> Последний подтверждённый snapshot кода/platform: **2026-08-08**
 > Документация упорядочена: **2026-08-07**
 > Local runtime, production health/auth и remote GitHub Actions baseline повторно проверены 2026-08-07. P0 commits отправлены, новый CI run завершён полностью green.
-> 2026-08-08: frontend contract publishable key реализован и проверен локально; production deploy/smoke verification ещё не выполнен.
+> 2026-08-08: commit publishable key отправлен и прошёл CI/Netlify deploy, но production bundle пока использует legacy fallback. Прямой browser Data API доступ к risk scanner tables закрыт в production.
 
 ## Текущая фаза
 
@@ -18,16 +18,17 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | P0 commit set `55ec941` → `a088fef` → `06b5756` отправлен в `origin/main` |
+| Git | Publishable-key commit `35d4b91` отправлен в `origin/main`; текущий RLS hardening ещё не закоммичен |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Backend | Supabase Edge Function `bright-api` v72 |
 | Health | `200` |
 | Type-check | Успешно |
-| Unit tests | 19/19 файлов, 96/96 тестов |
+| Unit tests | 21/21 файлов, 101/101 тестов |
 | Production build/security check | Успешно |
 | Production dependency audit | Scoped gate: 0 unexcepted high/critical; GHSA-qwww metadata exception до 2026-08-21 |
-| Remote GitHub Actions | Run `31188866507`, commit `06b5756`: success; все шаги `frontend-security-gate` green |
-| Frontend Supabase key contract | Local: publishable primary + temporary legacy fallback; production rollout pending |
+| Remote GitHub Actions | Run `31192041119`, commit `35d4b91`: success; все шаги `frontend-security-gate` green |
+| Frontend Supabase key contract | Code/deploy: publishable primary + temporary fallback; production bundle использует legacy anon fallback, Netlify env/login pending |
+| DB security | RLS на 32/32 public tables; 8/8 views используют `security_invoker`; 6/6 `SECURITY DEFINER` functions закрыты для browser EXECUTE; risk tables закрыты от `anon/authenticated` CRUD |
 
 ## Состояние возможностей
 
@@ -45,9 +46,9 @@
 
 ## Ближайший порядок
 
-1. Push publishable-key change, проверить GitHub CI/Netlify deploy и production bundle/Auth/Realtime, затем удалить legacy frontend env/fallback.
-2. До 2026-08-21 пересмотреть/удалить GHSA-qwww metadata exception.
-3. Завершить RLS/grants и cross-tenant authorization audit.
+1. Восстановить Netlify CLI login, установить production `VITE_SUPABASE_PUBLISHABLE_KEY`, redeploy и Auth/Realtime smoke-test; только затем удалить legacy frontend env/fallback.
+2. Добавить cross-tenant CRUD/role fixtures; проверить RLS на основе `user_tenants` и authorization каждого service-role route.
+3. До 2026-08-21 пересмотреть/удалить GHSA-qwww metadata exception.
 4. Завершить PDF/DOCX, private Storage и signed URL для Документолога.
 5. Закрыть Telegram/Resend verification, затем реализовать HR Candidate Analysis.
 

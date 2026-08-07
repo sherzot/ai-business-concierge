@@ -1,6 +1,6 @@
 # AI Business Concierge — active plan
 
-> Version 4.0 · Updated 2026-08-07
+> Version 4.1 · Updated 2026-08-08
 > Only active and next work belongs here. The previous master plan is archived at [../archive/English/PLAN_LEGACY_2026-07-24.md](../archive/English/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — safe session start
@@ -16,10 +16,13 @@
 
 - [ ] Re-review/remove the GHSA-qwww metadata exception by 2026-08-21.
 - [x] Confirm a production publishable key exists; migrate config, env type/example and CI while keeping a temporary rollout fallback.
-- [ ] Verify Netlify env/deploy through the production bundle, smoke-test Auth/Realtime, then remove the legacy frontend env/fallback.
+- [x] Push publishable-key commit `35d4b91`, confirm GitHub CI run `31192041119` green and Netlify production deploy ready; identify that the bundle uses the legacy fallback.
+- [ ] After Netlify CLI login, set the production publishable env, redeploy, smoke-test Auth/Realtime, then remove the legacy frontend env/fallback.
 - [x] Keep direct browser Supabase access limited to Auth/Realtime and add a `from/rpc/storage/functions` regression gate.
-- [ ] Audit public RLS/grants/RPCs and cross-tenant CRUD denial.
-- [ ] Verify every service-role and `SECURITY DEFINER` authorization boundary.
+- [x] Inventory public RLS/grants/views/functions: 32/32 tables use RLS, 8/8 views use `security_invoker`, and 6/6 `SECURITY DEFINER` functions deny browser EXECUTE.
+- [x] Harden the server-only risk-scanner boundary by removing browser CRUD grants/policies and applying the production migration.
+- [ ] Run cross-tenant SELECT/INSERT/UPDATE/DELETE and role-`403` fixtures.
+- [ ] Test `user_tenants`-dependent RLS/Realtime and audit internal authorization on every service-role Edge route.
 - [ ] Decide production/preview environment and secret separation.
 
 ## P1 — complete Phase 2 AI Document Assistant

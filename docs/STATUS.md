@@ -1,9 +1,9 @@
 # AI Business Concierge — joriy holat
 
-> Kod/platforma bo'yicha oxirgi tasdiqlangan snapshot: **2026-08-07**
+> Kod/platforma bo'yicha oxirgi tasdiqlangan snapshot: **2026-08-08**
 > Hujjatlar tartiblangan sana: **2026-08-07**
 > Lokal runtime, production health/auth va remote GitHub Actions baseline'i 2026-08-07 kuni qayta tekshirildi. P0 commitlari push qilindi va yangi CI run to'liq green yakunlandi.
-> 2026-08-08: publishable-key frontend contract lokal implementatsiya va verifikatsiya qilindi; production deploy/smoke-test hali bajarilmagan.
+> 2026-08-08: publishable-key commit push/CI/Netlify deploy qilindi, ammo production bundle hali legacy fallback ishlatmoqda. Risk scanner jadvallarining browser Data API ruxsatlari productionda yopildi.
 
 ## Hozir qayerdamiz
 
@@ -18,17 +18,18 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | P0 commit seti `55ec941` → `a088fef` → `06b5756` `origin/main`ga push qilindi |
+| Git | Publishable-key commit `35d4b91` `origin/main`ga push qilindi; joriy RLS hardening hali commit qilinmagan |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Backend | Supabase Edge Function `bright-api` v72 |
 | Health smoke-test | `200` |
 | Type-check | Muvaffaqiyatli |
-| Unit test | 19/19 fayl, 96/96 test |
+| Unit test | 21/21 fayl, 101/101 test |
 | Production build | Muvaffaqiyatli |
 | Security check | 9 ta build/Netlify fayli muvaffaqiyatli |
 | Production dependency audit | Scoped gate o'tdi: unexcepted high/critical 0; GHSA-qwww metadata exceptioni 2026-08-21 gacha |
-| Remote GitHub Actions | Run `31188866507`, commit `06b5756`: `success`; barcha `frontend-security-gate` qadamlari green |
-| Frontend Supabase key contract | Lokal: publishable primary + vaqtinchalik legacy fallback; production rollout **pending** |
+| Remote GitHub Actions | Run `31192041119`, commit `35d4b91`: `success`; barcha `frontend-security-gate` qadamlari green |
+| Frontend Supabase key contract | Kod/deploy: publishable primary + vaqtinchalik fallback; production bundle legacy anon fallback ishlatmoqda, Netlify env/login **pending** |
+| DB security | 32/32 public tableda RLS; 8/8 view `security_invoker`; 6/6 `SECURITY DEFINER` funksiya browser EXECUTEdan yopiq; risk jadvallari `anon/authenticated` CRUDdan yopildi |
 
 ## Mahsulot va integratsiyalar holati
 
@@ -58,9 +59,9 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. Publishable-key commitini push qilish, GitHub CI/Netlify deploy va production Auth/Realtime/bundle verifikatsiyasini yopish; legacy frontend env/fallbackni faqat keyin olib tashlash.
-2. 2026-08-21gacha GHSA-qwww npm metadata exceptionini qayta ko'rish; registry tuzatilsa exceptionni olib tashlash.
-3. DB grants/RLS va cross-tenant authorization auditini tugatish.
+1. Netlify CLI loginini tiklash, production `VITE_SUPABASE_PUBLISHABLE_KEY`ni o'rnatish, qayta deploy va Auth/Realtime smoke-test qilish; legacy frontend env/fallbackni faqat keyin olib tashlash.
+2. Cross-tenant CRUD/role test fixturelarini yozish; `user_tenants`ga bog'liq RLS siyosatlari va barcha service-role route authorizationini tekshirish.
+3. 2026-08-21gacha GHSA-qwww npm metadata exceptionini qayta ko'rish; registry tuzatilsa exceptionni olib tashlash.
 4. AI Hujjatchi uchun PDF/DOCX, Noto Sans, private Storage va signed URL oqimini yozish.
 5. Telegram webhook secret va Resend receiving/delivery smoke-testlarini yopish.
 6. Keyin HR Candidate Analysis implementatsiyasiga o'tish.

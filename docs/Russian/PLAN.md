@@ -1,6 +1,6 @@
 # AI Business Concierge — активный план
 
-> Версия 4.0 · Обновлено 2026-08-07
+> Версия 4.1 · Обновлено 2026-08-08
 > Здесь только активные и следующие задачи. Старый master plan: [../archive/Russian/PLAN_LEGACY_2026-07-24.md](../archive/Russian/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — безопасное начало сессии
@@ -16,10 +16,13 @@
 
 - [ ] Пересмотреть/удалить GHSA-qwww metadata exception до 2026-08-21.
 - [x] Подтвердить production publishable key; перевести config, env type/example и CI, сохранив temporary rollout fallback.
-- [ ] Проверить Netlify env/deploy через production bundle и Auth/Realtime smoke-test, затем удалить legacy frontend env/fallback.
+- [x] Отправить publishable-key commit `35d4b91`, подтвердить green GitHub CI run `31192041119` и ready Netlify production deploy; определить, что bundle использует legacy fallback.
+- [ ] После Netlify CLI login установить production publishable env, redeploy, Auth/Realtime smoke-test, затем удалить legacy frontend env/fallback.
 - [x] Ограничить direct browser Supabase только Auth/Realtime и добавить `from/rpc/storage/functions` regression gate.
-- [ ] Проверить public RLS/grants/RPC и отказ cross-tenant CRUD.
-- [ ] Проверить service-role и `SECURITY DEFINER` authorization boundaries.
+- [x] Инвентаризировать public RLS/grants/views/functions: RLS на 32/32 tables, `security_invoker` на 8/8 views, browser EXECUTE закрыт для 6/6 `SECURITY DEFINER` functions.
+- [x] Усилить server-only границу risk scanner: удалить browser CRUD grants/policies и применить production migration.
+- [ ] Запустить cross-tenant SELECT/INSERT/UPDATE/DELETE и role-`403` fixtures.
+- [ ] Проверить RLS/Realtime на основе `user_tenants` и internal authorization каждого service-role Edge route.
 - [ ] Решить разделение production/preview env и secrets.
 
 ## P1 — завершить Phase 2 AI Документолог

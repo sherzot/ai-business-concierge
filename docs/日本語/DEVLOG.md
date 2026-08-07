@@ -4,6 +4,23 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-08 — Risk scanner dataへのdirect Data API accessを閉鎖
+
+- Production inventoryで32/32 public tablesのRLS、8/8 viewsの`security_invoker`、全6 `SECURITY DEFINER` functionsのfixed `search_path`と`anon/authenticated` EXECUTEなしを確認。
+- `risk_scans`と`risk_findings`は`super_admin/sub_admin`確認後の`bright-api` service-role clientだけが使用する。しかし旧`auth.role() = 'authenticated'` SELECT policiesは全signed-in userにdirect Data API readを許可していた。
+- Migration historyを変更せずname driftを解消: production `20260724132314_harden_internal_functions_and_rpc_grants` SQLがlocal `20260724130852_...`と完全一致することを確認し、local fileを実production timestampへrename。
+- `20260807153154_lock_down_risk_scanner_tables.sql`を作成・production適用。Old policiesを削除し、`anon/authenticated`の全table privilegesをrevoke、service-role CRUDとRLSを保持。
+- Production verification: 両risk tablesはRLS enabled、policy 0、browser CRUD grant 0、service-role CRUDあり。Migration history一致、Security Advisor error 0。既知warningは`vector` in `public`とLeaked Password Protection disabled。No-policy tablesはdefault-deny INFO。
+- Smoke tests: production health `200`、unauthenticated risk endpoint `401`、publishable keyによるanonymous `risk_scans` Data API SELECTも`401`。
+- Regression verification成功: type-check、21/21 test files・101/101 tests、production build、9-file security gate、unexcepted high/critical 0。
+- Publishable-key commit `35d4b91`はGitHub run `31192041119` green、Netlify production deploy ready。ただしbundleはlegacy fallback使用中。Netlify CLI login/env rolloutが残り、old env/fallbackは削除していない。
+
+次: Netlify publishable env/Auth/Realtime rolloutを完了し、`user_tenants`依存RLS/Realtimeのcross-tenant fixturesと全service-role Edge route auditへ進む。
+
+Files: `supabase/migrations/20260724132314_harden_internal_functions_and_rpc_grants.sql`をrename、`supabase/migrations/20260807153154_lock_down_risk_scanner_tables.sql`を追加、4言語STATUS/PLAN/DEVLOGを同期。
+
+---
+
 ## 2026-08-08 — Publishable-key frontend contractをlocal実装
 
 - Current Supabase changelog/migration guidanceとproduction `default` publishable keyの存在をvalue非表示で確認。

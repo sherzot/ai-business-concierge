@@ -4,6 +4,23 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — Закрыт прямой Data API доступ к данным risk scanner
+
+- Production inventory подтвердил RLS на 32/32 public tables, `security_invoker` на 8/8 views и fixed `search_path` без `anon/authenticated` EXECUTE у всех 6 `SECURITY DEFINER` functions.
+- `risk_scans` и `risk_findings` используются только через service-role client `bright-api` после проверки `super_admin/sub_admin`. Старые SELECT policies с `auth.role() = 'authenticated'` позволяли любому вошедшему пользователю читать их напрямую через Data API.
+- Без изменения migration history устранён drift имени: SQL production `20260724132314_harden_internal_functions_and_rpc_grants` точно совпал с local `20260724130852_...`, после чего local file переименован в реальный production timestamp.
+- Создан и применён `20260807153154_lock_down_risk_scanner_tables.sql`: old policies удалены, все privileges для `anon/authenticated` отозваны, CRUD для service role сохранён, RLS оставлен включённым.
+- Production verification: обе risk tables имеют RLS, 0 policies, 0 browser CRUD grants и service-role CRUD. Migration histories совпадают; Security Advisor: 0 errors. Известные warnings — `vector` в `public` и отключённая Leaked Password Protection; tables без policies остаются default-deny INFO.
+- Smoke tests: production health `200`, risk endpoint без authentication `401`, а anonymous Data API SELECT `risk_scans` с publishable key также вернул `401`.
+- Regression verification: type-check; 21/21 test files и 101/101 tests; production build; security gate на 9 files; 0 unexcepted high/critical advisories.
+- Publishable-key commit `35d4b91` имеет green GitHub run `31192041119` и ready Netlify production deploy, но bundle пока использует legacy fallback. Нужен Netlify CLI login/env rollout; old env/fallback не удалён.
+
+Далее: завершить Netlify publishable env/Auth/Realtime rollout, затем добавить cross-tenant fixtures для RLS/Realtime на основе `user_tenants` и проверить каждый service-role Edge route.
+
+Files: переименован `supabase/migrations/20260724132314_harden_internal_functions_and_rpc_grants.sql`; добавлен `supabase/migrations/20260807153154_lock_down_risk_scanner_tables.sql`; синхронизированы STATUS/PLAN/DEVLOG на четырёх языках.
+
+---
+
 ## 2026-08-08 — Локально реализован frontend contract publishable key
 
 - Проверены актуальные Supabase changelog/migration guidance и наличие production `default` publishable key без раскрытия значения.

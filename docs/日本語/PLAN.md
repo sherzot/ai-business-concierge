@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 4.0 · 更新 2026-08-07
+> Version 4.1 · 更新 2026-08-08
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -16,10 +16,13 @@
 
 - [ ] 2026-08-21までにGHSA-qwww metadata exceptionを再確認/削除。
 - [x] Production publishable keyを確認し、temporary rollout fallbackを保持してconfig、env type/example、CIを移行。
-- [ ] Production bundleでNetlify env/deployを確認し、Auth/Realtime smoke-test後にlegacy frontend env/fallbackを削除。
+- [x] Publishable-key commit `35d4b91`をpushし、GitHub CI run `31192041119` greenとNetlify production deploy readyを確認。Bundleがlegacy fallbackを使うことを特定。
+- [ ] Netlify CLI login後、production publishable envを設定してredeploy、Auth/Realtime smoke-test後にlegacy frontend env/fallbackを削除。
 - [x] Direct browser SupabaseをAuth/Realtimeだけに限定し`from/rpc/storage/functions` regression gateを追加。
-- [ ] Public RLS/grants/RPCとcross-tenant CRUD拒否を監査。
-- [ ] Service-roleと`SECURITY DEFINER` authorization boundaryを確認。
+- [x] Public RLS/grants/views/functionsをinventory: 32/32 tablesでRLS、8/8 viewsが`security_invoker`、6/6 `SECURITY DEFINER` functionsはbrowser EXECUTE不可。
+- [x] Risk scannerのserver-only boundaryを強化しbrowser CRUD grants/policiesを削除、production migration適用。
+- [ ] Cross-tenant SELECT/INSERT/UPDATE/DELETEとrole-`403` fixturesを実行。
+- [ ] `user_tenants`依存RLS/Realtimeと全service-role Edge routeのinternal authorizationを検証。
 - [ ] Production/preview envとsecret分離を決定。
 
 ## P1 — Phase 2 AI文書作成を完了
