@@ -136,15 +136,28 @@ OPENAI_API_KEY=
 
 ---
 
+## 必須SESSION LIFECYCLE
+
+毎sessionでcode/documentationを変更する前に:
+
+1. `docs/README.md`を読む。
+2. `docs/STATUS.md`を完全に読む。
+3. `docs/DEVLOG.md`先頭の最新entryを読む。
+4. `docs/PLAN.md`でscope対象のactive taskを確認。
+5. `git status --short`を実行しuser changesを保持。
+
+Material changeを完了と宣言する前にDEVLOG protocolを実行しSTATUS/PLANを更新する。Capability、phase、architectureが変わった場合は該当documentも同期する。完全なrepo rule: `AGENTS.md`。
+
+---
+
 ## DEVLOGプロトコル（§DEVLOG）
 
-**ルール：** すべての重要な変更（新機能、バグ修正、マイグレーション、アーキテクチャ決定、デプロイエラー）は**5つのファイルに同時に**記録しなければならない：
+**ルール：** すべての重要な変更（新機能、バグ修正、マイグレーション、アーキテクチャ決定、デプロイエラー）は**4つのファイルに同時に**記録しなければならない：
 
 1. `docs/DEVLOG.md` — メイン（ウズベク語、詳細）
 2. `docs/English/DEVLOG.md` — 英語訳
 3. `docs/Russian/DEVLOG.md` — ロシア語訳
-4. `docs/Uzbek/DEVLOG.md` — ウズベク語（簡略版）
-5. `docs/日本語/DEVLOG.md` — 日本語訳
+4. `docs/日本語/DEVLOG.md` — 日本語訳
 
 **フォーマット：**
 ```
@@ -160,7 +173,7 @@ OPENAI_API_KEY=
 - `path/to/file`（新規/変更）
 ```
 
-**同期チェック：** 各セッション終了時、すべての5つのDEVLOG.mdの最新エントリが同じ日付であること。差異があれば — すぐに翻訳を追加すること。
+**同期チェック：** 各セッション終了時、すべての4つのDEVLOG.mdの最新エントリが同じ日付であること。差異があれば — すぐに翻訳を追加すること。
 
 ---
 
@@ -168,7 +181,7 @@ OPENAI_API_KEY=
 
 - **マイグレーション** — DBの変更はマイグレーションファイル経由のみ
 - **テスト** — 新しいAPIエンドポイント = 新しいテスト
-- **i18n** — 新しいUI文字列 = uz + ruの翻訳
+- **i18n** — 新しいUI文字列 = uz + ru + en + jaの翻訳
 - **モバイル** — すべてのUI変更はモバイルで確認
-- **DEVLOG** — すべての重要な変更は5つのDEVLOG.mdに記録する（§DEVLOGを参照）
+- **DEVLOG** — すべての重要な変更は4つのDEVLOG.mdに記録する（§DEVLOGを参照）
 - **競合** — SQBは競合ではなくファネル。私たちは日常の運営、彼らはスタートアップフェーズ。

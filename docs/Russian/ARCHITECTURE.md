@@ -1,7 +1,9 @@
 # ARCHITECTURE.md — AI Business Concierge
 
 > Архитектура проекта, паттерны проектирования и правила unit-тестирования
-> Версия: 1.0 | Дата: 2026-05-05
+> Версия: 1.1 | Обновлено: 2026-08-07
+>
+> Текущий runtime-статус находится в [STATUS.md](STATUS.md). Папки `hr-candidate` — modular scaffold с TODO/stub logic, а не production-ready эталон.
 
 ---
 
@@ -112,7 +114,7 @@ supabase/functions/server/
     services/
       llm-router.ts
       knowledge-base.ts
-      hr-candidate/        ← ЭТАЛОННЫЙ паттерн
+      hr-candidate/        ← SKELETON structure; остаются TODO/stub
         index.ts
         types.ts
         candidate-scorer.ts

@@ -1,7 +1,9 @@
 # ARCHITECTURE.md — AI Business Concierge
 
 > プロジェクトアーキテクチャ、設計パターン、ユニットテストルール
-> バージョン: 1.0 | 日付: 2026-05-05
+> バージョン: 1.1 | 更新: 2026-08-07
+>
+> Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate` foldersはTODO/stub logicを含むmodular scaffoldであり、production-ready referenceではない。
 
 ---
 
@@ -112,7 +114,7 @@ supabase/functions/server/
     services/
       llm-router.ts
       knowledge-base.ts
-      hr-candidate/        ← 参考実装パターン
+      hr-candidate/        ← SKELETON structure; TODO/stubが残る
         index.ts
         types.ts
         candidate-scorer.ts

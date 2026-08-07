@@ -1,88 +1,75 @@
-# AI Business Concierge – Requirements
+# AI Business Concierge — requirements
 
-Bu hujjat loyiha talablarini va kelajakdagi yo‘nalishlarni belgilaydi. Yangi funksiyalar qo‘shishda shu hujjatga murojaat qiling.
+> Yangilandi: 2026-08-07
+> Holat qiymatlari: **Done** — ishlaydigan implementatsiya bor; **Partial** — bir qismi yoki operatsion verifikatsiya qolgan; **Skeleton** — scaffold bor, business logic ishlamaydi; **Planned** — boshlanmagan.
 
-> Holat 2026-07-24 dagi kod va DEVLOG bilan sinxronlangan.
+## Hozirgi platforma capabilitylari
 
----
+| Capability | Holat | Izoh |
+|---|---|---|
+| Supabase Auth | Done | Email/password, reset va setup oqimlari |
+| Multi-tenant va RBAC | Done | Tenant membership, role guards va tenant switcher |
+| Reports | Done | KPI, health score va chartlar |
+| Inbox | Partial | UI/API mavjud; real Resend delivery qayta tasdiqlanishi kerak |
+| Tasks | Done | Board/list CRUD, Realtime, assignment notification va acknowledge |
+| HR employee management | Done | Employee profile/invite/status oqimlari |
+| Docs library | Done | List, search, CRUD va 15 ta 4 tilli template |
+| AI Hujjatchi | Partial | Qoralama generatsiya bor; PDF/DOCX va Storage yo'q |
+| Integrations | Partial | Telegram/Email fundamenti bor; ayrim production smoke-testlar qolgan |
+| AI Concierge | Partial | Router, safety, cost log va RAG fundamenti bor; to'liq semantic/citation UX qarzi mavjud |
+| Admin platforma | Partial | Asosiy boshqaruv/monitoring sahifalari bor; advanced agent va billing qismlari yo'q |
+| Settings va lokalizatsiya | Done | Profil, til, theme; `uz`, `ru`, `en`, `ja` |
 
-## 1. Hozirgi holat (MVP)
+## Requirementlar
 
-### 1.1 Auth va rollar
-- [x] Supabase Auth (email/password)
-- [x] Multi-tenant: `tenants`, `user_tenants`
-- [x] Rollar: super_admin, sub_admin, company_admin, leader, hr, accounting/accountant, department_head/manager, employee
-- [x] Rol bo‘yicha kirish: `canAccess(module)`
-- [x] Tenant switcher
+### Yuqori prioritet
 
-### 1.2 Modullar
-- [x] Reports – KPI, health score, daily report
-- [x] Inbox – unified inbox (email/telegram)
-- [x] Tasks – board/list, CRUD
-- [x] HR – cases, surveys
-- [x] Docs – list, search, index
-- [x] Integrations – Telegram, Email, AmoCRM
-- [x] AI Concierge – chat, tools
-- [x] Settings – profil, til
+| ID | Talab | Holat | Keyingi aniq ish |
+|---|---|---|---|
+| R-001 | Real email inbox | Partial | Resend receiving, signature, mapping va real delivery smoke-test |
+| R-002 | Supabase Realtime | Done | Regressiya testlari bilan saqlash |
+| R-015 | Task assignment notifications | Done | Regressiya testlari bilan saqlash |
+| R-016 | HR Candidate Analysis | Skeleton | GitHub/CV/LLM implementatsiyasi, auth/rate limit/testlar |
+| R-017 | AI rate limiting | Partial | Endpoint/plan bo'yicha yagona quota siyosati va `Retry-After` |
+| R-018 | AI cost tracking | Partial | Log wiring mavjud; usage API, tenant dashboard va plan enforcement |
+| R-019 | Vector Search (RAG) | Partial | Embedding/match fundamenti bor; explicit docs tool, citation va cache |
+| R-020 | Admin Dashboard | Partial | Billing/MRR/churn va advanced AI agent monitoring |
+| R-021 | AI Hujjatchi binary output | Partial | PDF/DOCX, font embedding, private Storage va signed URL |
+| R-003 | Billing/To'lovlar | Planned | Click/Payme, subscription lifecycle va idempotency |
+| R-004 | Audit log ko'rinishi | Done | Retention va filterlarni keyin kengaytirish |
+| R-005 | Export/Import | Planned | Reports/Tasks CSV/Excel va bulk import |
 
-### 1.3 Texnik stack
-- Frontend: React + Vite + TypeScript
-- Backend: Supabase Edge Function (Hono)
-- DB: Supabase Postgres
-- Deploy: Netlify + Supabase
+### O'rta prioritet
 
----
+| ID | Talab | Holat | Izoh |
+|---|---|---|---|
+| R-006 | Push/email bildirishnomalar | Partial | In-app mavjud; browser Web Push va umumiy email notification yo'q |
+| R-007 | Mobil/PWA | Partial | Manifest/offline shell bor; chuqur offline sync va push yo'q |
+| R-008 | Ko'p tillilik | Done | `uz`, `ru`, `en`, `ja`; yangi featurelar shu kontraktni saqlashi kerak |
+| R-009 | Custom branding | Planned | Tenant logo/ranglar |
+| R-010 | API rate limiting | Partial | AI DB-backed limit bor; barcha endpointlar uchun unified policy yo'q |
 
-## 2. Kelajakdagi talablar (prioritet bo‘yicha)
+### Past prioritet
 
-### 2.1 Yuqori prioritet
-| ID | Talab | Tavsif | Modul |
-|----|-------|--------|-------|
-| R-001 | Real inbox integratsiyasi | Email (Resend) webhook – qisman ✅ | Inbox |
-| R-002 | Real-time yangilanishlar | Supabase Realtime – inbox, tasks ✅ | Inbox, Tasks |
-| R-015 | Vazifa biriktirish bildirishnomalari | Rahbar biriktirganda mas'ulga alert, tasdiqlash, status shaffofligi ✅ | Tasks |
-| R-016 | HR Candidate Analysis | GitHub profil + CV tahlil, AI scoring, intervyu savollari (skeleton ✅, impl Phase 2) | HR |
-| R-017 | AI Rate Limiting | Tenant/user bo'yicha AI chaqiruv limiti (in-memory + DB tracking) ✅ qisman | Backend |
-| R-018 | AI Cost Tracking | Token usage log per tenant, billing zamini (`ai_usage_logs`) ✅ migration | Backend |
-| R-019 | Vector Search (RAG) | `pgvector` doc_chunks, `match_documents()` semantic search ✅ migration | Docs |
-| R-020 | Admin Dashboard | super_admin/sub_admin: contacts, health, AI chat — Phase 4'da to'liq | Admin |
-| R-003 | Billing/To‘lovlar | Subscription, planlar, to‘lov tarixi | Yangi |
-| R-004 | Audit log ko‘rinishi | Admin audit log sahifasi va backend endpoint ✅ | Settings |
-| R-005 | Export/Import | Excel, CSV export; bulk import | Reports, Tasks |
+| ID | Talab | Holat | Izoh |
+|---|---|---|---|
+| R-011 | SSO/OAuth | Planned | Google/Microsoft |
+| R-012 | 2FA | Planned | Auth hardening |
+| R-013 | Advanced analytics | Partial | Asosiy chartlar bor; custom analytics va biznes drilldown yo'q |
+| R-014 | Outbound webhooks | Planned | Tashqi tizimlarga event yuborish |
 
-### 2.2 O‘rta prioritet
-| ID | Talab | Tavsif | Modul |
-|----|-------|--------|-------|
-| R-006 | Push/bildirishnomalar | Browser push, email bildirishnomalar | Hammasi |
-| R-007 | Mobil qurilmalar | PWA yoki React Native | Hammasi |
-| R-008 | Ko‘p tillilik kengaytirish | Qo‘shimcha tillar (ru, en) | Settings |
-| R-009 | Custom branding | Logo, ranglar tenant bo‘yicha | Settings |
-| R-010 | API rate limiting | Foydalanuvchi/tenant bo‘yicha limit | Backend |
+## Talab qo'shish qoidasi
 
-### 2.3 Past prioritet
-| ID | Talab | Tavsif | Modul |
-|----|-------|--------|-------|
-| R-011 | SSO / OAuth | Google, Microsoft login | Auth |
-| R-012 | 2FA | Ikki bosqichli autentifikatsiya | Auth |
-| R-013 | Advanced analytics | Custom reportlar, grafiklar | Reports |
-| R-014 | Webhook chiqish | Tashqi tizimlarga event yuborish | Integrations |
+1. Keyingi bo'sh `R-XXX` ID tanlanadi.
+2. Muammo, acceptance criteria, modul, prioritet va qaramlik yoziladi.
+3. Holat faqat kod va verifikatsiya daliliga ko'ra o'zgartiriladi.
+4. Faol ish [PLAN.md](PLAN.md)ga, yakuniy natija [DEVLOG.md](DEVLOG.md)ga yoziladi.
+5. Multi-tenant, role, localization, audit va secret boundary talablari har yangi feature uchun majburiy.
 
----
+## Arxitektura talablari
 
-## 3. Talab qo‘shish qoidalari
-
-Yangi talab qo‘shishda:
-1. **ID** – `R-XXX` formatida (keyingi raqam)
-2. **Tavsif** – qisqa, aniq
-3. **Modul** – qaysi modulga qo‘shiladi
-4. **Prioritet** – yuqori / o‘rta / past
-5. **Qaramliklar** – boshqa talablarga bog‘liq
-
----
-
-## 4. Arxitektura tamoyillari
-
-- **Feature-based** – har bir modul o‘z `features/` papkasida
-- **API-first** – backend endpointlar avval, keyin frontend
-- **Rol-based** – har bir modul `canAccess` tekshiradi
-- **Tenant isolation** – barcha ma’lumotlar `tenant_id` orqali ajratiladi
+- Feature-based frontend va typed API qatlam.
+- Business data faqat `bright-api` orqali; browser direct Supabase faqat Auth/Realtime.
+- Har data operatsiyasi tenant/role/ownership bilan tekshiriladi.
+- Private fayllar private Storage + RLS + signed/authenticated access bilan ishlaydi.
+- Server secretlari browser yoki `VITE_*` envga chiqmaydi.

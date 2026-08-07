@@ -1,82 +1,83 @@
-# AI Business Concierge – Roadmap
+# AI Business Concierge — roadmap
 
-Requirements va roadmap bir-biriga bog‘liq. `docs/REQUIREMENTS.md` da talablar, shu yerda bosqichlar va rejalar.
+> Yangilandi: 2026-08-07
+> Joriy operatsion holat uchun [STATUS.md](STATUS.md), bajarish tartibi uchun [PLAN.md](PLAN.md) ishlatiladi.
 
----
+## Joriy ish nuqtasi
 
-## Joriy ish nuqtasi (2026-07-24)
+- Phase 0, Phase 1 va Phase 1.5 yakunlangan.
+- Phase 2 faol: landing va 15 ta to'rt tilli hujjat shabloni tayyor; qoralama generatsiya ishlaydi.
+- Phase 2 ning hozirgi maqsadi: haqiqiy PDF/DOCX, AI polishing va private Storage.
+- HR Candidate Analysis scaffold/skeleton holatida; production endpoint `501 NOT_IMPLEMENTED`.
+- Phase 3 monetizatsiya va Phase 4 advanced Admin AI boshlanmagan.
 
-- Phase 0, Phase 1 va Phase 1.5 yakunlangan
-- Phase 2 boshlangan: web landing, FAQ va SEO tayyor
-- Keyingi mahsulot vazifasi: AI Hujjatchi (hujjat generatsiyasi)
-- HR Candidate Analysis skeleton holatida; endpoint hozircha `501 NOT_IMPLEMENTED`
-- Phase 3 billing/to'lov va Phase 4 advanced Admin AI hali boshlanmagan
+## Phase 0 — Foundation ✅
 
----
+- Supabase Auth, multi-tenant va RBAC.
+- Hono/Supabase Edge Function backend va React/Vite frontend.
+- Claude/OpenAI router, Knowledge Base va pgvector fundamenti.
+- RLS, audit, structured logging, CI/build/security asoslari.
 
-## Bosqich 1: Tayanch (tugallangan) ✅
+## Phase 1 — Telegram MVP ✅ / operatsion tekshiruv qolgan
 
-- Auth, rollar, tenant
-- Barcha asosiy modullar (Reports, Inbox, Tasks, HR, Docs, Integrations)
-- AI Concierge
-- Settings
+- To'rt til, komandalar, AI javob, feedback va kunlik limit implementatsiya qilingan.
+- Beta monitoring viewlari mavjud.
+- Production webhook secret va end-to-end bot smoke-testi qayta tasdiqlanishi kerak.
 
----
+## Phase 1.5 — Company Auth & Management ✅
 
-## Bosqich 2: Qisqa muddat (1–2 oy)
+- Company contact/invite/register/approve/block oqimi.
+- Employee invite, profil, parol va HR tasdiqlash oqimi.
+- Admin companies, contacts, users, health, audit, KB, risk va AI stats sahifalari.
+- Realtime notifications va task acknowledge.
 
-| Vaqt | Vazifa | Requirement ID |
-|------|--------|----------------|
-| Hafta 1–2 | Real inbox: Email API (Resend/SendGrid) yoki Telegram Bot | R-001 |
-| Hafta 2–3 | Supabase Realtime – inbox, tasks yangilanish | R-002 |
-| Hafta 3–4 | Audit log sahifasi (admin) | R-004 |
+## Phase 2 — AI Hujjatchi + Landing 🚧
 
----
+### Bajarilgan
 
-## Bosqich 3: O‘rta muddat (2–4 oy)
+- Landing hero, featurelar, pricing, FAQ, SEO va responsive UI.
+- 15 ta hujjat shabloni `uz`, `ru`, `en`, `ja` tillarida.
+- Dinamik forma va `documents`/`doc_generated` qoralama pipeline.
+- Template/generate API va frontend testlari.
 
-| Vaqt | Vazifa | Requirement ID |
-|------|--------|----------------|
-| Oy 1 | Billing / subscription (Stripe yoki Supabase Billing) | R-003 |
-| Oy 2 | Export (Excel, CSV) – Reports, Tasks | R-005 |
-| Oy 2–3 | Push bildirishnomalar | R-006 |
-| Oy 3–4 | PWA / mobil optimizatsiya | R-007 |
+### Qolgan
 
----
+- AI savol-javob va polishing.
+- PDF/DOCX binary va Noto Sans font embedding.
+- Private Storage, RLS, file validation va signed URL.
+- Telegram orqali step-by-step hujjat yaratish va fayl yuborish.
+- Phase 2 yakunidan keyin HR Candidate Analysis full implementation.
 
-## Bosqich 4: Uzoq muddat (4+ oy)
+## Phase 3 — Savdo bot + monetizatsiya
 
-| Vaqt | Vazifa | Requirement ID |
-|------|--------|----------------|
-| Oy 4+ | SSO / OAuth | R-011 |
-| Oy 4+ | 2FA | R-012 |
-| Oy 5+ | Custom branding | R-009 |
-| Oy 5+ | Advanced analytics | R-013 |
+- AI Sotuvchi bot va katalog/buyurtma oqimi.
+- Click va Payme integratsiyasi.
+- Subscription lifecycle, plan limitlari, usage billing va grace period.
+- Resend webhook idempotency va retry queue.
 
----
+## Phase 4 — Advanced Admin AI + sifat
 
-## Qanday qilish kerak
+- Billing, MRR, churn va AI cost monitoring.
+- KB, Support, Analytics va Health agentlari.
+- Playwright E2E va keng cross-tenant testlar.
+- Export/delete, SSO/2FA, custom branding va advanced analyticsni prioritet bo'yicha olish.
 
-### 1. Yangi talab qo‘shishda
-1. `docs/REQUIREMENTS.md` ga yangi qator qo‘shing (ID, tavsif, modul, prioritet)
-2. `docs/ROADMAP.md` da tegishli bosqichga qo‘shing
-3. Agar prioritet o‘zgarsa – roadmap ni yangilang
+## Phase 5 — Scale
 
-### 2. Sprint/rejalashda
-1. Roadmap dan bir bosqichni tanlang
-2. Requirements dan tegishli ID larni oling
-3. Backend → Frontend tartibida ishlang
+- Performance/code splitting va observability.
+- Web Push va chuqurroq PWA/offline oqimlari.
+- Regional expansion va tashqi biznes integratsiyalari.
 
-### 3. O‘zgartirishlar
-- Requirements va Roadmap hujjatlar – faqat qo‘llab-quvvatlash
-- Asosiy kod `frontend/` va `supabase/` da
-- Yangi talab kelsa – avval Requirements ga yozing, keyin kodga o‘ting
+## Roadmap yangilash qoidasi
 
----
+1. Yangi capability avval [REQUIREMENTS.md](REQUIREMENTS.md)da `R-XXX` sifatida yoziladi.
+2. Faol bajarish ishlari [PLAN.md](PLAN.md)ga qo'shiladi.
+3. Phase o'zgarganda shu roadmap va [STATUS.md](STATUS.md) bir sessiyada yangilanadi.
+4. Bajarilgan ish dalili [DEVLOG.md](DEVLOG.md)ga yoziladi.
 
-## Changelog (qisqacha)
+## Changelog
 
-| Sana | O‘zgarish |
-|------|-----------|
-| 2026-07-24 | Phase 1.5 yakuni va Phase 2 start nuqtasi kod/DEVLOG bilan sinxronlandi |
-| 2026-02-05 | Initial roadmap, Bosqich 1 tugallangan |
+| Sana | O'zgarish |
+|---|---|
+| 2026-08-07 | Phase 2 ning real bajarilgan/qolgan qismlari ajratildi; HR Candidate skeleton va keyingi phase'lar aniqlashtirildi |
+| 2026-07-24 | Phase 1.5 yakuni va Phase 2 starti kod/DEVLOG bilan sinxronlangan |

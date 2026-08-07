@@ -2,7 +2,7 @@
 
 This document defines project requirements and future directions. Refer to this document when adding new features.
 
-> Status synchronized with the code and DEVLOG as of 2026-07-24.
+> Updated 2026-08-07. Current operational snapshot: [STATUS.md](STATUS.md). Status terms are Done, Partial, Skeleton, and Planned.
 
 ---
 
@@ -41,6 +41,12 @@ This document defines project requirements and future directions. Refer to this 
 | R-001 | Real inbox integration | Email (Resend) webhook – partially done ✅ | Inbox |
 | R-002 | Real-time updates | Supabase Realtime – inbox, tasks ✅ | Inbox, Tasks |
 | R-015 | Task assignment notifications | Alert assignee when leader assigns, acknowledgement, status transparency ✅ | Tasks |
+| R-016 | HR Candidate Analysis | Skeleton; GitHub/CV/LLM business logic and tests remain | HR |
+| R-017 | AI rate limiting | Partial; DB-backed AI limits exist, unified plan/endpoint policy remains | Backend |
+| R-018 | AI cost tracking | Partial; logging exists, tenant usage dashboard/enforcement remains | Backend |
+| R-019 | Vector Search (RAG) | Partial; vector/embedding foundation exists, explicit tool/citations remain | Docs |
+| R-020 | Admin Dashboard | Partial; core pages exist, billing/advanced agents remain | Admin |
+| R-021 | AI Document Maker binary output | Partial; templates/drafts exist, PDF/DOCX/Storage remain | Docs |
 | R-003 | Billing/Payments | Subscription, plans, payment history | New |
 | R-004 | Audit log view | Admin audit log page and backend endpoint ✅ | Settings |
 | R-005 | Export/Import | Excel, CSV export; bulk import | Reports, Tasks |
@@ -49,10 +55,10 @@ This document defines project requirements and future directions. Refer to this 
 | ID | Requirement | Description | Module |
 |----|-------------|-------------|--------|
 | R-006 | Push/notifications | Browser push, email notifications | All |
-| R-007 | Mobile devices | PWA or React Native | All |
-| R-008 | Multilingual expansion | Additional languages (ru, en) | Settings |
+| R-007 | Mobile devices | Partial PWA shell; deep offline sync/push remains | All |
+| R-008 | Multilingual expansion | Done: uz, ru, en, ja | Settings |
 | R-009 | Custom branding | Logo, colors per tenant | Settings |
-| R-010 | API rate limiting | Limit per user/tenant | Backend |
+| R-010 | API rate limiting | Partial: AI protection exists; unified API policy remains | Backend |
 
 ### 2.3 Low Priority
 | ID | Requirement | Description | Module |

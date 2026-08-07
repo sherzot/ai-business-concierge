@@ -1,5 +1,7 @@
 # R-015: Vazifa biriktirish bildirishnomalari
 
+> **Holat: DONE.** Backend, frontend va migration implementatsiyasi mavjud. Bu fayl feature oqimi va operatsion eslatma sifatida saqlanadi.
+
 Rahbar vazifa yaratib/yangilab mas'ul biriktirganda, mas'ulga bildirishnoma boradi. Mas'ul "Tasdiqlash" tugmasi orqali vazifani qabul qilganini tasdiqlaydi. Barcha xodimlar barcha vazifalar va ularning statuslarini ko'radi – tizim ochiq va shaffof.
 
 ## O'zgarishlar

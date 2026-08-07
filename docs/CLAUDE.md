@@ -254,15 +254,28 @@ OPENAI_API_KEY=        # Embedding uchun (text-embedding-3-small)
 
 ---
 
+## MAJBURIY SESSION LIFECYCLE
+
+Har sessiya boshida, kod yoki hujjat o'zgartirishdan oldin:
+
+1. `docs/README.md`ni o'qing.
+2. `docs/STATUS.md`ni to'liq o'qing.
+3. `docs/DEVLOG.md`ning eng yangi yuqori entrysini o'qing.
+4. `docs/PLAN.md`dan scope'ga mos faol vazifani aniqlang.
+5. `git status --short` bilan user o'zgarishlarini aniqlang va saqlang.
+
+Material o'zgarishni tugallangan deb aytishdan oldin DEVLOG protokolini bajaring, `STATUS.md` va `PLAN.md`ni yangilang; requirement, phase yoki arxitektura o'zgargan bo'lsa tegishli hujjatni ham sinxronlang. To'liq repo qoidasi: `AGENTS.md`.
+
+---
+
 ## DEVLOG PROTOKOLI (§DEVLOG)
 
-**Qoida:** Har qanday muhim o'zgarish (yangi feature, bug fix, migration, arxitektura qarori, deployment xatosi) **5 ta faylga bir vaqtda** yozilishi SHART:
+**Qoida:** Har qanday muhim o'zgarish (yangi feature, bug fix, migration, arxitektura qarori, deployment xatosi) **4 ta faylga bir vaqtda** yozilishi SHART:
 
 1. `docs/DEVLOG.md` — asosiy (o'zbek, batafsil)
 2. `docs/English/DEVLOG.md` — inglizcha tarjima
 3. `docs/Russian/DEVLOG.md` — ruscha tarjima
-4. `docs/Uzbek/DEVLOG.md` — o'zbek (qisqa variant)
-5. `docs/日本語/DEVLOG.md` — yaponcha tarjima
+4. `docs/日本語/DEVLOG.md` — yaponcha tarjima
 
 **Format:**
 ```
@@ -278,7 +291,7 @@ Nima muammo bor edi yoki nima kerak edi.
 - `path/to/file` (yangi/o'zgargan)
 ```
 
-**Sinxronizatsiya tekshiruvi:** Har sessiya oxirida barcha 5 ta DEVLOG.md dagi so'nggi yozuv bir xil sanali bo'lishi kerak. Agar farq bo'lsa — tarjimani darhol qo'shing.
+**Sinxronizatsiya tekshiruvi:** Har sessiya oxirida barcha 4 ta DEVLOG.md dagi so'nggi yozuv bir xil sanali bo'lishi kerak. Agar farq bo'lsa — tarjimani darhol qo'shing.
 
 ---
 
@@ -286,8 +299,8 @@ Nima muammo bor edi yoki nima kerak edi.
 
 - **Migration** — DB o'zgarish faqat migration fayl orqali
 - **Test** — yangi API endpoint = yangi test
-- **i18n** — yangi UI string = uz + ru tarjima
+- **i18n** — yangi UI string = uz + ru + en + ja tarjima
 - **Mobile** — har bir UI o'zgarish mobile da tekshiriladi
 - **AI test** — AI prompt o'zgarish = 10 ta test savol bilan tekshirish
-- **DEVLOG** — har muhim o'zgarish 5 ta DEVLOG.md ga yoziladi (§DEVLOG qarang)
+- **DEVLOG** — har muhim o'zgarish 4 ta DEVLOG.md ga yoziladi (§DEVLOG qarang)
 - **Raqobat** — SQB raqib emas, funnel. Biz kundalik ops, ular startup bosqich.

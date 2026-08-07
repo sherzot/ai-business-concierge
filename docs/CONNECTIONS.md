@@ -3,6 +3,8 @@
 > AI Business Concierge — barcha tashqi connectionlarni sozlash bo'yicha qo'llanma
 > Version: 1.1 · Yangilandi: 2026-07-24 (production audit)
 > Owner: Sher (PM/PL)
+>
+> **Status eslatmasi (2026-08-07):** Joriy snapshot [STATUS.md](STATUS.md)da. Quyidagi ayrim buyruqlarda legacy `anon`/`server` nomlari qolgan; publishable-key migratsiyasi tugamaguncha keyni ko'r-ko'rona rotate/revoke qilmang.
 
 ---
 

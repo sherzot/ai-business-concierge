@@ -1,5 +1,7 @@
 # FIRST_PUSH.md — Phase 0 yakunlash deploy qo'llanmasi
 
+> ⚠️ **TARIXIY HUJJAT:** Bu 2026-04-29 Phase 0 birinchi push uchun saqlangan. Undagi ochiq checklist, function nomi, RLS soni va env nomlari joriy production holati hisoblanmaydi. Joriy ish uchun [STATUS.md](STATUS.md), [PLAN.md](PLAN.md) va eng yangi [DEVLOG.md](DEVLOG.md) entrysini ishlating.
+
 > **Maqsad:** 2026-04-29 da yaratilgan Phase 0 fayllarini GitHub → Supabase → Netlify ga deploy qilish.
 > **Vaqt:** ~30-45 daqiqa (CLI tayyor bo'lsa).
 > **Auditoriya:** Sher (PM/PL) — copy-paste qilib bajaradigan bosqichma-bosqich qo'llanma.

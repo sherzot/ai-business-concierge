@@ -2,13 +2,15 @@
 
 要件とロードマップは相互に関連しています。`docs/REQUIREMENTS.md`に要件が、このドキュメントにフェーズと計画があります。
 
+> 2026-08-07更新。現在状態: [STATUS.md](STATUS.md)。Active tasks: [PLAN.md](PLAN.md)。
+
 ---
 
-## 現在の作業地点（2026-07-24）
+## 現在の作業地点（2026-08-07 docs snapshot）
 
 - Phase 0、Phase 1、Phase 1.5は完了
-- Phase 2開始済み: web landing、FAQ、SEOは完成
-- 次のプロダクト作業: AI書類メーカー（文書生成）
+- Phase 2進行中: landing、4言語15 templates、draft pipelineは完成
+- 現在の作業: AI polishing、実PDF/DOCX、private StorageでAI書類メーカーを完了
 - HR Candidate Analysisはskeletonのまま、endpointは`501 NOT_IMPLEMENTED`
 - Phase 3 billing/paymentsとPhase 4 advanced Admin AIは未開始
 
@@ -23,35 +25,43 @@
 
 ---
 
-## フェーズ2: 短期（1〜2ヶ月）
+## フェーズ2: AI書類メーカー + Landing（進行中）
 
-| 時期 | タスク | 要件ID |
+| Slice | Status | 要件ID |
 |------|--------|--------|
-| 第1〜2週 | リアルInbox: Email API（Resend/SendGrid）またはTelegram Bot | R-001 |
-| 第2〜3週 | Supabase Realtime – inbox、tasksの更新 | R-002 |
-| 第3〜4週 | 監査ログページ（admin） | R-004 |
+| Landing、FAQ、SEO、responsive UI | Done | — |
+| 15 templates、4言語、draft pipeline | Done | R-021 |
+| AI polishing、PDF/DOCX、private Storage、signed URL | Active | R-021 |
+| Telegram document wizard/送信 | Next | R-021 |
+| HR Candidate Analysis full implementation | 書類メーカー完了後 | R-016 |
 
 ---
 
-## フェーズ3: 中期（2〜4ヶ月）
+## フェーズ3: Sales Bot + Monetization
 
-| 時期 | タスク | 要件ID |
-|------|--------|--------|
-| 月1 | 課金/サブスクリプション（StripeまたはSupabase Billing） | R-003 |
-| 月2 | エクスポート（Excel、CSV）– Reports、Tasks | R-005 |
-| 月2〜3 | プッシュ通知 | R-006 |
-| 月3〜4 | PWA / モバイル最適化 | R-007 |
+| Slice | 要件ID |
+|------|--------|
+| AI Sales Bot、catalog、order flow | — |
+| Click/Paymeとsubscription lifecycle | R-003 |
+| Plan limits、usage billing、grace period | R-018 |
+| Resend idempotencyとretry queue | R-001 |
 
 ---
 
-## フェーズ4: 長期（4ヶ月以降）
+## フェーズ4: Advanced Admin AI + Quality
 
-| 時期 | タスク | 要件ID |
-|------|--------|--------|
-| 月4以降 | SSO / OAuth | R-011 |
-| 月4以降 | 2FA | R-012 |
-| 月5以降 | カスタムブランディング | R-009 |
-| 月5以降 | 高度な分析 | R-013 |
+| Slice | 要件ID |
+|------|--------|
+| Billing/MRR/churnとAI cost monitoring | R-020 |
+| KB、Support、Analytics、Health agents | R-020 |
+| Playwright E2Eとtenant-isolation tests | — |
+| Export/delete、SSO/2FA、branding、advanced analytics | R-005、R-011–R-013 |
+
+## フェーズ5: Scale
+
+- Performance/code splittingとobservability。
+- Web Pushと深いPWA/offline flows。
+- Regional expansionとexternal business integrations。
 
 ---
 
@@ -78,5 +88,6 @@
 
 | 日付 | 変更内容 |
 |------|----------|
+| 2026-08-07 | Phase 2の完了/残作業を分離しCandidate skeletonとactive planを明確化 |
 | 2026-07-24 | Phase 1.5完了とPhase 2開始地点をコードおよびDEVLOGと同期 |
 | 2026-02-05 | 初期ロードマップ、フェーズ1完了 |

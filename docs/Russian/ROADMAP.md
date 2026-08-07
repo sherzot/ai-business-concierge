@@ -2,13 +2,15 @@
 
 Требования и дорожная карта взаимосвязаны. В `docs/REQUIREMENTS.md` находятся требования, здесь — этапы и планы.
 
+> Обновлено 2026-08-07. Текущий статус: [STATUS.md](STATUS.md). Активные задачи: [PLAN.md](PLAN.md).
+
 ---
 
-## Текущая точка работ (2026-07-24)
+## Текущая точка работ (snapshot документации 2026-08-07)
 
 - Phase 0, Phase 1 и Phase 1.5 завершены
-- Phase 2 начат: web landing, FAQ и SEO готовы
-- Следующая продуктовая задача: AI Документовед (генерация документов)
+- Phase 2 активен: landing, 15 шаблонов на четырёх языках и draft pipeline готовы
+- Текущая задача: завершить AI Документовед — AI polishing, реальные PDF/DOCX и private Storage
 - HR Candidate Analysis остаётся skeleton; endpoint возвращает `501 NOT_IMPLEMENTED`
 - Phase 3 billing/payments и Phase 4 advanced Admin AI ещё не начаты
 
@@ -23,35 +25,43 @@
 
 ---
 
-## Этап 2: Краткосрочный (1–2 месяца)
+## Этап 2: AI Документовед + Landing (активен)
 
-| Время | Задача | ID требования |
+| Slice | Статус | ID требования |
 |-------|--------|---------------|
-| Неделя 1–2 | Реальный inbox: Email API (Resend/SendGrid) или Telegram Bot | R-001 |
-| Неделя 2–3 | Supabase Realtime – обновление inbox, tasks | R-002 |
-| Неделя 3–4 | Страница журнала аудита (admin) | R-004 |
+| Landing, FAQ, SEO и responsive UI | Done | — |
+| 15 шаблонов, четыре языка и draft pipeline | Done | R-021 |
+| AI polishing, PDF/DOCX, private Storage и signed URL | Active | R-021 |
+| Telegram wizard/отправка документа | Next | R-021 |
+| Полная реализация HR Candidate Analysis | После Документоведа | R-016 |
 
 ---
 
-## Этап 3: Среднесрочный (2–4 месяца)
+## Этап 3: Sales Bot + Монетизация
 
-| Время | Задача | ID требования |
-|-------|--------|---------------|
-| Месяц 1 | Биллинг / подписка (Stripe или Supabase Billing) | R-003 |
-| Месяц 2 | Экспорт (Excel, CSV) – Reports, Tasks | R-005 |
-| Месяц 2–3 | Push-уведомления | R-006 |
-| Месяц 3–4 | PWA / мобильная оптимизация | R-007 |
+| Slice | ID требования |
+|-------|---------------|
+| AI Sales Bot, каталог и заказы | — |
+| Click/Payme и subscription lifecycle | R-003 |
+| Plan limits, usage billing и grace period | R-018 |
+| Resend idempotency и retry queue | R-001 |
 
 ---
 
-## Этап 4: Долгосрочный (4+ месяца)
+## Этап 4: Advanced Admin AI + Качество
 
-| Время | Задача | ID требования |
-|-------|--------|---------------|
-| Месяц 4+ | SSO / OAuth | R-011 |
-| Месяц 4+ | 2FA | R-012 |
-| Месяц 5+ | Кастомный брендинг | R-009 |
-| Месяц 5+ | Расширенная аналитика | R-013 |
+| Slice | ID требования |
+|-------|---------------|
+| Billing/MRR/churn и AI cost monitoring | R-020 |
+| KB, Support, Analytics и Health agents | R-020 |
+| Playwright E2E и расширенные tenant-isolation tests | — |
+| Export/delete, SSO/2FA, branding и advanced analytics по приоритету | R-005, R-011–R-013 |
+
+## Этап 5: Scale
+
+- Performance/code splitting и observability.
+- Web Push и расширенные PWA/offline flows.
+- Региональное расширение и внешние business integrations.
 
 ---
 
@@ -78,5 +88,6 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-07 | Разделены готовые и оставшиеся работы Phase 2; уточнены Candidate skeleton и active plan |
 | 2026-07-24 | Завершение Phase 1.5 и стартовая точка Phase 2 синхронизированы с кодом и DEVLOG |
 | 2026-02-05 | Начальная дорожная карта, Этап 1 завершён |

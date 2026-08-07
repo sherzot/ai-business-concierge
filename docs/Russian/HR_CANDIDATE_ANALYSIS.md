@@ -1,5 +1,7 @@
 # HR_CANDIDATE_ANALYSIS.md
 
+> **Статус: SKELETON / DESIGN.** Frontend/backend scaffold существует, но CV parser, scorer и report generator не production-ready; canonical endpoint возвращает `501 NOT_IMPLEMENTED`. Текущее состояние: [STATUS.md](STATUS.md).
+
 > **AI Business Concierge — Пакет проектирования модуля `hr_candidate_analysis`**
 > Версия: 1.0 (MVP дизайн) · Дата: 2026-04-29
 > Владелец: Sher · Расположение модуля: `features/hr/candidates/` (подмодуль)

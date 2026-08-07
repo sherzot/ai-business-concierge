@@ -1,7 +1,9 @@
 # ARCHITECTURE.md — AI Business Concierge
 
 > Loyiha arxitekturasi, design patternlar va unit testing qoidalari
-> Version: 1.0 | Sana: 2026-05-05
+> Version: 1.1 | Yangilandi: 2026-08-07
+>
+> Bu hujjat joriy arxitektura chegaralari va target refactoring yo'nalishini birga ko'rsatadi. Runtime holati uchun [STATUS.md](STATUS.md) ustun. `hr-candidate` papkalari scaffold bo'lib, production-ready etalon emas.
 
 ---
 
@@ -128,7 +130,7 @@ supabase/functions/server/
     services/                    # Application use cases
       llm-router.ts              #   ✅ Mavjud
       knowledge-base.ts          #   ✅ Mavjud
-      hr-candidate/              #   ✅ ETALON — shu pattern bo'yicha yozing
+      hr-candidate/              #   🚧 SKELETON — strukturasi bor, TODO/stublar mavjud
         index.ts                 #     Orchestrator
         types.ts                 #     Domain types
         candidate-scorer.ts      #     Domain service
@@ -140,7 +142,7 @@ supabase/functions/server/
       inbox-repository.ts
   presentation/
     routes/                      # Thin Hono route handlers
-      hr-candidate.ts            #   ✅ Mavjud
+      hr-candidate.ts            #   🚧 Mavjud scaffold; canonical index.ts hali 501 qaytaradi
       tasks.ts                   #   TODO: index.ts dan ajratish
       inbox.ts                   #   TODO: index.ts dan ajratish
     middleware/                  # Auth, tenant, logging
@@ -168,9 +170,9 @@ router.post("/tasks", async (c) => {
 });
 ```
 
-### 3.3 ETALON: hr-candidate service pattern
+### 3.3 Target pattern: modular service papkasi
 
-HR Candidate service loyihadagi eng yaxshi namuna. Har yangi murakkab service shu pattern bo'yicha:
+`hr-candidate` papkasi kerakli modular strukturani ko'rsatadi, ammo ichidagi GitHub fetch, PDF/DOCX parsing, scoring va report qismlarida TODO/stublar bor. Uni production implementatsiya deb ko'chirmang. Ishlaydigan servis chegaralari uchun `llm-router.ts`, `knowledge-base.ts` va `document-generator.ts`; murakkab feature papka shakli uchun quyidagi target pattern ishlatiladi:
 
 ```
 services/{domain}/
@@ -334,7 +336,7 @@ it('overdue: done status bo'lsa false', () => {
 ### 6.2 Backend checklist
 
 ```
-✅ Murakkab logika → services/{domain}/ papkaga (hr-candidate pattern)
+✅ Murakkab logika → services/{domain}/ papkaga (hr-candidate strukturasi, lekin stub kodini ko'chirmang)
 ✅ Route handler → max 20 qator (validate + call service + return json)
 ✅ Auth/tenant tekshiruvi → middleware orqali (inline emas)
 ✅ Zod schema → har input uchun
@@ -372,4 +374,4 @@ it('overdue: done status bo'lsa false', () => {
 
 *ARCHITECTURE.md — AI Business Concierge v1.0*
 *Sana: 2026-05-05*
-*HR Candidate service pattern — bu loyihadagi etalon Clean Architecture implementatsiyasi*
+*HR Candidate papka strukturasi target modular pattern; uning business logikasi hali skeleton.*

@@ -1,12 +1,14 @@
 # AI Business Concierge – Push va Deploy qo'llanmasi
 
+> **Operatsion qo'llanma:** Ishlatishdan oldin [STATUS.md](STATUS.md), [CONNECTIONS.md](CONNECTIONS.md) va eng yangi [DEVLOG.md](DEVLOG.md) bilan function/env nomlarini tekshiring. 2026-07-24 snapshotida production backend `bright-api`, CI/runtime Node.js esa 22.
+
 Bu hujjat loyihani GitHub, Supabase va Netlify ga push va deploy qilish uchun bosqichma-bosqich ko'rsatma beradi.
 
 ---
 
 ## 1. Oldindan talablar
 
-- **Node.js** 18+ (20 tavsiya etiladi)
+- **Node.js** 22 (CI va Netlify bilan bir xil)
 - **Git** – versiya nazorati
 - **Supabase CLI** – `npm i -g supabase` yoki `brew install supabase/tap/supabase`
 - **GitHub** hisobi

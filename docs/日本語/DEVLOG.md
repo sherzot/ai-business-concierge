@@ -4,6 +4,90 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-07 — 全agent session向け必須documentation lifecycle
+
+- Root `AGENTS.md`を追加し、全sessionの開始順を`README → STATUS → newest DEVLOG → PLAN → git status`に固定。
+- Material changeはnew DEVLOG entry、STATUS/PLAN更新、必要時Requirements/Roadmap/Architecture更新、4言語同期でcloseする。
+- Read-only reportingでは不要なDEVLOG entryを作らず、secrets/private dataをdocs/logsへ書かない。
+- 必須documentationが未同期ならtaskをfully completeと宣言しない。
+- `docs/README.md`からruleへlinkし、4つの`CLAUDE.md` variantへ同じlifecycleを追加。
+
+Documentation/agent rulesのみ変更。Application runtimeは変更なし。
+
+---
+
+## 2026-08-07 — Documentation source-of-truthを整理
+
+- Document role/order用`README.md`とcanonical current handoff用`STATUS.md`を追加。
+- 旧master PLANをarchiveへ移し、active P0/P1/P2 planへ置換。
+- ROADMAP/REQUIREMENTSをDone/Partial/Skeleton/Planned状態へ更新し、Document Maker binary outputのR-021を追加。
+- Architectureを修正: HR CandidateはTODO/stubを含むmodular scaffoldでありproduction-ready referenceではない。
+- Phase 0/setup documentsへhistorical/operational warningを追加。
+- English/Russian/JapaneseのSTATUS/PLAN/ROADMAP/REQUIREMENTSを同期。
+
+Documentationのみ変更。Application code、DB、Functions、hosting configは変更せず、production/CI/tests/buildも再実行していない。STATUSは最終確認済み2026-07-24 runtime snapshotを明示的に保持する。
+
+---
+
+## 2026-07-24 — セッション終了時の引き継ぎ
+
+### 完了状態
+- Template Library/UIの4言語対応と、productionの15 active document template向けmigrationを完了。
+- Light/dark themeのcontrast、残存hardcoded text、locale race condition、古いmodal state、keyboard focus、icon button accessibilityを修正。
+- Netlify/Supabase境界を強化: CSP/HSTS/cache/preview、PWA private-response cache、CORS、PostgreSQL-backed AI rate limit、RPC grants、internal `SECURITY DEFINER` helpers。
+- 所有していない`aibizconcierge.uz`を全runtime設定から削除。
+- Production migrationを適用し、`bright-api` v72をdeploy。health smoke-testは`200`。
+- Frontend security CI gateを追加し、clean runner failureをcommit `730b3bd`で修正。
+
+CI failureの原因はproduction secret不足ではなく、module初期化時にpublic Supabase test configが無かったこと。CIへnon-production placeholder、`actions/checkout@v5`、`actions/setup-node@v6`を追加した。
+
+セッション終了時のlocal確認:
+- type-check成功;
+- 19/19 test files、96/96 tests成功;
+- production build成功;
+- 9 build/Netlify filesのsecurity check成功;
+- local `HEAD`と`origin/main`はいずれも`730b3bd`。
+
+次回は最初にremote GitHub Actions runがgreenであることを確認する。非blocking debtとして約1.76 MBのmain JS chunk、`supabase.ts`のstatic/dynamic混在import、古いBrowserslist dataが残る。
+
+---
+
+## 2026-07-24 — 目標アーキテクチャ: Netlifyはfrontendのみ、Supabaseをbackend platformにする
+
+### 決定
+- Netlifyにはstatic React/Vite frontendとbrowser-delivery securityを残す: HTTPS/CDN、CSP/HSTS、cache rules、preview protection。
+- SupabaseがAuth、PostgreSQL、Edge Functions/backend API、Realtime、将来のStorage、RLS、authorization、server secrets、rate limiting、audit logを担当する。
+- BrowserからSupabaseへの直接接続はAuthとRealtimeだけに限定する。
+- Business/admin/AI/Telegram/emailおよびsensitive operationはすべてSupabase Edge Function `bright-api`経由にする。
+
+Browserに置いてよいpublic config:
+
+```text
+VITE_SUPABASE_URL
+VITE_SUPABASE_PUBLISHABLE_KEY
+VITE_API_BASE_URL
+```
+
+Raw PostgreSQL URL/password、`service_role`、`sb_secret_...`、AI、Telegram、email、payment、webhook secretsはfrontendへ絶対に出さず、Supabase Project/Edge Function Secretsだけに保存する。
+
+Frontend監査ではbusiness data用の直接`supabase.from`、`rpc`、Storage callは見つからなかった。直接Supabase利用はAuth、Realtime subscriptions、`bright-api`へ送るuser access token取得のみ。完全なcookie/BFF proxyは、token refresh、reset/OAuth callback、CSRF、cookie、CORS、Realtimeを書き直す必要がありpublic endpointも隠せないため、採用しない。
+
+### 次回セッションの順序
+1. Clean Git/CI baselineとproduction `bright-api` health/auth動作を確認。
+2. Modern `sb_publishable_...` keyの有無を確認し、server secretを露出せずlegacy anon namingから移行。
+3. Browser Supabase callsを再監査し、Auth/Realtime以外をすべて`bright-api`境界内に維持。
+4. RLS、grants、views、RPC、tenant isolation、全service-role authorization boundaryを監査。
+5. Storageはprivate bucket、tenant/user policy、file validation、short-lived signed/authenticated accessと同時に導入。
+6. CORS、private response cache、endpoint別quota/rate limit、audit redaction、production/preview分離を強化。
+7. Type-check、tests、production audit/build/security gate、Auth/Realtime/locale/theme/template smoke test、cross-tenant authorization testを実行。
+8. Review済みmigration、`bright-api`、Netlify frontendの順にdeployし、versionと結果を記録。
+
+完全なfile-by-file checklist、acceptance criteria、安全制約はcanonical [Uzbek DEVLOG](../DEVLOG.md)に記載。
+
+手動/platform作業: Supabase Leaked Password Protection有効化、Netlify planに合うpreview protection選択、`vector`移動の別計画、`TELEGRAM_WEBHOOK_SECRET`確認。Key rotation/revokeはreplacement configのdeployとsmoke-test後だけ実施する。
+
+---
+
 ## 2026-07-24 — Netlify + Supabase セキュリティ強化
 
 ### 実施内容

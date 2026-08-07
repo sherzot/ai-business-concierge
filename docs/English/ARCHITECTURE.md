@@ -1,7 +1,9 @@
 # ARCHITECTURE.md — AI Business Concierge
 
 > Project architecture, design patterns, and unit testing rules
-> Version: 1.0 | Date: 2026-05-05
+> Version: 1.1 | Updated: 2026-08-07
+>
+> Current runtime status is in [STATUS.md](STATUS.md). The `hr-candidate` folders are a modular scaffold with TODO/stub logic, not a production-ready reference implementation.
 
 ---
 
@@ -122,7 +124,7 @@ supabase/functions/server/
     services/
       llm-router.ts
       knowledge-base.ts
-      hr-candidate/        ← REFERENCE pattern
+      hr-candidate/        ← SKELETON structure; TODO/stub logic remains
         index.ts           # Orchestrator
         types.ts
         candidate-scorer.ts

@@ -2,7 +2,7 @@
 
 Данный документ определяет требования к проекту и направления развития. Обращайтесь к этому документу при добавлении новых функций.
 
-> Статус синхронизирован с кодом и DEVLOG по состоянию на 2026-07-24.
+> Обновлено 2026-08-07. Текущий snapshot: [STATUS.md](STATUS.md). Статусы: Done, Partial, Skeleton, Planned.
 
 ---
 
@@ -41,6 +41,12 @@
 | R-001 | Интеграция реального inbox | Email (Resend) webhook – частично ✅ | Inbox |
 | R-002 | Обновления в реальном времени | Supabase Realtime – inbox, tasks ✅ | Inbox, Tasks |
 | R-015 | Уведомления о назначении задач | Уведомление ответственному при назначении, подтверждение, прозрачность статусов ✅ | Tasks |
+| R-016 | HR Candidate Analysis | Skeleton; остаются GitHub/CV/LLM business logic и тесты | HR |
+| R-017 | AI rate limiting | Partial; DB-backed AI limit есть, unified plan/endpoint policy остаётся | Backend |
+| R-018 | AI cost tracking | Partial; logging есть, tenant dashboard/enforcement остаётся | Backend |
+| R-019 | Vector Search (RAG) | Partial; vector/embedding основа есть, explicit tool/citations остаются | Docs |
+| R-020 | Admin Dashboard | Partial; core pages есть, billing/advanced agents остаются | Admin |
+| R-021 | AI Документовед binary output | Partial; templates/drafts есть, PDF/DOCX/Storage остаются | Docs |
 | R-003 | Биллинг/Платежи | Подписка, планы, история платежей | Новый |
 | R-004 | Просмотр журнала аудита | Admin audit log страница и backend endpoint ✅ | Settings |
 | R-005 | Экспорт/Импорт | Excel, CSV экспорт; массовый импорт | Reports, Tasks |
@@ -49,10 +55,10 @@
 | ID | Требование | Описание | Модуль |
 |----|------------|----------|--------|
 | R-006 | Push/уведомления | Push-уведомления браузера, email-уведомления | Всё |
-| R-007 | Мобильные устройства | PWA или React Native | Всё |
-| R-008 | Расширение многоязычности | Дополнительные языки (ru, en) | Settings |
+| R-007 | Мобильные устройства | Partial PWA shell; deep offline sync/push остаются | Всё |
+| R-008 | Расширение многоязычности | Done: uz, ru, en, ja | Settings |
 | R-009 | Кастомный брендинг | Логотип, цвета по тенанту | Settings |
-| R-010 | Rate limiting API | Лимит по пользователю/тенанту | Backend |
+| R-010 | Rate limiting API | Partial: AI protection есть; unified API policy остаётся | Backend |
 
 ### 2.3 Низкий приоритет
 | ID | Требование | Описание | Модуль |

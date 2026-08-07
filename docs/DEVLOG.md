@@ -4,6 +4,294 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-07 — Har bir agent sessiyasi uchun majburiy hujjat lifecycle
+
+### Kontekst
+
+Sessiya yakuni protokoli `docs/README.md`da, DEVLOG qoidasi esa `docs/CLAUDE.md`da bor edi, lekin yangi Codex/agent sessiyasi bu hujjatlarni ish boshlashdan oldin o'qishini repo darajasida majburlovchi ko'rsatma yo'q edi.
+
+### Bajarildi
+
+- Repo ildizida `AGENTS.md` yaratildi; u har agent sessiyasiga tatbiq qilinadi.
+- Majburiy startup tartibi yozildi: `README → STATUS → DEVLOG top entry → PLAN → git status`.
+- Material o'zgarish uchun majburiy closeout yozildi: yangi DEVLOG entry, STATUS/PLAN update, kerak bo'lsa REQUIREMENTS/ROADMAP/ARCHITECTURE va 4 til sinxronizatsiyasi.
+- Read-only savol bilan material repo o'zgarishi ajratildi; faqat o'qish uchun keraksiz DEVLOG yozish taqiqlandi.
+- Secret/private data'ni hujjat yoki logga yozmaslik va documentation closeout tugamasa taskni “to'liq tugadi” demaslik qotirildi.
+- `docs/README.md`dan `AGENTS.md`ga link qo'shildi; `CLAUDE.md`ning 4 til nusxasiga bir xil session lifecycle kiritildi.
+
+### Verifikatsiya
+
+- O'zgarishlar faqat agent/documentation qoidalariga tegishli; application runtime o'zgarmadi.
+- `git diff --check` — muvaffaqiyatli.
+- Barcha lokal Markdown linklari mavjud targetlarga yechildi.
+
+### Fayllar
+
+- `AGENTS.md` (yangi)
+- `docs/README.md`
+- `docs/{CLAUDE,English/CLAUDE,Russian/CLAUDE,日本語/CLAUDE}.md`
+- `docs/{DEVLOG,English/DEVLOG,Russian/DEVLOG,日本語/DEVLOG}.md`
+
+---
+
+## 2026-08-07 — Hujjatlar source-of-truth tizimiga keltirildi
+
+### Kontekst
+
+`DEVLOG.md` eng to'liq tarixiy manba bo'lib qolgan, ammo `PLAN`, `ROADMAP`, `REQUIREMENTS` va `ARCHITECTURE`da eski checkboxlar hamda bir-biriga zid statuslar bor edi. Xususan, AI Hujjatchining birinchi slice'i bajarilgan bo'lsa ham “keyingi vazifa” deb turardi; HR Candidate esa arxitekturada etalon deb yozilgan, real kodda esa skeleton va `501 NOT_IMPLEMENTED` edi.
+
+### Bajarildi
+
+- `docs/README.md` — hujjatlar xaritasi, source-of-truth ustuvorligi va sessiya yakuni protokoli yaratildi.
+- `docs/STATUS.md` — joriy phase, oxirgi tasdiqlangan texnik snapshot, capability holatlari, bloklar va next actionlar uchun canonical handoff yaratildi.
+- Eski katta `PLAN.md` 2026-07-24 holatida `docs/archive/`ga saqlandi; yangi `PLAN.md` faqat faol P0/P1/P2 ishlarni saqlaydi.
+- `ROADMAP.md` Phase 2 ning bajarilgan va qolgan qismlariga ajratildi.
+- `REQUIREMENTS.md` `Done`, `Partial`, `Skeleton`, `Planned` statuslari bilan yangilandi va R-021 AI Hujjatchi binary output talabi qo'shildi.
+- `ARCHITECTURE.md`da HR Candidate production-ready etalon emas, TODO/stublari bor target modular scaffold ekani aniqlandi.
+- Phase 0 `FIRST_PUSH.md` tarixiy deb, integratsiya/setup fayllari esa joriy status bannerlari bilan belgilandi.
+- `STATUS`, `PLAN`, `ROADMAP` va `REQUIREMENTS`ning English, Russian va Japanese nusxalari sinxronlandi.
+
+### Verifikatsiya chegarasi
+
+- Bu sessiyada faqat Markdown hujjatlari o'zgardi; application kodi, DB, Edge Function va hosting konfiguratsiyasi o'zgarmadi.
+- Production, GitHub Actions, test va build qayta ishlatilmadi. `STATUS.md` runtime snapshoti 2026-07-24 dagi oxirgi tasdiqlangan DEVLOG dalillariga tayangan va bu cheklovni ochiq ko'rsatadi.
+
+### Fayllar
+
+- `docs/{README,STATUS,DEVLOG,PLAN,ROADMAP,REQUIREMENTS,ARCHITECTURE}.md`
+- `docs/{CLAUDE,English/CLAUDE,Russian/CLAUDE,日本語/CLAUDE}.md`
+- `docs/{English,Russian,日本語}/{STATUS,DEVLOG,PLAN,ROADMAP,REQUIREMENTS,ARCHITECTURE}.md`
+- `docs/archive/**/PLAN_LEGACY_2026-07-24.md`
+- `docs/{FIRST_PUSH,DEPLOY_SETUP,CONNECTIONS,R001_EMAIL_SETUP,R002_REALTIME_SETUP,R015_TASK_NOTIFICATIONS,HR_CANDIDATE_ANALYSIS}.md`
+
+---
+
+## 2026-07-24 — Sessiya yakuni va ertangi aniq handoff
+
+### Bugun yakunlangan holat
+- Shablonlar kutubxonasi va unga bog'liq mayda UI matnlari `uz`, `ru`, `en`, `ja` tillariga o'tkazildi; productiondagi 15 ta aktiv hujjat shabloni 4 tilda to'ldirildi.
+- Light/dark theme yagona `next-themes` holatiga o'tkazildi; theme almashganda yo'qoladigan matnlar, fon, border va placeholder kontrastlari tuzatildi.
+- Code review topilmalari yopildi: locale race condition, eski modal holati, klaviatura fokusi, icon-only tugmalar `aria-label`lari, admin/auth/xodim sahifalaridagi qolgan hardcoded matnlar.
+- Netlify va Supabase xavfsizlik chegaralari mustahkamlandi: CSP, HSTS, cache, preview protection, PWA authenticated-response cache, CORS, DB-backed rate limit, RPC grantlari va `SECURITY DEFINER` helperlar.
+- Egalik qilinmaydigan `aibizconcierge.uz` barcha runtime konfiguratsiyalaridan olib tashlandi. Bu domen sotib olinmagan va loyiha domeni deb hisoblanmaydi.
+- Production migration qo'llandi va `bright-api` v72 deploy qilindi; health smoke-test `200`.
+- Dependency audit tozalandi; production dependency auditda 0 ta zaiflik qoldi.
+- Security CI gate yaratildi: type-check, unit test, production audit, build va bundle/hosting security check.
+
+Tegishli commitlar:
+- `0931e50` — 4 til shablonlari va theme support.
+- `625231d` — code review locale/theme/accessibility tuzatishlari.
+- `db6588a` — Netlify/Supabase security hardening va CI security gate.
+- `730b3bd` — clean GitHub runner uchun public test konfiguratsiyasi va Node action yangilanishlari.
+
+### CI xatosi va tuzatishi
+
+GitHub Actions'dagi `frontend-security-gate` avval clean runnerda quyidagi sabab bilan yiqildi:
+
+```text
+VITE_SUPABASE_PROJECT_ID va VITE_SUPABASE_ANON_KEY sozlanmagan
+```
+
+Bu production secret muammosi emas edi. `config.ts` import vaqtida public Supabase konfiguratsiyasini talab qilgan, testlar esa networkni mock qilsa ham clean CI environmentda bu public qiymatlar mavjud emas edi.
+
+Tuzatish:
+- `.github/workflows/ci.yml` job environmentiga faqat test uchun mo'ljallangan, non-production public placeholderlar qo'shildi.
+- `actions/checkout@v4` -> `actions/checkout@v5`.
+- `actions/setup-node@v4` -> `actions/setup-node@v6`.
+- Node.js `22` saqlandi; GitHub'ning Node 20 action runtime warningi bartaraf qilindi.
+- `useTasks` boshlang'ich loading testi tugamaydigan mocked promise bilan deterministik qilindi va hook unmount qilindi.
+
+2026-07-24 sessiya oxiridagi local CI-equivalent natija:
+- `npm run typecheck` — muvaffaqiyatli.
+- `npm run test:run` — 19/19 test fayli, 96/96 test muvaffaqiyatli.
+- `npm run build` — muvaffaqiyatli.
+- `npm run security:check` — 9 ta build/Netlify fayli tekshirildi, muvaffaqiyatli.
+- Git holati tekshiruvdan oldin clean; `HEAD` va `origin/main` bir xil: `730b3bd`.
+- Ertaga ishni boshlashdan oldin remote GitHub Actions run ham green ekanini birinchi bo'lib tekshirish kerak.
+
+Builddagi bloklamaydigan warninglar:
+- asosiy JS chunk taxminan 1.76 MB; keyinchalik route/module code splitting kerak;
+- `supabase.ts` ham statik, ham dinamik import qilinadi, shuning uchun alohida chunkka ajralmaydi;
+- Browserslist bazasi eskirgan.
+
+---
+
+## 2026-07-24 — Ertangi asosiy arxitektura: Netlify faqat frontend, Supabase backend platformasi
+
+### Qabul qilingan yo'nalish
+
+Netlify'da faqat React/Vite statik frontend qoladi. Auth, PostgreSQL DB, backend API, Realtime, kelajakdagi Storage, RLS va data authorization Supabase'da bo'ladi.
+
+```text
+Internet
+   |
+   v
+Netlify CDN
+   `-- React/Vite statik frontend
+          |
+          |-- Supabase Auth + Realtime
+          |      public URL + publishable key + user JWT
+          |
+          `-- Supabase Edge Function: bright-api
+                  |-- JWT/session tekshiruvi
+                  |-- tenant/role/permission tekshiruvi
+                  |-- PostgreSQL operatsiyalari
+                  |-- private Storage/signed URL
+                  |-- AI, Telegram va email integratsiyalari
+                  |-- rate limit va audit log
+                  `-- server-only secretlar
+```
+
+Netlify "faqat frontend" bo'lsa ham quyidagi browser/delivery himoyalari Netlify'da qoladi:
+- HTTPS va CDN/DDoS qatlami;
+- CSP, HSTS, MIME/frame/referrer va Permissions Policy;
+- statik asset cache siyosati;
+- Deploy Preview uchun `noindex`, `no-store` va access protection.
+
+Data va biznes xavfsizligining asosiy qismi Supabase'da bo'ladi:
+- Supabase Auth va session;
+- RLS, table/function grantlari va tenant izolyatsiyasi;
+- Edge Function authorization;
+- private Storage bucket va Storage Policy;
+- server secretlari;
+- rate limit, audit log va backend input validation.
+
+### Public konfiguratsiya va haqiqiy secret farqi
+
+Frontendda ko'rinishi normal va xavfsizlik hodisasi hisoblanmaydigan qiymatlar:
+
+```text
+VITE_SUPABASE_URL=https://<project-ref>.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+VITE_API_BASE_URL=https://<project-ref>.supabase.co/functions/v1/bright-api/...
+```
+
+Supabase project/API URL raw database URL emas. Browser ishlatadigan endpoint baribir Network panelda ko'rinadi. Uni "yashirish" xavfsizlik bermaydi.
+
+Frontendga hech qachon chiqmasligi kerak:
+
+```text
+postgresql://... database connection string
+DATABASE_URL
+POSTGRES_PASSWORD
+SUPABASE_SERVICE_ROLE_KEY / SB_SERVICE_ROLE_KEY
+sb_secret_...
+OPENAI_API_KEY
+ANTHROPIC_API_KEY
+TELEGRAM_BOT_TOKEN
+RESEND_API_KEY
+Stripe/payment secretlari
+webhook signing secretlari
+```
+
+Bu qiymatlar faqat Supabase Project Secrets/Edge Function environmentida saqlanadi. `service_role` yoki `sb_secret_...` RLS'ni chetlab o'tishi mumkin, shuning uchun ularning browser bundle, Git, Netlify public environment yoki logga chiqishi critical incident hisoblanadi.
+
+### Nega browser Supabase Auth va Realtime bilan bevosita ishlashda qoladi
+
+Hozirgi frontendda Supabase browser client faqat quyidagi vazifalarda ishlatiladi:
+- `AuthContext.tsx` — session, login, logout va auth state;
+- `ForgotPasswordPage.tsx`, `ResetPasswordPage.tsx`, `SetupAccountPage.tsx`, `PasswordChangeForm.tsx` — Auth operatsiyalari;
+- `useRealtimeInbox.ts`, `useRealtimeTasks.ts`, `useRealtimeNotifications.ts` — Realtime subscriptionlar;
+- `apiClient.ts` va `candidatesApi.ts` — user access tokenni olib `bright-api`ga yuborish.
+
+Frontend kodida hozir to'g'ridan-to'g'ri `supabase.from(...)`, `supabase.rpc(...)` yoki `supabase.storage...` business-data chaqiruvi topilmadi. Asosiy CRUD va biznes operatsiyalari allaqachon `bright-api` orqali o'tadi.
+
+Shuning uchun tavsiya qilingan xavfsiz va kam-riskli variant:
+- Auth va Realtime browser -> Supabase bevosita;
+- barcha biznes/admin/AI/Telegram/email operatsiyalari browser -> `bright-api`;
+- DB va Storage authorization RLS/policy bilan;
+- jiddiy kalitlar faqat Edge Functionda.
+
+Supabase URL va publishable key'ni ham browserdan butunlay olib tashlash uchun to'liq BFF/cookie proxy yozish mumkin, lekin bu hozir tavsiya qilinmaydi. U Auth refresh, OAuth/reset callback, `HttpOnly` cookie, CSRF, CORS va Realtime relayni qayta yozishni talab qiladi; murakkablik oshadi, lekin public endpointni baribir yashirmaydi.
+
+### Hozirgi backend holati
+- Canonical backend: `supabase/functions/server/`, production function nomi `bright-api`.
+- Frontend API client barcha authenticated requestlarga Supabase access token qo'shadi.
+- Backend user tokenini tekshiradi va tenant/role kontekstini DB orqali aniqlaydi.
+- Service-role client faqat Edge Function ichida yaratiladi.
+- OpenAI, Anthropic, Telegram va boshqa jiddiy secretlar frontendda emas.
+- Storage uchun frontend yoki backendda faol upload/download integratsiyasi hozir topilmadi; Storage qo'shilganda boshidan private bucket + policy + signed URL modeli ishlatiladi.
+
+### Ertaga bajarish tartibi
+
+#### 1. Boshlang'ich holatni tasdiqlash
+1. `git status`, `git log` va GitHub Actions `frontend-security-gate` natijasini tekshirish.
+2. `npm ci`, type-check, 96 test, production build va security check bilan baseline olish.
+3. Supabase production project, `bright-api` health va authsiz protected endpoint `401` holatini smoke-test qilish.
+4. Hech qanday secret qiymatini terminal output, DEVLOG yoki commitga chiqarmaslik.
+
+#### 2. Frontend environment kontraktini yangilash
+1. Supabase Dashboard'da zamonaviy `sb_publishable_...` key mavjudligini tekshirish.
+2. Legacy `VITE_SUPABASE_ANON_KEY`dan `VITE_SUPABASE_PUBLISHABLE_KEY`ga bosqichma-bosqich o'tish.
+3. `frontend/src/app/config.ts`, `frontend/.env.example`, Vitest setup, CI placeholder va Netlify production/preview env nomlarini bir xil kontraktga keltirish.
+4. Avval yangi key bilan production ishlashini tekshirish; faqat shundan keyin legacy anon keyni revoke/rotate qilish.
+5. `DATABASE_URL`, service role yoki boshqa server secret uchun hech qanday `VITE_*` o'zgaruvchi yaratmaslik.
+
+#### 3. Browser-to-Supabase auditini qotirish
+1. Frontendda `supabase.from`, `rpc`, `storage`, `functions.invoke` va tashqi secret API chaqiruvlarini qayta qidirish.
+2. Auth/Realtimedan boshqa barcha operatsiyalarni `apiClient -> bright-api` chegarasida saqlash.
+3. Direct browser DB chaqiruvi keyinchalik qo'shilmasligi uchun security script/testga regressiya qoidasi qo'shishni baholash.
+4. Auth va Realtime uchun faqat publishable key ishlatilishini test qilish.
+
+#### 4. Supabase DB va authorization auditi
+1. Browserga ta'sir qilishi mumkin bo'lgan barcha `public` table/view/functionlar uchun RLS va grantlarni inventarizatsiya qilish.
+2. `anon` va `authenticated`ga keraksiz table/function execute/select huquqlarini revoke qilish.
+3. Har tenant jadvalida cross-tenant SELECT/INSERT/UPDATE/DELETE rad etilishini test qilish.
+4. `SECURITY DEFINER` funksiyalarda fixed `search_path`, minimal EXECUTE grant va ichki authorization borligini tekshirish.
+5. Backend-only obyektlarni `private` schema'ga ko'chirishdan oldin `bright-api`ning PostgREST/service-role access modeliga ta'sirini aniqlash; ko'r-ko'rona schema ko'chirmaslik.
+6. Service-role bilan bajariladigan har bir user action oldidan JWT, membership va permission tekshiruvi borligini tasdiqlash.
+
+#### 5. Storage modeli
+1. Kerakli bucketlar va fayl path kontraktini aniqlash: masalan, `<tenant_id>/<user_id>/<resource_id>/<filename>`.
+2. Bucketlarni default private qilish.
+3. Upload/download/delete uchun tenant va userga bog'langan Storage RLS policy yozish.
+4. Private download uchun qisqa muddatli signed URL yoki authenticated Edge Function response ishlatish.
+5. File type, extension, MIME, size va nom sanitizatsiyasini backendda tekshirish.
+6. Storage hali ishlatilmasa, bo'sh infratuzilma yaratib qo'ymasdan, birinchi real feature bilan migratsiya qilish.
+
+#### 6. Backend va network security
+1. `bright-api`da Authorization Bearer tokenni server-side `getUser` bilan tekshirish.
+2. Har endpoint uchun role/tenant/ownership tekshiruvini qotirish.
+3. CORS allowlistga faqat real production origin va boshqariladigan preview/staging originlarini qo'shish.
+4. Authenticated/private response uchun `Cache-Control: no-store`.
+5. AI, login/reset, upload, webhook va admin endpointlar uchun alohida rate-limit/quota siyosati.
+6. Audit loglarda token, cookie, password, raw PII va secretlarni yozmaslik.
+7. Preview environmentni production DB/secretlardan ajratish; buning uchun alohida staging Supabase kerakmi, ertaga mavjud Netlify/Supabase resurslari bo'yicha aniqlash.
+
+#### 7. Yakuniy verifikatsiya va deploy
+1. Source va `dist/` ichida secret nomlari/qiymatlari yo'qligini security gate bilan tekshirish.
+2. `npm run typecheck`.
+3. `npm run test:run`.
+4. `npm audit --omit=dev --audit-level=high`.
+5. `npm run build`.
+6. `npm run security:check`.
+7. Auth login/logout/reset, 4 til, light/dark theme, template generate va Realtime smoke-test.
+8. Authsiz request `401`, noto'g'ri role `403`, boshqa tenant ma'lumoti ko'rinmasligi va private Storage access rad etilishini test qilish.
+9. Migrationlarni avval dry-run/audit qilish, keyin productionga qo'llash.
+10. `bright-api`ni deploy qilish, health/auth smoke-test, undan keyin frontendni Netlify'ga deploy qilish.
+11. Natijalar, migration nomlari, function version va test sonlarini DEVLOG'ga yozish.
+
+### Ertangi yakuniy qabul mezonlari
+- Netlify faqat statik frontend va browser-delivery security vazifasini bajaradi.
+- Browser bundle ichida faqat Supabase public URL, publishable key va public API base URL mavjud.
+- Raw PostgreSQL URL/password, `service_role`, `sb_secret`, AI/Telegram/email/payment secretlari source, bundle, log va Netlify public envda yo'q.
+- Auth va Realtime ishlaydi; biznes operatsiyalari faqat `bright-api` orqali o'tadi.
+- Barcha exposed data RLS/grant bilan himoyalangan va cross-tenant testlar o'tadi.
+- Storage ishlatilsa, private bucket va signed/authenticated access bilan ishlaydi.
+- Production va preview environmentlari production secret/data bo'yicha aralashmaydi.
+- GitHub Actions security gate green.
+- Production health `200`, protected endpoint authsiz `401`, unauthorized role uchun `403`.
+- 4 til va light/dark theme regressiyasiz ishlaydi.
+
+### Hali qo'lda yoki ehtiyotkorlik bilan bajariladigan platforma ishlari
+- Supabase Dashboard'da Leaked Password Protection'ni yoqish.
+- Netlify Personal plan sabab non-production Team Login `422`; plan imkoniyatiga qarab password/SSO yoki boshqa preview protection tanlash.
+- `vector` extensionini `public`dan ko'chirishni alohida migration sifatida rejalash.
+- `TELEGRAM_WEBHOOK_SECRET` real qiymati mavjudligini tekshirish; yo'q bo'lsa webhook 503 holati davom etadi.
+- Production key rotation yoki revoke faqat yangi konfiguratsiya deploy va smoke-testdan keyin amalga oshiriladi.
+
+---
+
 ## 2026-07-24 — Netlify + Supabase security hardening
 
 ### Bajarildi

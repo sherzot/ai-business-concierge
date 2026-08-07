@@ -4,6 +4,90 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-07 — Mandatory documentation lifecycle for every agent session
+
+- Added root `AGENTS.md`, which requires every agent session to start with `README → STATUS → newest DEVLOG → PLAN → git status`.
+- Material changes must close with a new DEVLOG entry, STATUS/PLAN updates, conditional Requirements/Roadmap/Architecture updates, and four-language synchronization.
+- Read-only reporting does not create unnecessary DEVLOG entries; secrets/private data must never enter docs or logs.
+- A task cannot be claimed fully complete while required documentation remains unsynchronized.
+- Linked the rule from `docs/README.md` and mirrored the lifecycle in all four `CLAUDE.md` variants.
+
+Documentation/agent rules only; application runtime did not change.
+
+---
+
+## 2026-08-07 — Documentation normalized around explicit sources of truth
+
+- Added `README.md` for document ownership/order and `STATUS.md` as the canonical current handoff.
+- Archived the legacy master PLAN and replaced it with a focused P0/P1/P2 active plan.
+- Updated ROADMAP and REQUIREMENTS with Done/Partial/Skeleton/Planned states and R-021 for Document Maker binary output.
+- Corrected the architecture claim: HR Candidate is a modular scaffold with TODO/stub logic, not a production-ready reference implementation.
+- Marked Phase 0/setup documents with historical or operational status warnings.
+- Synchronized English, Russian, and Japanese STATUS/PLAN/ROADMAP/REQUIREMENTS documents.
+
+Documentation only: no application, database, function, or hosting configuration changed. Production, CI, tests, and build were not re-run; STATUS explicitly retains the last verified 2026-07-24 runtime snapshot.
+
+---
+
+## 2026-07-24 — Session closeout and next-session handoff
+
+### Completed state
+- Completed four-language template/UI coverage and the production migration for all 15 active document templates.
+- Fixed light/dark theme contrast, remaining hardcoded strings, locale race conditions, stale modal state, keyboard focus, and icon-button accessibility.
+- Hardened Netlify/Supabase boundaries: CSP/HSTS/cache/preview rules, PWA private-response handling, CORS, PostgreSQL-backed AI rate limiting, RPC grants, and internal `SECURITY DEFINER` helpers.
+- Removed the unowned `aibizconcierge.uz` domain from all runtime configuration.
+- Applied the production migration, deployed `bright-api` v72, and received `200` from the health smoke test.
+- Added the frontend security CI gate and fixed its clean-runner failure in commit `730b3bd`.
+
+The CI failure was caused by missing public Supabase test configuration during module initialization, not by a missing production secret. CI now uses non-production placeholders, `actions/checkout@v5`, and `actions/setup-node@v6`.
+
+End-of-session local verification:
+- type-check passed;
+- 19/19 test files and 96/96 tests passed;
+- production build passed;
+- security check passed across 9 build/Netlify files;
+- local `HEAD` and `origin/main` both pointed to `730b3bd`.
+
+The next session must first confirm that the remote GitHub Actions run is green. Non-blocking build debt remains: a roughly 1.76 MB main JS chunk, mixed static/dynamic import of `supabase.ts`, and stale Browserslist data.
+
+---
+
+## 2026-07-24 — Target architecture: Netlify frontend only, Supabase backend platform
+
+### Decision
+- Netlify retains the static React/Vite frontend plus browser-delivery security: HTTPS/CDN, CSP/HSTS, cache rules, and preview protection.
+- Supabase owns Auth, PostgreSQL, Edge Functions/backend API, Realtime, future Storage, RLS, authorization, server secrets, rate limiting, and audit logging.
+- Browser-to-Supabase direct access remains only for Auth and Realtime.
+- All business, admin, AI, Telegram, email, and sensitive operations go through the `bright-api` Supabase Edge Function.
+
+Public browser configuration is expected:
+
+```text
+VITE_SUPABASE_URL
+VITE_SUPABASE_PUBLISHABLE_KEY
+VITE_API_BASE_URL
+```
+
+It must never include raw PostgreSQL URLs/passwords, `service_role`, `sb_secret_...`, AI, Telegram, email, payment, or webhook secrets. Those belong only in Supabase project/Edge Function secrets.
+
+Current frontend inspection found no direct `supabase.from`, `rpc`, or Storage business-data calls. Direct Supabase use is limited to Auth, Realtime subscriptions, and retrieving the user access token sent to `bright-api`. A full cookie/BFF proxy is intentionally not selected because it would require rewriting token refresh, reset/OAuth callbacks, CSRF, cookies, CORS, and Realtime without hiding the public endpoint.
+
+### Ordered work for the next session
+1. Confirm clean Git/CI baseline and production `bright-api` health/auth behavior.
+2. Verify availability of a modern `sb_publishable_...` key and migrate the frontend env contract from legacy anon naming without exposing any server secret.
+3. Re-audit browser Supabase calls and keep every non-Auth/Realtime operation behind `bright-api`.
+4. Inventory RLS, grants, views, RPCs, tenant isolation, and every service-role authorization boundary.
+5. Introduce Storage only with private buckets, tenant/user policies, file validation, and short-lived signed or authenticated access.
+6. Tighten CORS, private response caching, per-endpoint quotas/rate limits, audit redaction, and production/preview separation.
+7. Run type-check, all tests, production audit/build/security gate, auth/Realtime/locale/theme/template smoke tests, and cross-tenant authorization tests.
+8. Apply reviewed migrations, deploy `bright-api`, smoke-test it, deploy the Netlify frontend, and record exact versions/results.
+
+The full file-by-file checklist, acceptance criteria, and safety constraints are maintained in the canonical [Uzbek DEVLOG](../DEVLOG.md).
+
+Manual/platform follow-ups remain: enable Supabase Leaked Password Protection, choose preview protection compatible with the Netlify plan, plan the `vector` extension move separately, verify `TELEGRAM_WEBHOOK_SECRET`, and rotate/revoke keys only after the replacement configuration is deployed and smoke-tested.
+
+---
+
 ## 2026-07-24 — Netlify + Supabase security hardening
 
 ### Done

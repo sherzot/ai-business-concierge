@@ -1,5 +1,7 @@
 # R-002: Supabase Realtime – Sozlash
 
+> **Holat: DONE.** Inbox va Tasks Realtime implementatsiyasi mavjud. Bu fayl setup/troubleshooting qo'llanmasi sifatida saqlanadi.
+
 Inbox va Tasks sahifalari endi real-time yangilanadi (yangi xabar/vazifa kelsa avtomatik ko‘rinadi).
 
 ---

@@ -1,5 +1,7 @@
 # R-001: Resend Email Inbox – Sozlash
 
+> **Holat: PARTIAL.** Webhook va tenant mapping implementatsiyasi mavjud, lekin real receiving/delivery end-to-end smoke-test qayta tasdiqlanishi kerak. Joriy holat: [STATUS.md](STATUS.md).
+
 Real email xabarlarini Inbox ga qo‘shish uchun Resend Inbound va webhook sozlash.
 
 **Domen:** Haqiqiy domen bo‘lmasa, Resend’ning bepul `*.resend.app` domenidan foydalanishingiz mumkin. Sizda: `doroufdalu.resend.app` – har qanday manzil (`inbox@doroufdalu.resend.app`, `support@doroufdalu.resend.app` va hokazo) qabul qilinadi.

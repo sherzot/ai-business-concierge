@@ -136,15 +136,28 @@ OPENAI_API_KEY=
 
 ---
 
+## MANDATORY SESSION LIFECYCLE
+
+Before changing code or documentation in every session:
+
+1. Read `docs/README.md`.
+2. Read `docs/STATUS.md` completely.
+3. Read the newest top entry in `docs/DEVLOG.md`.
+4. Identify the in-scope active task in `docs/PLAN.md`.
+5. Run `git status --short` and preserve user changes.
+
+Before declaring a material change complete, follow the DEVLOG protocol and update STATUS/PLAN; synchronize Requirements, Roadmap, or Architecture when capability, phase, or boundaries changed. Full repository rule: `AGENTS.md`.
+
+---
+
 ## DEVLOG PROTOCOL (§DEVLOG)
 
-**Rule:** Every significant change (new feature, bug fix, migration, architectural decision, deployment error) MUST be written to **5 files simultaneously**:
+**Rule:** Every significant change (new feature, bug fix, migration, architectural decision, deployment error) MUST be written to **4 files simultaneously**:
 
 1. `docs/DEVLOG.md` — primary (Uzbek, detailed)
 2. `docs/English/DEVLOG.md` — English translation
 3. `docs/Russian/DEVLOG.md` — Russian translation
-4. `docs/Uzbek/DEVLOG.md` — Uzbek (short variant)
-5. `docs/日本語/DEVLOG.md` — Japanese translation
+4. `docs/日本語/DEVLOG.md` — Japanese translation
 
 **Format:**
 ```
@@ -160,7 +173,7 @@ What problem existed or what was needed.
 - `path/to/file` (new/changed)
 ```
 
-**Sync check:** At the end of each session, the latest entry in all 5 DEVLOG.md files must have the same date. If there's a discrepancy — add the translation immediately.
+**Sync check:** At the end of each session, the latest entry in all 4 DEVLOG.md files must have the same date. If there's a discrepancy — add the translation immediately.
 
 ---
 
@@ -168,7 +181,7 @@ What problem existed or what was needed.
 
 - **Migration** — DB changes only through migration files
 - **Test** — new API endpoint = new test
-- **i18n** — new UI string = uz + ru translation
+- **i18n** — new UI string = uz + ru + en + ja translation
 - **Mobile** — every UI change checked on mobile
-- **DEVLOG** — every significant change goes into all 5 DEVLOG.md files (see §DEVLOG)
+- **DEVLOG** — every significant change goes into all 4 DEVLOG.md files (see §DEVLOG)
 - **Competition** — SQB is not a competitor, it's a funnel. We handle daily ops, they handle the startup phase.

@@ -2,7 +2,7 @@
 
 このドキュメントはプロジェクトの要件と今後の方向性を定義します。新機能を追加する際はこのドキュメントを参照してください。
 
-> ステータスは2026-07-24時点のコードとDEVLOGに同期済み。
+> 2026-08-07更新。現在snapshot: [STATUS.md](STATUS.md)。Status: Done、Partial、Skeleton、Planned。
 
 ---
 
@@ -41,6 +41,12 @@
 | R-001 | リアル受信ボックス統合 | Email（Resend）webhook – 部分実装済み ✅ | Inbox |
 | R-002 | リアルタイム更新 | Supabase Realtime – inbox、tasks ✅ | Inbox、Tasks |
 | R-015 | タスク割り当て通知 | リーダーが割り当てた際の担当者への通知、確認、ステータスの透明性 ✅ | Tasks |
+| R-016 | HR Candidate Analysis | Skeleton; GitHub/CV/LLM business logicとtestsが残る | HR |
+| R-017 | AI rate limiting | Partial; DB-backed AI limitあり、unified plan/endpoint policyが残る | Backend |
+| R-018 | AI cost tracking | Partial; loggingあり、tenant dashboard/enforcementが残る | Backend |
+| R-019 | Vector Search (RAG) | Partial; vector/embedding基盤あり、explicit tool/citationsが残る | Docs |
+| R-020 | Admin Dashboard | Partial; core pagesあり、billing/advanced agentsが残る | Admin |
+| R-021 | AI書類メーカーbinary output | Partial; templates/draftsあり、PDF/DOCX/Storageが残る | Docs |
 | R-003 | 課金/支払い | サブスクリプション、プラン、支払い履歴 | 新規 |
 | R-004 | 監査ログ表示 | Admin audit logページとbackend endpoint ✅ | Settings |
 | R-005 | エクスポート/インポート | Excel、CSVエクスポート、一括インポート | Reports、Tasks |
@@ -49,10 +55,10 @@
 | ID | 要件 | 説明 | モジュール |
 |----|------|------|----------|
 | R-006 | プッシュ/通知 | ブラウザプッシュ、メール通知 | すべて |
-| R-007 | モバイル対応 | PWAまたはReact Native | すべて |
-| R-008 | 多言語対応拡張 | 追加言語（ru、en） | Settings |
+| R-007 | モバイル対応 | Partial PWA shell; deep offline sync/pushが残る | すべて |
+| R-008 | 多言語対応拡張 | Done: uz、ru、en、ja | Settings |
 | R-009 | カスタムブランディング | テナント別ロゴ・カラー | Settings |
-| R-010 | API レート制限 | ユーザー/テナント単位の制限 | Backend |
+| R-010 | API レート制限 | Partial: AI protectionあり、unified API policyが残る | Backend |
 
 ### 2.3 低優先度
 | ID | 要件 | 説明 | モジュール |

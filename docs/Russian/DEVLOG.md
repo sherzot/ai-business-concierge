@@ -4,6 +4,90 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-07 — Обязательный documentation lifecycle для каждой agent-сессии
+
+- Создан корневой `AGENTS.md`: каждая сессия начинается с `README → STATUS → newest DEVLOG → PLAN → git status`.
+- Material changes завершаются новой записью DEVLOG, обновлением STATUS/PLAN, при необходимости Requirements/Roadmap/Architecture и синхронизацией четырёх языков.
+- Read-only reporting не создаёт лишние DEVLOG entries; secrets/private data запрещено писать в docs/logs.
+- Нельзя объявлять задачу полностью завершённой, пока обязательная документация не синхронизирована.
+- Правило связано из `docs/README.md` и продублировано во всех четырёх вариантах `CLAUDE.md`.
+
+Изменены только documentation/agent rules; application runtime не менялся.
+
+---
+
+## 2026-08-07 — Документация приведена к явной системе source of truth
+
+- Добавлены `README.md` с ролями документов и `STATUS.md` как основной текущий handoff.
+- Старый master PLAN перенесён в архив и заменён активным планом P0/P1/P2.
+- ROADMAP и REQUIREMENTS обновлены статусами Done/Partial/Skeleton/Planned; добавлен R-021 для binary output Документоведа.
+- Исправлено описание архитектуры: HR Candidate — modular scaffold с TODO/stub logic, а не production-ready эталон.
+- Phase 0/setup документы получили historical/operational предупреждения.
+- STATUS/PLAN/ROADMAP/REQUIREMENTS синхронизированы на English, Russian и Japanese.
+
+Изменялась только документация. Код, DB, Functions и hosting config не менялись; production, CI, tests и build повторно не запускались. STATUS явно использует последний подтверждённый runtime snapshot от 2026-07-24.
+
+---
+
+## 2026-07-24 — Завершение сессии и передача контекста
+
+### Итоговое состояние
+- Завершены четыре языка для библиотеки шаблонов/UI и production migration для всех 15 активных шаблонов документов.
+- Исправлены контраст light/dark theme, оставшиеся hardcoded-строки, locale race condition, устаревшее состояние modal, keyboard focus и accessibility icon-кнопок.
+- Усилены границы Netlify/Supabase: CSP/HSTS/cache/preview, PWA private-response cache, CORS, PostgreSQL-backed AI rate limit, RPC grants и внутренние `SECURITY DEFINER` helpers.
+- Не принадлежащий проекту домен `aibizconcierge.uz` удалён из всей runtime-конфигурации.
+- Production migration применена, `bright-api` v72 задеплоен, health smoke-test вернул `200`.
+- Создан frontend security CI gate; его ошибка на clean runner исправлена commit'ом `730b3bd`.
+
+Причиной CI failure было отсутствие public Supabase test config при инициализации модулей, а не отсутствие production secret. В CI добавлены non-production placeholders, `actions/checkout@v5` и `actions/setup-node@v6`.
+
+Локальная проверка в конце сессии:
+- type-check успешен;
+- 19/19 test files и 96/96 tests успешны;
+- production build успешен;
+- security check проверил 9 build/Netlify файлов;
+- локальные `HEAD` и `origin/main` указывали на `730b3bd`.
+
+Следующую сессию нужно начать с проверки, что remote GitHub Actions run имеет статус green. Неблокирующий technical debt: основной JS chunk около 1.76 MB, смешанный static/dynamic import `supabase.ts`, устаревшая база Browserslist.
+
+---
+
+## 2026-07-24 — Целевая архитектура: Netlify только для frontend, Supabase как backend platform
+
+### Решение
+- В Netlify остаётся статический React/Vite frontend и browser-delivery security: HTTPS/CDN, CSP/HSTS, cache rules и preview protection.
+- Supabase отвечает за Auth, PostgreSQL, Edge Functions/backend API, Realtime, будущий Storage, RLS, authorization, server secrets, rate limiting и audit log.
+- Прямой browser-to-Supabase доступ остаётся только для Auth и Realtime.
+- Все business/admin/AI/Telegram/email и sensitive операции проходят через Supabase Edge Function `bright-api`.
+
+Допустимая public browser-конфигурация:
+
+```text
+VITE_SUPABASE_URL
+VITE_SUPABASE_PUBLISHABLE_KEY
+VITE_API_BASE_URL
+```
+
+Во frontend никогда не должны попадать raw PostgreSQL URL/password, `service_role`, `sb_secret_...`, AI, Telegram, email, payment и webhook secrets. Они хранятся только в Supabase Project/Edge Function Secrets.
+
+Проверка frontend не нашла прямых business-data вызовов `supabase.from`, `rpc` или Storage. Прямой Supabase используется только для Auth, Realtime subscriptions и получения user access token для `bright-api`. Полный cookie/BFF proxy не выбран: он потребует переписать token refresh, reset/OAuth callbacks, CSRF, cookies, CORS и Realtime, не скрывая public endpoint.
+
+### Порядок следующей сессии
+1. Подтвердить clean Git/CI baseline и production health/auth поведение `bright-api`.
+2. Проверить наличие современного `sb_publishable_...` и безопасно перейти с legacy anon naming без раскрытия server secrets.
+3. Повторно проверить browser Supabase calls и оставить все операции кроме Auth/Realtime за `bright-api`.
+4. Провести инвентаризацию RLS, grants, views, RPC, tenant isolation и всех service-role authorization boundaries.
+5. Добавлять Storage только с private buckets, tenant/user policies, file validation и short-lived signed/authenticated access.
+6. Усилить CORS, private response caching, endpoint-specific quota/rate limit, audit redaction и разделение production/preview.
+7. Выполнить type-check, tests, production audit/build/security gate, Auth/Realtime/locale/theme/template smoke tests и cross-tenant authorization tests.
+8. Применить проверенные migrations, задеплоить и проверить `bright-api`, затем Netlify frontend и записать точные версии/результаты.
+
+Полный file-by-file checklist, критерии приёмки и ограничения безопасности находятся в основном [узбекском DEVLOG](../DEVLOG.md).
+
+Оставшиеся ручные/platform задачи: включить Supabase Leaked Password Protection, выбрать preview protection в рамках Netlify plan, отдельно спланировать перенос `vector`, проверить `TELEGRAM_WEBHOOK_SECRET`, а key rotation/revoke выполнять только после deploy и smoke-test новой конфигурации.
+
+---
+
 ## 2026-07-24 — Усиление безопасности Netlify + Supabase
 
 ### Сделано
