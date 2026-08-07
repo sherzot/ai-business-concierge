@@ -18,7 +18,7 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | Publishable-key commit `35d4b91` отправлен в `origin/main`; текущий RLS hardening ещё не закоммичен |
+| Git | Risk-scanner hardening commit `3e383b1` отправлен в `origin/main` |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Backend | Supabase Edge Function `bright-api` v72 |
 | Health | `200` |
@@ -26,7 +26,7 @@
 | Unit tests | 21/21 файлов, 101/101 тестов |
 | Production build/security check | Успешно |
 | Production dependency audit | Scoped gate: 0 unexcepted high/critical; GHSA-qwww metadata exception до 2026-08-21 |
-| Remote GitHub Actions | Run `31192041119`, commit `35d4b91`: success; все шаги `frontend-security-gate` green |
+| Remote GitHub Actions | Run `31193931735`, commit `3e383b1`: success; все шаги `frontend-security-gate` green |
 | Frontend Supabase key contract | Code/deploy: publishable primary + temporary fallback; production bundle использует legacy anon fallback, Netlify env/login pending |
 | DB security | RLS на 32/32 public tables; 8/8 views используют `security_invoker`; 6/6 `SECURITY DEFINER` functions закрыты для browser EXECUTE; risk tables закрыты от `anon/authenticated` CRUD |
 

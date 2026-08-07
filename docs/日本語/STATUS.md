@@ -18,7 +18,7 @@
 
 | Check | 状態 |
 |---|---|
-| Git | Publishable-key commit `35d4b91`を`origin/main`へpush済み。Current RLS hardeningは未commit |
+| Git | Risk-scanner hardening commit `3e383b1`を`origin/main`へpush済み |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Backend | Supabase Edge Function `bright-api` v72 |
 | Health | `200` |
@@ -26,7 +26,7 @@
 | Unit tests | 21/21 files、101/101 tests |
 | Production build/security check | 成功 |
 | Production dependency audit | Scoped gate: unexcepted high/critical 0; GHSA-qwww exceptionは2026-08-21まで |
-| Remote GitHub Actions | Run `31192041119`、commit `35d4b91`: success。全`frontend-security-gate` stepがgreen |
+| Remote GitHub Actions | Run `31193931735`、commit `3e383b1`: success。全`frontend-security-gate` stepがgreen |
 | Frontend Supabase key contract | Code/deployはpublishable primary + temporary fallback。Production bundleはlegacy anon fallback使用、Netlify env/login pending |
 | DB security | 32/32 public tablesでRLS、8/8 viewsが`security_invoker`、6/6 `SECURITY DEFINER` functionsはbrowser EXECUTE不可、risk tablesは`anon/authenticated` CRUD不可 |
 

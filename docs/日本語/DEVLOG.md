@@ -10,6 +10,7 @@
 - `risk_scans`と`risk_findings`は`super_admin/sub_admin`確認後の`bright-api` service-role clientだけが使用する。しかし旧`auth.role() = 'authenticated'` SELECT policiesは全signed-in userにdirect Data API readを許可していた。
 - Migration historyを変更せずname driftを解消: production `20260724132314_harden_internal_functions_and_rpc_grants` SQLがlocal `20260724130852_...`と完全一致することを確認し、local fileを実production timestampへrename。
 - `20260807153154_lock_down_risk_scanner_tables.sql`を作成・production適用。Old policiesを削除し、`anon/authenticated`の全table privilegesをrevoke、service-role CRUDとRLSを保持。
+- Security changesをcommit `3e383b1`としてpushし、GitHub CI run `31193931735`は全gate greenで`success`完了。
 - Production verification: 両risk tablesはRLS enabled、policy 0、browser CRUD grant 0、service-role CRUDあり。Migration history一致、Security Advisor error 0。既知warningは`vector` in `public`とLeaked Password Protection disabled。No-policy tablesはdefault-deny INFO。
 - Smoke tests: production health `200`、unauthenticated risk endpoint `401`、publishable keyによるanonymous `risk_scans` Data API SELECTも`401`。
 - Regression verification成功: type-check、21/21 test files・101/101 tests、production build、9-file security gate、unexcepted high/critical 0。

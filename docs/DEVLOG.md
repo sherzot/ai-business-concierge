@@ -16,6 +16,7 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 - `20260807153154_lock_down_risk_scanner_tables.sql` yaratildi va productionga qo'llandi.
 - Ikkala risk jadvalidagi eski read/service policylar olib tashlandi; `anon` va `authenticated` uchun barcha table privilege'lar bekor qilindi; `service_role` CRUD saqlandi va RLS yoqilgan holda qoldi.
+- Security o'zgarishlari `3e383b1` commitida `origin/main`ga push qilindi; GitHub CI run `31193931735` to'liq `success` yakunlandi.
 - Publishable-key commit `35d4b91` uchun GitHub CI run `31192041119` green, Netlify production deploy `ready` ekanligi tasdiqlandi. Production bundle hali legacy anon fallback ishlatadi: Netlify CLI login/env rollout qolgan, eski env/fallback olib tashlanmadi.
 
 ### Verifikatsiya

@@ -18,7 +18,7 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | Publishable-key commit `35d4b91` `origin/main`ga push qilindi; joriy RLS hardening hali commit qilinmagan |
+| Git | Risk-scanner hardening commit `3e383b1` `origin/main`ga push qilindi |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Backend | Supabase Edge Function `bright-api` v72 |
 | Health smoke-test | `200` |
@@ -27,7 +27,7 @@
 | Production build | Muvaffaqiyatli |
 | Security check | 9 ta build/Netlify fayli muvaffaqiyatli |
 | Production dependency audit | Scoped gate o'tdi: unexcepted high/critical 0; GHSA-qwww metadata exceptioni 2026-08-21 gacha |
-| Remote GitHub Actions | Run `31192041119`, commit `35d4b91`: `success`; barcha `frontend-security-gate` qadamlari green |
+| Remote GitHub Actions | Run `31193931735`, commit `3e383b1`: `success`; barcha `frontend-security-gate` qadamlari green |
 | Frontend Supabase key contract | Kod/deploy: publishable primary + vaqtinchalik fallback; production bundle legacy anon fallback ishlatmoqda, Netlify env/login **pending** |
 | DB security | 32/32 public tableda RLS; 8/8 view `security_invoker`; 6/6 `SECURITY DEFINER` funksiya browser EXECUTEdan yopiq; risk jadvallari `anon/authenticated` CRUDdan yopildi |
 

@@ -10,6 +10,7 @@
 - `risk_scans` и `risk_findings` используются только через service-role client `bright-api` после проверки `super_admin/sub_admin`. Старые SELECT policies с `auth.role() = 'authenticated'` позволяли любому вошедшему пользователю читать их напрямую через Data API.
 - Без изменения migration history устранён drift имени: SQL production `20260724132314_harden_internal_functions_and_rpc_grants` точно совпал с local `20260724130852_...`, после чего local file переименован в реальный production timestamp.
 - Создан и применён `20260807153154_lock_down_risk_scanner_tables.sql`: old policies удалены, все privileges для `anon/authenticated` отозваны, CRUD для service role сохранён, RLS оставлен включённым.
+- Security changes отправлены как commit `3e383b1`; GitHub CI run `31193931735` полностью завершён со статусом `success`.
 - Production verification: обе risk tables имеют RLS, 0 policies, 0 browser CRUD grants и service-role CRUD. Migration histories совпадают; Security Advisor: 0 errors. Известные warnings — `vector` в `public` и отключённая Leaked Password Protection; tables без policies остаются default-deny INFO.
 - Smoke tests: production health `200`, risk endpoint без authentication `401`, а anonymous Data API SELECT `risk_scans` с publishable key также вернул `401`.
 - Regression verification: type-check; 21/21 test files и 101/101 tests; production build; security gate на 9 files; 0 unexcepted high/critical advisories.
