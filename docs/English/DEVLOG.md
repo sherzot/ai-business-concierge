@@ -4,6 +4,15 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-07 — P0 commits pushed and new CI green
+
+- Pushed local commits `55ec941`, `a088fef`, and `06b5756` to `origin/main` (`730b3bd..06b5756`).
+- GitHub Actions `CI` run `31188866507` for commit `06b5756` completed successfully in 42 seconds.
+- Every `frontend-security-gate` step passed: checkout, Node setup, clean install, type-check, unit tests, production dependency audit, production build, and bundle/hosting security checks.
+- The local and remote P0 baseline is complete. Next: monitor the React Router metadata-exception deadline, then continue with the publishable-key contract and Supabase/RLS authorization audit.
+
+---
+
 ## 2026-08-07 — GitHub CLI authentication and remote CI verified
 
 - Restored GitHub CLI authentication for `sherzot` through browser login and the system keyring; no token value was recorded in documentation or logs.

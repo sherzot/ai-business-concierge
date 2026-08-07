@@ -6,8 +6,7 @@
 ## P0 — safe session start
 
 - [x] Preserve user changes and commit the documentation workflow as `55ec941`.
-- [x] Confirm the latest existing remote CI run for `730b3bd` is green.
-- [ ] After pushing local `55ec941` and `a088fef`, verify the new CI run until green.
+- [x] Push the P0 commits to `origin/main` and confirm CI run `31188866507` for commit `06b5756` is fully green.
 - [x] Run Node 22 install, type-check, 96 tests, build and security check.
 - [x] Run scoped production audit: 0 unexcepted high/critical; GHSA-qwww metadata exception expires 2026-08-21.
 - [x] Smoke-test production health `200` and unauthenticated protected route `401`.

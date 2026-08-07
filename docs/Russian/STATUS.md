@@ -2,7 +2,7 @@
 
 > Последний подтверждённый snapshot кода/platform: **2026-08-07**
 > Документация упорядочена: **2026-08-07**
-> Local runtime и production health/auth smoke-tests повторно проверены 2026-08-07. GitHub CLI authentication восстановлена, последний существующий remote CI run подтверждён green; новые local commits ещё не отправлены.
+> Local runtime, production health/auth и remote GitHub Actions baseline повторно проверены 2026-08-07. P0 commits отправлены, новый CI run завершён полностью green.
 
 ## Текущая фаза
 
@@ -17,7 +17,7 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | Local docs commit `55ec941`; local `main` впереди unpushed `origin/main` |
+| Git | P0 commit set `55ec941` → `a088fef` → `06b5756` отправлен в `origin/main` |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Backend | Supabase Edge Function `bright-api` v72 |
 | Health | `200` |
@@ -25,7 +25,7 @@
 | Unit tests | 19/19 файлов, 96/96 тестов |
 | Production build/security check | Успешно |
 | Production dependency audit | Scoped gate: 0 unexcepted high/critical; GHSA-qwww metadata exception до 2026-08-21 |
-| Remote GitHub Actions | Последний run для `730b3bd` успешен; local `55ec941` и `a088fef` не отправлены, поэтому нового run для них нет |
+| Remote GitHub Actions | Run `31188866507`, commit `06b5756`: success; все шаги `frontend-security-gate` green |
 
 ## Состояние возможностей
 
@@ -43,11 +43,10 @@
 
 ## Ближайший порядок
 
-1. Решить push local commits `55ec941` и `a088fef`; после push проверить новый CI run до green.
-2. До 2026-08-21 пересмотреть/удалить GHSA-qwww metadata exception.
-3. Безопасно перейти на `VITE_SUPABASE_PUBLISHABLE_KEY`.
-4. Завершить browser Supabase, RLS/grants и cross-tenant authorization audit.
-5. Завершить PDF/DOCX, private Storage и signed URL для Документолога.
-6. Закрыть Telegram/Resend verification, затем реализовать HR Candidate Analysis.
+1. До 2026-08-21 пересмотреть/удалить GHSA-qwww metadata exception.
+2. Безопасно перейти на `VITE_SUPABASE_PUBLISHABLE_KEY`.
+3. Завершить browser Supabase, RLS/grants и cross-tenant authorization audit.
+4. Завершить PDF/DOCX, private Storage и signed URL для Документолога.
+5. Закрыть Telegram/Resend verification, затем реализовать HR Candidate Analysis.
 
 Подробности: [PLAN.md](PLAN.md). Основной источник: [узбекский STATUS](../STATUS.md).

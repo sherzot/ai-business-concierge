@@ -2,7 +2,7 @@
 
 > 最終確認済みcode/platform snapshot: **2026-08-07**
 > ドキュメント整理日: **2026-08-07**
-> 2026-08-07にlocal runtimeとproduction health/auth smoke-testを再確認。GitHub CLI authenticationを復旧し、既存の最新remote CI runがgreenであることを確認。新しいlocal commitsは未push。
+> 2026-08-07にlocal runtime、production health/auth、remote GitHub Actions baselineを再確認。P0 commitsをpushし、new CI runはfully greenで完了。
 
 ## 現在のPhase
 
@@ -17,7 +17,7 @@
 
 | Check | 状態 |
 |---|---|
-| Git | Local docs commit `55ec941`; local `main`はunpushed `origin/main`よりahead |
+| Git | P0 commit set `55ec941` → `a088fef` → `06b5756`を`origin/main`へpush済み |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Backend | Supabase Edge Function `bright-api` v72 |
 | Health | `200` |
@@ -25,7 +25,7 @@
 | Unit tests | 19/19 files、96/96 tests |
 | Production build/security check | 成功 |
 | Production dependency audit | Scoped gate: unexcepted high/critical 0; GHSA-qwww exceptionは2026-08-21まで |
-| Remote GitHub Actions | `730b3bd`の最新runは成功。Local `55ec941`と`a088fef`は未pushのためnew runなし |
+| Remote GitHub Actions | Run `31188866507`、commit `06b5756`: success。全`frontend-security-gate` stepがgreen |
 
 ## Capability状態
 
@@ -43,11 +43,10 @@
 
 ## 直近の順序
 
-1. Local `55ec941`と`a088fef`をpushするか決定し、push後のnew CI runをgreenまで確認。
-2. 2026-08-21までにGHSA-qwww metadata exceptionを再確認/削除。
-3. `VITE_SUPABASE_PUBLISHABLE_KEY`へ安全に移行。
-4. Browser Supabase、RLS/grants、cross-tenant authorization auditを完了。
-5. 文書作成のPDF/DOCX、private Storage、signed URLを完了。
-6. Telegram/Resend verification後、HR Candidate Analysisを実装。
+1. 2026-08-21までにGHSA-qwww metadata exceptionを再確認/削除。
+2. `VITE_SUPABASE_PUBLISHABLE_KEY`へ安全に移行。
+3. Browser Supabase、RLS/grants、cross-tenant authorization auditを完了。
+4. 文書作成のPDF/DOCX、private Storage、signed URLを完了。
+5. Telegram/Resend verification後、HR Candidate Analysisを実装。
 
 詳細: [PLAN.md](PLAN.md)。Canonical: [Uzbek STATUS](../STATUS.md)。

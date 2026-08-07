@@ -4,6 +4,15 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-07 — P0 commits отправлены, новый CI green
+
+- Local commits `55ec941`, `a088fef` и `06b5756` отправлены в `origin/main` (`730b3bd..06b5756`).
+- GitHub Actions `CI` run `31188866507` для commit `06b5756` завершился успешно за 42 секунды.
+- Все шаги `frontend-security-gate` успешны: checkout, Node setup, clean install, type-check, unit tests, production dependency audit, production build и bundle/hosting security checks.
+- Local и remote P0 baseline завершён. Далее: контролировать срок React Router metadata exception, затем перейти к publishable-key contract и Supabase/RLS authorization audit.
+
+---
+
 ## 2026-08-07 — Проверены GitHub CLI authentication и remote CI
 
 - GitHub CLI authentication для `sherzot` успешно восстановлена через browser login и system keyring; значение token не записывалось в документацию или логи.

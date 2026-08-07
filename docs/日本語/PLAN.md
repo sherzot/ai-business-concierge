@@ -6,8 +6,7 @@
 ## P0 — 安全なsession開始
 
 - [x] User changesを保持しdocumentation workflowを`55ec941`でcommit。
-- [x] `730b3bd`のlatest existing remote CI runがgreenと確認。
-- [ ] Local `55ec941`と`a088fef`をpush後、new CI runをgreenまで確認。
+- [x] P0 commitsを`origin/main`へpushし、commit `06b5756`のCI run `31188866507`がfully greenと確認。
 - [x] Node 22 install、type-check、96 tests、build、security checkを実行。
 - [x] Scoped production audit: unexcepted high/critical 0; GHSA-qwww exceptionは2026-08-21まで。
 - [x] Production health `200`とunauthenticated protected route `401`を確認。

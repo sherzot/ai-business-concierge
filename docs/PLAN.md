@@ -14,8 +14,7 @@
 ## P0 — sessiyani xavfsiz boshlash
 
 - [x] `git status` va oxirgi commitlarni tekshirish; docs workflow `55ec941` commitida saqlandi.
-- [x] Remote GitHub Actions'dagi oxirgi mavjud CI run `730b3bd` uchun green ekanini tasdiqlash.
-- [ ] Lokal `55ec941` va `a088fef` push qilingach, yangi CI run'ni green holatigacha tekshirish.
+- [x] P0 commitlarini `origin/main`ga push qilish va commit `06b5756` uchun CI run `31188866507` to'liq green ekanini tasdiqlash.
 - [x] Node 22 bilan `npm ci`, type-check, 96 unit test, build va security check baseline olish.
 - [x] Production dependency auditni scoped gate bilan tekshirish: unexcepted high/critical 0; GHSA-qwww/React Router 7.18.2 metadata exceptioni 2026-08-21gacha.
 - [x] Production `bright-api` health `200`, protected endpoint authsiz `401` ekanini smoke-test qilish.

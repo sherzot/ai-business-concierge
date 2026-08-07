@@ -4,6 +4,15 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-07 — P0 commitsをpushしnew CI green
+
+- Local commits `55ec941`、`a088fef`、`06b5756`を`origin/main`へpush (`730b3bd..06b5756`)。
+- Commit `06b5756`のGitHub Actions `CI` run `31188866507`は42秒でsuccess。
+- `frontend-security-gate`の全stepが成功: checkout、Node setup、clean install、type-check、unit tests、production dependency audit、production build、bundle/hosting security checks。
+- Local/remote P0 baseline完了。次はReact Router metadata exception期限をmonitorし、publishable-key contractとSupabase/RLS authorization auditへ進む。
+
+---
+
 ## 2026-08-07 — GitHub CLI authenticationとremote CIを確認
 
 - `sherzot`のGitHub CLI authenticationをbrowser loginとsystem keyringで復旧。Token valueはdocumentation/logへ記録していない。

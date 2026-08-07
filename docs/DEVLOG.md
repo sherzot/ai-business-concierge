@@ -4,6 +4,15 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-07 — P0 commitlari push qilindi va yangi CI green
+
+- Lokal `55ec941`, `a088fef` va `06b5756` commitlari `origin/main`ga push qilindi (`730b3bd..06b5756`).
+- GitHub Actions `CI` run `31188866507` commit `06b5756` uchun 42 soniyada `success` yakunlandi.
+- `frontend-security-gate`ning barcha qadamlari o'tdi: checkout, Node setup, clean install, typecheck, unit testlar, production dependency audit, production build va bundle/hosting security check.
+- Shu bilan P0 lokal va remote baseline yakunlandi. Keyingi faol ish: React Router metadata exception muddatini kuzatish, so'ng publishable-key contract va Supabase/RLS authorization auditi.
+
+---
+
 ## 2026-08-07 — GitHub CLI autentifikatsiyasi va remote CI tasdiqlandi
 
 - `gh auth login --web` orqali `sherzot` akkaunti uchun GitHub CLI autentifikatsiyasi keyring'da muvaffaqiyatli tiklandi; token qiymati hujjat yoki logga yozilmadi.

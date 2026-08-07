@@ -2,7 +2,7 @@
 
 > Kod/platforma bo'yicha oxirgi tasdiqlangan snapshot: **2026-08-07**
 > Hujjatlar tartiblangan sana: **2026-08-07**
-> Lokal runtime va production health/auth smoke-testlari 2026-08-07 kuni qayta tekshirildi. GitHub CLI autentifikatsiyasi tiklandi va remote'dagi oxirgi mavjud CI run green ekani tasdiqlandi; yangi lokal commitlar hali push qilinmagan.
+> Lokal runtime, production health/auth va remote GitHub Actions baseline'i 2026-08-07 kuni qayta tekshirildi. P0 commitlari push qilindi va yangi CI run to'liq green yakunlandi.
 
 ## Hozir qayerdamiz
 
@@ -17,7 +17,7 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | Local `main`da docs commit `55ec941`; push qilinmagan commitlar sabab `origin/main`dan oldinda |
+| Git | P0 commit seti `55ec941` → `a088fef` → `06b5756` `origin/main`ga push qilindi |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Backend | Supabase Edge Function `bright-api` v72 |
 | Health smoke-test | `200` |
@@ -26,7 +26,7 @@
 | Production build | Muvaffaqiyatli |
 | Security check | 9 ta build/Netlify fayli muvaffaqiyatli |
 | Production dependency audit | Scoped gate o'tdi: unexcepted high/critical 0; GHSA-qwww metadata exceptioni 2026-08-21 gacha |
-| Remote GitHub Actions | `730b3bd` uchun oxirgi run `success`; lokal `55ec941` va `a088fef` hali push qilinmagani sabab ular uchun yangi run yo'q |
+| Remote GitHub Actions | Run `31188866507`, commit `06b5756`: `success`; barcha `frontend-security-gate` qadamlari green |
 
 ## Mahsulot va integratsiyalar holati
 
@@ -56,13 +56,12 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. Lokal `55ec941` va `a088fef` commitlarini push qilish bo'yicha qaror olish; pushdan keyin yangi CI run'ni green holatigacha tekshirish.
-2. 2026-08-21gacha GHSA-qwww npm metadata exceptionini qayta ko'rish; registry tuzatilsa exceptionni olib tashlash.
-3. Legacy anon-key env nomidan `VITE_SUPABASE_PUBLISHABLE_KEY` kontraktiga xavfsiz o'tish.
-4. Browser-to-Supabase, DB grants/RLS va cross-tenant authorization auditini tugatish.
-5. AI Hujjatchi uchun PDF/DOCX, Noto Sans, private Storage va signed URL oqimini yozish.
-6. Telegram webhook secret va Resend receiving/delivery smoke-testlarini yopish.
-7. Keyin HR Candidate Analysis implementatsiyasiga o'tish.
+1. 2026-08-21gacha GHSA-qwww npm metadata exceptionini qayta ko'rish; registry tuzatilsa exceptionni olib tashlash.
+2. Legacy anon-key env nomidan `VITE_SUPABASE_PUBLISHABLE_KEY` kontraktiga xavfsiz o'tish.
+3. Browser-to-Supabase, DB grants/RLS va cross-tenant authorization auditini tugatish.
+4. AI Hujjatchi uchun PDF/DOCX, Noto Sans, private Storage va signed URL oqimini yozish.
+5. Telegram webhook secret va Resend receiving/delivery smoke-testlarini yopish.
+6. Keyin HR Candidate Analysis implementatsiyasiga o'tish.
 
 Batafsil tartib: [PLAN.md](PLAN.md).
 

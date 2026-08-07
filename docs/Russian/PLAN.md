@@ -6,8 +6,7 @@
 ## P0 — безопасное начало сессии
 
 - [x] Сохранить user changes и commit documentation workflow как `55ec941`.
-- [x] Подтвердить green последнего существующего remote CI run для `730b3bd`.
-- [ ] После push local `55ec941` и `a088fef` проверить новый CI run до green.
+- [x] Отправить P0 commits в `origin/main` и подтвердить полностью green CI run `31188866507` для commit `06b5756`.
 - [x] Запустить Node 22 install, type-check, 96 tests, build и security check.
 - [x] Scoped production audit: 0 unexcepted high/critical; GHSA-qwww exception до 2026-08-21.
 - [x] Проверить production health `200` и protected route без auth `401`.
