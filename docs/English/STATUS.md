@@ -1,8 +1,8 @@
 # AI Business Concierge — current status
 
-> Last code/platform snapshot verified: **2026-07-24**
+> Last code/platform snapshot verified: **2026-08-07**
 > Documentation normalized: **2026-08-07**
-> Production and CI were not re-verified on 2026-08-07; runtime claims below come from the latest DEVLOG evidence.
+> Local runtime and production health/auth smoke tests were re-verified on 2026-08-07; only remote GitHub Actions remains unconfirmed because authentication is blocked.
 
 ## Current phase
 
@@ -17,14 +17,15 @@
 
 | Check | Status |
 |---|---|
-| Git | `730b3bd`, equal to `origin/main` in that session |
+| Git | Local docs commit `55ec941`; local `main` is ahead of unpushed `origin/main` |
+| Runtime | Node.js `22.18.0`; `.nvmrc` and package engine pin `22.x` |
 | Backend | Supabase Edge Function `bright-api` v72 |
 | Health | `200` |
 | Type-check | Passed |
 | Unit tests | 19/19 files, 96/96 tests |
 | Production build/security check | Passed |
-| Production dependency audit | 0 vulnerabilities |
-| Remote GitHub Actions | Must be confirmed in the next session |
+| Production dependency audit | Scoped gate passed: 0 unexcepted high/critical; GHSA-qwww metadata exception expires 2026-08-21 |
+| Remote GitHub Actions | **BLOCKED:** invalid local `gh` token; run `gh auth login -h github.com` |
 
 ## Capability status
 
@@ -42,11 +43,11 @@
 
 ## Immediate order
 
-1. Re-confirm Git, CI, tests, build, security gate and production health/auth baseline.
-2. Safely migrate the frontend env contract to `VITE_SUPABASE_PUBLISHABLE_KEY`.
-3. Complete browser Supabase, RLS/grants and cross-tenant authorization audits.
-4. Finish PDF/DOCX, fonts, private Storage and signed URLs for the Document Assistant.
-5. Close Telegram secret and Resend delivery verification.
-6. Then implement HR Candidate Analysis.
+1. Re-authenticate `gh`, confirm remote Actions, and separately decide whether to push local commits.
+2. Re-review/remove the GHSA-qwww metadata exception by 2026-08-21.
+3. Safely migrate the frontend env contract to `VITE_SUPABASE_PUBLISHABLE_KEY`.
+4. Complete browser Supabase, RLS/grants and cross-tenant authorization audits.
+5. Finish PDF/DOCX, private Storage and signed URLs for the Document Assistant.
+6. Close Telegram/Resend operational verification, then implement HR Candidate Analysis.
 
 Detailed tasks: [PLAN.md](PLAN.md). Canonical source: [Uzbek STATUS](../STATUS.md).

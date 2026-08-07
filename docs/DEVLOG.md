@@ -4,6 +4,51 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-07 — P0 lokal baseline va dependency audit mustahkamlandi
+
+### Kontekst
+
+2026-07-24 dagi runtime holatini qayta tasdiqlash, hujjat tartibini alohida commit qilish va keyingi xavfsizlik ishlariga ishonchli baseline bilan kirish kerak edi. Dastlabki shell Node.js 21.4.0 bilan ishlayotgani aniqlandi; loyiha CI esa Node.js 22 ni kutadi. Shu tekshiruv vaqtida npm advisory metadata va React Router upstream advisory orasida ham tafovut topildi.
+
+### Bajarildi
+
+- Hujjatlar va doimiy session lifecycle o'zgarishlari `55ec941` (`docs: establish project status and session workflow`) lokal commitiga jamlandi; commit hali remote'ga push qilinmadi.
+- Frontend runtime'i Node.js 22 ga `frontend/.nvmrc` va `package.json` `engines` orqali pin qilindi.
+- `react-router-dom` va uning `react-router` dependency'si `7.18.2` ga yangilandi. React Router'ning upstream advisory'si bu versiyani v7 liniyasi uchun patched deb ko'rsatadi.
+- npm/global advisory metadata hali eski range'ni qaytargani sabab CI uchun tor doiradagi `audit:production` gate yozildi. U audit network/API/JSON xatolarida va barcha boshqa high/critical advisory'larda fail qiladi; yagona vaqtinchalik metadata exception exact `react-router@7.18.2`ga bog'langan va 2026-08-21 da avtomatik eskiradi.
+- GitHub Actions production audit qadami yangi scoped gate'ga o'tkazildi.
+
+### Verifikatsiya
+
+- Node.js `22.18.0`, npm `11.5.2` ostida `npm ci` — muvaffaqiyatli.
+- `npm run typecheck` — muvaffaqiyatli.
+- `npm run test:run` — 19/19 test fayli, 96/96 test muvaffaqiyatli.
+- `npm run audit:production` — 0 ta exception'dan tashqari high/critical advisory; vaqtinchalik metadata exception aniq ko'rsatildi.
+- Audit endpoint mavjud bo'lmagan holat alohida sinovda gate'ni fail qildi; registry access tiklanganda audit muvaffaqiyatli o'tdi.
+- Raw `npm audit --omit=dev --audit-level=high` hali stale global metadata sabab 2 ta high natija ko'rsatadi; bu cheklov yashirilmaydi va 2026-08-21 gacha qayta ko'rib chiqiladi.
+- `npm run build` — muvaffaqiyatli. Oldingi bloklamaydigan warninglar saqlanadi: katta main chunk, `supabase.ts` mixed import va eski Browserslist data.
+- `npm run security:check` — 9 ta build/Netlify fayli tekshirildi, muvaffaqiyatli.
+- Production smoke-test: `bright-api` health — `200`; auth'siz tenant-protected endpoint — `401 TENANT_REQUIRED`.
+- Remote GitHub Actions holatini tekshirish bloklandi: lokal `gh` tokeni yaroqsiz. `gh auth login -h github.com` bajarilgach remote run tekshiriladi.
+
+### Keyingi aniq qadamlar
+
+1. GitHub CLI autentifikatsiyasini tiklash va remote Actions run'ni tekshirish.
+2. Lokal commitlarni push qilish qarorini alohida tasdiqlash.
+3. 2026-08-21 gacha React Router metadata exception'ini qayta tekshirish va imkon bo'lsa olib tashlash.
+4. `sb_publishable_...` frontend contract, browser Supabase boundary va RLS/grant/tenant isolation auditiga o'tish.
+
+### Fayllar
+
+- `.github/workflows/ci.yml`
+- `frontend/.nvmrc`
+- `frontend/package.json`
+- `frontend/package-lock.json`
+- `frontend/scripts/audit-production.mjs`
+- `docs/{STATUS,PLAN,DEVLOG}.md` va uchta tarjima to'plami
+
+---
+
 ## 2026-08-07 — Har bir agent sessiyasi uchun majburiy hujjat lifecycle
 
 ### Kontekst

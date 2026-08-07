@@ -1,8 +1,8 @@
 # AI Business Concierge — joriy holat
 
-> Kod/platforma bo'yicha oxirgi tasdiqlangan snapshot: **2026-07-24**
+> Kod/platforma bo'yicha oxirgi tasdiqlangan snapshot: **2026-08-07**
 > Hujjatlar tartiblangan sana: **2026-08-07**
-> Muhim: 2026-08-07 kuni production va CI qayta tekshirilmagan; quyidagi runtime holat oxirgi `DEVLOG` dalillariga asoslangan.
+> Muhim: lokal runtime va production health/auth smoke-testlari 2026-08-07 kuni qayta tekshirildi; faqat remote GitHub Actions autentifikatsiya sabab tasdiqlanmadi.
 
 ## Hozir qayerdamiz
 
@@ -17,15 +17,16 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git commit | `730b3bd`, o'sha sessiyada `origin/main` bilan bir xil |
+| Git | Local `main`da docs commit `55ec941`; push qilinmagan commitlar sabab `origin/main`dan oldinda |
+| Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Backend | Supabase Edge Function `bright-api` v72 |
 | Health smoke-test | `200` |
 | Type-check | Muvaffaqiyatli |
 | Unit test | 19/19 fayl, 96/96 test |
 | Production build | Muvaffaqiyatli |
 | Security check | 9 ta build/Netlify fayli muvaffaqiyatli |
-| Production dependency audit | 0 ta zaiflik |
-| Remote GitHub Actions | Keyingi sessiyada qayta tasdiqlanishi kerak |
+| Production dependency audit | Scoped gate o'tdi: unexcepted high/critical 0; GHSA-qwww metadata exceptioni 2026-08-21 gacha |
+| Remote GitHub Actions | **BLOCKED:** local `gh` token invalid; `gh auth login -h github.com` kerak |
 
 ## Mahsulot va integratsiyalar holati
 
@@ -55,12 +56,13 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. Git/CI/runtime baseline'ni qayta tasdiqlash.
-2. Legacy anon-key env nomidan `VITE_SUPABASE_PUBLISHABLE_KEY` kontraktiga xavfsiz o'tish.
-3. Browser-to-Supabase, DB grants/RLS va cross-tenant authorization auditini tugatish.
-4. AI Hujjatchi uchun PDF/DOCX, Noto Sans, private Storage va signed URL oqimini yozish.
-5. Telegram webhook secret va Resend receiving/delivery smoke-testlarini yopish.
-6. Keyin HR Candidate Analysis implementatsiyasiga o'tish.
+1. `gh auth login -h github.com`dan keyin remote Actions holatini tekshirish va local commitlarni push qilish bo'yicha alohida qaror olish.
+2. 2026-08-21gacha GHSA-qwww npm metadata exceptionini qayta ko'rish; registry tuzatilsa exceptionni olib tashlash.
+3. Legacy anon-key env nomidan `VITE_SUPABASE_PUBLISHABLE_KEY` kontraktiga xavfsiz o'tish.
+4. Browser-to-Supabase, DB grants/RLS va cross-tenant authorization auditini tugatish.
+5. AI Hujjatchi uchun PDF/DOCX, Noto Sans, private Storage va signed URL oqimini yozish.
+6. Telegram webhook secret va Resend receiving/delivery smoke-testlarini yopish.
+7. Keyin HR Candidate Analysis implementatsiyasiga o'tish.
 
 Batafsil tartib: [PLAN.md](PLAN.md).
 
@@ -70,10 +72,12 @@ Batafsil tartib: [PLAN.md](PLAN.md).
 - Netlify Personal rejasiga mos preview access protection tanlash.
 - `vector` extensionini `public` sxemadan ko'chirishni alohida migration sifatida rejalash.
 - Production key rotation/revoke'ni faqat replacement config deploy va smoke-testdan keyin bajarish.
+- GitHub CLI'ni `gh auth login -h github.com` bilan qayta autentifikatsiya qilish.
 
 ## Ma'lum, lekin bloklamaydigan qarzlar
 
 - Asosiy JavaScript chunk taxminan 1.76 MB; route/module code splitting kerak.
 - `supabase.ts` static va dynamic import aralashmasi alohida chunkni cheklaydi.
 - Browserslist bazasi eskirgan.
+- npm global advisory metadata GHSA-qwww uchun React Router 7.18.2 ni noto'g'ri vulnerable deb hisoblamoqda; upstream repo advisory 7.18.2 ni patched deb belgilagan. Scoped exception 2026-08-21da avtomatik qayta ko'rishni talab qiladi.
 - Eski setup hujjatlarida legacy function/key nomlari uchrashi mumkin; joriy qaror uchun `STATUS.md` va eng yangi `DEVLOG` ustun.

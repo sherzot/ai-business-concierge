@@ -13,14 +13,17 @@
 
 ## P0 — sessiyani xavfsiz boshlash
 
-- [ ] `git status` va oxirgi commitlarni tekshirish; mavjud user o'zgarishlarini saqlash.
-- [ ] Remote GitHub Actions `frontend-security-gate` green ekanini tasdiqlash.
-- [ ] `npm ci`, type-check, 96+ unit test, production audit, build va security check bilan baseline olish.
-- [ ] Production `bright-api` health `200`, protected endpoint authsiz `401` ekanini smoke-test qilish.
-- [ ] Natijani `DEVLOG.md` va `STATUS.md`ga yozish.
+- [x] `git status` va oxirgi commitlarni tekshirish; docs workflow `55ec941` commitida saqlandi.
+- [ ] Remote GitHub Actions `frontend-security-gate` green ekanini tasdiqlash — **BLOCKED:** `gh` token invalid, qayta login kerak.
+- [x] Node 22 bilan `npm ci`, type-check, 96 unit test, build va security check baseline olish.
+- [x] Production dependency auditni scoped gate bilan tekshirish: unexcepted high/critical 0; GHSA-qwww/React Router 7.18.2 metadata exceptioni 2026-08-21gacha.
+- [x] Production `bright-api` health `200`, protected endpoint authsiz `401` ekanini smoke-test qilish.
+- [x] Natijani `DEVLOG.md` va `STATUS.md`ga yozish.
 
 ## P1 — Supabase/Netlify security handoffini yakunlash
 
+- [ ] `gh auth login -h github.com`dan keyin remote CI holatini tekshirish.
+- [ ] 2026-08-21gacha GHSA-qwww metadata exceptionini qayta tekshirish va npm advisory yangilansa exceptionni olib tashlash.
 - [ ] `sb_publishable_...` mavjudligini tekshirish va `VITE_SUPABASE_PUBLISHABLE_KEY` env kontraktiga bosqichma-bosqich o'tish.
 - [ ] `config.ts`, `.env.example`, Vitest, CI va Netlify env nomlarini bir xil qilish.
 - [ ] Frontend direct Supabase chaqiruvlarini audit qilish; Auth/Realtimedan boshqa operatsiyalarga regressiya gate qo'shish.

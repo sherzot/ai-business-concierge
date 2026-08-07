@@ -4,6 +4,40 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-07 — P0 local baselineとdependency auditを強化
+
+### Contextと実施内容
+
+- 次のsecurity作業前に2026-07-24 runtime baselineを再確認。初期shellは未対応のNode.js 21.4.0を使用していたが、CIはNode.js 22を要求する。
+- Documentation/session lifecycleをlocal commit `55ec941` (`docs: establish project status and session workflow`)として分離。まだremoteへpushしていない。
+- `.nvmrc`と`package.json` `engines`でfrontendをNode.js 22へ固定。
+- `react-router-dom`と`react-router`を`7.18.2`へ更新。React Router upstream advisoryではv7系列のpatched versionとして扱われる。
+- npm/global advisory metadataが古いrangeを返すため、限定的な`audit:production` gateを追加。Audit network/API/JSON errorと他のhigh/critical advisoryはすべてfailし、唯一のexceptionはexact `react-router@7.18.2`に限定され、2026-08-21に期限切れになる。
+- GitHub Actionsのproduction audit stepをこのgateへ変更。
+
+### 検証
+
+- Node.js `22.18.0`、npm `11.5.2`: `npm ci`成功。
+- Type-check成功。19/19 test files、96/96 tests成功。
+- `npm run audit:production`成功: exception外のhigh/critical advisoryは0件で、temporary metadata exceptionを明示した。
+- Endpoint unavailableの別確認でfail-closed動作を確認し、registry access復旧後にauditが成功した。
+- Raw `npm audit --omit=dev --audit-level=high`はstale global metadataにより2件のhighを引き続き報告。この制約を記録し、2026-08-21までに再確認する。
+- Production build成功。既存の非blocking warning（large main chunk、mixed import、Browserslist data）は残る。
+- 9 build/Netlify filesのsecurity check成功。
+- Production smoke-testは`bright-api` healthが`200`、unauthenticated tenant-protected endpointが`401 TENANT_REQUIRED`。
+- Remote GitHub Actions確認はlocal `gh` token無効のためblocked。`gh auth login -h github.com`後にremote runを確認する。
+
+### 次の作業
+
+1. GitHub CLI authenticationを復旧し、remote Actionsを確認。
+2. Local commitsをpushするかは別途判断。
+3. 2026-08-21までにReact Router metadata exceptionを再確認し、可能なら削除。
+4. `sb_publishable_...` frontend contractとbrowser Supabase/RLS/grant/tenant isolation auditへ進む。
+
+変更ファイル: `.github/workflows/ci.yml`、`frontend/.nvmrc`、`frontend/package.json`、`frontend/package-lock.json`、`frontend/scripts/audit-production.mjs`、4言語のSTATUS/PLAN/DEVLOG。
+
+---
+
 ## 2026-08-07 — 全agent session向け必須documentation lifecycle
 
 - Root `AGENTS.md`を追加し、全sessionの開始順を`README → STATUS → newest DEVLOG → PLAN → git status`に固定。

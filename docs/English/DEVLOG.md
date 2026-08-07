@@ -4,6 +4,40 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-07 — P0 local baseline and dependency audit hardened
+
+### Context and completed work
+
+- Re-established the 2026-07-24 runtime baseline before starting the next security work. The initial shell was using unsupported Node.js 21.4.0 while CI expects Node.js 22.
+- Committed the documentation/session lifecycle separately as local commit `55ec941` (`docs: establish project status and session workflow`); it has not been pushed.
+- Pinned the frontend to Node.js 22 with `.nvmrc` and `package.json` `engines`.
+- Updated `react-router-dom` and `react-router` to `7.18.2`, which the upstream React Router advisory marks patched for the v7 line.
+- Added a narrowly scoped `audit:production` gate because npm/global advisory metadata still reports the older range. It fails on audit network/API/JSON errors and every other high/critical advisory; its only exception requires exact `react-router@7.18.2` and expires on 2026-08-21.
+- Updated the GitHub Actions production-audit step to use this gate.
+
+### Verification
+
+- Node.js `22.18.0`, npm `11.5.2`: `npm ci` passed.
+- Type-check passed; 19/19 test files and 96/96 tests passed.
+- `npm run audit:production` passed with zero unexcepted high/critical advisories and explicitly reported the temporary metadata exception.
+- A separate unavailable-endpoint check confirmed fail-closed behavior; the audit passed when registry access was restored.
+- Raw `npm audit --omit=dev --audit-level=high` still reports two high findings because of stale global metadata; this limitation is recorded and must be reviewed by 2026-08-21.
+- Production build passed with the existing non-blocking main-chunk, mixed-import, and Browserslist warnings.
+- Security check passed across 9 build/Netlify files.
+- Production smoke tests returned `200` for `bright-api` health and `401 TENANT_REQUIRED` for an unauthenticated tenant-protected endpoint.
+- Remote GitHub Actions verification is blocked by an invalid local `gh` token. Run `gh auth login -h github.com`, then inspect the remote run.
+
+### Next steps
+
+1. Restore GitHub CLI authentication and verify remote Actions.
+2. Decide separately whether to push the local commits.
+3. Re-check and remove the React Router metadata exception by 2026-08-21 if upstream metadata is corrected.
+4. Continue with the `sb_publishable_...` frontend contract and the browser Supabase/RLS/grant/tenant-isolation audit.
+
+Changed files: `.github/workflows/ci.yml`, `frontend/.nvmrc`, `frontend/package.json`, `frontend/package-lock.json`, `frontend/scripts/audit-production.mjs`, and the four-language STATUS/PLAN/DEVLOG set.
+
+---
+
 ## 2026-08-07 — Mandatory documentation lifecycle for every agent session
 
 - Added root `AGENTS.md`, which requires every agent session to start with `README → STATUS → newest DEVLOG → PLAN → git status`.

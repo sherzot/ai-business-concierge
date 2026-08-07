@@ -5,14 +5,17 @@
 
 ## P0 — safe session start
 
-- [ ] Preserve existing user changes and inspect Git/commit baseline.
-- [ ] Confirm remote `frontend-security-gate` is green.
-- [ ] Run install, type-check, 96+ tests, production audit, build and security check.
-- [ ] Smoke-test production health `200` and unauthenticated protected route `401`.
-- [ ] Record evidence in DEVLOG and STATUS.
+- [x] Preserve user changes and commit the documentation workflow as `55ec941`.
+- [ ] Confirm remote `frontend-security-gate` is green — **BLOCKED:** invalid `gh` token.
+- [x] Run Node 22 install, type-check, 96 tests, build and security check.
+- [x] Run scoped production audit: 0 unexcepted high/critical; GHSA-qwww metadata exception expires 2026-08-21.
+- [x] Smoke-test production health `200` and unauthenticated protected route `401`.
+- [x] Record evidence in DEVLOG and STATUS.
 
 ## P1 — finish the Supabase/Netlify security handoff
 
+- [ ] Re-authenticate `gh`, then confirm remote CI.
+- [ ] Re-review/remove the GHSA-qwww metadata exception by 2026-08-21.
 - [ ] Migrate safely to the `VITE_SUPABASE_PUBLISHABLE_KEY` env contract.
 - [ ] Align config, env example, Vitest, CI and Netlify names.
 - [ ] Keep direct browser Supabase access limited to Auth/Realtime and add a regression gate.

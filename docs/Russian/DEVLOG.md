@@ -4,6 +4,40 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-07 — Усилен локальный P0 baseline и dependency audit
+
+### Контекст и выполненная работа
+
+- Перед следующим этапом безопасности повторно подтверждён runtime baseline от 2026-07-24. Изначально shell использовал неподдерживаемый Node.js 21.4.0, тогда как CI ожидает Node.js 22.
+- Документация и session lifecycle оформлены отдельным локальным commit `55ec941` (`docs: establish project status and session workflow`); он ещё не отправлен в remote.
+- Frontend закреплён на Node.js 22 через `.nvmrc` и `package.json` `engines`.
+- `react-router-dom` и `react-router` обновлены до `7.18.2`; upstream advisory React Router отмечает эту версию исправленной для линейки v7.
+- Из-за устаревших npm/global advisory metadata добавлен узкий gate `audit:production`. Он падает при network/API/JSON ошибках audit и на любом другом high/critical advisory; единственное исключение требует exact `react-router@7.18.2` и истекает 2026-08-21.
+- Шаг production audit в GitHub Actions переведён на этот gate.
+
+### Проверка
+
+- Node.js `22.18.0`, npm `11.5.2`: `npm ci` успешен.
+- Type-check успешен; 19/19 test files и 96/96 tests успешны.
+- `npm run audit:production` успешен: 0 high/critical advisory вне исключения, временное metadata exception показано явно.
+- Отдельная проверка недоступного endpoint подтвердила fail-closed поведение; после восстановления registry access audit прошёл успешно.
+- Raw `npm audit --omit=dev --audit-level=high` всё ещё показывает 2 high из-за stale global metadata; ограничение записано и должно быть пересмотрено до 2026-08-21.
+- Production build успешен с прежними неблокирующими warning'ами: большой main chunk, mixed import и Browserslist data.
+- Security check успешно проверил 9 build/Netlify файлов.
+- Production smoke-tests: health `bright-api` вернул `200`, endpoint с tenant-защитой без auth вернул `401 TENANT_REQUIRED`.
+- Проверка remote GitHub Actions заблокирована невалидным локальным `gh` token. После `gh auth login -h github.com` нужно проверить remote run.
+
+### Следующие шаги
+
+1. Восстановить GitHub CLI authentication и проверить remote Actions.
+2. Отдельно принять решение о push локальных commit'ов.
+3. До 2026-08-21 перепроверить и по возможности удалить React Router metadata exception.
+4. Продолжить с frontend contract `sb_publishable_...` и аудитом browser Supabase/RLS/grants/tenant isolation.
+
+Изменённые файлы: `.github/workflows/ci.yml`, `frontend/.nvmrc`, `frontend/package.json`, `frontend/package-lock.json`, `frontend/scripts/audit-production.mjs` и четырёхъязычный набор STATUS/PLAN/DEVLOG.
+
+---
+
 ## 2026-08-07 — Обязательный documentation lifecycle для каждой agent-сессии
 
 - Создан корневой `AGENTS.md`: каждая сессия начинается с `README → STATUS → newest DEVLOG → PLAN → git status`.
