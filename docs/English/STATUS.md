@@ -2,7 +2,7 @@
 
 > Last code/platform snapshot verified: **2026-08-07**
 > Documentation normalized: **2026-08-07**
-> Local runtime and production health/auth smoke tests were re-verified on 2026-08-07; only remote GitHub Actions remains unconfirmed because authentication is blocked.
+> Local runtime and production health/auth smoke tests were re-verified on 2026-08-07. GitHub CLI authentication was restored and the latest existing remote CI run was confirmed green; the new local commits remain unpushed.
 
 ## Current phase
 
@@ -25,7 +25,7 @@
 | Unit tests | 19/19 files, 96/96 tests |
 | Production build/security check | Passed |
 | Production dependency audit | Scoped gate passed: 0 unexcepted high/critical; GHSA-qwww metadata exception expires 2026-08-21 |
-| Remote GitHub Actions | **BLOCKED:** invalid local `gh` token; run `gh auth login -h github.com` |
+| Remote GitHub Actions | Latest run for `730b3bd` succeeded; local `55ec941` and `a088fef` are unpushed, so no new run exists for them |
 
 ## Capability status
 
@@ -43,7 +43,7 @@
 
 ## Immediate order
 
-1. Re-authenticate `gh`, confirm remote Actions, and separately decide whether to push local commits.
+1. Decide whether to push local commits `55ec941` and `a088fef`; after push, verify the new CI run until green.
 2. Re-review/remove the GHSA-qwww metadata exception by 2026-08-21.
 3. Safely migrate the frontend env contract to `VITE_SUPABASE_PUBLISHABLE_KEY`.
 4. Complete browser Supabase, RLS/grants and cross-tenant authorization audits.

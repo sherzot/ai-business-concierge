@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-07 — Проверены GitHub CLI authentication и remote CI
+
+- GitHub CLI authentication для `sherzot` успешно восстановлена через browser login и system keyring; значение token не записывалось в документацию или логи.
+- `gh auth status` подтвердил активную HTTPS authentication с необходимыми repository/workflow scopes.
+- Remote workflow `CI` активен. Run `30099108015` для последнего remote commit `main` `730b3bd` завершился успешно.
+- Local commits `55ec941` и `a088fef` ещё не отправлены, поэтому нового remote CI run для dependency audit gate пока нет.
+- Следующий шаг: отдельно подтвердить push, затем следить за новым run до green.
+
+---
+
 ## 2026-08-07 — Усилен локальный P0 baseline и dependency audit
 
 ### Контекст и выполненная работа

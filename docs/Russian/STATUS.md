@@ -2,7 +2,7 @@
 
 > Последний подтверждённый snapshot кода/platform: **2026-08-07**
 > Документация упорядочена: **2026-08-07**
-> Local runtime и production health/auth smoke-tests повторно проверены 2026-08-07; только remote GitHub Actions не подтверждён из-за блокировки authentication.
+> Local runtime и production health/auth smoke-tests повторно проверены 2026-08-07. GitHub CLI authentication восстановлена, последний существующий remote CI run подтверждён green; новые local commits ещё не отправлены.
 
 ## Текущая фаза
 
@@ -25,7 +25,7 @@
 | Unit tests | 19/19 файлов, 96/96 тестов |
 | Production build/security check | Успешно |
 | Production dependency audit | Scoped gate: 0 unexcepted high/critical; GHSA-qwww metadata exception до 2026-08-21 |
-| Remote GitHub Actions | **BLOCKED:** local `gh` token invalid; нужен `gh auth login -h github.com` |
+| Remote GitHub Actions | Последний run для `730b3bd` успешен; local `55ec941` и `a088fef` не отправлены, поэтому нового run для них нет |
 
 ## Состояние возможностей
 
@@ -43,7 +43,7 @@
 
 ## Ближайший порядок
 
-1. Переавторизовать `gh`, проверить remote Actions и отдельно решить push local commits.
+1. Решить push local commits `55ec941` и `a088fef`; после push проверить новый CI run до green.
 2. До 2026-08-21 пересмотреть/удалить GHSA-qwww metadata exception.
 3. Безопасно перейти на `VITE_SUPABASE_PUBLISHABLE_KEY`.
 4. Завершить browser Supabase, RLS/grants и cross-tenant authorization audit.

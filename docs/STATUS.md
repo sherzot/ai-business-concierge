@@ -2,7 +2,7 @@
 
 > Kod/platforma bo'yicha oxirgi tasdiqlangan snapshot: **2026-08-07**
 > Hujjatlar tartiblangan sana: **2026-08-07**
-> Muhim: lokal runtime va production health/auth smoke-testlari 2026-08-07 kuni qayta tekshirildi; faqat remote GitHub Actions autentifikatsiya sabab tasdiqlanmadi.
+> Lokal runtime va production health/auth smoke-testlari 2026-08-07 kuni qayta tekshirildi. GitHub CLI autentifikatsiyasi tiklandi va remote'dagi oxirgi mavjud CI run green ekani tasdiqlandi; yangi lokal commitlar hali push qilinmagan.
 
 ## Hozir qayerdamiz
 
@@ -26,7 +26,7 @@
 | Production build | Muvaffaqiyatli |
 | Security check | 9 ta build/Netlify fayli muvaffaqiyatli |
 | Production dependency audit | Scoped gate o'tdi: unexcepted high/critical 0; GHSA-qwww metadata exceptioni 2026-08-21 gacha |
-| Remote GitHub Actions | **BLOCKED:** local `gh` token invalid; `gh auth login -h github.com` kerak |
+| Remote GitHub Actions | `730b3bd` uchun oxirgi run `success`; lokal `55ec941` va `a088fef` hali push qilinmagani sabab ular uchun yangi run yo'q |
 
 ## Mahsulot va integratsiyalar holati
 
@@ -56,7 +56,7 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. `gh auth login -h github.com`dan keyin remote Actions holatini tekshirish va local commitlarni push qilish bo'yicha alohida qaror olish.
+1. Lokal `55ec941` va `a088fef` commitlarini push qilish bo'yicha qaror olish; pushdan keyin yangi CI run'ni green holatigacha tekshirish.
 2. 2026-08-21gacha GHSA-qwww npm metadata exceptionini qayta ko'rish; registry tuzatilsa exceptionni olib tashlash.
 3. Legacy anon-key env nomidan `VITE_SUPABASE_PUBLISHABLE_KEY` kontraktiga xavfsiz o'tish.
 4. Browser-to-Supabase, DB grants/RLS va cross-tenant authorization auditini tugatish.
@@ -72,7 +72,6 @@ Batafsil tartib: [PLAN.md](PLAN.md).
 - Netlify Personal rejasiga mos preview access protection tanlash.
 - `vector` extensionini `public` sxemadan ko'chirishni alohida migration sifatida rejalash.
 - Production key rotation/revoke'ni faqat replacement config deploy va smoke-testdan keyin bajarish.
-- GitHub CLI'ni `gh auth login -h github.com` bilan qayta autentifikatsiya qilish.
 
 ## Ma'lum, lekin bloklamaydigan qarzlar
 

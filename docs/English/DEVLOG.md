@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-07 — GitHub CLI authentication and remote CI verified
+
+- Restored GitHub CLI authentication for `sherzot` through browser login and the system keyring; no token value was recorded in documentation or logs.
+- `gh auth status` confirmed active HTTPS authentication with the required repository/workflow scopes.
+- The remote `CI` workflow is active. Run `30099108015` for the latest remote `main` commit `730b3bd` completed successfully.
+- Local commits `55ec941` and `a088fef` remain unpushed, so the new dependency audit gate has no remote CI run yet.
+- Next: approve the push separately, then monitor the new run until green.
+
+---
+
 ## 2026-08-07 — P0 local baseline and dependency audit hardened
 
 ### Context and completed work

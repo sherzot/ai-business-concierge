@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-07 — GitHub CLI authenticationとremote CIを確認
+
+- `sherzot`のGitHub CLI authenticationをbrowser loginとsystem keyringで復旧。Token valueはdocumentation/logへ記録していない。
+- `gh auth status`で必要なrepository/workflow scopesを持つHTTPS authenticationがactiveと確認。
+- Remote `CI` workflowはactive。Latest remote `main` commit `730b3bd`のrun `30099108015`はsuccess。
+- Local commits `55ec941`と`a088fef`は未pushのため、新dependency audit gateのremote CI runはまだ存在しない。
+- 次: pushを別途承認し、その後new runをgreenまでmonitorする。
+
+---
+
 ## 2026-08-07 — P0 local baselineとdependency auditを強化
 
 ### Contextと実施内容

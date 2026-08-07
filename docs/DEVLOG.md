@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-07 — GitHub CLI autentifikatsiyasi va remote CI tasdiqlandi
+
+- `gh auth login --web` orqali `sherzot` akkaunti uchun GitHub CLI autentifikatsiyasi keyring'da muvaffaqiyatli tiklandi; token qiymati hujjat yoki logga yozilmadi.
+- `gh auth status` HTTPS protocol va kerakli repository/workflow scope'lari bilan login faol ekanini tasdiqladi.
+- Remote `CI` workflow active. `main`dagi oxirgi remote commit `730b3bd` uchun run `30099108015` `success` holatida yakunlangan.
+- Lokal `55ec941` va `a088fef` commitlari hali push qilinmagan; shu sabab yangi dependency audit gate uchun remote CI run hali mavjud emas.
+- Keyingi qadam: pushni alohida tasdiqlash, so'ng yangi run'ni green holatigacha kuzatish.
+
+---
+
 ## 2026-08-07 — P0 lokal baseline va dependency audit mustahkamlandi
 
 ### Kontekst

@@ -6,7 +6,8 @@
 ## P0 — 安全なsession開始
 
 - [x] User changesを保持しdocumentation workflowを`55ec941`でcommit。
-- [ ] Remote `frontend-security-gate`確認 — **BLOCKED:** invalid `gh` token。
+- [x] `730b3bd`のlatest existing remote CI runがgreenと確認。
+- [ ] Local `55ec941`と`a088fef`をpush後、new CI runをgreenまで確認。
 - [x] Node 22 install、type-check、96 tests、build、security checkを実行。
 - [x] Scoped production audit: unexcepted high/critical 0; GHSA-qwww exceptionは2026-08-21まで。
 - [x] Production health `200`とunauthenticated protected route `401`を確認。
@@ -14,7 +15,6 @@
 
 ## P1 — Supabase/Netlify security handoff完了
 
-- [ ] `gh`を再認証しremote CIを確認。
 - [ ] 2026-08-21までにGHSA-qwww metadata exceptionを再確認/削除。
 - [ ] `VITE_SUPABASE_PUBLISHABLE_KEY` env contractへ安全に移行。
 - [ ] Config、env example、Vitest、CI、Netlify namesを統一。

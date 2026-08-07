@@ -2,7 +2,7 @@
 
 > 最終確認済みcode/platform snapshot: **2026-08-07**
 > ドキュメント整理日: **2026-08-07**
-> 2026-08-07にlocal runtimeとproduction health/auth smoke-testを再確認。Authentication blockedのためremote GitHub Actionsのみ未確認。
+> 2026-08-07にlocal runtimeとproduction health/auth smoke-testを再確認。GitHub CLI authenticationを復旧し、既存の最新remote CI runがgreenであることを確認。新しいlocal commitsは未push。
 
 ## 現在のPhase
 
@@ -25,7 +25,7 @@
 | Unit tests | 19/19 files、96/96 tests |
 | Production build/security check | 成功 |
 | Production dependency audit | Scoped gate: unexcepted high/critical 0; GHSA-qwww exceptionは2026-08-21まで |
-| Remote GitHub Actions | **BLOCKED:** local `gh` token invalid; `gh auth login -h github.com`が必要 |
+| Remote GitHub Actions | `730b3bd`の最新runは成功。Local `55ec941`と`a088fef`は未pushのためnew runなし |
 
 ## Capability状態
 
@@ -43,7 +43,7 @@
 
 ## 直近の順序
 
-1. `gh`を再認証しremote Actionsを確認、local commit pushは別途決定。
+1. Local `55ec941`と`a088fef`をpushするか決定し、push後のnew CI runをgreenまで確認。
 2. 2026-08-21までにGHSA-qwww metadata exceptionを再確認/削除。
 3. `VITE_SUPABASE_PUBLISHABLE_KEY`へ安全に移行。
 4. Browser Supabase、RLS/grants、cross-tenant authorization auditを完了。
