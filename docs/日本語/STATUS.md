@@ -8,6 +8,7 @@
 > 2026-08-08: fresh local replayは32/32 migrations、pgTAPは21/21、real local Auth-token Edge acceptanceは8/8成功。
 > 2026-08-08: production migration historyをlocalと整合。Local Storage/Auth pin driftを解消しenabled full-stack healthを確認。
 > 2026-08-08: Supabase CLIを`v2.112.0`へupgrade。新local key/grant contractでfresh replayと全acceptance/regression gatesが成功。
+> 2026-08-08: Portfolio-inspired frontend redesignをlocalで完了し全automated frontend gates成功。Browser acceptanceとcommit/pushはpending。
 
 ## 現在のPhase
 
@@ -22,7 +23,7 @@
 
 | Check | 状態 |
 |---|---|
-| Git | Realtime/authorizationとCLI-regression sliceは`agent/harden-tenant-authorization`; base `origin/main` commitは`ddb2207` |
+| Git | Redesignはlocal branch `agent/portfolio-inspired-redesign`; base/HEAD `df42ecf`; uncommitted・unpushed |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Supabase Edge Function `bright-api` v74 |
@@ -31,6 +32,8 @@
 | Unit tests | 21/21 files、101/101 tests |
 | Production build/security check | 成功 |
 | Production dependency audit | Scoped gate: unexcepted high/critical 0; GHSA-qwww exceptionは2026-08-21まで |
+| Frontend design system | Portfolio-inspired warm/ink/Sher-blue。Landing、public/auth、product core、admin shell redesignをlocal完了 |
+| Visual browser acceptance | `agent-browser`: desktop/mobile landing、login、forgot-password、contact passed。Overlay、browser errors、horizontal overflowなし |
 | Remote GitHub Actions | Run `31193931735`、commit `3e383b1`: success。全`frontend-security-gate` stepがgreen |
 | Frontend Supabase key contract | Code/deployはpublishable primary + temporary fallback。Production bundleはlegacy anon fallback使用、Netlify env/login pending |
 | DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、real Auth-token Edge tests 8/8。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |
@@ -53,9 +56,8 @@
 
 ## 直近の順序
 
-1. Netlify CLI loginを復旧しproduction `VITE_SUPABASE_PUBLISHABLE_KEY`を設定、redeployとAuth/Realtime smoke-test後にlegacy frontend env/fallbackを削除。
-2. 2026-08-21までにGHSA-qwww metadata exceptionを再確認/削除。
-3. 文書作成のPDF/DOCX、private Storage、signed URLを完了。
-4. Telegram/Resend verification後、HR Candidate Analysisを実装。
+1. Findingsなしのredesignをcommit/pushしGitHub CIとNetlify previewを確認。
+2. Netlify CLI login、production publishable env、redeploy、Auth/Realtime smoke-test後にlegacy fallbackを削除。
+3. 2026-08-21までにGHSA-qwwwを再確認し、その後Document Assistant PDF/DOCX/Storageを継続。
 
 詳細: [PLAN.md](PLAN.md)。Canonical: [Uzbek STATUS](../STATUS.md)。

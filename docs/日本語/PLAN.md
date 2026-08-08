@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 4.5 · 更新 2026-08-08
+> Version 4.6 · 更新 2026-08-08
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -11,6 +11,15 @@
 - [x] Scoped production audit: unexcepted high/critical 0; GHSA-qwww exceptionは2026-08-21まで。
 - [x] Production health `200`とunauthenticated protected route `401`を確認。
 - [x] DEVLOGとSTATUSへ証跡を記録。
+
+## P1 — Portfolio-inspired frontend redesignをdelivery
+
+- [x] Portfolio visual languageをauditしwarm canvas、ink typography、Sher-blue、divider、restrained-motion foundationを作成。
+- [x] Landing/public forms、auth flows、product shell/dashboard、Inbox、Tasks、Docs、Settings、admin shellをredesign。
+- [x] Light/dark、reduced motion、focus-visibleを維持しlegacy modulesをsemantic compatibilityで統一。
+- [x] TypeScript、101/101 tests、production build、security gate、dependency audit成功。
+- [x] Browser-enabled environmentでdesktop/mobile landing、login、forgot-password、contact routesをbrowser acceptance。Overlay、browser errors、horizontal overflowなし。
+- [ ] Findings修正後、別承認でcommit/pushしGitHub CIとNetlify previewを確認。
 
 ## P1 — Supabase/Netlify security handoff完了
 

@@ -8,12 +8,13 @@ export function SettingsPage({ tenant }: { tenant: { id: string; name: string } 
   const { translate } = useI18n();
   return (
     <div className="space-y-6">
-      <div className="bg-white border border-slate-200 rounded-xl p-5">
-        <h2 className="text-lg font-semibold text-slate-800">{translate("settings.title")}</h2>
-        <p className="text-xs text-slate-400 mt-1">
+      <header className="border-b border-border pb-5">
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary">Workspace preferences</p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground">{translate("settings.title")}</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
           {translate("common.tenant")}: {tenant.name}
         </p>
-      </div>
+      </header>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ProfileForm />
         <LanguageSwitcher />

@@ -67,6 +67,7 @@ import { useTour, type TourStep } from "./shared/components/OnboardingTour";
 import { getMembers } from "./features/tasks/api/tasksApi";
 import { getTasks } from "./features/tasks/api/tasksApi";
 import { getNotifications } from "./features/notifications/api/notificationsApi";
+import { BrandLockup } from "./shared/components/BrandMark";
 
 const ROLE_KEYS: Record<string, string> = {
   leader: "auth.role.leader",
@@ -289,41 +290,33 @@ export default function App() {
   const userName = currentTenant?.fullName?.split(" ")[0] ?? profile?.user?.email?.split("@")[0] ?? "User";
 
   return (
-    <div className="flex h-screen bg-background font-sans text-foreground overflow-hidden">
+    <div className="product-workspace flex h-screen overflow-hidden font-sans text-foreground">
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-[260px] transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 flex flex-col",
-          "bg-sidebar border-r border-sidebar-border",
+          "fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0",
+          "border-r border-sidebar-border bg-background",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Logo */}
-        <div className="h-20 flex flex-col justify-center px-5 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-sm">
-              <Zap size={22} className="text-primary-foreground" strokeWidth={2.5} />
-            </div>
-            <div>
-              <h1 className="font-semibold text-base tracking-tight text-sidebar-foreground">AI Concierge</h1>
-              <p className="text-xs text-muted-foreground">{translate("nav.sidebarTagline")}</p>
-            </div>
-          </div>
+        <div className="flex h-[76px] items-center border-b border-sidebar-border px-5">
+          <BrandLockup />
         </div>
 
         {/* Tenant selector */}
-        <div ref={tenantRef} className="px-4 py-4 relative">
+        <div ref={tenantRef} className="relative px-4 py-4">
           <button
             onClick={() => setTenantDropdownOpen(!tenantDropdownOpen)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 bg-secondary hover:bg-accent rounded-xl transition-colors border border-border"
+            className="flex w-full items-center gap-3 border-y border-border bg-transparent px-0 py-3 text-left transition-colors hover:border-foreground"
           >
-            <div className="w-9 h-9 rounded-lg bg-card flex items-center justify-center shrink-0">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center border border-border bg-card">
               <Building2 size={18} className="text-muted-foreground" />
             </div>
             <div className="flex-1 text-left min-w-0">
               <p className="text-sm font-semibold text-foreground truncate">{currentTenant.name}</p>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="inline-flex items-center rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-foreground ring-1 ring-primary/20">
+                <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-[0.12em] text-primary">
                   {translate(ROLE_KEYS[currentTenant.role] ?? "auth.role.employee")}
                 </span>
                 <span className="text-xs text-muted-foreground truncate">
@@ -334,7 +327,7 @@ export default function App() {
             <ChevronDown size={16} className="text-muted-foreground shrink-0" />
           </button>
           {tenantDropdownOpen && profile?.tenants && (
-            <div className="absolute left-4 right-4 mt-1 bg-popover border border-border rounded-xl shadow-lg z-50 py-1">
+            <div className="absolute left-4 right-4 z-50 mt-1 border border-border bg-popover py-1 shadow-md">
               {profile.tenants.length > 1 ? (
                 profile.tenants
                   .filter((t) => t.id !== currentTenant.id)
@@ -345,7 +338,7 @@ export default function App() {
                         setCurrentTenant(t);
                         setTenantDropdownOpen(false);
                       }}
-                      className="w-full px-3 py-2 text-left text-sm text-popover-foreground hover:bg-secondary hover:text-foreground rounded-lg mx-1"
+                      className="w-full px-3 py-2 text-left text-sm text-popover-foreground hover:bg-secondary hover:text-foreground"
                     >
                       {t.name}
                     </button>
@@ -360,7 +353,7 @@ export default function App() {
         </div>
 
         {/* Main nav */}
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-4" data-tour="nav">
           {canAccessReports && (
             <NavItem
               icon={<LayoutDashboard size={20} />}
@@ -385,7 +378,7 @@ export default function App() {
             <div className="pt-2">
               <button
                 onClick={() => setHrExpanded(!hrExpanded)}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                className="flex w-full items-center justify-between border-l border-transparent px-3 py-2.5 text-muted-foreground transition-colors hover:border-border hover:text-foreground"
               >
                 <div className="flex items-center gap-3">
                   <HeartPulse size={18} />
@@ -436,9 +429,9 @@ export default function App() {
             active={activeModule === "settings"}
             onClick={() => setActiveModule("settings")}
           />
-          <div className="flex items-center gap-3 px-3 py-2.5 bg-secondary rounded-xl border border-border">
+          <div className="flex items-center gap-3 border-t border-sidebar-border px-3 py-3">
             <div className="relative">
-              <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center ring-1 ring-primary/20">
+              <div className="flex h-9 w-9 items-center justify-center border border-border bg-card">
                 <Zap size={18} className="text-primary" />
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-status-success rounded-full border-2 border-card" />
@@ -456,7 +449,7 @@ export default function App() {
       {/* Main content */}
       <main className="flex-1 flex flex-col min-w-0 bg-background relative">
         {/* Topbar */}
-        <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:px-6 z-20">
+        <header className="z-20 flex h-[72px] items-center justify-between border-b border-border bg-background/90 px-4 backdrop-blur-xl lg:px-8">
           <div className="flex items-center gap-6">
             <button
               className="lg:hidden p-2 text-muted-foreground hover:bg-secondary rounded-lg"
@@ -465,7 +458,7 @@ export default function App() {
               <Menu size={20} />
             </button>
             <div>
-              <h2 className="text-lg font-semibold text-foreground">
+              <h2 className="text-base font-semibold tracking-[-0.02em] text-foreground">
                 {activeModule === "dashboard" && translate("nav.dashboard")}
                 {activeModule === "reports" && translate("nav.reports")}
                 {activeModule === "inbox" && translate("nav.inbox")}
@@ -477,7 +470,7 @@ export default function App() {
                 {activeModule === "integrations" && translate("nav.integrations")}
                 {activeModule === "settings" && translate("nav.settings")}
               </h2>
-              <p className="text-sm text-muted-foreground">{translate("nav.welcome", { name: userName })}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{translate("nav.welcome", { name: userName })}</p>
             </div>
           </div>
 
@@ -485,11 +478,11 @@ export default function App() {
             <button
               data-tour="search"
               onClick={() => setPaletteOpen(true)}
-              className="relative hidden md:flex items-center gap-2 pl-10 pr-4 py-2 w-72 bg-secondary border border-border rounded-full text-sm text-muted-foreground hover:bg-accent transition-colors cursor-pointer"
+              className="relative hidden w-72 cursor-pointer items-center gap-2 border-b border-border bg-transparent py-2 pl-8 pr-1 text-sm text-muted-foreground transition-colors hover:border-foreground md:flex"
             >
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+              <Search className="absolute left-0 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
               <span className="flex-1 text-left">{translate("nav.searchPlaceholder")}</span>
-              <kbd className="text-[11px] bg-card text-muted-foreground rounded px-1.5 py-0.5 font-mono border border-border">⌘K</kbd>
+              <kbd className="border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">⌘K</kbd>
             </button>
             <ThemeToggle />
             <LocaleSelect variant="light" />
@@ -546,38 +539,38 @@ export default function App() {
 
         {/* Dashboard action buttons */}
         {activeModule === "dashboard" && (
-          <div className="bg-card border-b border-border px-4 lg:px-6 py-3 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-x-1 gap-y-2 border-b border-border bg-background px-4 py-2.5 lg:px-8">
             <button
               onClick={() => setActiveModule("tasks")}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-[var(--brand-primary-hover)] transition-colors"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-[var(--brand-primary-hover)]"
             >
               <Plus size={18} />
               {translate("dashboard.actions.newTask")}
             </button>
             <button
               onClick={() => setActiveModule("docs")}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-card border border-border text-foreground rounded-lg text-sm font-medium hover:bg-secondary transition-colors"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             >
               <FilePlus size={18} />
               {translate("dashboard.actions.createDoc")}
             </button>
             <button
               onClick={() => setActiveModule("hr")}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-card border border-border text-foreground rounded-lg text-sm font-medium hover:bg-secondary transition-colors"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             >
               <UserPlus size={18} />
               {translate("dashboard.actions.addEmployee")}
             </button>
             <button
               onClick={() => setActiveModule("inbox")}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-card border border-border text-foreground rounded-lg text-sm font-medium hover:bg-secondary transition-colors"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             >
               <Send size={18} />
               {translate("dashboard.actions.sendMessage")}
             </button>
             <button
               onClick={() => setIsAIChatOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-card border border-border text-foreground rounded-lg text-sm font-medium hover:bg-secondary transition-colors"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             >
               <Calendar size={18} />
               {translate("dashboard.actions.meeting")}
@@ -586,13 +579,13 @@ export default function App() {
         )}
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-4 lg:p-6">
+        <div className="flex-1 overflow-auto px-4 py-6 lg:px-8 lg:py-8">
           <motion.div
             key={activeModule}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="max-w-7xl mx-auto"
+            className="mx-auto max-w-[1440px]"
           >
             {renderContent()}
           </motion.div>
@@ -661,11 +654,11 @@ function NavItem({
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+        "relative flex w-full items-center justify-between border-l px-3 py-2.5 text-sm font-medium transition-all duration-200",
         indent && "py-2",
         active
-          ? "bg-accent text-accent-foreground"
-          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+          ? "border-primary bg-transparent text-foreground"
+          : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
       )}
     >
       <div className="flex items-center gap-3">

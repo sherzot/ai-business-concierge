@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Users, Building2, Activity, MessageSquare, BookOpen, Shield,
-  Zap, LogOut, Menu, X, PanelLeftClose, PanelLeftOpen, ShieldAlert,
+  LogOut, Menu, X, PanelLeftClose, PanelLeftOpen, ShieldAlert,
   BarChart3, Users2, Globe,
 } from "lucide-react";
 import { useAuthContext } from "../../auth/context/AuthContext";
 import { apiRequest } from "../../../shared/lib/apiClient";
 import { ThemeToggle } from "../../../shared/components/ThemeToggle";
 import { useI18n } from "../../../app/providers/I18nProvider";
+import { BrandLockup, BrandMark } from "../../../shared/components/BrandMark";
 
 type NavGroup = {
   labelKey?: string;
@@ -82,26 +83,22 @@ function NavItem({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={() => setHovered(false)}
         className={({ isActive }) =>
-          `relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
+          `relative flex items-center gap-3 border-l-2 px-3 py-2.5 text-sm font-medium
            transition-all duration-150 group select-none
            ${isActive
-             ? "bg-accent text-accent-foreground"
-             : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+             ? "border-primary text-foreground"
+             : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
            }`
         }
       >
         {({ isActive }) => (
           <>
             <span
-              className={`absolute left-0 top-1/2 -translate-y-1/2 w-0.5 rounded-full bg-primary
-                transition-all duration-200
-                ${isActive ? "h-5 opacity-100" : "h-0 opacity-0"}`}
+              className={`absolute -left-0.5 top-1/2 h-5 w-0.5 -translate-y-1/2 bg-primary transition-opacity duration-200 ${isActive ? "opacity-100" : "opacity-0"}`}
             />
             <Icon
               size={18}
-              className={`shrink-0 transition-transform duration-150
-                ${isActive ? "text-primary" : ""}
-                ${hovered && !isActive ? "scale-110" : "scale-100"}`}
+              className={`shrink-0 transition-colors duration-150 ${isActive ? "text-primary" : ""}`}
             />
             {!collapsed && (
               <span className="truncate flex-1 transition-opacity duration-150">{label}</span>
@@ -123,7 +120,7 @@ function NavItem({
           className="fixed z-[200] pointer-events-none"
           style={{ top: tooltipY, left: 68, transform: "translateY(-50%)" }}
         >
-          <div className="flex items-center gap-2 bg-popover border border-border text-popover-foreground text-xs font-medium px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap">
+          <div className="flex items-center gap-2 border border-border bg-popover px-3 py-1.5 text-xs font-medium text-popover-foreground whitespace-nowrap">
             {label}
             {badge && contactBadge > 0 && (
               <span className="bg-status-danger text-white text-[10px] font-bold rounded-full px-1.5 leading-5 min-w-[18px] text-center">
@@ -148,7 +145,7 @@ function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" }) {
     .join("");
   const sz = size === "sm" ? "w-7 h-7 text-xs" : "w-8 h-8 text-sm";
   return (
-    <div className={`${sz} rounded-full bg-accent border border-border flex items-center justify-center font-semibold text-accent-foreground shrink-0 select-none`}>
+    <div className={`${sz} flex shrink-0 select-none items-center justify-center border border-border bg-transparent font-semibold text-foreground`}>
       {initials || "A"}
     </div>
   );
@@ -184,19 +181,14 @@ export function AdminLayout() {
   const sidebarContent = (
     <>
       {/* Logo */}
-      <div className="h-16 flex items-center gap-3 px-4 border-b border-sidebar-border shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center shrink-0">
-          <Zap size={16} className="text-primary" />
-        </div>
+      <div className="flex h-18 shrink-0 items-center gap-3 border-b border-sidebar-border px-4">
+        {collapsed && <BrandMark className="h-8 w-8 shrink-0" />}
         {!collapsed && (
-          <div className="min-w-0 flex-1 overflow-hidden">
-            <p className="text-sm font-semibold text-sidebar-foreground truncate">{translate("admin.panel")}</p>
-            <p className="text-xs text-muted-foreground truncate">AI Business Concierge</p>
-          </div>
+          <BrandLockup compact className="min-w-0 flex-1" />
         )}
         <button
           onClick={() => setSidebarOpen((v) => !v)}
-          className="hidden lg:flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors shrink-0"
+          className="hidden h-7 w-7 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:text-foreground lg:flex"
           aria-label={translate(collapsed ? "admin.expandSidebar" : "admin.collapseSidebar")}
         >
           {collapsed ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}
@@ -208,7 +200,7 @@ export function AdminLayout() {
         {NAV_GROUPS.map((group) => (
           <div key={group.labelKey ?? group.items[0]?.to}>
             {group.labelKey && !collapsed && (
-              <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
                 {translate(group.labelKey)}
               </p>
             )}
@@ -248,13 +240,13 @@ export function AdminLayout() {
         <div className="relative group/home">
           <button
             onClick={() => navigate("/")}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            className="flex w-full items-center gap-3 border-l-2 border-transparent px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-border hover:text-foreground"
           >
             <Globe size={15} className="shrink-0" />
             {!collapsed && <span>{translate("admin.mainSite")}</span>}
           </button>
           {collapsed && (
-            <div className="absolute left-14 top-1/2 -translate-y-1/2 hidden group-hover/home:flex items-center bg-popover border border-border text-popover-foreground text-xs font-medium px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap z-[200] pointer-events-none">
+            <div className="pointer-events-none absolute left-14 top-1/2 z-[200] hidden -translate-y-1/2 items-center whitespace-nowrap border border-border bg-popover px-3 py-1.5 text-xs font-medium text-popover-foreground group-hover/home:flex">
               {translate("admin.mainSite")}
             </div>
           )}
@@ -264,13 +256,13 @@ export function AdminLayout() {
         <div className="relative group/logout">
           <button
             onClick={() => logout()}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-status-danger hover:bg-[var(--status-danger-soft)] transition-colors"
+            className="flex w-full items-center gap-3 border-l-2 border-transparent px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-status-danger hover:text-status-danger"
           >
             <LogOut size={15} className="shrink-0" />
             {!collapsed && <span>{translate("nav.logout")}</span>}
           </button>
           {collapsed && (
-            <div className="absolute left-14 top-1/2 -translate-y-1/2 hidden group-hover/logout:flex items-center bg-popover border border-border text-status-danger text-xs font-medium px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap z-[200] pointer-events-none">
+            <div className="pointer-events-none absolute left-14 top-1/2 z-[200] hidden -translate-y-1/2 items-center whitespace-nowrap border border-border bg-popover px-3 py-1.5 text-xs font-medium text-status-danger group-hover/logout:flex">
               {translate("nav.logout")} ({displayName})
             </div>
           )}
@@ -286,7 +278,7 @@ export function AdminLayout() {
       <aside
         className={`hidden lg:flex flex-col bg-sidebar border-r border-sidebar-border
           transition-all duration-300 ease-in-out shrink-0
-          ${collapsed ? "w-16" : "w-56"}`}
+          ${collapsed ? "w-16" : "w-[248px]"}`}
       >
         {sidebarContent}
       </aside>
@@ -300,13 +292,13 @@ export function AdminLayout() {
       )}
       {/* Mobile Drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex flex-col w-56 bg-sidebar border-r border-sidebar-border
+        className={`fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col border-r border-sidebar-border bg-sidebar
           transition-transform duration-300 ease-in-out lg:hidden
           ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <button
           onClick={() => setMobileOpen(false)}
-          className="absolute top-3 right-3 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary"
+          className="absolute right-3 top-3 p-1.5 text-muted-foreground hover:text-foreground"
           aria-label={translate("common.close")}
         >
           <X size={16} />
@@ -317,10 +309,10 @@ export function AdminLayout() {
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Topbar */}
-        <header className="h-16 flex items-center gap-3 px-4 border-b border-border bg-card/90 backdrop-blur shrink-0">
+        <header className="flex h-18 shrink-0 items-center gap-3 border-b border-border bg-background/90 px-4 backdrop-blur sm:px-6">
           <button
             onClick={() => setMobileOpen(true)}
-            className="lg:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            className="p-2 text-muted-foreground transition-colors hover:text-foreground lg:hidden"
             aria-label={translate("admin.menu")}
           >
             <Menu size={18} />
@@ -331,7 +323,7 @@ export function AdminLayout() {
               {translate("auth.role.super_admin")}
             </span>
             {contactBadge > 0 && (
-              <span className="bg-[var(--status-danger-soft)] text-[var(--status-danger-fg)] text-xs font-medium px-2 py-0.5 rounded-full border border-status-danger/25">
+              <span className="border-l-2 border-status-danger pl-2 text-xs font-medium text-[var(--status-danger-fg)]">
                 {translate("admin.newRequests", { count: String(contactBadge) })}
               </span>
             )}
@@ -345,7 +337,7 @@ export function AdminLayout() {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto bg-background">
           <Outlet />
         </main>
       </div>

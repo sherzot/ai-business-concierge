@@ -4,6 +4,30 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-08 — Portfolio-inspired to'liq frontend redesign lokal yakunlandi
+
+### Bajarildi
+
+- `sherzot/Portfolio`ning warm canvas, qora tipografiya, yagona Sher-blue accent, divider-based kompozitsiya va yengil motion tili AI Business Concierge'ga mahsulotga mos tarzda ko'chirildi; Portfolio kodi nusxalanmadi.
+- Yangi global tokenlar, editorial primitivlar, brand mark/lockup va product operational-system SVG yaratildi. Light/dark theme, reduced-motion va focus-visible holatlari saqlandi.
+- Landing, contact/company registration, login/forgot/reset/setup-account, product sidebar/topbar, dashboard, Inbox, Tasks, Docs, Settings va admin shell qayta dizayn qilindi. Qolgan eski modullar yagona compatibility layer orqali warm/ink/blue tizimiga moslandi.
+- Auth sahifalaridagi takroriy layout yagona `AuthShell`ga yig'ildi; public form label/input bog'lanishlari va password-toggle aria labellari yaxshilandi.
+
+### Verifikatsiya va chegara
+
+- `git diff --check`, TypeScript, 21/21 test fayli va 101/101 test, production build va 9-file security gate — `PASS`; production dependency audit high/critical `0`.
+- Build muvaffaqiyatli, oldindan ma'lum bloklamaydigan warninglar saqlanadi: ~1.76 MB main chunk, `supabase.ts` mixed import va eski Browserslist data.
+- `agent-browser` Chrome runtime bilan o'rnatildi va browser acceptance bajarildi: desktop landing, mobile landing, login, forgot-password va contact route'lari mazmunli render bo'ldi; error overlay, browser error va horizontal overflow topilmadi. Annotated screenshots `/private/tmp/abc-landing.png`, `/private/tmp/abc-mobile.png`, `/private/tmp/abc-login.png`da saqlandi.
+- Keyingi Vite route smoke-checkda `/`, `/login`, `/forgot-password`, `/contact`, `/app` va `/admin` barchasi `200` status va SPA shell bilan qaytdi; server tartibli to'xtatildi.
+- Ishlar local `agent/portfolio-inspired-redesign` branchida, base `df42ecf`; hali commit/push/deploy qilinmagan.
+
+### Keyingi qadam
+
+1. Browser acceptance topilmalari bo'lmagani uchun redesignni commit/push qilish va GitHub CI/Netlify previewni tekshirish.
+2. Shundan so'ng faol product rejasidagi Netlify publishable-key handoff va AI Hujjatchi ishlariga qaytish.
+
+---
+
 ## 2026-08-08 — Supabase CLI v2.112.0 va fresh local-infra regressiyasi
 
 ### Yangilash va topilmalar

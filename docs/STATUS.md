@@ -8,6 +8,7 @@
 > 2026-08-08: Fresh local replay 32/32 migratsiya, pgTAP 21/21 va real local Auth tokenli Edge acceptance 8/8 o'tdi.
 > 2026-08-08: Production migration history local bilan tenglashtirildi; local Storage/Auth pin drifti yopildi va enabled full-stack health tasdiqlandi.
 > 2026-08-08: Supabase CLI `v2.112.0`ga yangilandi; yangi local key/grant contractiga mos fresh replay va barcha acceptance/regression gate'lar o'tdi.
+> 2026-08-08: Portfolio-inspired frontend redesign lokal yakunlandi va barcha avtomatik frontend gate'lar o'tdi; browser acceptance hamda commit/push hali pending.
 
 ## Hozir qayerdamiz
 
@@ -22,7 +23,7 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | Realtime/authorization va CLI-regression slice `agent/harden-tenant-authorization` branchida; base `origin/main` commit `ddb2207` |
+| Git | Redesign local `agent/portfolio-inspired-redesign` branchida; base/HEAD `df42ecf`; uncommitted, unpushed |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Supabase Edge Function `bright-api` v74 |
@@ -32,6 +33,8 @@
 | Production build | Muvaffaqiyatli |
 | Security check | 9 ta build/Netlify fayli muvaffaqiyatli |
 | Production dependency audit | Scoped gate o'tdi: unexcepted high/critical 0; GHSA-qwww metadata exceptioni 2026-08-21 gacha |
+| Frontend design system | Portfolio-inspired warm/ink/Sher-blue tokenlari; landing, public/auth, product core va admin shell redesign lokal yakunlangan |
+| Visual browser acceptance | `agent-browser`: desktop/mobile landing, login, forgot-password, contact passed; no overlay, browser errors, or horizontal overflow |
 | Remote GitHub Actions | Run `31193931735`, commit `3e383b1`: `success`; barcha `frontend-security-gate` qadamlari green |
 | Frontend Supabase key contract | Kod/deploy: publishable primary + vaqtinchalik fallback; production bundle legacy anon fallback ishlatmoqda, Netlify env/login **pending** |
 | DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; real Auth tokenli Edge `8/8`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |
@@ -66,11 +69,9 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. Netlify CLI loginini tiklash, production `VITE_SUPABASE_PUBLISHABLE_KEY`ni o'rnatish, qayta deploy va Auth/Realtime smoke-test qilish; legacy frontend env/fallbackni faqat keyin olib tashlash.
-2. 2026-08-21gacha GHSA-qwww npm metadata exceptionini qayta ko'rish; registry tuzatilsa exceptionni olib tashlash.
-3. AI Hujjatchi uchun PDF/DOCX, Noto Sans, private Storage va signed URL oqimini yozish.
-4. Telegram webhook secret va Resend receiving/delivery smoke-testlarini yopish.
-5. Keyin HR Candidate Analysis implementatsiyasiga o'tish.
+1. Redesignni commit/push qilish va GitHub CI hamda Netlify previewni tekshirish.
+2. Netlify CLI loginini tiklash, production `VITE_SUPABASE_PUBLISHABLE_KEY`ni o'rnatish, qayta deploy va Auth/Realtime smoke-test qilish; legacy fallbackni faqat keyin olib tashlash.
+3. 2026-08-21gacha GHSA-qwww metadata exceptionini qayta ko'rish; keyin AI Hujjatchi PDF/DOCX/Storage ishlariga o'tish.
 
 Batafsil tartib: [PLAN.md](PLAN.md).
 

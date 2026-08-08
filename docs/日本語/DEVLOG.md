@@ -4,6 +4,22 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-08 — Portfolio-inspired frontend全面redesignをlocalで完了
+
+- `sherzot/Portfolio`のwarm canvas、black typography、単一Sher-blue accent、divider中心のcomposition、控えめなmotionを、code copyなしでproductへ適用。
+- Global editorial tokens/primitives、reusable brand mark/lockup、product operational-system SVGを追加。Light/dark theme、reduced motion、focus-visibleを維持。
+- Landing、contact/company registration、全auth flow、product shell/dashboard、Inbox、Tasks、Docs、Settings、admin shellをredesign。残るlegacy surfacesはcompatibility layerでwarm/ink/blue systemへ統一。
+- 重複auth layoutを`AuthShell`へ集約し、public formのlabel/input関連付けとpassword-toggle aria labelを改善。
+- Verification成功: `git diff --check`、TypeScript、21/21 test files・101/101 tests、production build、9-file security gate、dependency audit high/critical 0。
+- Known non-blocking warnings: main chunk約1.76 MB、`supabase.ts` mixed import、古いBrowserslist data。
+- `agent-browser` Chrome runtimeをinstallしbrowser acceptanceを完了。Desktop landing、mobile landing、login、forgot-password、contact routesはcontentをrenderし、error overlay、browser errors、horizontal overflowはなし。Annotated screenshotsは`/private/tmp/abc-landing.png`、`/private/tmp/abc-mobile.png`、`/private/tmp/abc-login.png`に保存。
+- Follow-up Vite route smoke-checkで`/`、`/login`、`/forgot-password`、`/contact`、`/app`、`/admin`はすべて`200`とSPA shellを返し、serverはcleanに停止。
+- Workは`df42ecf`ベースのlocal branch `agent/portfolio-inspired-redesign`。Commit/push/deployは未実施。
+
+次: findingsなしのredesignをcommit/pushしGitHub CIとNetlify previewを確認後、publishable-key handoffとDocument Assistantへ戻る。
+
+---
+
 ## 2026-08-08 — Supabase CLI v2.112.0とfresh local-infra regression
 
 - Official Supabase Homebrew formulaを限定的な`brew trust --formula supabase/tap/supabase`で選択。Core formulaが一時的に`v2.111.0`をinstallした後、official tapからCLIを`v2.112.0`へupgrade。Broad tap trustは付与していない。

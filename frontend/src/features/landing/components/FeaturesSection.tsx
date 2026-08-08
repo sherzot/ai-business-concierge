@@ -1,5 +1,5 @@
 import React from "react";
-import { MessageSquare, FileText, ShoppingCart, Check } from "lucide-react";
+import { ArrowUpRight, Check } from "lucide-react";
 import type { landingI18n } from "../i18n";
 import type { LandingLocale } from "../types";
 
@@ -8,71 +8,47 @@ type FeaturesT = typeof landingI18n[LandingLocale]["features"];
 type Props = { t: FeaturesT };
 
 export function FeaturesSection({ t }: Props) {
+  const features = [
+    { index: "01", item: t.maslahatchi, status: "Live", active: true },
+    { index: "02", item: t.hujjatchi, status: t.soon, active: false },
+    { index: "03", item: t.sotuvchi, status: t.soon, active: false },
+  ];
+
   return (
-    <section className="py-20 sm:py-24 bg-slate-50" id="features">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">{t.title}</h2>
-          <p className="text-slate-600 text-lg">{t.subtitle}</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* AI Maslahatchi — active */}
-          <div className="rounded-2xl bg-white border border-indigo-200 p-7 hover:border-indigo-300 hover:shadow-md transition-all">
-            <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center mb-5">
-              <MessageSquare size={22} className="text-indigo-600" aria-hidden="true" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">{t.maslahatchi.title}</h3>
-            <p className="text-slate-600 leading-relaxed mb-5 text-sm">{t.maslahatchi.desc}</p>
-            <ul className="space-y-2">
-              {t.maslahatchi.bullets.map((b) => (
-                <li key={b} className="flex items-start gap-2 text-slate-700 text-sm">
-                  <Check size={14} className="text-indigo-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                  {b}
-                </li>
-              ))}
-            </ul>
+    <section className="editorial-section bg-background" id="features">
+      <div className="editorial-page">
+        <header className="mb-12 grid gap-8 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-8">
+            <p className="editorial-kicker">Product system</p>
+            <h2 className="editorial-title mt-6">{t.title}</h2>
           </div>
+          <p className="editorial-copy text-base lg:col-span-4">{t.subtitle}</p>
+        </header>
 
-          {/* AI Hujjatchi — soon */}
-          <div className="relative rounded-2xl bg-white border border-slate-200 p-7">
-            <span className="absolute top-5 right-5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium">
-              {t.soon}
-            </span>
-            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mb-5">
-              <FileText size={22} className="text-slate-500" aria-hidden="true" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">{t.hujjatchi.title}</h3>
-            <p className="text-slate-500 leading-relaxed mb-5 text-sm">{t.hujjatchi.desc}</p>
-            <ul className="space-y-2">
-              {t.hujjatchi.bullets.map((b) => (
-                <li key={b} className="flex items-start gap-2 text-slate-500 text-sm">
-                  <Check size={14} className="text-slate-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                  {b}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* AI Sotuvchi — soon */}
-          <div className="relative rounded-2xl bg-white border border-slate-200 p-7">
-            <span className="absolute top-5 right-5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium">
-              {t.soon}
-            </span>
-            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mb-5">
-              <ShoppingCart size={22} className="text-slate-500" aria-hidden="true" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">{t.sotuvchi.title}</h3>
-            <p className="text-slate-500 leading-relaxed mb-5 text-sm">{t.sotuvchi.desc}</p>
-            <ul className="space-y-2">
-              {t.sotuvchi.bullets.map((b) => (
-                <li key={b} className="flex items-start gap-2 text-slate-500 text-sm">
-                  <Check size={14} className="text-slate-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                  {b}
-                </li>
-              ))}
-            </ul>
-          </div>
+        <div className="editorial-rule-list">
+          {features.map(({ index, item, status, active }) => (
+            <article key={item.title} className="group grid gap-6 py-9 md:grid-cols-12 md:items-start lg:py-12">
+              <div className="flex items-center justify-between md:col-span-2 md:block">
+                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{index}</span>
+                <span className={`mt-0 md:mt-5 md:block text-[11px] font-bold uppercase tracking-[0.14em] ${active ? "text-primary" : "text-muted-foreground"}`}>
+                  {status}
+                </span>
+              </div>
+              <div className="md:col-span-4">
+                <h3 className="text-2xl font-semibold tracking-[-0.035em] text-foreground sm:text-3xl">{item.title}</h3>
+                <p className="mt-4 max-w-md text-sm leading-7 text-muted-foreground">{item.desc}</p>
+              </div>
+              <ul className="grid gap-3 md:col-span-5 lg:grid-cols-2">
+                {item.bullets.map((bullet) => (
+                  <li key={bullet} className="flex gap-3 text-sm leading-6 text-foreground">
+                    <Check size={14} className="mt-1 shrink-0 text-primary" />
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+              <ArrowUpRight className="hidden text-muted-foreground transition-transform group-hover:-translate-y-1 group-hover:translate-x-1 md:col-span-1 md:block" size={20} />
+            </article>
+          ))}
         </div>
       </div>
     </section>

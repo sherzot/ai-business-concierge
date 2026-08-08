@@ -4,6 +4,22 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — Portfolio-inspired full frontend redesign completed locally
+
+- Adapted the warm canvas, black typography, single Sher-blue accent, divider-led composition, and restrained motion language of `sherzot/Portfolio` to the product without copying its code.
+- Added global editorial tokens/primitives, a reusable brand mark/lockup, and a product operational-system SVG. Light/dark themes, reduced motion, and focus-visible behavior remain supported.
+- Redesigned landing, contact/company registration, all auth flows, product shell/dashboard, Inbox, Tasks, Docs, Settings, and admin shell. A compatibility layer aligns remaining legacy feature surfaces with the warm/ink/blue system.
+- Consolidated repeated auth layouts into `AuthShell` and improved public-form label associations and password-toggle aria labels.
+- Verification passed: `git diff --check`, TypeScript, 21/21 test files and 101/101 tests, production build, 9-file security gate, and production dependency audit with 0 high/critical findings.
+- Known non-blocking build warnings remain: ~1.76 MB main chunk, mixed `supabase.ts` imports, and stale Browserslist data.
+- Installed the `agent-browser` Chrome runtime and completed browser acceptance: desktop landing, mobile landing, login, forgot-password, and contact routes rendered meaningful content with no error overlay, browser errors, or horizontal overflow. Annotated screenshots are saved at `/private/tmp/abc-landing.png`, `/private/tmp/abc-mobile.png`, and `/private/tmp/abc-login.png`.
+- A follow-up Vite route smoke check returned `200` with the SPA shell for `/`, `/login`, `/forgot-password`, `/contact`, `/app`, and `/admin`; the server was stopped cleanly.
+- Work is local on `agent/portfolio-inspired-redesign`, based on `df42ecf`; it is not committed, pushed, or deployed.
+
+Next: commit/push the finding-free redesign and verify GitHub CI plus Netlify preview, then return to the active publishable-key handoff and Document Assistant work.
+
+---
+
 ## 2026-08-08 — Supabase CLI v2.112.0 and fresh local-infra regression
 
 - Selected the official Supabase Homebrew formula with narrowly scoped `brew trust --formula supabase/tap/supabase`. After core Homebrew temporarily installed `v2.111.0`, the official tap upgraded the CLI to `v2.112.0`; no broad tap trust was granted.

@@ -8,23 +8,21 @@ type Props = { t: AutomationT };
 
 export function AutomationSection({ t }: Props) {
   return (
-    <section className="py-20 sm:py-24 bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">{t.title}</h2>
-          <p className="text-slate-600 text-lg max-w-2xl mx-auto">{t.subtitle}</p>
-        </div>
+    <section className="editorial-section border-b border-border bg-background">
+      <div className="editorial-page">
+        <header className="mb-12 max-w-3xl">
+          <p className="editorial-kicker">Automation</p>
+          <h2 className="editorial-title mt-6">{t.title}</h2>
+          <p className="editorial-copy mt-6">{t.subtitle}</p>
+        </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {t.items.map((item) => (
-            <div
-              key={item.title}
-              className="rounded-xl bg-white border border-slate-200 p-5 hover:border-indigo-300 hover:shadow-sm transition-all"
-            >
-              <div className="text-2xl mb-3" aria-hidden="true">{item.icon}</div>
-              <h3 className="text-sm font-bold text-slate-900 mb-1.5">{item.title}</h3>
-              <p className="text-slate-600 text-xs leading-relaxed">{item.desc}</p>
-            </div>
+        <div className="grid border-l border-t border-border sm:grid-cols-2 lg:grid-cols-4">
+          {t.items.map((item, index) => (
+            <article key={item.title} className="min-h-56 border-b border-r border-border p-6 transition-colors hover:bg-card lg:p-7">
+              <span className="text-[11px] font-bold tracking-[0.16em] text-primary">0{index + 1}</span>
+              <h3 className="mt-12 text-lg font-semibold tracking-[-0.02em] text-foreground">{item.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.desc}</p>
+            </article>
           ))}
         </div>
       </div>

@@ -14,22 +14,21 @@ export function HowItWorksSection({ t }: Props) {
   ];
 
   return (
-    <section className="py-20 sm:py-24 bg-white">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">{t.title}</h2>
-          <p className="text-slate-600 text-lg">{t.subtitle}</p>
-        </div>
+    <section className="editorial-section border-y border-border bg-background">
+      <div className="editorial-page">
+        <header className="mb-12 max-w-3xl">
+          <p className="editorial-kicker">Workflow</p>
+          <h2 className="editorial-title mt-6">{t.title}</h2>
+          <p className="editorial-copy mt-6">{t.subtitle}</p>
+        </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid border-t border-border md:grid-cols-3">
           {steps.map((s) => (
-            <div key={s.step} className="text-center">
-              <div className="w-14 h-14 rounded-full bg-indigo-50 border-2 border-indigo-200 flex items-center justify-center mx-auto mb-5">
-                <span className="text-2xl font-bold text-indigo-700">{s.step}</span>
-              </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">{s.title}</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">{s.desc}</p>
-            </div>
+            <article key={s.step} className="border-b border-border py-8 md:border-r md:px-7 md:last:border-r-0">
+              <span className="text-4xl font-semibold tracking-[-0.05em] text-primary">0{s.step}</span>
+              <h3 className="mt-10 text-xl font-semibold tracking-[-0.03em] text-foreground">{s.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">{s.desc}</p>
+            </article>
           ))}
         </div>
       </div>

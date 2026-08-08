@@ -21,7 +21,7 @@ export function LandingPage() {
   const t = landingI18n[locale];
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
+    <div className="min-h-screen bg-background text-foreground">
       <LandingNavbar locale={locale} onLocaleChange={setLocale} t={t.nav} />
       <main>
         <HeroSection t={t.hero} />

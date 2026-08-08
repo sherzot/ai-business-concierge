@@ -4,6 +4,22 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — Portfolio-inspired полный frontend redesign завершён локально
+
+- В продукт адаптированы warm canvas, чёрная типографика, единый Sher-blue accent, divider-композиция и сдержанный motion из `sherzot/Portfolio`, без копирования его кода.
+- Добавлены global editorial tokens/primitives, reusable brand mark/lockup и SVG operational-system продукта. Сохранены light/dark theme, reduced motion и focus-visible.
+- Переработаны landing, contact/company registration, все auth flows, product shell/dashboard, Inbox, Tasks, Docs, Settings и admin shell. Compatibility layer приводит оставшиеся legacy surfaces к единой warm/ink/blue системе.
+- Повторяющиеся auth layouts объединены в `AuthShell`; улучшены связи label/input и aria labels password toggles.
+- Проверки прошли: `git diff --check`, TypeScript, 21/21 test files и 101/101 tests, production build, 9-file security gate, dependency audit high/critical `0`.
+- Остались известные non-blocking warnings: main chunk ~1.76 MB, mixed imports `supabase.ts`, устаревшие Browserslist data.
+- Установлен Chrome runtime для `agent-browser` и выполнен browser acceptance: desktop landing, mobile landing, login, forgot-password и contact routes отрендерили содержимое; error overlay, browser errors и horizontal overflow не обнаружены. Annotated screenshots сохранены в `/private/tmp/abc-landing.png`, `/private/tmp/abc-mobile.png`, `/private/tmp/abc-login.png`.
+- Повторный Vite route smoke-check вернул `200` и SPA shell для `/`, `/login`, `/forgot-password`, `/contact`, `/app` и `/admin`; сервер корректно остановлен.
+- Работа локальна в branch `agent/portfolio-inspired-redesign` от `df42ecf`; commit/push/deploy ещё не выполнялись.
+
+Далее: commit/push redesign без находок и проверка GitHub CI/Netlify preview, затем возврат к publishable-key handoff и Document Assistant.
+
+---
+
 ## 2026-08-08 — Supabase CLI v2.112.0 и fresh local-infra regression
 
 - Official Supabase Homebrew formula выбрана с узким разрешением `brew trust --formula supabase/tap/supabase`. После промежуточной установки core formula `v2.111.0` official tap обновил CLI до `v2.112.0`; broad tap trust не выдавался.

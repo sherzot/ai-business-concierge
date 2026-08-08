@@ -61,7 +61,11 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <header className="border-b border-border pb-5">
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary">Knowledge operations</p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground">{translate("nav.docsTitle")}</h2>
+      </header>
       {generatedNotice && (
         <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           <span>{generatedNotice}</span>
@@ -75,15 +79,15 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
       )}
 
       {/* Tab switcher */}
-      <div className="flex w-fit rounded-lg border border-border bg-card p-1">
+      <div className="flex w-fit gap-5 border-b border-border bg-transparent">
         {(["my-docs", "templates"] as DocsTab[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+            className={`border-b-2 px-1 py-2 text-xs font-bold uppercase tracking-[0.08em] transition-colors ${
               activeTab === tab
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
             }`}
           >
             {translate(tab === "my-docs" ? "docs.tabs.myDocs" : "docs.tabs.templates")}
@@ -103,7 +107,7 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
           }}
         />
       ) : (
-        <div className="flex h-[calc(100vh-12rem)] overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+        <div className="flex h-[calc(100vh-16rem)] overflow-hidden border-y border-border bg-transparent">
           <div className="flex w-full flex-col border-r border-border bg-muted md:w-1/3">
             <div className="border-b border-border bg-card p-4">
               <div className="flex items-center gap-3">
