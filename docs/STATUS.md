@@ -23,7 +23,7 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | `agent/portfolio-inspired-redesign` pushed at `83bc7e0`; draft PR #2 open against `main`; production merge/deploy yo'q |
+| Git | `agent/portfolio-inspired-redesign` pushed through `e379137`; PR #2 open against `main`; production merge/deploy yo'q |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Supabase Edge Function `bright-api` v74 |
@@ -70,7 +70,7 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. Draft PR #2 review/merge qarorini qabul qilish; production deploy qilinmagan.
+1. PR #2 review/merge qarorini qabul qilish; production deploy qilinmagan.
 2. Netlify CLI loginini tiklash, production `VITE_SUPABASE_PUBLISHABLE_KEY`ni o'rnatish, qayta deploy va Auth/Realtime smoke-test qilish; legacy fallbackni faqat keyin olib tashlash.
 3. 2026-08-21gacha GHSA-qwww metadata exceptionini qayta ko'rish; keyin AI Hujjatchi PDF/DOCX/Storage ishlariga o'tish.
 

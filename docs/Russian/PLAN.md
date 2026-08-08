@@ -19,7 +19,7 @@
 - [x] Выровнять оставшиеся legacy modules через semantic compatibility с сохранением light/dark, reduced motion и focus-visible.
 - [x] Пройти TypeScript, 101/101 tests, production build, security gate и dependency audit.
 - [x] Выполнить browser acceptance desktop/mobile landing, login, forgot-password и contact routes; overlay, browser errors и horizontal overflow не обнаружены.
-- [x] Commit/push redesign без находок как `83bc7e0`, открыть draft PR #2 и проверить GitHub CI/Vercel/Netlify preview.
+- [x] Commit/push redesign без находок как `83bc7e0`, открыть PR #2 и проверить GitHub CI/Vercel/Netlify preview.
 
 ## P1 — завершить Supabase/Netlify security handoff
 

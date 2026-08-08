@@ -23,7 +23,7 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | `agent/portfolio-inspired-redesign` pushed at `83bc7e0`; draft PR #2 открыт в `main`; не merged/deployed |
+| Git | `agent/portfolio-inspired-redesign` pushed through `e379137`; PR #2 открыт в `main`; не merged/deployed |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v74 |
@@ -57,7 +57,7 @@
 
 ## Ближайший порядок
 
-1. Принять решение по review/merge draft PR #2; production deployment не выполнялся.
+1. Принять решение по review/merge PR #2; production deployment не выполнялся.
 2. Восстановить Netlify CLI login, установить publishable env, redeploy и Auth/Realtime smoke-test до удаления legacy fallback.
 3. До 2026-08-21 пересмотреть GHSA-qwww, затем продолжить PDF/DOCX/Storage Документолога.
 

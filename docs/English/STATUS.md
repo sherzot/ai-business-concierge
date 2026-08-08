@@ -23,7 +23,7 @@
 
 | Check | Status |
 |---|---|
-| Git | `agent/portfolio-inspired-redesign` pushed at `83bc7e0`; draft PR #2 open against `main`; not merged/deployed |
+| Git | `agent/portfolio-inspired-redesign` pushed through `e379137`; PR #2 open against `main`; not merged/deployed |
 | Runtime | Node.js `22.18.0`; `.nvmrc` and package engine pin `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; verified with a fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v74 |
@@ -57,7 +57,7 @@
 
 ## Immediate order
 
-1. Review/merge draft PR #2; no production deployment has been performed.
+1. Review/merge PR #2; no production deployment has been performed.
 2. Restore Netlify CLI login, set the production publishable env, redeploy, and smoke-test Auth/Realtime before removing the legacy fallback.
 3. Re-review GHSA-qwww by 2026-08-21, then continue Document Assistant PDF/DOCX/Storage work.
 

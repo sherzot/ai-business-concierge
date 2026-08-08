@@ -7,7 +7,7 @@ Project development history, completed work, encountered errors, and their solut
 ## 2026-08-08 — Redesign commit, push, and preview CI completed
 
 - Committed the Portfolio-inspired redesign as `83bc7e0` (`feat: redesign frontend in portfolio style`) and pushed `agent/portfolio-inspired-redesign` to `origin`.
-- Opened draft PR #2: https://github.com/sherzot/ai-business-concierge/pull/2
+- Opened PR #2: https://github.com/sherzot/ai-business-concierge/pull/2
 - GitHub `frontend-security-gate` run `31240118332` passed; Vercel preview passed; Netlify Deploy Preview `https://deploy-preview-2--ai-business-concierge1.netlify.app` is ready.
 - The PR is not merged to `main` and no production deployment was performed. Next active work: the Netlify publishable-key handoff, then Document Assistant PDF/DOCX/Storage.
 

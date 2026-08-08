@@ -7,7 +7,7 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 ## 2026-08-08 — Redesign commit, push va preview CI yakunlandi
 
 - Portfolio-inspired redesign `83bc7e0` (`feat: redesign frontend in portfolio style`) commit qilindi va `agent/portfolio-inspired-redesign` branchi `origin`ga push qilindi.
-- Draft PR #2 ochildi: https://github.com/sherzot/ai-business-concierge/pull/2
+- PR #2 ochiq: https://github.com/sherzot/ai-business-concierge/pull/2
 - GitHub `frontend-security-gate` run `31240118332` `success`; Vercel preview `success`; Netlify Deploy Preview `https://deploy-preview-2--ai-business-concierge1.netlify.app` ready.
 - PR `main`ga merge qilinmagan va production deploy qilinmagan. Keyingi faol ish: Netlify publishable-key handoff, keyin AI Hujjatchi PDF/DOCX/Storage.
 

@@ -27,7 +27,7 @@
 - [x] Qolgan legacy modullar uchun semantic compatibility layer, light/dark, reduced-motion va focus-visible holatlarini saqlash.
 - [x] TypeScript, 101/101 test, production build, security gate va dependency auditni o'tkazish.
 - [x] Browser-enabled muhitda desktop/mobile landing, login, forgot-password va contact route'larni vizual acceptance qilish; overlay, browser error va horizontal overflow topilmadi.
-- [x] Topilmasiz redesignni `83bc7e0` bilan commit/push qilish, draft PR #2 ochish, GitHub CI/Vercel/Netlify previewni tekshirish.
+- [x] Topilmasiz redesignni `83bc7e0` bilan commit/push qilish, PR #2 ochish, GitHub CI/Vercel/Netlify previewni tekshirish.
 
 ## P1 — Supabase/Netlify security handoffini yakunlash
 

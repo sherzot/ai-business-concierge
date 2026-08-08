@@ -23,7 +23,7 @@
 
 | Check | 状態 |
 |---|---|
-| Git | `agent/portfolio-inspired-redesign`を`83bc7e0`でpush、`main`向けdraft PR #2 open。未merge・未deploy |
+| Git | `agent/portfolio-inspired-redesign`を`e379137`までpush、`main`向けPR #2 open。未merge・未deploy |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Supabase Edge Function `bright-api` v74 |
@@ -57,7 +57,7 @@
 
 ## 直近の順序
 
-1. Draft PR #2のreview/merge判断。Production deployは未実施。
+1. PR #2のreview/merge判断。Production deployは未実施。
 2. Netlify CLI login、production publishable env、redeploy、Auth/Realtime smoke-test後にlegacy fallbackを削除。
 3. 2026-08-21までにGHSA-qwwwを再確認し、その後Document Assistant PDF/DOCX/Storageを継続。
 

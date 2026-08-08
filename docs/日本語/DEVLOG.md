@@ -7,7 +7,7 @@
 ## 2026-08-08 — Redesign commit、push、preview CIを完了
 
 - Portfolio-inspired redesignを`83bc7e0`（`feat: redesign frontend in portfolio style`）としてcommitし、`agent/portfolio-inspired-redesign`を`origin`へpush。
-- Draft PR #2を作成: https://github.com/sherzot/ai-business-concierge/pull/2
+- PR #2を作成: https://github.com/sherzot/ai-business-concierge/pull/2
 - GitHub `frontend-security-gate` run `31240118332`成功、Vercel preview成功、Netlify Deploy Preview `https://deploy-preview-2--ai-business-concierge1.netlify.app` ready。
 - PRはまだ`main`へmergeされておらずproduction deployも未実施。次はNetlify publishable-key handoff、その後Document Assistant PDF/DOCX/Storage。
 
