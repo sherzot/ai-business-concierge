@@ -23,7 +23,7 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | Redesign локально в `agent/portfolio-inspired-redesign`; base/HEAD `df42ecf`; uncommitted и unpushed |
+| Git | `agent/portfolio-inspired-redesign` pushed at `83bc7e0`; draft PR #2 открыт в `main`; не merged/deployed |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v74 |
@@ -34,6 +34,7 @@
 | Production dependency audit | Scoped gate: 0 unexcepted high/critical; GHSA-qwww metadata exception до 2026-08-21 |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue; landing, public/auth, product core и admin shell redesign завершён локально |
 | Visual browser acceptance | `agent-browser`: desktop/mobile landing, login, forgot-password и contact passed; overlay, browser errors и horizontal overflow не обнаружены |
+| Preview CI | GitHub run `31240118332` passed; Vercel passed; Netlify Deploy Preview ready |
 | Remote GitHub Actions | Run `31193931735`, commit `3e383b1`: success; все шаги `frontend-security-gate` green |
 | Frontend Supabase key contract | Code/deploy: publishable primary + temporary fallback; production bundle использует legacy anon fallback, Netlify env/login pending |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; real Auth-token Edge tests 8/8; Realtime tables SELECT-only и требуют active membership/tenant |
@@ -56,7 +57,7 @@
 
 ## Ближайший порядок
 
-1. Сделать commit/push redesign без находок и проверить GitHub CI/Netlify preview.
+1. Принять решение по review/merge draft PR #2; production deployment не выполнялся.
 2. Восстановить Netlify CLI login, установить publishable env, redeploy и Auth/Realtime smoke-test до удаления legacy fallback.
 3. До 2026-08-21 пересмотреть GHSA-qwww, затем продолжить PDF/DOCX/Storage Документолога.
 

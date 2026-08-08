@@ -23,7 +23,7 @@
 
 | Check | 状態 |
 |---|---|
-| Git | Redesignはlocal branch `agent/portfolio-inspired-redesign`; base/HEAD `df42ecf`; uncommitted・unpushed |
+| Git | `agent/portfolio-inspired-redesign`を`83bc7e0`でpush、`main`向けdraft PR #2 open。未merge・未deploy |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Supabase Edge Function `bright-api` v74 |
@@ -34,6 +34,7 @@
 | Production dependency audit | Scoped gate: unexcepted high/critical 0; GHSA-qwww exceptionは2026-08-21まで |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue。Landing、public/auth、product core、admin shell redesignをlocal完了 |
 | Visual browser acceptance | `agent-browser`: desktop/mobile landing、login、forgot-password、contact passed。Overlay、browser errors、horizontal overflowなし |
+| Preview CI | GitHub run `31240118332` passed、Vercel passed、Netlify Deploy Preview ready |
 | Remote GitHub Actions | Run `31193931735`、commit `3e383b1`: success。全`frontend-security-gate` stepがgreen |
 | Frontend Supabase key contract | Code/deployはpublishable primary + temporary fallback。Production bundleはlegacy anon fallback使用、Netlify env/login pending |
 | DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、real Auth-token Edge tests 8/8。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |
@@ -56,7 +57,7 @@
 
 ## 直近の順序
 
-1. Findingsなしのredesignをcommit/pushしGitHub CIとNetlify previewを確認。
+1. Draft PR #2のreview/merge判断。Production deployは未実施。
 2. Netlify CLI login、production publishable env、redeploy、Auth/Realtime smoke-test後にlegacy fallbackを削除。
 3. 2026-08-21までにGHSA-qwwwを再確認し、その後Document Assistant PDF/DOCX/Storageを継続。
 

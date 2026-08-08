@@ -4,6 +4,15 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — Commit, push и preview CI redesign завершены
+
+- Portfolio-inspired redesign закоммичен как `83bc7e0` (`feat: redesign frontend in portfolio style`) и branch `agent/portfolio-inspired-redesign` отправлен в `origin`.
+- Открыт draft PR #2: https://github.com/sherzot/ai-business-concierge/pull/2
+- GitHub `frontend-security-gate` run `31240118332` прошёл; Vercel preview прошёл; Netlify Deploy Preview `https://deploy-preview-2--ai-business-concierge1.netlify.app` готов.
+- PR ещё не merged в `main`, production deployment не выполнялся. Далее: Netlify publishable-key handoff, затем PDF/DOCX/Storage Документолога.
+
+---
+
 ## 2026-08-08 — Portfolio-inspired полный frontend redesign завершён локально
 
 - В продукт адаптированы warm canvas, чёрная типографика, единый Sher-blue accent, divider-композиция и сдержанный motion из `sherzot/Portfolio`, без копирования его кода.

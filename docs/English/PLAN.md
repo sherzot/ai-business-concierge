@@ -19,7 +19,7 @@
 - [x] Align remaining legacy modules through semantic compatibility while preserving light/dark, reduced motion, and focus-visible behavior.
 - [x] Pass TypeScript, 101/101 tests, production build, security gate, and dependency audit.
 - [x] Run browser acceptance for desktop/mobile landing, login, forgot-password, and contact routes; no overlay, browser errors, or horizontal overflow found.
-- [ ] Fix findings, then obtain separate approval for commit/push and verify GitHub CI plus Netlify preview.
+- [x] Commit/push the finding-free redesign as `83bc7e0`, open draft PR #2, and verify GitHub CI/Vercel/Netlify preview.
 
 ## P1 — finish the Supabase/Netlify security handoff
 
