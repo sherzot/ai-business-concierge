@@ -194,7 +194,7 @@ export function EmployeeDetailPage({
   if (error || !data) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3 text-slate-400">
-        <span className="text-3xl">👤</span>
+        <User size={28} aria-hidden="true" />
         <p className="text-sm font-medium text-slate-500">{error ?? translate("employeeProfile.notFound")}</p>
       </div>
     );

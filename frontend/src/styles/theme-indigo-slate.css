@@ -221,6 +221,15 @@
 .hover\:text-indigo-600:hover, .hover\:text-indigo-700:hover,
 .hover\:text-blue-600:hover, .hover\:text-blue-700:hover { color: var(--brand-primary-hover); }
 
+/* Keep legacy feature modules inside the editorial palette. Purple and pink
+   were decorative category colors, not product state, so they now resolve to
+   the same restrained blue/neutral system as the rest of the application. */
+[class*="bg-purple-"], [class*="bg-pink-"] { background-color: var(--brand-primary-soft); }
+[class*="text-purple-"], [class*="text-pink-"] { color: var(--brand-primary); }
+[class*="border-purple-"], [class*="border-pink-"] { border-color: var(--brand-primary-ring); }
+[class*="hover:bg-purple-"]:hover, [class*="hover:bg-pink-"]:hover { background-color: var(--brand-primary-soft); }
+[class*="hover:text-purple-"]:hover, [class*="hover:text-pink-"]:hover { color: var(--brand-primary-hover); }
+
 [class~="shadow-sm"], [class~="shadow-md"], [class~="shadow-lg"],
 [class~="shadow-xl"], [class~="shadow-2xl"] { box-shadow: none; }
 [class~="rounded-2xl"] { border-radius: var(--radius-xl); }

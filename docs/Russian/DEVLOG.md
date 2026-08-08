@@ -4,6 +4,13 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — Visual consolidation и уменьшение масштаба заголовков
+
+- Усилено единое Portfolio-inspired правило для product/admin/HR surfaces: декоративные purple/pink цвета сведены к semantic blue/neutral palette, emoji в notifications/templates/HR signals заменены на Lucide icons.
+- Уменьшен размер hero headline и editorial titles landing, чтобы длинный Uzbek hero copy легче сканировался в первом viewport.
+- Увеличены tracking и line-height, чтобы title и paragraph text не слипались.
+- TypeScript и targeted landing/docs tests: `PASS`.
+
 ## 2026-08-08 — Review comments PR #2 закрыты
 
 - Исправлен dark-system contrast feedback: editorial inverse surfaces и headers используют theme-independent tokens `#111318`/`#f4f3ef`, content contact/register/auth остаётся читаемым.

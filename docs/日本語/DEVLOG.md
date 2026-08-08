@@ -4,6 +4,13 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-08 — Visual consolidationとtitle scale調整
+
+- Product/admin/HR surface全体でPortfolio-inspired visual ruleを強化。装飾的なpurple/pink色をsemantic blue/neutral paletteへ統一し、notification/template/HR signalのemojiをLucide iconへ変更。
+- Landing hero headlineとeditorial titleのサイズを縮小し、長いUzbek hero copyをfirst viewportで読みやすく調整。
+- Global trackingとline-heightを緩め、titleとparagraph textが詰まらないように調整。
+- TypeScriptとlanding/docs targeted tests: `PASS`。
+
 ## 2026-08-08 — PR #2 review commentsを対応
 
 - Dark-system contrast feedbackを修正。Editorial inverse surface/headerはtheme非依存の`#111318`/`#f4f3ef` tokenを使用し、contact/register/auth contentの可読性を維持。

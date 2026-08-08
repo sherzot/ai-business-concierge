@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, Send } from "lucide-react";
+import { ArrowLeft, CheckCircle2, MessageCircle, Phone, Send } from "lucide-react";
 import { useLandingLocale } from "../hooks/useLandingLocale";
 import { landingI18n } from "../i18n";
 import { SUPPORTED_LOCALES } from "../types";
@@ -118,8 +118,8 @@ export function ContactPage() {
             <div className="border-t border-white/15">
               {t.companyOnboarding.steps.map((step) => (
                 <div key={step.step} className="flex gap-4 border-b border-white/15 py-4">
-                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center border border-white/15 text-lg">
-                    {step.icon}
+                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center border border-white/15 text-xs font-bold text-[#5f7cff]">
+                    {step.step}
                   </div>
                   <div>
                     <div className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-0.5">
@@ -136,8 +136,8 @@ export function ContactPage() {
             <div className="mt-8 pt-6 border-t border-white/10">
               <p className="text-xs text-slate-500 mb-3">{ct.successNote}</p>
               <div className="space-y-2 text-sm text-slate-300">
-                <div>📞 +998 XX XXX-XX-XX</div>
-                <div>💬 <a href="https://t.me/ai_business_concierge_bot" className="text-indigo-400 hover:text-indigo-300">@ai_business_concierge_bot</a></div>
+                <div className="flex items-center gap-2"><Phone size={14} aria-hidden="true" /> +998 XX XXX-XX-XX</div>
+                <div className="flex items-center gap-2"><MessageCircle size={14} aria-hidden="true" /> <a href="https://t.me/ai_business_concierge_bot" className="text-indigo-400 hover:text-indigo-300">@ai_business_concierge_bot</a></div>
               </div>
             </div>
           </div>

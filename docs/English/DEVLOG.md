@@ -4,6 +4,13 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — Visual consolidation and title-scale refinement
+
+- Strengthened the Portfolio-inspired visual rule across product/admin/HR surfaces: decorative purple/pink colors now resolve to the semantic blue/neutral palette, and notification/template/HR signal emoji were replaced with Lucide icons.
+- Reduced the landing hero headline and editorial title scale so long Uzbek hero copy is lighter and easier to scan in the first viewport.
+- Relaxed global tracking and line-height so title and paragraph text no longer feels cramped.
+- TypeScript and targeted landing/docs tests: `PASS`.
+
 ## 2026-08-08 — PR #2 review comments addressed
 
 - Fixed dark-system contrast feedback: editorial inverse surfaces and headers now use theme-independent `#111318`/`#f4f3ef` tokens, preserving readable contact/register/auth content.

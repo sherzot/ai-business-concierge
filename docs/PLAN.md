@@ -28,6 +28,7 @@
 - [x] TypeScript, 101/101 test, production build, security gate va dependency auditni o'tkazish.
 - [x] Browser-enabled muhitda desktop/mobile landing, login, forgot-password va contact route'larni vizual acceptance qilish; overlay, browser error va horizontal overflow topilmadi.
 - [x] Topilmasiz redesignni `83bc7e0` bilan commit/push qilish, PR #2 ochish, GitHub CI/Vercel/Netlify previewni tekshirish.
+- [ ] Portfolio visual consolidationni yakunlash: qolgan legacy status/category surface’larini audit qilish, decorative emoji/stickerlarni olib tashlash va barcha route’larda editorial palette/cardless compositionni browser bilan tasdiqlash.
 
 ## P1 — Supabase/Netlify security handoffini yakunlash
 

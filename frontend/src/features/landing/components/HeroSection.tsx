@@ -29,7 +29,7 @@ export function HeroSection({ t }: Props) {
       <div className="editorial-page grid min-h-[calc(100svh-68px)] items-center gap-12 py-12 lg:grid-cols-12 lg:gap-16 lg:py-16">
         <div className="lg:col-span-7">
           <p className="editorial-kicker editorial-enter">{t.badge}</p>
-          <h1 className="editorial-enter editorial-delay-1 mt-7 max-w-[760px] text-[clamp(3rem,7vw,6.7rem)] font-semibold leading-[0.94] tracking-[-0.075em] text-foreground">
+          <h1 className="editorial-enter editorial-delay-1 mt-7 max-w-[680px] text-[clamp(2.65rem,5.6vw,5.25rem)] font-semibold leading-[1.06] tracking-[-0.045em] text-foreground">
             {t.title}
           </h1>
           <p className="editorial-copy editorial-enter editorial-delay-2 mt-7 max-w-xl">

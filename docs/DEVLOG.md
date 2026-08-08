@@ -4,6 +4,13 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-08 — Visual consolidation va title scale refinement
+
+- Portfolio-inspired visual qoidasi product/admin/HR surface’lariga yanada kuchaytirildi: dekorativ purple/pink ranglar semantic blue/neutral palette’ga bog‘landi, notification/template/HR signal emoji’lari lucide ikonkalarga almashtirildi.
+- Landing hero sarlavhasi va umumiy editorial title scale kichraytirildi; uzun Uzbek hero copy endi birinchi viewportda yengilroq va o‘qilishi qulayroq.
+- Harf tracking va line-height kengaytirildi; title va paragraph matnlari bir-biriga yopishib qolmaydi.
+- TypeScript va landing/docs targeted tests: `PASS`.
+
 ## 2026-08-08 — PR #2 review commentlari yopildi
 
 - Dark-system kontrast feedbacki tuzatildi: editorial inverse surface va header endi theme’dan mustaqil `#111318`/`#f4f3ef` tokenlaridan foydalanadi; contact/register/auth inverse content o‘qilishi saqlandi.

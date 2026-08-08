@@ -1,5 +1,5 @@
 import React from "react";
-import { FileText, RefreshCw, Sparkles } from "lucide-react";
+import { FileText, FileSignature, ClipboardList, ScrollText, RefreshCw, Sparkles } from "lucide-react";
 import {
   getDocTemplates,
   type DocumentTemplate,
@@ -33,17 +33,17 @@ const CATEGORY_LABEL_KEYS: Record<DocumentTemplate["category"], string> = {
 };
 
 const CATEGORY_COLORS: Record<DocumentTemplate["category"], string> = {
-  shartnoma: "bg-blue-50 text-blue-700 border-blue-100",
-  ariza: "bg-green-50 text-green-700 border-green-100",
-  buyruq: "bg-purple-50 text-purple-700 border-purple-100",
-  boshqa: "bg-slate-50 text-slate-600 border-slate-200",
+  shartnoma: "bg-primary/10 text-primary border-primary/20",
+  ariza: "bg-card text-muted-foreground border-border",
+  buyruq: "bg-primary/10 text-primary border-primary/20",
+  boshqa: "bg-card text-muted-foreground border-border",
 };
 
-const CATEGORY_ICONS: Record<DocumentTemplate["category"], string> = {
-  shartnoma: "🤝",
-  ariza: "📋",
-  buyruq: "✅",
-  boshqa: "📜",
+const CATEGORY_ICONS = {
+  shartnoma: FileSignature,
+  ariza: ClipboardList,
+  buyruq: ScrollText,
+  boshqa: FileText,
 };
 
 export function TemplatesLibrary({
@@ -185,8 +185,8 @@ export function TemplatesLibrary({
               className="group rounded-xl border border-border bg-card p-4 text-card-foreground transition-all hover:border-primary/40 hover:shadow-sm"
             >
               <div className="flex items-start gap-3">
-                <span className="text-2xl leading-none">
-                  {CATEGORY_ICONS[template.category]}
+                <span className="mt-0.5 text-primary">
+                  {React.createElement(CATEGORY_ICONS[template.category], { size: 20, strokeWidth: 1.7 })}
                 </span>
                 <div className="min-w-0 flex-1">
                   <h3 className="text-sm font-medium leading-snug text-foreground">

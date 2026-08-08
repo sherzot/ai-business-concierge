@@ -12,7 +12,7 @@ export function ForWhoSection({ t }: Props) {
       <div className="editorial-page grid gap-12 lg:grid-cols-12">
         <header className="lg:col-span-4">
           <p className="editorial-kicker">Teams</p>
-          <h2 className="editorial-title mt-6 !text-[clamp(2rem,4vw,3rem)]">{t.title}</h2>
+          <h2 className="editorial-title mt-6 !text-[clamp(1.9rem,3.4vw,2.75rem)]">{t.title}</h2>
           <p className="editorial-copy mt-6 text-base">{t.subtitle}</p>
         </header>
 
