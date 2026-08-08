@@ -55,7 +55,7 @@ export function HeroSection({ t }: Props) {
           </button>
         </div>
           <a href="#features" className="mt-14 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground">
-            Explore system <ArrowDownRight size={15} />
+            {t.exploreSystem} <ArrowDownRight size={15} />
           </a>
         </div>
 

@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — PR #2 review comments addressed
+
+- Fixed dark-system contrast feedback: editorial inverse surfaces and headers now use theme-independent `#111318`/`#f4f3ef` tokens, preserving readable contact/register/auth content.
+- Added the landing `Explore system` CTA to `landingI18n` for Uzbek, Russian, English, and Japanese.
+- Corrected the canonical `STATUS.md` browser/commit pending contradiction and synchronized all four translations.
+- Browser regression passed for dark contact inverse background/header, form content, and no overflow; Russian and Japanese locale-switch CTA text was verified.
+- Full regression passed: 21/21 test files, 101/101 tests, production build, 9-file security gate, and `git diff --check`.
+
+---
+
 ## 2026-08-08 — Redesign commit, push, and preview CI completed
 
 - Committed the Portfolio-inspired redesign as `83bc7e0` (`feat: redesign frontend in portfolio style`) and pushed `agent/portfolio-inspired-redesign` to `origin`.

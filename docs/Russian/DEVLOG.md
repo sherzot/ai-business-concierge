@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — Review comments PR #2 закрыты
+
+- Исправлен dark-system contrast feedback: editorial inverse surfaces и headers используют theme-independent tokens `#111318`/`#f4f3ef`, content contact/register/auth остаётся читаемым.
+- CTA `Explore system` добавлен в `landingI18n` для Uzbek, Russian, English и Japanese.
+- Исправлено противоречие browser/commit pending в canonical `STATUS.md`, синхронизированы четыре языка.
+- Browser regression прошёл для dark contact inverse background/header, form content и no overflow; проверены CTA после Russian и Japanese locale switch.
+- Full regression прошёл: 21/21 test files, 101/101 tests, production build, 9-file security gate и `git diff --check`.
+
+---
+
 ## 2026-08-08 — Commit, push и preview CI redesign завершены
 
 - Portfolio-inspired redesign закоммичен как `83bc7e0` (`feat: redesign frontend in portfolio style`) и branch `agent/portfolio-inspired-redesign` отправлен в `origin`.

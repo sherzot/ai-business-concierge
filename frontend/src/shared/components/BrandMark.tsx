@@ -33,14 +33,14 @@ export function BrandLockup({
   className?: string;
 }) {
   return (
-    <span className={cn("inline-flex items-center gap-2.5", inverse ? "text-background" : "text-foreground", className)}>
+    <span className={cn("inline-flex items-center gap-2.5", inverse ? "text-[var(--editorial-inverse-fg)]" : "text-foreground", className)}>
       <BrandMark className={compact ? "h-8 w-8" : "h-10 w-10"} />
       <span className="flex flex-col leading-none">
         <span className="text-[11px] font-extrabold uppercase tracking-[0.18em]">
           AI Concierge<span className="text-primary">.</span>
         </span>
         {!compact && (
-          <span className={cn("mt-1 text-[10px] font-medium tracking-[0.08em]", inverse ? "text-background/55" : "text-muted-foreground")}>
+          <span className={cn("mt-1 text-[10px] font-medium tracking-[0.08em]", inverse ? "text-[color-mix(in_srgb,var(--editorial-inverse-fg)_55%,transparent)]" : "text-muted-foreground")}>
             Business operating system
           </span>
         )}

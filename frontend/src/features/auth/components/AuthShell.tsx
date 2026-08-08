@@ -24,15 +24,15 @@ export function AuthShell({ backTo = "/", backLabel, children }: AuthShellProps)
 
         <div className="relative z-10 max-w-md">
           <p className="editorial-kicker text-[#5f7cff]">Operational intelligence</p>
-          <h2 className="mt-6 text-4xl font-semibold leading-[1.04] tracking-[-0.055em] text-background xl:text-5xl">
+          <h2 className="mt-6 text-4xl font-semibold leading-[1.04] tracking-[-0.055em] text-[var(--editorial-inverse-fg)] xl:text-5xl">
             {translate("auth.loginSubtitle")}
           </h2>
-          <p className="mt-6 text-base leading-7 text-background/65">
+          <p className="editorial-inverse-muted mt-6 text-base leading-7">
             {translate("auth.platformSubtitle")}
           </p>
           <ul className="mt-10 border-t border-background/20">
             {benefits.map((key) => (
-              <li key={key} className="flex items-center gap-3 border-b border-background/20 py-4 text-sm text-background/75">
+              <li key={key} className="editorial-inverse-muted flex items-center gap-3 border-b border-white/20 py-4 text-sm">
                 <CheckCircle2 size={16} className="shrink-0 text-[#5f7cff]" aria-hidden />
                 {translate(key)}
               </li>
@@ -40,7 +40,7 @@ export function AuthShell({ backTo = "/", backLabel, children }: AuthShellProps)
           </ul>
         </div>
 
-        <p className="relative z-10 text-xs uppercase tracking-[0.12em] text-background/45">
+        <p className="editorial-inverse-faint relative z-10 text-xs uppercase tracking-[0.12em]">
           © 2026 AI Business Concierge
         </p>
       </aside>

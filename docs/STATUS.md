@@ -8,7 +8,7 @@
 > 2026-08-08: Fresh local replay 32/32 migratsiya, pgTAP 21/21 va real local Auth tokenli Edge acceptance 8/8 o'tdi.
 > 2026-08-08: Production migration history local bilan tenglashtirildi; local Storage/Auth pin drifti yopildi va enabled full-stack health tasdiqlandi.
 > 2026-08-08: Supabase CLI `v2.112.0`ga yangilandi; yangi local key/grant contractiga mos fresh replay va barcha acceptance/regression gate'lar o'tdi.
-> 2026-08-08: Portfolio-inspired frontend redesign lokal yakunlandi va barcha avtomatik frontend gate'lar o'tdi; browser acceptance hamda commit/push hali pending.
+> 2026-08-08: Portfolio-inspired frontend redesign browser acceptance bilan yakunlandi, `83bc7e0`/`509bc2d` push qilindi, PR #2 ochiq va CI green.
 
 ## Hozir qayerdamiz
 

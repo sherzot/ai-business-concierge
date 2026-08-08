@@ -15,7 +15,7 @@ type FaqItem = { q: string; a: string };
 
 type LandingDict = {
   nav: { login: string; contact: string; features: string; pricing: string; faq: string };
-  hero: { badge: string; title: string; subtitle: string; ctaTelegram: string; ctaLogin: string };
+  hero: { badge: string; title: string; subtitle: string; ctaTelegram: string; ctaLogin: string; exploreSystem: string };
   stats: { items: StatItem[] };
   features: {
     title: string; subtitle: string;
@@ -102,6 +102,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
         "Soliq, mehnat kodeksi, shartnomalar, Telegram savdo — 24/7, 5 soniyada, aniq javob. Professional maslahatchi narxining 10 foizida.",
       ctaTelegram: "Telegram botni sinab ko'rish",
       ctaLogin: "Dashboard ga kirish",
+      exploreSystem: "Tizimni ko'rish",
     },
     stats: {
       items: [
@@ -439,6 +440,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
         "Налоги, трудовой кодекс, договоры, Telegram-продажи — 24/7, за 5 секунд, точный ответ. За 10% от стоимости профессиональной консультации.",
       ctaTelegram: "Попробовать Telegram бот",
       ctaLogin: "Открыть дашборд",
+      exploreSystem: "Посмотреть систему",
     },
     stats: {
       items: [
@@ -776,6 +778,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
         "Tax, labor code, contracts, Telegram sales — 24/7, in 5 seconds, accurate answers. At 10% of the cost of professional consultation.",
       ctaTelegram: "Try Telegram Bot",
       ctaLogin: "Open Dashboard",
+      exploreSystem: "Explore system",
     },
     stats: {
       items: [
@@ -1113,6 +1116,7 @@ export const landingI18n: Record<LandingLocale, LandingDict> = {
         "税務・労働法・契約・Telegram販売 — 24時間365日、5秒で正確な回答。専門家相談費用の10%で利用可能。",
       ctaTelegram: "Telegramボットを試す",
       ctaLogin: "ダッシュボードを開く",
+      exploreSystem: "システムを見る",
     },
     stats: {
       items: [

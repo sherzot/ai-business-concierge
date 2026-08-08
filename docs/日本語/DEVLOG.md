@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-08 — PR #2 review commentsを対応
+
+- Dark-system contrast feedbackを修正。Editorial inverse surface/headerはtheme非依存の`#111318`/`#f4f3ef` tokenを使用し、contact/register/auth contentの可読性を維持。
+- Landing `Explore system` CTAを`landingI18n`へ追加し、Uzbek、Russian、English、Japaneseをlocalize。
+- Canonical `STATUS.md`のbrowser/commit pending contradictionを修正し4言語を同期。
+- Browser regression成功: dark contact inverse background/header、form content、no overflowを確認。Russian/Japanese locale switch CTAも確認。
+- Full regression成功: 21/21 test files、101/101 tests、production build、9-file security gate、`git diff --check`。
+
+---
+
 ## 2026-08-08 — Redesign commit、push、preview CIを完了
 
 - Portfolio-inspired redesignを`83bc7e0`（`feat: redesign frontend in portfolio style`）としてcommitし、`agent/portfolio-inspired-redesign`を`origin`へpush。

@@ -74,7 +74,7 @@ export function ContactPage() {
   return (
     <div className="editorial-inverse min-h-screen">
       {/* Navbar */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-foreground/90 backdrop-blur-md">
+      <header className="editorial-inverse-header sticky top-0 z-50 border-b border-white/10 backdrop-blur-md">
         <div className="mx-auto flex h-18 max-w-5xl items-center justify-between px-4 sm:px-6">
           <Link to="/">
             <BrandLockup inverse compact />

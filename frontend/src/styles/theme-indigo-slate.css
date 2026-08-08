@@ -33,6 +33,11 @@
   --brand-text-muted:     #686b73;
   --brand-text-soft:      #7c8088;
 
+  /* Editorial inverse surfaces stay dark in both color schemes so public forms
+     using white-on-ink content retain readable contrast. */
+  --editorial-inverse-bg: #111318;
+  --editorial-inverse-fg: #f4f3ef;
+
   --status-success:       #16a34a;
   --status-success-soft:  #dcfce7;
   --status-success-fg:    #14532d;
@@ -118,6 +123,9 @@
   --brand-text:           #f3f4f6;
   --brand-text-muted:     #a2a6af;
   --brand-text-soft:      #7d828c;
+
+  --editorial-inverse-bg: #111318;
+  --editorial-inverse-fg: #f4f3ef;
 
   --status-success:       #4ade80;
   --status-success-soft:  rgba(22, 163, 74, 0.18);

@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-08 — PR #2 review commentlari yopildi
+
+- Dark-system kontrast feedbacki tuzatildi: editorial inverse surface va header endi theme’dan mustaqil `#111318`/`#f4f3ef` tokenlaridan foydalanadi; contact/register/auth inverse content o‘qilishi saqlandi.
+- Landing `Explore system` CTA’si `landingI18n`ga qo‘shilib Uzbek, Russian, English va Japanese bo‘yicha lokalizatsiya qilindi.
+- Canonical `STATUS.md` snapshotidagi browser/commit pending contradictioni tuzatildi va 4 til nusxasi sinxronlashtirildi.
+- Browser regression: dark contact computed inverse background/header, form content va no-overflow; Russian va Japanese locale switch CTA’lari tekshirildi.
+- Full regression: 21/21 test fayli, 101/101 test, production build, 9-file security gate va `git diff --check` — `PASS`.
+
+---
+
 ## 2026-08-08 — Redesign commit, push va preview CI yakunlandi
 
 - Portfolio-inspired redesign `83bc7e0` (`feat: redesign frontend in portfolio style`) commit qilindi va `agent/portfolio-inspired-redesign` branchi `origin`ga push qilindi.
