@@ -4,6 +4,10 @@
 > Hujjatlar tartiblangan sana: **2026-08-07**
 > Lokal runtime, production health/auth va remote GitHub Actions baseline'i 2026-08-07 kuni qayta tekshirildi. P0 commitlari push qilindi va yangi CI run to'liq green yakunlandi.
 > 2026-08-08: publishable-key commit push/CI/Netlify deploy qilindi, ammo production bundle hali legacy fallback ishlatmoqda. Risk scanner jadvallarining browser Data API ruxsatlari productionda yopildi.
+> 2026-08-08: Realtime tenant isolation productionda qotirildi; faol membership/tenant tekshiruvi va service-role Edge authorization markazlashtirildi.
+> 2026-08-08: Fresh local replay 32/32 migratsiya, pgTAP 21/21 va real local Auth tokenli Edge acceptance 8/8 o'tdi.
+> 2026-08-08: Production migration history local bilan tenglashtirildi; local Storage/Auth pin drifti yopildi va enabled full-stack health tasdiqlandi.
+> 2026-08-08: Supabase CLI `v2.112.0`ga yangilandi; yangi local key/grant contractiga mos fresh replay va barcha acceptance/regression gate'lar o'tdi.
 
 ## Hozir qayerdamiz
 
@@ -18,9 +22,10 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | Risk-scanner hardening commit `3e383b1` `origin/main`ga push qilindi |
+| Git | Realtime/authorization va CLI-regression slice `agent/harden-tenant-authorization` branchida; base `origin/main` commit `ddb2207` |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
-| Backend | Supabase Edge Function `bright-api` v72 |
+| Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
+| Backend | Supabase Edge Function `bright-api` v74 |
 | Health smoke-test | `200` |
 | Type-check | Muvaffaqiyatli |
 | Unit test | 21/21 fayl, 101/101 test |
@@ -29,13 +34,15 @@
 | Production dependency audit | Scoped gate o'tdi: unexcepted high/critical 0; GHSA-qwww metadata exceptioni 2026-08-21 gacha |
 | Remote GitHub Actions | Run `31193931735`, commit `3e383b1`: `success`; barcha `frontend-security-gate` qadamlari green |
 | Frontend Supabase key contract | Kod/deploy: publishable primary + vaqtinchalik fallback; production bundle legacy anon fallback ishlatmoqda, Netlify env/login **pending** |
-| DB security | 32/32 public tableda RLS; 8/8 view `security_invoker`; 6/6 `SECURITY DEFINER` funksiya browser EXECUTEdan yopiq; risk jadvallari `anon/authenticated` CRUDdan yopildi |
+| DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; real Auth tokenli Edge `8/8`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |
+| Migration history | Local/remote 32/32 teng; production `db push --dry-run`: up to date |
+| Local Supabase services | Storage `v1.68.1`, Auth `v2.195.0`; barcha enabled containerlar healthy; Storage/Auth/Studio HTTP `200`; `imgproxy` transformations o'chiq bo'lgani uchun stopped |
 
 ## Mahsulot va integratsiyalar holati
 
 | Yo'nalish | Holat | Izoh |
 |---|---|---|
-| Auth, multi-tenant, RBAC | **Done** | Asosiy rollar, tenant membership va route guardlar mavjud |
+| Auth, multi-tenant, RBAC | **Done / hardening davom etadi** | DB canonical tenant/role, faol membership/tenant va yagona admin middleware productionda |
 | Core web modullar | **Done** | Reports, Inbox, Tasks, HR, Docs, Integrations, Settings |
 | Realtime | **Done** | Inbox, Tasks va Notifications subscriptionlari |
 | Task assignment notifications | **Done** | Biriktirish, read va acknowledge oqimi |
@@ -60,11 +67,10 @@
 ## Eng yaqin bajariladigan ishlar
 
 1. Netlify CLI loginini tiklash, production `VITE_SUPABASE_PUBLISHABLE_KEY`ni o'rnatish, qayta deploy va Auth/Realtime smoke-test qilish; legacy frontend env/fallbackni faqat keyin olib tashlash.
-2. Cross-tenant CRUD/role test fixturelarini yozish; `user_tenants`ga bog'liq RLS siyosatlari va barcha service-role route authorizationini tekshirish.
-3. 2026-08-21gacha GHSA-qwww npm metadata exceptionini qayta ko'rish; registry tuzatilsa exceptionni olib tashlash.
-4. AI Hujjatchi uchun PDF/DOCX, Noto Sans, private Storage va signed URL oqimini yozish.
-5. Telegram webhook secret va Resend receiving/delivery smoke-testlarini yopish.
-6. Keyin HR Candidate Analysis implementatsiyasiga o'tish.
+2. 2026-08-21gacha GHSA-qwww npm metadata exceptionini qayta ko'rish; registry tuzatilsa exceptionni olib tashlash.
+3. AI Hujjatchi uchun PDF/DOCX, Noto Sans, private Storage va signed URL oqimini yozish.
+4. Telegram webhook secret va Resend receiving/delivery smoke-testlarini yopish.
+5. Keyin HR Candidate Analysis implementatsiyasiga o'tish.
 
 Batafsil tartib: [PLAN.md](PLAN.md).
 

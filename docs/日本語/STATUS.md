@@ -4,6 +4,10 @@
 > ドキュメント整理日: **2026-08-07**
 > 2026-08-07にlocal runtime、production health/auth、remote GitHub Actions baselineを再確認。P0 commitsをpushし、new CI runはfully greenで完了。
 > 2026-08-08: publishable-key commitをpushしCI/Netlify deploy成功。ただしproduction bundleはまだlegacy fallbackを使用。Risk scanner tablesへのdirect browser Data API accessをproductionで閉鎖。
+> 2026-08-08: Realtime tenant isolationをproductionで強化し、active membership/tenant確認とservice-role Edge authorizationを集中化。
+> 2026-08-08: fresh local replayは32/32 migrations、pgTAPは21/21、real local Auth-token Edge acceptanceは8/8成功。
+> 2026-08-08: production migration historyをlocalと整合。Local Storage/Auth pin driftを解消しenabled full-stack healthを確認。
+> 2026-08-08: Supabase CLIを`v2.112.0`へupgrade。新local key/grant contractでfresh replayと全acceptance/regression gatesが成功。
 
 ## 現在のPhase
 
@@ -18,9 +22,10 @@
 
 | Check | 状態 |
 |---|---|
-| Git | Risk-scanner hardening commit `3e383b1`を`origin/main`へpush済み |
+| Git | Realtime/authorizationとCLI-regression sliceは`agent/harden-tenant-authorization`; base `origin/main` commitは`ddb2207` |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
-| Backend | Supabase Edge Function `bright-api` v72 |
+| Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
+| Backend | Supabase Edge Function `bright-api` v74 |
 | Health | `200` |
 | Type-check | 成功 |
 | Unit tests | 21/21 files、101/101 tests |
@@ -28,7 +33,9 @@
 | Production dependency audit | Scoped gate: unexcepted high/critical 0; GHSA-qwww exceptionは2026-08-21まで |
 | Remote GitHub Actions | Run `31193931735`、commit `3e383b1`: success。全`frontend-security-gate` stepがgreen |
 | Frontend Supabase key contract | Code/deployはpublishable primary + temporary fallback。Production bundleはlegacy anon fallback使用、Netlify env/login pending |
-| DB security | 32/32 public tablesでRLS、8/8 viewsが`security_invoker`、6/6 `SECURITY DEFINER` functionsはbrowser EXECUTE不可、risk tablesは`anon/authenticated` CRUD不可 |
+| DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、real Auth-token Edge tests 8/8。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |
+| Migration history | Local/remote 32/32整合、production `db push --dry-run`: up to date |
+| Local Supabase services | Storage `v1.68.1`、Auth `v2.195.0`。全enabled containers healthy、Storage/Auth/Studio HTTP `200`、transformations無効のため`imgproxy` stopped |
 
 ## Capability状態
 
@@ -47,9 +54,8 @@
 ## 直近の順序
 
 1. Netlify CLI loginを復旧しproduction `VITE_SUPABASE_PUBLISHABLE_KEY`を設定、redeployとAuth/Realtime smoke-test後にlegacy frontend env/fallbackを削除。
-2. Cross-tenant CRUD/role fixturesを追加し、`user_tenants`依存RLSと全service-role route authorizationを検証。
-3. 2026-08-21までにGHSA-qwww metadata exceptionを再確認/削除。
-4. 文書作成のPDF/DOCX、private Storage、signed URLを完了。
-5. Telegram/Resend verification後、HR Candidate Analysisを実装。
+2. 2026-08-21までにGHSA-qwww metadata exceptionを再確認/削除。
+3. 文書作成のPDF/DOCX、private Storage、signed URLを完了。
+4. Telegram/Resend verification後、HR Candidate Analysisを実装。
 
 詳細: [PLAN.md](PLAN.md)。Canonical: [Uzbek STATUS](../STATUS.md)。

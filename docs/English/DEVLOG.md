@@ -4,6 +4,59 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — Supabase CLI v2.112.0 and fresh local-infra regression
+
+- Selected the official Supabase Homebrew formula with narrowly scoped `brew trust --formula supabase/tap/supabase`. After core Homebrew temporarily installed `v2.111.0`, the official tap upgraded the CLI to `v2.112.0`; no broad tap trust was granted.
+- Following official upgrade guidance, deleted the previous local-only data volume without backup. Production schema/data and linked migration history were untouched.
+- CLI `v2.112.0` no longer accepts a function name as a positional argument to `functions serve`; local acceptance now serves all functions with `supabase functions serve --no-verify-jwt`.
+- The fresh Postgres image exposed an implicit-grant dependency. The core baseline now explicitly grants `service_role` access to backend-managed baseline tables.
+- pgTAP now asserts direct `user_tenants` reads fail with PostgreSQL `42501` instead of expecting an empty result. The Edge fixture separates the new `sb_secret_...` API key from the legacy service-role JWT; no values were logged or documented.
+- Verification: fresh replay 32/32 migrations; pgTAP 21/21; real local Auth-token Edge acceptance 8/8; all enabled containers healthy after warm-up; Storage/Auth/Studio HTTP `200`.
+- Node `22.18.0`: type-check, 21/21 test files and 101/101 tests, production build, 9-file security gate, and production audit with 0 high/critical all passed. Local services were stopped cleanly.
+
+Files: core baseline grant repair, deterministic pgTAP/Edge fixtures, and synchronized four-language STATUS/PLAN/DEVLOG.
+
+---
+
+## 2026-08-08 — Closed migration-history and local Storage drift
+
+- Current Supabase changelog/CLI docs were checked. Dry runs showed that only the backdated `20250212000000_core_schema_baseline.sql` was missing remotely. Production metadata confirmed all 10 tables, 13 indexes, `pgcrypto`, and RLS expected by the baseline already existed.
+- Marked `20250212000000` applied with official migration-history repair instead of rerunning SQL. No schema or business data changed. A follow-up migration list was fully aligned and `db push --linked --dry-run` reported the remote database up to date.
+- Relinking refreshed stale local Storage/Auth pins from `v1.58.1/v2.189.0` to the production-aligned `v1.68.1/v2.195.0`, without tracked file changes.
+- Started the local stack without exclusions. Initial two-second warm-up probes timed out, but all enabled Supabase containers then became healthy. Storage, Auth, and Studio HTTP smoke tests each returned `200`.
+- `imgproxy` remains intentionally stopped because image transformations are not enabled; it will not be added as unused infrastructure. Local services were stopped after verification. Installed CLI is `v2.101.0`; `v2.112.0` is available but did not block validation.
+
+Files/state: production migration history aligned, ignored local linked metadata refreshed, and four-language STATUS/PLAN/DEVLOG synchronized.
+
+---
+
+## 2026-08-08 — Closed the remaining acceptance checks
+
+- A fresh local DB exposed two replay defects: the core tables had only been bootstrapped through `supabase/schema.sql`, outside migration history, and the trigger loop in `20260417134151_phase0_new_tables.sql` had an invalid `EXCEPTION` block.
+- Added the idempotent `20250212000000_core_schema_baseline.sql` from a Supabase CLI scaffold, without demo seeds or duplicate policies, and corrected the historical PL/pgSQL block. An empty local DB then replayed all 32 migrations.
+- The backdated baseline was not sent to production, so version `20250212000000` is not yet in remote migration history. Before the next production DB migration, use a dry run to choose an idempotent no-op apply or history repair.
+- Local DB verification passed: one pgTAP file, 21/21 tests. Because linked/local Storage service versions drifted and its health-check failed, the DB/Auth/Realtime/Edge acceptance stack was started without `storage-api,imgproxy`; file storage was not in this acceptance scope.
+- Added `supabase/tests/integration/edge_tenant_authorization.test.mjs`. Using temporary local Auth users and real tokens, all 8 cases passed: active own-tenant; cross-tenant denial; blocked and terminated denial; super-admin cross-tenant/admin access; blocked-admin `403`; employee role `403`.
+- No production Auth users or data were created. Fixtures were cleaned up and local services were stopped after the run.
+
+Files: core baseline migration, replay fix in the Phase 0 migration, Edge integration fixture, and synchronized four-language STATUS/PLAN/DEVLOG.
+
+---
+
+## 2026-08-08 — Hardened Realtime tenant isolation and Edge authorization
+
+- A production reproducer found that active members could not read their own `tasks`/`inbox_items` because their policies queried default-deny `user_tenants`; notifications did not check membership status. Historical migrations also left production accepting only `active/terminated` while the application writes `password_pending/password_set/blocked`.
+- Applied `20260808014845_harden_realtime_tenant_authorization.sql`: unified all five membership statuses, added `private.is_active_tenant_member()`, limited browser access on tasks/inbox/notifications to SELECT, and required active membership plus an active tenant in every Realtime policy.
+- Added a 21-case transactional pgTAP fixture using the real `authenticated` DB role/JWT settings. It checks cross-tenant SELECT, denied INSERT/UPDATE/DELETE, blocked membership, and status compatibility, then rolls back.
+- Tenant context now revalidates header/JWT tenant selection in the DB, derives the canonical role from active assignments, preserves active super-admin cross-tenant access, and rejects inactive tenants/members. `/auth/me` filters inactive access, and a shared middleware now requires an active platform-admin assignment and active source tenant for all `/admin/*` routes.
+- Deployed `bright-api` v74. Verification: pre-fix pgTAP 4/21 failed, post-fix `ok 21`; metadata confirms a private security-definer helper with empty search path, no anon EXECUTE, and SELECT-only browser grants; health `200`, unauthenticated tenant route `401`, unauthenticated admin route `401`.
+- Regression checks passed: type-check, 21/21 files and 101/101 tests, production build, 9-file security gate, and 0 high/critical dependency advisories. Security Advisor added no new errors; known warnings remain for `vector` in `public` and disabled Leaked Password Protection.
+- Verification boundary: Docker was unavailable for a fresh local migration run. Real active/blocked/terminated and role-`403` Edge token tests require dedicated non-production Auth fixtures; no temporary production Auth users were created. Netlify publishable-key rollout remains separate.
+
+Files: `supabase/migrations/20260808014845_harden_realtime_tenant_authorization.sql`, `supabase/tests/database/realtime_tenant_isolation.test.sql`, `supabase/functions/server/index.ts`, and synchronized STATUS/PLAN/DEVLOG in four languages.
+
+---
+
 ## 2026-08-08 — Closed direct Data API access to risk-scanner data
 
 - Production inventory confirmed RLS on 32/32 public tables, `security_invoker` on 8/8 views, and fixed `search_path` plus no `anon/authenticated` EXECUTE on all 6 `SECURITY DEFINER` functions.

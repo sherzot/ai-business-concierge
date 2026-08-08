@@ -4,6 +4,59 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-08 — Supabase CLI v2.112.0とfresh local-infra regression
+
+- Official Supabase Homebrew formulaを限定的な`brew trust --formula supabase/tap/supabase`で選択。Core formulaが一時的に`v2.111.0`をinstallした後、official tapからCLIを`v2.112.0`へupgrade。Broad tap trustは付与していない。
+- Official upgrade guidanceに従い、旧local-only data volumeをbackupなしで削除。Production schema/dataとlinked migration historyには変更なし。
+- CLI `v2.112.0`の`functions serve`はfunction名のpositional argumentを受け付けない。Local acceptanceは`supabase functions serve --no-verify-jwt`で全functionsをserveする。
+- Fresh Postgres imageでimplicit grants依存を発見。Core baselineにbackend-managed baseline tables向けの明示的な`service_role` grantsを追加。
+- pgTAPはdirect `user_tenants` readをempty resultではなくPostgreSQL `42501`として検証。Edge fixtureは新`sb_secret_...` API keyとlegacy service-role JWTを分離し、値はlog/docsへ出していない。
+- 検証: fresh replay 32/32 migrations、pgTAP 21/21、real local Auth-token Edge acceptance 8/8。Warm-up後は全enabled containers healthy、Storage/Auth/Studio HTTP `200`。
+- Node `22.18.0`: type-check、21/21 test files・101/101 tests、production build、9-file security gate、high/critical 0のproduction auditが成功。Local servicesは正常停止。
+
+Files: core baseline grant repair、deterministic pgTAP/Edge fixtures、4言語STATUS/PLAN/DEVLOG同期。
+
+---
+
+## 2026-08-08 — Migration-historyとlocal Storage driftを解消
+
+- Current Supabase changelog/CLI docsを確認。Dry-runでremoteにないのはbackdated `20250212000000_core_schema_baseline.sql`だけと判明。Production metadataでbaselineが期待する10 tables、13 indexes、`pgcrypto`、全RLSが既存と確認。
+- SQLを再実行せずofficial migration-history repairで`20250212000000`をappliedに設定。Schema/business dataは変更なし。再確認でmigration listは完全一致し、`db push --linked --dry-run`はremote database up to date。
+- Relinkによりstale local Storage/Auth pinsを`v1.58.1/v2.189.0`からproduction-aligned `v1.68.1/v2.195.0`へ更新。Tracked file changesなし。
+- Exclusionなしでlocal stackを起動。最初の2-second warm-up probesはtimeoutしたが、その後全enabled Supabase containersがhealthy。Storage、Auth、Studio HTTP smoke-testsは各`200`。
+- Image transformations未有効のため`imgproxy`は意図的にstopped。Unused infrastructureとして追加しない。検証後local servicesを停止。Installed CLIは`v2.101.0`、`v2.112.0`が利用可能だがvalidationは非block。
+
+Files/state: production migration history整合、ignored local linked metadata更新、4-language STATUS/PLAN/DEVLOG同期。
+
+---
+
+## 2026-08-08 — 残りのacceptance checksを完了
+
+- Fresh local DBで2つのreplay defectを発見。Core tablesはmigration history外の`supabase/schema.sql`だけでbootstrapされ、`20260417134151_phase0_new_tables.sql`のtrigger loopには無効な`EXCEPTION` blockがあった。
+- Supabase CLI scaffoldからdemo seeds/duplicate policiesなしのidempotentな`20250212000000_core_schema_baseline.sql`を追加し、historical PL/pgSQL blockを修正。Empty local DBで全32 migrationsのreplayに成功。
+- Backdated baselineはproductionへ送っていないため、version `20250212000000`はremote migration historyに未登録。次のproduction DB migration前にdry-runし、idempotent no-op applyかhistory repairを選ぶ。
+- Local DB verificationは1 pgTAP file・21/21 tests PASS。Linked/local Storage service version driftでhealth-checkがunhealthyだったため、DB/Auth/Realtime/Edge acceptance stackは`storage-api,imgproxy`を除外して起動。File storageは今回のscope外。
+- `supabase/tests/integration/edge_tenant_authorization.test.mjs`を追加。Temporary local Auth usersとreal tokensで8/8 cases成功: active own-tenant、cross-tenant denial、blocked/terminated denial、super-admin cross-tenant/admin access、blocked-admin `403`、employee role `403`。
+- Production Auth users/dataは作成していない。Fixturesをcleanupしlocal servicesを停止済み。
+
+Files: core baseline migration、Phase 0 replay fix、Edge integration fixture、4-language STATUS/PLAN/DEVLOG。
+
+---
+
+## 2026-08-08 — Realtime tenant isolationとEdge authorizationを強化
+
+- Production reproducerでactive memberが自tenantの`tasks/inbox_items`を読めないことを確認。Policiesがdefault-denyの`user_tenants`をqueryし、notificationsはmembership status未確認だった。Historical migrationsもproductionを`active/terminated`だけにし、codeが使う`password_pending/password_set/blocked`と不一致だった。
+- `20260808014845_harden_realtime_tenant_authorization.sql`を適用。5 statusesを統合し、`private.is_active_tenant_member()`を追加、tasks/inbox/notificationsのbrowser accessをSELECTのみにし、active membershipとactive tenantをpolicyで必須化。
+- Real DB role `authenticated`とJWT settingsを使う21-case transactional pgTAP fixtureを追加。Cross-tenant SELECT、INSERT/UPDATE/DELETE denial、blocked membership、status contractを検証し最後にROLLBACK。
+- Tenant contextはheader/JWT tenantをDBで再検証し、active assignmentのcanonical roleを使用。Active super-admin cross-tenant accessは維持。`/auth/me`はinactive accessを除外し、全`/admin/*` routesにactive platform-admin assignmentとactive source tenantを要求するmiddlewareを追加。
+- `bright-api` v74をdeploy。Fix前pgTAPは4/21 fail、fix後`ok 21`。Metadataはprivate security-definer helper、empty search path、anon EXECUTEなし、browser SELECT-only grantsを確認。Health `200`、unauth tenant route `401`、unauth admin route `401`。
+- Type-check、21/21 files・101/101 tests、build、9-file security gate、high/critical 0のdependency auditが成功。新Security Advisor errorなし。Known warningsは`vector` in publicとLeaked Password Protection disabled。
+- Verification boundary: Dockerがなくfresh local migration runは未実施。Real active/blocked/terminatedとrole-`403` Edge token testsにはnon-production Auth fixturesが必要で、temporary production Auth usersは作成していない。Netlify publishable-key rolloutは別task。
+
+Files: `supabase/migrations/20260808014845_harden_realtime_tenant_authorization.sql`, `supabase/tests/database/realtime_tenant_isolation.test.sql`, `supabase/functions/server/index.ts`, 4-language STATUS/PLAN/DEVLOG。
+
+---
+
 ## 2026-08-08 — Risk scanner dataへのdirect Data API accessを閉鎖
 
 - Production inventoryで32/32 public tablesのRLS、8/8 viewsの`security_invoker`、全6 `SECURITY DEFINER` functionsのfixed `search_path`と`anon/authenticated` EXECUTEなしを確認。
