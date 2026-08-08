@@ -395,12 +395,14 @@ begin
     'doc_templates', 'doc_generated', 'sales_bots',
     'catalogs', 'orders', 'usage_tracking'
   ] loop
-    execute format('
-      create trigger set_%I_updated_at
-      before update on %I
-      for each row execute function set_updated_at()', t, t);
-  exception when duplicate_object then
-    null; -- trigger allaqachon mavjud
+    begin
+      execute format('
+        create trigger set_%I_updated_at
+        before update on %I
+        for each row execute function set_updated_at()', t, t);
+    exception when duplicate_object then
+      null; -- trigger allaqachon mavjud
+    end;
   end loop;
 end;
 $$;

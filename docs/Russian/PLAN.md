@@ -1,6 +1,6 @@
 # AI Business Concierge — активный план
 
-> Версия 4.1 · Обновлено 2026-08-08
+> Версия 4.5 · Обновлено 2026-08-08
 > Здесь только активные и следующие задачи. Старый master plan: [../archive/Russian/PLAN_LEGACY_2026-07-24.md](../archive/Russian/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — безопасное начало сессии
@@ -21,8 +21,12 @@
 - [x] Ограничить direct browser Supabase только Auth/Realtime и добавить `from/rpc/storage/functions` regression gate.
 - [x] Инвентаризировать public RLS/grants/views/functions: RLS на 32/32 tables, `security_invoker` на 8/8 views, browser EXECUTE закрыт для 6/6 `SECURITY DEFINER` functions.
 - [x] Усилить server-only границу risk scanner: удалить browser CRUD grants/policies и применить production migration.
-- [ ] Запустить cross-tenant SELECT/INSERT/UPDATE/DELETE и role-`403` fixtures.
-- [ ] Проверить RLS/Realtime на основе `user_tenants` и internal authorization каждого service-role Edge route.
+- [x] Объединить lifecycle membership из пяти статусов; добавить active membership/tenant helper, read-only browser grants и rollback pgTAP fixture из 21 проверки.
+- [x] Проверить cross-tenant SELECT и запрет browser INSERT/UPDATE/DELETE под реальной DB role `authenticated`: до исправления 4/21 fail, после — 21/21 pass.
+- [x] Перевести tenant-protected service-role routes на DB-canonical context, закрыть JWT role/tenant bypass и добавить active-admin middleware для всех `/admin/*` routes.
+- [x] Запустить active/blocked/terminated, super-admin cross-tenant/admin и role-`403` Edge integration tests с local non-production Auth fixtures/tokens: 8/8 pass, без production users/data.
+- [x] Исправить и запустить fresh local migration stack: после core baseline и historical PL/pgSQL replay fix прошли 32/32 migrations и pgTAP 21/21.
+- [x] Обновить Supabase CLI с `v2.101.0` до `v2.112.0` и повторить fresh/full-stack regression: 32/32 migrations, pgTAP 21/21, Edge 8/8, Storage/Auth/Studio `200`.
 - [ ] Решить разделение production/preview env и secrets.
 
 ## P1 — завершить Phase 2 AI Документолог

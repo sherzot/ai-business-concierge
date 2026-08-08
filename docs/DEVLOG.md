@@ -4,6 +4,125 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-08 — Supabase CLI v2.112.0 va fresh local-infra regressiyasi
+
+### Yangilash va topilmalar
+
+- Official Supabase Homebrew formulasi tor `brew trust --formula supabase/tap/supabase` ruxsati bilan tanlandi. Core formula oraliqda `v2.111.0`ni o'rnatganidan keyin official tap orqali CLI `v2.112.0`ga yangilandi; keng tap trust berilmadi.
+- Official upgrade tavsiyasiga ko'ra oldingi local-only volume backup qilinmay o'chirildi. Production schema/data va linked migration historyga tegilmadi.
+- `v2.112.0`da `functions serve` function nomini positional argument sifatida qabul qilmaydi; local acceptance barcha functionlarni `supabase functions serve --no-verify-jwt` bilan serve qiladi.
+- Fresh Postgres image implicit CRUD grantlariga tayanib bo'lmasligini ko'rsatdi. Core baseline backend boshqaradigan dastlabki jadvallar uchun aniq `service_role` grantlari bilan to'ldirildi.
+- pgTAP direct `user_tenants` o'qishini bo'sh natija deb emas, aniq `42501 permission denied` deb tekshiradigan bo'ldi. Edge fixture yangi `sb_secret_...` API key va legacy service-role JWT'ni alohida headerlarda ishlatadi; qiymatlar log/hujjatga yozilmadi.
+
+### Yakuniy verifikatsiya
+
+- Toza local bazada 32/32 migratsiya replay bo'ldi. Cold-start health probe warm-up paytida timeout berdi, lekin diagnostik startdan keyin barcha enabled containerlar `healthy`; Storage/Auth/Studio endpointlari `200` bo'ldi.
+- `supabase test db`: 1 fayl, 21/21 test — `PASS`. Real local Auth-token Edge acceptance: 8/8 — `PASS`.
+- Node `22.18.0`: type-check, 21/21 test fayli va 101/101 test, production build, 9-file security gate muvaffaqiyatli; production dependency audit high/critical `0`.
+- Local Edge server va Supabase stack tekshiruvdan keyin tartibli to'xtatildi.
+
+### Fayllar
+
+- `supabase/migrations/20250212000000_core_schema_baseline.sql`
+- `supabase/tests/database/realtime_tenant_isolation.test.sql`
+- `supabase/tests/integration/edge_tenant_authorization.test.mjs`
+- `docs/{STATUS,PLAN,DEVLOG}.md` va uchta tarjima to'plami
+
+---
+
+## 2026-08-08 — Migration history va local Storage drift yopildi
+
+### Production migration history
+
+- Joriy Supabase changelog va CLI migration hujjatlari tekshirildi. `db push --dry-run` backdated `20250212000000_core_schema_baseline.sql` remote historyda yo'qligini, `--include-all --dry-run` esa faqat shu faylni rejalayotganini ko'rsatdi.
+- Production metadata read-only tekshirildi: baseline kutgan 10/10 jadval, 13/13 index, `pgcrypto` va barcha 10 jadvaldagi RLS allaqachon mavjud edi.
+- SQL'ni qayta ishlatish o'rniga `supabase migration repair 20250212000000 --status applied --linked` bajarildi. Bu faqat migration-history yozuvini qo'shdi; schema va business data o'zgarmadi.
+- Yakuniy `migration list` local/remote versiyalar to'liq tengligini, `db push --linked --dry-run` esa `Remote database is up to date` holatini tasdiqladi.
+
+### Local Storage/full-stack health
+
+- Stale linked metadata local Storage/Auth'ni `v1.58.1/v2.189.0`ga pin qilgan edi. `supabase link`dan keyin pinlar productionga mos `v1.68.1/v2.195.0`ga yangilandi; repo fayllari o'zgarmadi.
+- Yangilangan image'lar bilan exclusionsiz local stack ishga tushirildi. Dastlab 2 soniyalik health probe warm-up paytida timeout berdi; diagnostik startdan keyin barcha enabled Supabase containerlari `healthy` bo'ldi.
+- Gateway smoke-testlari: Storage `/storage/v1/status` `200`, Auth `/auth/v1/health` `200`, Studio profile `200`.
+- `imgproxy` image transformations configda yoqilmagani uchun ataylab stopped; capability kerak bo'lmaguncha bo'sh infratuzilma sifatida yoqilmaydi. Local stack tekshiruvdan keyin to'xtatildi.
+
+### Qolgan operatsion eslatma
+
+- O'rnatilgan Supabase CLI `v2.101.0`, mavjud yangilanish `v2.112.0`; bu tekshiruvlarni bloklamadi.
+
+### Fayllar
+
+- Production migration history: `20250212000000` applied deb muvofiqlashtirildi
+- Local-only linked service metadata yangilandi (`supabase/.temp`, Gitga kirmaydi)
+- `docs/{STATUS,PLAN,DEVLOG}.md` va uchta tarjima to'plami
+
+---
+
+## 2026-08-08 — Qolgan acceptance tekshiruvlari yopildi
+
+### Fresh migration stack
+
+- Toza lokal DB birinchi urinishda yiqildi: asosiy jadvallar tarixan `supabase/schema.sql` bilan yaratilgan, ammo migratsiya tarixida foundation yo'q edi. Replay keyin `20260417134151_phase0_new_tables.sql` ichidagi noto'g'ri `DO/EXCEPTION` blokida ham to'xtadi.
+- CLI scaffoldidan `20250212000000_core_schema_baseline.sql` yaratildi. U seed va policylarni takrorlamasdan asosiy jadvallar/indexlar/RLSni idempotent yaratadi; mavjud muhitga xavfsiz no-op bo'ladi.
+- Tarixiy trigger loopiga ichki `BEGIN … EXCEPTION … END` bloki qo'shildi. Shundan keyin bo'sh lokal bazada 32/32 migratsiya oxirigacha replay bo'ldi.
+- Backdated baseline productionga yuborilmadi va `20250212000000` remote migration historyda hali yo'q. Keyingi production DB migrationidan oldin dry-run qilib idempotent no-op apply yoki history repair yo'li tanlanadi.
+- Linked project va local CLI service-version drift sabab Storage health-check nosog'lom bo'ldi; DB/Auth/Realtime/Edge acceptance stacki `storage-api,imgproxy`ni chiqarib muvaffaqiyatli ishga tushdi. Bu file-storage acceptance emas.
+- Lokal `supabase test db`: 1 fayl, 21 test — `PASS`.
+
+### Real Auth tokenli Edge integration
+
+- `supabase/tests/integration/edge_tenant_authorization.test.mjs` qo'shildi. Test faqat local Auth/REST/Edge'da vaqtinchalik tenant va userlar yaratadi, token/keylarni chiqarmaydi va fixturelarni `finally`da tozalaydi.
+- `bright-api` real access tokenlari bilan 8/8 holat o'tdi: active own-tenant `200`; cross-tenant, blocked va terminated `401 TENANT_REQUIRED`; super-admin cross-tenant va admin route `200`; blocked admin `403 FORBIDDEN`; employee privileged member-create `403 FORBIDDEN_ROLE`.
+- Production Auth user yoki production data yaratilmagan. Local Edge server va Supabase containerlari testdan keyin to'xtatildi; local DB volume backup qoldi.
+
+### Fayllar
+
+- `supabase/migrations/20250212000000_core_schema_baseline.sql`
+- `supabase/migrations/20260417134151_phase0_new_tables.sql`
+- `supabase/tests/integration/edge_tenant_authorization.test.mjs`
+- `docs/{STATUS,PLAN,DEVLOG}.md` va uchta tarjima to'plami
+
+---
+
+## 2026-08-08 — Realtime tenant isolation va Edge authorization qotirildi
+
+### Topilma va qaror
+
+- Production reproducer faol tenant a'zosi o'z `tasks` va `inbox_items` yozuvlarini ko'ra olmasligini ko'rsatdi: policy RLS yoqilgan, ammo policy'siz `user_tenants`ni subquery qilgani uchun default-deny ishlagan. `notifications` esa membership statusini umuman tekshirmas edi.
+- Tarixiy migratsiyalar `user_tenants.status` uchun ikki xil kontrakt qoldirgan: production faqat `active/terminated`ni qabul qilgan, kod esa `password_pending/password_set/blocked`ni ham yozadi.
+- `getTenantContext` JWT ichidagi `tenant_id/role`ni DB membership statusisiz qabul qilgan; takroriy admin route tekshiruvlari ham active membership/tenantni talab qilmagan.
+
+### Bajarildi
+
+- `20260808014845_harden_realtime_tenant_authorization.sql` productionga qo'llandi: status kontrakti besh lifecycle holatiga birlashtirildi; `private.is_active_tenant_member()` yaratildi; `tasks`, `inbox_items`, `notifications` browser uchun read-only qilindi va policylar faol membership hamda faol tenantga bog'landi.
+- `supabase/tests/database/realtime_tenant_isolation.test.sql` 21 ta tranzaksion pgTAP fixture bilan yaratildi. Testlar real `authenticated` DB role/JWT setting, cross-tenant SELECT, uch jadvaldagi INSERT/UPDATE/DELETE deniali, blocked membership va status kontraktini tekshiradi; oxirida `ROLLBACK` qiladi.
+- Edge tenant context header/JWT tenant tanlovini DB'da qayta tasdiqlaydi, faqat faol tenant/a'zolikni qabul qiladi va faol `super_admin` cross-tenant huquqini saqlaydi. DB roli canonical bo'ldi.
+- `/auth/me` faqat faol assignment va faol tenantlarni qaytaradi. Barcha `/admin/*` route'lar oldiga faol `super_admin/sub_admin` assignment va faol source tenantni talab qiladigan yagona middleware qo'shildi.
+- `bright-api` v74 productionga deploy qilindi.
+
+### Verifikatsiya
+
+- Pre-fix pgTAP: 4/21 fail; migrationdan keyin: `ok 21`. Fixture ma'lumotlari saqlanmadi.
+- Production metadata: helper `private` sxemada `SECURITY DEFINER`, `search_path=""`; `anon` EXECUTE yo'q, `authenticated` EXECUTE bor. Uch Realtime jadvalida `authenticated` uchun faqat SELECT va bittadan SELECT policy mavjud.
+- Migration historyda `20260808014845` mavjud. Security Advisor yangi error bermadi; ma'lum warninglar `vector` public schema va Leaked Password Protection o'chiqligi. Policy'siz server-only jadvallar INFO/default-deny.
+- `bright-api` v74 ACTIVE; health `200`; authsiz tenant route `401 TENANT_REQUIRED`; authsiz admin route `401 UNAUTHORIZED`.
+- Frontend regression: type-check, 21/21 test fayli va 101/101 test, build, 9-file security gate muvaffaqiyatli; dependency audit high/critical `0`.
+
+### Ochiq verifikatsiya chegarasi
+
+- Docker ishlamagani sabab fresh local Supabase migration/test stacki ishlatilmadi.
+- Active/blocked/terminated va role `403` uchun haqiqiy Edge token integration testi maxsus non-production Auth fixturelarini talab qiladi. Productionda vaqtinchalik Auth user yaratilmagan.
+- Netlify publishable-key env rollout alohida ochiq ish bo'lib qoladi.
+
+### Fayllar
+
+- `supabase/migrations/20260808014845_harden_realtime_tenant_authorization.sql`
+- `supabase/tests/database/realtime_tenant_isolation.test.sql`
+- `supabase/functions/server/index.ts`
+- `docs/{STATUS,PLAN,DEVLOG}.md` va uchta tarjima to'plami
+
+---
+
 ## 2026-08-08 — Risk scanner uchun to'g'ridan-to'g'ri Data API kirishi yopildi
 
 ### Kontekst va qaror

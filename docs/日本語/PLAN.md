@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 4.1 · 更新 2026-08-08
+> Version 4.5 · 更新 2026-08-08
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -21,8 +21,12 @@
 - [x] Direct browser SupabaseをAuth/Realtimeだけに限定し`from/rpc/storage/functions` regression gateを追加。
 - [x] Public RLS/grants/views/functionsをinventory: 32/32 tablesでRLS、8/8 viewsが`security_invoker`、6/6 `SECURITY DEFINER` functionsはbrowser EXECUTE不可。
 - [x] Risk scannerのserver-only boundaryを強化しbrowser CRUD grants/policiesを削除、production migration適用。
-- [ ] Cross-tenant SELECT/INSERT/UPDATE/DELETEとrole-`403` fixturesを実行。
-- [ ] `user_tenants`依存RLS/Realtimeと全service-role Edge routeのinternal authorizationを検証。
+- [x] 5-state membership lifecycleを統合し、active membership/tenant helper、read-only browser grants、21-case rollback pgTAP fixtureを追加。
+- [x] Real DB role `authenticated`でcross-tenant SELECTとbrowser INSERT/UPDATE/DELETE denialを検証。Fix前4/21 fail、fix後21/21 pass。
+- [x] Tenant-protected service-role routesをDB-canonical contextへ移行し、JWT role/tenant bypassを閉じ、全`/admin/*` routesへactive-admin middlewareを追加。
+- [x] Local non-production Auth fixtures/tokensでactive/blocked/terminated、super-admin cross-tenant/admin、role-`403` Edge integration testsを実行: 8/8 pass、production users/dataなし。
+- [x] Fresh local migration stackを修復・実行: core baselineとhistorical PL/pgSQL replay fix後、32/32 migrationsとpgTAP 21/21 pass。
+- [x] Supabase CLIを`v2.101.0`から`v2.112.0`へupgradeしfresh/full-stack regressionを再実行: 32/32 migrations、pgTAP 21/21、Edge 8/8、Storage/Auth/Studio `200`。
 - [ ] Production/preview envとsecret分離を決定。
 
 ## P1 — Phase 2 AI文書作成を完了

@@ -1,6 +1,6 @@
 # AI Business Concierge — faol reja
 
-> Version: 4.1
+> Version: 4.5
 > Yangilandi: 2026-08-08
 > Bu faylda faqat faol va navbatdagi ishlar turadi. 2026-07-24 gacha bo'lgan katta tarixiy reja [archive/PLAN_LEGACY_2026-07-24.md](archive/PLAN_LEGACY_2026-07-24.md)ga ko'chirilgan.
 
@@ -29,8 +29,12 @@
 - [x] Frontend direct Supabase chaqiruvlarini audit qilish; Auth/Realtimedan boshqa `from/rpc/storage/functions` operatsiyalariga regressiya gate qo'shish.
 - [x] Public table/view/functionlar uchun RLS va `anon`/`authenticated` grantlarini inventarizatsiya qilish; 32/32 table RLS, 8/8 view `security_invoker`, 6/6 `SECURITY DEFINER` browser EXECUTEdan yopiq ekanini tasdiqlash.
 - [x] Risk scanner server-only chegarasini qotirish: browser CRUD grant/policylarini olib tashlash va production migrationni qo'llash.
-- [ ] Cross-tenant SELECT/INSERT/UPDATE/DELETE va role `403` testlarini yozish/ishlatish.
-- [ ] `user_tenants`ga bog'liq RLS/Realtimeni test fixture bilan tekshirish va barcha service-role Edge route'larining ichki authorizationini audit qilish.
+- [x] `user_tenants` status kontraktini besh lifecycle holatiga birlashtirish; Realtime uchun active membership/tenant helper, read-only browser grantlari va 21 ta rollback pgTAP fixture yozish/productionda ishlatish.
+- [x] Cross-tenant SELECT hamda browser INSERT/UPDATE/DELETE denialini real `authenticated` DB role bilan tekshirish; pre-fix 4/21 fail, post-fix 21/21 pass.
+- [x] Tenant-protected service-role route'larni DB-canonical contextga o'tkazish; JWT role/tenant bypassini yopish va barcha `/admin/*` route'lar uchun faol admin middleware qo'shish.
+- [x] Production bo'lmagan local Auth fixture/tokenlar bilan active/blocked/terminated, super-admin cross-tenant/admin va role-`403` Edge integration testlarini ishlatish: 8/8 pass, production user/data yaratilmagan.
+- [x] Fresh local migration stackni tiklash: core baseline va tarixiy PL/pgSQL replay fixidan keyin 32/32 migratsiya, pgTAP 21/21 pass.
+- [x] Supabase CLI'ni `v2.101.0`dan `v2.112.0`ga yangilash va fresh/full-stack regressiyani qayta ishlatish: 32/32 migration, pgTAP 21/21, Edge 8/8, Storage/Auth/Studio `200`.
 - [ ] Production va preview environment/secret/data ajratish qarorini qabul qilish.
 
 ## P1 — Phase 2 AI Hujjatchini tugallash

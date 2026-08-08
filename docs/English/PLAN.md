@@ -1,6 +1,6 @@
 # AI Business Concierge — active plan
 
-> Version 4.1 · Updated 2026-08-08
+> Version 4.5 · Updated 2026-08-08
 > Only active and next work belongs here. The previous master plan is archived at [../archive/English/PLAN_LEGACY_2026-07-24.md](../archive/English/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — safe session start
@@ -21,8 +21,12 @@
 - [x] Keep direct browser Supabase access limited to Auth/Realtime and add a `from/rpc/storage/functions` regression gate.
 - [x] Inventory public RLS/grants/views/functions: 32/32 tables use RLS, 8/8 views use `security_invoker`, and 6/6 `SECURITY DEFINER` functions deny browser EXECUTE.
 - [x] Harden the server-only risk-scanner boundary by removing browser CRUD grants/policies and applying the production migration.
-- [ ] Run cross-tenant SELECT/INSERT/UPDATE/DELETE and role-`403` fixtures.
-- [ ] Test `user_tenants`-dependent RLS/Realtime and audit internal authorization on every service-role Edge route.
+- [x] Unify the five-state membership lifecycle; add the active membership/tenant Realtime helper, read-only browser grants, and a 21-case rollback pgTAP fixture.
+- [x] Verify cross-tenant SELECT and browser INSERT/UPDATE/DELETE denial under the real `authenticated` DB role: 4/21 failed before the fix and 21/21 passed after it.
+- [x] Move tenant-protected service-role routes to DB-canonical context, close JWT role/tenant bypasses, and add active-admin middleware for every `/admin/*` route.
+- [x] Run active/blocked/terminated, super-admin cross-tenant/admin, and role-`403` Edge integration tests with local non-production Auth fixtures/tokens: 8/8 passed, with no production users/data.
+- [x] Repair and run a fresh local migration stack: after the core baseline and historical PL/pgSQL replay fix, 32/32 migrations and pgTAP 21/21 passed.
+- [x] Upgrade Supabase CLI from `v2.101.0` to `v2.112.0` and rerun fresh/full-stack regression: 32/32 migrations, pgTAP 21/21, Edge 8/8, Storage/Auth/Studio `200`.
 - [ ] Decide production/preview environment and secret separation.
 
 ## P1 — complete Phase 2 AI Document Assistant

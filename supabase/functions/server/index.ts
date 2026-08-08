@@ -103,8 +103,15 @@ app.use("*", async (c, next) => {
 type TenantContext = {
   tenantId: string;
   userId?: string;
+  role?: string;
   roles?: string[];
   permissions?: string[];
+};
+
+type PlatformAdminContext = {
+  userId: string;
+  role: "super_admin" | "sub_admin";
+  tenantId: string;
 };
 
 const TRACE_ID_KEY = "trace_id";
@@ -368,40 +375,79 @@ const getTenantContext = async (c: any): Promise<TenantContext | null> => {
       const userId = payload.sub ?? payload.user_id;
       if (!userId) return null;
 
-      // Case 1: JWT da tenant_id to'g'ridan mavjud (custom claim)
-      const jwtTenantId = payload.tenant_id;
-      if (jwtTenantId) {
-        const ctx: TenantContext = {
-          tenantId: jwtTenantId,
-          userId,
-          roles: payload.roles ?? payload.app_metadata?.roles ?? [],
-          permissions: payload.permissions ?? [],
-        };
-        c.set(TENANT_CTX_KEY, ctx);
-        c.set(TENANT_ID_KEY, jwtTenantId);
-        return ctx;
+      // Header foydalanuvchining joriy tenant tanlovidir. JWT claim faqat
+      // backward-compatible fallback; ikkala holatda ham DB canonical manba.
+      const headerTenantId = c.req.header("x-tenant-id")?.trim();
+      const jwtTenantId =
+        typeof payload.tenant_id === "string" ? payload.tenant_id.trim() : "";
+      const targetTenantId = headerTenantId || jwtTenantId;
+      if (!targetTenantId) return null;
+
+      const [tenantResult, membershipResult, superAdminResult] =
+        await Promise.all([
+          supabase
+            .from("tenants")
+            .select("id")
+            .eq("id", targetTenantId)
+            .eq("status", "active")
+            .maybeSingle(),
+          supabase
+            .from("user_tenants")
+            .select("tenant_id, role")
+            .eq("user_id", userId)
+            .eq("tenant_id", targetTenantId)
+            .eq("status", "active")
+            .maybeSingle(),
+          supabase
+            .from("user_tenants")
+            .select("tenant_id")
+            .eq("user_id", userId)
+            .eq("role", "super_admin")
+            .eq("status", "active"),
+        ]);
+
+      if (
+        tenantResult.error ||
+        membershipResult.error ||
+        superAdminResult.error ||
+        !tenantResult.data
+      ) {
+        return null;
       }
 
-      // Case 2: JWT da tenant_id yo'q — header tenantini DB da tekshirib tasdiqlaymiz
-      const headerTenantId = c.req.header("x-tenant-id");
-      if (headerTenantId) {
-        const { data: membership } = await supabase
-          .from("user_tenants")
-          .select("tenant_id")
-          .eq("user_id", userId)
-          .eq("tenant_id", headerTenantId)
-          .maybeSingle();
-        if (!membership) return null; // Foydalanuvchi bu tenantga tegishli emas
-        const ctx: TenantContext = {
-          tenantId: headerTenantId,
-          userId,
-          roles: payload.roles ?? payload.app_metadata?.roles ?? [],
-          permissions: payload.permissions ?? [],
-        };
-        c.set(TENANT_CTX_KEY, ctx);
-        c.set(TENANT_ID_KEY, headerTenantId);
-        return ctx;
+      // super_admin faqat o'zining kamida bitta faol tenant assignment'i
+      // mavjud bo'lsa global tenant switcher huquqini saqlab qoladi.
+      const superAdminTenantIds = (superAdminResult.data ?? []).map(
+        (membership) => membership.tenant_id,
+      );
+      let isActiveSuperAdmin = false;
+      if (superAdminTenantIds.length > 0) {
+        const { data: activeAdminTenant, error: activeAdminTenantError } =
+          await supabase
+            .from("tenants")
+            .select("id")
+            .in("id", superAdminTenantIds)
+            .eq("status", "active")
+            .limit(1)
+            .maybeSingle();
+        if (activeAdminTenantError) return null;
+        isActiveSuperAdmin = Boolean(activeAdminTenant);
       }
+
+      const membership = membershipResult.data;
+      if (!membership && !isActiveSuperAdmin) return null;
+
+      const role = isActiveSuperAdmin ? "super_admin" : membership!.role;
+      const ctx: TenantContext = {
+        tenantId: targetTenantId,
+        userId,
+        role,
+        roles: [role],
+        permissions: ROLE_ACCESS[role] ?? [],
+      };
+      c.set(TENANT_CTX_KEY, ctx);
+      c.set(TENANT_ID_KEY, targetTenantId);
+      return ctx;
     }
   }
 
@@ -431,6 +477,64 @@ const requireTenant = async (c: any) => {
     return failure(c, 401, "TENANT_REQUIRED", "Tenant context topilmadi.");
   }
   return ctx;
+};
+
+const requirePlatformAdmin = async (
+  c: any,
+): Promise<PlatformAdminContext | Response> => {
+  const auth = c.req.header("authorization");
+  if (!auth?.startsWith("Bearer ")) {
+    return failure(c, 401, "UNAUTHORIZED", "Token kerak.");
+  }
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser(auth.slice(7));
+  if (authError || !user) {
+    return failure(c, 401, "UNAUTHORIZED", "Token noto'g'ri.");
+  }
+
+  const { data: assignments, error: assignmentError } = await supabase
+    .from("user_tenants")
+    .select("tenant_id, role")
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .in("role", ["super_admin", "sub_admin"]);
+  if (assignmentError) {
+    return failure(c, 500, "DB_ERROR", "Admin rolini tekshirishda xato.");
+  }
+  if (!assignments?.length) {
+    return failure(c, 403, "FORBIDDEN", "Faol admin roli talab qilinadi.");
+  }
+
+  const { data: activeTenants, error: tenantError } = await supabase
+    .from("tenants")
+    .select("id")
+    .in(
+      "id",
+      assignments.map((assignment) => assignment.tenant_id),
+    )
+    .eq("status", "active");
+  if (tenantError) {
+    return failure(c, 500, "DB_ERROR", "Admin tenantini tekshirishda xato.");
+  }
+
+  const activeTenantIds = new Set(
+    (activeTenants ?? []).map((tenant) => tenant.id),
+  );
+  const assignment = assignments
+    .filter((item) => activeTenantIds.has(item.tenant_id))
+    .sort((a) => (a.role === "super_admin" ? -1 : 1))[0];
+  if (!assignment) {
+    return failure(c, 403, "FORBIDDEN", "Faol admin tenant topilmadi.");
+  }
+
+  return {
+    userId: user.id,
+    role: assignment.role as PlatformAdminContext["role"],
+    tenantId: assignment.tenant_id,
+  };
 };
 
 const writeAuditLog = async (
@@ -1157,6 +1261,13 @@ async function sendAdminNewRegistrationEmail(
 }
 
 const registerRoutes = (prefix: string) => {
+  app.use(`${prefix}/admin/*`, async (c, next) => {
+    const admin = await requirePlatformAdmin(c);
+    if (admin instanceof Response) return admin;
+    c.set("platform_admin_context", admin);
+    await next();
+  });
+
   app.get(`${prefix}/health`, (c) => c.json({ status: "ok" }));
 
   // ─── POST /v1/contact — public, rate limited ──────────────────────────────
@@ -1302,19 +1413,61 @@ const registerRoutes = (prefix: string) => {
 
     const { data: assignments, error } = await supabase
       .from("user_tenants")
-      .select("tenant_id, role, full_name")
+      .select("tenant_id, role, full_name, status")
       .eq("user_id", userId);
 
     if (error) {
       return failure(c, 500, "DB_ERROR", "Profil yuklashda xatolik.");
     }
 
-    const tenants = (assignments ?? []).map((a) => ({
-      id: a.tenant_id,
-      role: a.role,
-      fullName: a.full_name,
-      permissions: ROLE_ACCESS[a.role] ?? [],
-    }));
+    const activeAssignments = (assignments ?? []).filter(
+      (assignment) => assignment.status === "active",
+    );
+    if (activeAssignments.length === 0) {
+      const statuses = new Set(
+        (assignments ?? []).map((assignment) => assignment.status),
+      );
+      const message = statuses.has("blocked")
+        ? "Hisob bloklangan. Administrator bilan bog'laning."
+        : statuses.has("password_pending") || statuses.has("password_set")
+          ? "Hisob tasdiqlashni kutmoqda."
+          : "Hisob faol emas.";
+      return failure(c, 403, "ACCOUNT_INACTIVE", message);
+    }
+
+    const { data: activeAssignmentTenants, error: tenantStatusError } =
+      await supabase
+        .from("tenants")
+        .select("id")
+        .in(
+          "id",
+          activeAssignments.map((assignment) => assignment.tenant_id),
+        )
+        .eq("status", "active");
+    if (tenantStatusError) {
+      return failure(c, 500, "DB_ERROR", "Profil yuklashda xatolik.");
+    }
+
+    const activeTenantIds = new Set(
+      (activeAssignmentTenants ?? []).map((tenant) => tenant.id),
+    );
+    const tenants = activeAssignments
+      .filter((assignment) => activeTenantIds.has(assignment.tenant_id))
+      .map((a) => ({
+        id: a.tenant_id,
+        role: a.role,
+        fullName: a.full_name,
+        permissions: ROLE_ACCESS[a.role] ?? [],
+      }));
+
+    if (tenants.length === 0) {
+      return failure(
+        c,
+        403,
+        "TENANT_INACTIVE",
+        "Kompaniya to'xtatilgan yoki bloklangan.",
+      );
+    }
 
     // SUPER_ADMIN cross-tenant access:
     // Foydalanuvchi super_admin rolida bo'lsa, tizimdagi BARCHA tenantlarga
@@ -1324,7 +1477,8 @@ const registerRoutes = (prefix: string) => {
     if (isSuperAdmin) {
       const { data: allTenants } = await supabase
         .from("tenants")
-        .select("id, name, plan");
+        .select("id, name, plan")
+        .eq("status", "active");
       const existingIds = new Set(tenants.map((t) => t.id));
       const fullName = tenants[0]?.fullName ?? user.email ?? "Super Admin";
       for (const t of allTenants ?? []) {
@@ -1346,7 +1500,8 @@ const registerRoutes = (prefix: string) => {
       .in(
         "id",
         tenants.map((t) => t.id),
-      );
+      )
+      .eq("status", "active");
 
     const tenantMap = Object.fromEntries(
       (tenantRows ?? []).map((t) => [t.id, t]),
@@ -1880,7 +2035,7 @@ const registerRoutes = (prefix: string) => {
         "Boshqa tenant profilini o'zgartira olmaysiz.",
       );
 
-    const role = (ctx as any).role as string;
+    const role = ctx.role ?? "";
     if (
       !["company_admin", "leader", "super_admin", "sub_admin"].includes(role)
     ) {
@@ -1963,13 +2118,7 @@ const registerRoutes = (prefix: string) => {
     if (tenantId !== ctx.tenantId)
       return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
 
-    const { data: callerRow } = await supabase
-      .from("user_tenants")
-      .select("role")
-      .eq("user_id", callerUserId)
-      .eq("tenant_id", tenantId)
-      .single();
-    const role = callerRow?.role ?? "";
+    const role = ctx.role ?? "";
     const allowed = [
       "leader",
       "hr",
@@ -2133,17 +2282,7 @@ const registerRoutes = (prefix: string) => {
     // Caller rolini tekshirish (user_tenants'dan)
     const callerUserId = (ctx as any).userId ?? null;
     if (!callerUserId) return failure(c, 401, "UNAUTHORIZED", "User ID yo'q.");
-    // Super_admin har tenantda ruxsatga ega; boshqalar — faqat o'z tenantida
-    const { data: callerRows } = await supabase
-      .from("user_tenants")
-      .select("role, tenant_id")
-      .eq("user_id", callerUserId);
-    const isSuperAdmin = (callerRows ?? []).some(
-      (r) => r.role === "super_admin",
-    );
-    const tenantSpecificRole =
-      (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
-    const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
+    const callerRole = ctx.role ?? "";
     if (
       callerRole !== "leader" &&
       callerRole !== "hr" &&
@@ -2235,17 +2374,7 @@ const registerRoutes = (prefix: string) => {
         "O'zingizni ishdan ketkaza olmaysiz.",
       );
     }
-    // Super_admin har tenantda ruxsatga ega; boshqalar — faqat o'z tenantida
-    const { data: callerRows } = await supabase
-      .from("user_tenants")
-      .select("role, tenant_id")
-      .eq("user_id", callerUserId);
-    const isSuperAdmin = (callerRows ?? []).some(
-      (r) => r.role === "super_admin",
-    );
-    const tenantSpecificRole =
-      (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
-    const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
+    const callerRole = ctx.role ?? "";
     if (
       callerRole !== "leader" &&
       callerRole !== "hr" &&
@@ -2306,13 +2435,7 @@ const registerRoutes = (prefix: string) => {
         "O'zingizni bloklab bo'lmaydi.",
       );
 
-    const { data: callerRow } = await supabase
-      .from("user_tenants")
-      .select("role")
-      .eq("user_id", callerUserId)
-      .eq("tenant_id", tenantId)
-      .single();
-    const role = callerRow?.role ?? "";
+    const role = ctx.role ?? "";
     if (
       !["leader", "hr", "super_admin", "sub_admin", "company_admin"].includes(
         role,
@@ -2363,17 +2486,7 @@ const registerRoutes = (prefix: string) => {
       const callerUserId = (ctx as any).userId ?? null;
       if (!callerUserId)
         return failure(c, 401, "UNAUTHORIZED", "User ID yo'q.");
-      // Super_admin har tenantda ruxsatga ega; boshqalar — faqat o'z tenantida
-      const { data: callerRows } = await supabase
-        .from("user_tenants")
-        .select("role, tenant_id")
-        .eq("user_id", callerUserId);
-      const isSuperAdmin = (callerRows ?? []).some(
-        (r) => r.role === "super_admin",
-      );
-      const tenantSpecificRole =
-        (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
-      const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
+      const callerRole = ctx.role ?? "";
       if (
         callerRole !== "leader" &&
         callerRole !== "hr" &&
@@ -2474,17 +2587,7 @@ const registerRoutes = (prefix: string) => {
         "O'zingizni butunlay o'chira olmaysiz.",
       );
     }
-    // Super_admin har tenantda ruxsatga ega; boshqalar — faqat o'z tenantida
-    const { data: callerRows } = await supabase
-      .from("user_tenants")
-      .select("role, tenant_id")
-      .eq("user_id", callerUserId);
-    const isSuperAdmin = (callerRows ?? []).some(
-      (r) => r.role === "super_admin",
-    );
-    const tenantSpecificRole =
-      (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
-    const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
+    const callerRole = ctx.role ?? "";
     if (
       callerRole !== "leader" &&
       callerRole !== "company_admin" &&
@@ -2595,17 +2698,7 @@ const registerRoutes = (prefix: string) => {
 
     const callerUserId = (ctx as any).userId ?? null;
     if (!callerUserId) return failure(c, 401, "UNAUTHORIZED", "User ID yo'q.");
-    // Super_admin har tenantda ruxsatga ega; boshqalar — faqat o'z tenantida
-    const { data: callerRows } = await supabase
-      .from("user_tenants")
-      .select("role, tenant_id")
-      .eq("user_id", callerUserId);
-    const isSuperAdmin = (callerRows ?? []).some(
-      (r) => r.role === "super_admin",
-    );
-    const tenantSpecificRole =
-      (callerRows ?? []).find((r) => r.tenant_id === tenantId)?.role ?? "";
-    const callerRole = isSuperAdmin ? "super_admin" : tenantSpecificRole;
+    const callerRole = ctx.role ?? "";
     if (
       callerRole !== "leader" &&
       callerRole !== "hr" &&
@@ -2653,21 +2746,12 @@ const registerRoutes = (prefix: string) => {
       );
     }
 
-    // Caller rolini user_tenants jadvalidan o'qish (JWT'da role claim yo'q)
+    // Caller roli getTenantContext ichida DB membershipdan tasdiqlangan.
     const callerUserId = (ctx as any).userId ?? null;
     if (!callerUserId) {
       return failure(c, 401, "UNAUTHORIZED", "Foydalanuvchi ID yo'q.");
     }
-    const { data: callerRow, error: callerErr } = await supabase
-      .from("user_tenants")
-      .select("role")
-      .eq("user_id", callerUserId)
-      .eq("tenant_id", tenantId)
-      .maybeSingle();
-    if (callerErr) {
-      return failure(c, 500, "DB_ERROR", "Caller rolini o'qishda xato.");
-    }
-    const callerRole = (callerRow?.role as string) ?? "";
+    const callerRole = ctx.role ?? "";
     if (
       callerRole !== "leader" &&
       callerRole !== "hr" &&
@@ -2890,13 +2974,7 @@ const registerRoutes = (prefix: string) => {
     if (tenantId !== ctx.tenantId)
       return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
 
-    const { data: callerRow } = await supabase
-      .from("user_tenants")
-      .select("role")
-      .eq("user_id", (ctx as any).userId)
-      .eq("tenant_id", tenantId)
-      .maybeSingle();
-    const callerRole = callerRow?.role ?? "";
+    const callerRole = ctx.role ?? "";
     if (!["leader", "hr", "super_admin"].includes(callerRole)) {
       return failure(
         c,
@@ -2948,13 +3026,7 @@ const registerRoutes = (prefix: string) => {
     if (tenantId !== ctx.tenantId)
       return failure(c, 403, "FORBIDDEN", "Boshqa tenant.");
 
-    const { data: callerRow } = await supabase
-      .from("user_tenants")
-      .select("role")
-      .eq("user_id", (ctx as any).userId)
-      .eq("tenant_id", tenantId)
-      .maybeSingle();
-    const callerRole = callerRow?.role ?? "";
+    const callerRole = ctx.role ?? "";
     if (!["leader", "hr", "super_admin"].includes(callerRole)) {
       return failure(
         c,

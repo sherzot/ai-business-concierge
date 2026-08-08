@@ -4,6 +4,59 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — Supabase CLI v2.112.0 и fresh local-infra regression
+
+- Official Supabase Homebrew formula выбрана с узким разрешением `brew trust --formula supabase/tap/supabase`. После промежуточной установки core formula `v2.111.0` official tap обновил CLI до `v2.112.0`; broad tap trust не выдавался.
+- По official upgrade guidance прежний local-only data volume удалён без backup. Production schema/data и linked migration history не затронуты.
+- В CLI `v2.112.0` команда `functions serve` больше не принимает имя function как positional argument; local acceptance запускает все functions через `supabase functions serve --no-verify-jwt`.
+- Fresh Postgres image выявил зависимость от implicit grants. Core baseline теперь явно выдаёт `service_role` доступ к backend-managed baseline tables.
+- pgTAP теперь проверяет, что direct read `user_tenants` завершается PostgreSQL `42501`, а не пустым результатом. Edge fixture разделяет новый `sb_secret_...` API key и legacy service-role JWT; значения не логировались и не документировались.
+- Проверки: fresh replay 32/32 migrations; pgTAP 21/21; real local Auth-token Edge acceptance 8/8; после warm-up все enabled containers healthy; Storage/Auth/Studio HTTP `200`.
+- Node `22.18.0`: type-check, 21/21 test files и 101/101 tests, production build, 9-file security gate и production audit с 0 high/critical прошли. Local services корректно остановлены.
+
+Файлы: core baseline grant repair, deterministic pgTAP/Edge fixtures и синхронизированные STATUS/PLAN/DEVLOG на четырёх языках.
+
+---
+
+## 2026-08-08 — Закрыты migration-history и local Storage drift
+
+- Проверены current Supabase changelog/CLI docs. Dry-run показал, что remote отсутствует только backdated `20250212000000_core_schema_baseline.sql`. Production metadata подтвердили наличие всех 10 tables, 13 indexes, `pgcrypto` и RLS, ожидаемых baseline.
+- `20250212000000` отмечена applied через official migration-history repair без повторного SQL. Schema/business data не изменялись. Повторный migration list полностью совпал, `db push --linked --dry-run` сообщил, что remote database up to date.
+- Relink обновил stale local Storage/Auth pins с `v1.58.1/v2.189.0` до production-aligned `v1.68.1/v2.195.0` без tracked file changes.
+- Local stack запущен без exclusions. Первые 2-second warm-up probes дали timeout, затем все enabled Supabase containers стали healthy. Storage, Auth и Studio HTTP smoke-tests вернули `200`.
+- `imgproxy` намеренно stopped, поскольку image transformations не включены; unused infrastructure не добавляется. Local services после проверки остановлены. Installed CLI `v2.101.0`, доступна `v2.112.0`, но validation не блокировалась.
+
+Files/state: production migration history выровнена, ignored local linked metadata обновлена, four-language STATUS/PLAN/DEVLOG синхронизированы.
+
+---
+
+## 2026-08-08 — Закрыты оставшиеся acceptance-проверки
+
+- Fresh local DB выявила две проблемы replay: core tables создавались только через `supabase/schema.sql` вне migration history, а trigger loop в `20260417134151_phase0_new_tables.sql` содержал неверный блок `EXCEPTION`.
+- Из Supabase CLI scaffold добавлена идемпотентная `20250212000000_core_schema_baseline.sql` без demo seeds и дублирующих policies; historical PL/pgSQL block исправлен. После этого пустая local DB успешно применила все 32 migrations.
+- Backdated baseline не отправлялась в production, поэтому version `20250212000000` ещё нет в remote migration history. Перед следующей production DB migration нужен dry-run и выбор между idempotent no-op apply и history repair.
+- Local DB verification: один pgTAP file, 21/21 tests PASS. Из-за drift версий linked/local Storage его health-check был unhealthy, поэтому DB/Auth/Realtime/Edge acceptance stack запущен без `storage-api,imgproxy`; file storage не входил в scope.
+- Добавлен `supabase/tests/integration/edge_tenant_authorization.test.mjs`. С временными local Auth users и реальными tokens прошли 8/8 случаев: active own-tenant; cross-tenant denial; blocked/terminated denial; super-admin cross-tenant/admin access; blocked-admin `403`; employee role `403`.
+- Production Auth users/data не создавались. Fixtures очищены, local services остановлены.
+
+Files: core baseline migration, replay fix Phase 0 migration, Edge integration fixture и синхронные STATUS/PLAN/DEVLOG на четырёх языках.
+
+---
+
+## 2026-08-08 — Усилены Realtime tenant isolation и Edge authorization
+
+- Production reproducer показал, что active members не видят свои `tasks/inbox_items`, потому что policies читают default-deny `user_tenants`; notifications не проверяли membership status. Historical migrations также оставили в production только `active/terminated`, хотя код пишет `password_pending/password_set/blocked`.
+- Применён `20260808014845_harden_realtime_tenant_authorization.sql`: объединены пять statuses, создан `private.is_active_tenant_member()`, browser доступ к tasks/inbox/notifications ограничен SELECT, policies требуют active membership и active tenant.
+- Добавлен transactional pgTAP fixture из 21 проверки с реальной DB role `authenticated` и JWT settings: cross-tenant SELECT, запрет INSERT/UPDATE/DELETE, blocked membership и status contract; в конце ROLLBACK.
+- Tenant context теперь повторно проверяет выбранный header/JWT tenant в DB и использует canonical role из active assignment, сохраняя active super-admin cross-tenant access. `/auth/me` фильтрует inactive доступ, а общий middleware требует active platform-admin assignment и active source tenant для всех `/admin/*` routes.
+- `bright-api` v74 deployed. До fix pgTAP: 4/21 fail; после: `ok 21`. Metadata подтверждает private security-definer helper с empty search path, без anon EXECUTE и только SELECT browser grants. Health `200`, tenant route без auth `401`, admin route без auth `401`.
+- Type-check, 21/21 files и 101/101 tests, build, 9-file security gate и dependency audit с 0 high/critical прошли. Новых Security Advisor errors нет; известны warnings `vector` in public и disabled Leaked Password Protection.
+- Граница проверки: Docker недоступен для fresh local migration run. Реальные active/blocked/terminated и role-`403` Edge token tests требуют non-production Auth fixtures; временные production Auth users не создавались. Netlify publishable-key rollout остаётся отдельной задачей.
+
+Files: `supabase/migrations/20260808014845_harden_realtime_tenant_authorization.sql`, `supabase/tests/database/realtime_tenant_isolation.test.sql`, `supabase/functions/server/index.ts`, synchronized STATUS/PLAN/DEVLOG на четырёх языках.
+
+---
+
 ## 2026-08-08 — Закрыт прямой Data API доступ к данным risk scanner
 
 - Production inventory подтвердил RLS на 32/32 public tables, `security_invoker` на 8/8 views и fixed `search_path` без `anon/authenticated` EXECUTE у всех 6 `SECURITY DEFINER` functions.
