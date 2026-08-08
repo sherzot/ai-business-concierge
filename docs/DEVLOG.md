@@ -4,6 +4,12 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-08 — Hero typography va form spacing sinchiklab tuzatildi
+
+- LP hero headline max-size yana pasaytirildi, tracking normalga yaqinlashtirildi va line-height oshirildi; browser screenshotda uzun Uzbek sarlavha endi yumshoqroq, 3 qatorli va o‘qilishi qulay.
+- Global `label + input/select/textarea` oralig‘iga 6px breathing space qo‘shildi; contact form browser computed tekshiruvda label/control overlap topilmadi.
+- Agent-browser visual smoke-check: landing va contact route’lari content bilan render bo‘ldi, Vite overlay yo‘q.
+
 ## 2026-08-08 — Visual consolidation va title scale refinement
 
 - Portfolio-inspired visual qoidasi product/admin/HR surface’lariga yanada kuchaytirildi: dekorativ purple/pink ranglar semantic blue/neutral palette’ga bog‘landi, notification/template/HR signal emoji’lari lucide ikonkalarga almashtirildi.

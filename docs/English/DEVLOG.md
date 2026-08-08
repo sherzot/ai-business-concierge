@@ -4,6 +4,12 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — Hero typography and form spacing refined
+
+- Lowered the LP hero headline max-size again, relaxed tracking toward normal, and increased line-height; the long Uzbek headline now renders as a softer, readable three-line composition in the browser screenshot.
+- Added a 6px breathing gap between global labels and adjacent inputs/selects/textareas; contact-form computed styles showed no label/control overlap.
+- Agent-browser visual smoke check: landing and contact routes rendered meaningful content with no Vite overlay.
+
 ## 2026-08-08 — Visual consolidation and title-scale refinement
 
 - Strengthened the Portfolio-inspired visual rule across product/admin/HR surfaces: decorative purple/pink colors now resolve to the semantic blue/neutral palette, and notification/template/HR signal emoji were replaced with Lucide icons.

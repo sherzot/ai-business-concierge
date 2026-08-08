@@ -4,6 +4,12 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — Точная настройка hero typography и form spacing
+
+- Ещё раз уменьшен max-size LP hero headline, tracking приближен к normal, line-height увеличен; длинный Uzbek headline теперь выглядит мягче и читается в три строки.
+- Добавлен 6px breathing gap между global labels и соседними input/select/textarea; computed browser check contact form не выявил overlap.
+- Agent-browser visual smoke check: landing и contact routes отрендерились без Vite overlay.
+
 ## 2026-08-08 — Visual consolidation и уменьшение масштаба заголовков
 
 - Усилено единое Portfolio-inspired правило для product/admin/HR surfaces: декоративные purple/pink цвета сведены к semantic blue/neutral palette, emoji в notifications/templates/HR signals заменены на Lucide icons.
