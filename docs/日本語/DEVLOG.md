@@ -4,6 +4,54 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-08 — Hero typographyとform spacingを精密調整
+
+- LP hero headlineのmax-sizeをさらに縮小し、trackingをnormal寄りに戻し、line-heightを拡大。長いUzbek headlineがbrowser screenshotで柔らかい3行構成になり読みやすくなった。
+- Global labelと隣接するinput/select/textareaの間に6pxの余白を追加。Contact formのcomputed checkでlabel/control overlapなし。
+- Agent-browser visual smoke check: landingとcontact routeがVite overlayなしでrender。
+
+## 2026-08-08 — Visual consolidationとtitle scale調整
+
+- Product/admin/HR surface全体でPortfolio-inspired visual ruleを強化。装飾的なpurple/pink色をsemantic blue/neutral paletteへ統一し、notification/template/HR signalのemojiをLucide iconへ変更。
+- Landing hero headlineとeditorial titleのサイズを縮小し、長いUzbek hero copyをfirst viewportで読みやすく調整。
+- Global trackingとline-heightを緩め、titleとparagraph textが詰まらないように調整。
+- TypeScriptとlanding/docs targeted tests: `PASS`。
+
+## 2026-08-08 — PR #2 review commentsを対応
+
+- Dark-system contrast feedbackを修正。Editorial inverse surface/headerはtheme非依存の`#111318`/`#f4f3ef` tokenを使用し、contact/register/auth contentの可読性を維持。
+- Landing `Explore system` CTAを`landingI18n`へ追加し、Uzbek、Russian、English、Japaneseをlocalize。
+- Canonical `STATUS.md`のbrowser/commit pending contradictionを修正し4言語を同期。
+- Browser regression成功: dark contact inverse background/header、form content、no overflowを確認。Russian/Japanese locale switch CTAも確認。
+- Full regression成功: 21/21 test files、101/101 tests、production build、9-file security gate、`git diff --check`。
+
+---
+
+## 2026-08-08 — Redesign commit、push、preview CIを完了
+
+- Portfolio-inspired redesignを`83bc7e0`（`feat: redesign frontend in portfolio style`）としてcommitし、`agent/portfolio-inspired-redesign`を`origin`へpush。
+- PR #2を作成: https://github.com/sherzot/ai-business-concierge/pull/2
+- GitHub `frontend-security-gate` run `31240118332`成功、Vercel preview成功、Netlify Deploy Preview `https://deploy-preview-2--ai-business-concierge1.netlify.app` ready。
+- PRはまだ`main`へmergeされておらずproduction deployも未実施。次はNetlify publishable-key handoff、その後Document Assistant PDF/DOCX/Storage。
+
+---
+
+## 2026-08-08 — Portfolio-inspired frontend全面redesignをlocalで完了
+
+- `sherzot/Portfolio`のwarm canvas、black typography、単一Sher-blue accent、divider中心のcomposition、控えめなmotionを、code copyなしでproductへ適用。
+- Global editorial tokens/primitives、reusable brand mark/lockup、product operational-system SVGを追加。Light/dark theme、reduced motion、focus-visibleを維持。
+- Landing、contact/company registration、全auth flow、product shell/dashboard、Inbox、Tasks、Docs、Settings、admin shellをredesign。残るlegacy surfacesはcompatibility layerでwarm/ink/blue systemへ統一。
+- 重複auth layoutを`AuthShell`へ集約し、public formのlabel/input関連付けとpassword-toggle aria labelを改善。
+- Verification成功: `git diff --check`、TypeScript、21/21 test files・101/101 tests、production build、9-file security gate、dependency audit high/critical 0。
+- Known non-blocking warnings: main chunk約1.76 MB、`supabase.ts` mixed import、古いBrowserslist data。
+- `agent-browser` Chrome runtimeをinstallしbrowser acceptanceを完了。Desktop landing、mobile landing、login、forgot-password、contact routesはcontentをrenderし、error overlay、browser errors、horizontal overflowはなし。Annotated screenshotsは`/private/tmp/abc-landing.png`、`/private/tmp/abc-mobile.png`、`/private/tmp/abc-login.png`に保存。
+- Follow-up Vite route smoke-checkで`/`、`/login`、`/forgot-password`、`/contact`、`/app`、`/admin`はすべて`200`とSPA shellを返し、serverはcleanに停止。
+- Workは`df42ecf`ベースのlocal branch `agent/portfolio-inspired-redesign`。Commit/push/deployは未実施。
+
+次: findingsなしのredesignをcommit/pushしGitHub CIとNetlify previewを確認後、publishable-key handoffとDocument Assistantへ戻る。
+
+---
+
 ## 2026-08-08 — Supabase CLI v2.112.0とfresh local-infra regression
 
 - Official Supabase Homebrew formulaを限定的な`brew trust --formula supabase/tap/supabase`で選択。Core formulaが一時的に`v2.111.0`をinstallした後、official tapからCLIを`v2.112.0`へupgrade。Broad tap trustは付与していない。

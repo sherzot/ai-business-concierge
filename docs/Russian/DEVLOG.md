@@ -4,6 +4,54 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-08 — Точная настройка hero typography и form spacing
+
+- Ещё раз уменьшен max-size LP hero headline, tracking приближен к normal, line-height увеличен; длинный Uzbek headline теперь выглядит мягче и читается в три строки.
+- Добавлен 6px breathing gap между global labels и соседними input/select/textarea; computed browser check contact form не выявил overlap.
+- Agent-browser visual smoke check: landing и contact routes отрендерились без Vite overlay.
+
+## 2026-08-08 — Visual consolidation и уменьшение масштаба заголовков
+
+- Усилено единое Portfolio-inspired правило для product/admin/HR surfaces: декоративные purple/pink цвета сведены к semantic blue/neutral palette, emoji в notifications/templates/HR signals заменены на Lucide icons.
+- Уменьшен размер hero headline и editorial titles landing, чтобы длинный Uzbek hero copy легче сканировался в первом viewport.
+- Увеличены tracking и line-height, чтобы title и paragraph text не слипались.
+- TypeScript и targeted landing/docs tests: `PASS`.
+
+## 2026-08-08 — Review comments PR #2 закрыты
+
+- Исправлен dark-system contrast feedback: editorial inverse surfaces и headers используют theme-independent tokens `#111318`/`#f4f3ef`, content contact/register/auth остаётся читаемым.
+- CTA `Explore system` добавлен в `landingI18n` для Uzbek, Russian, English и Japanese.
+- Исправлено противоречие browser/commit pending в canonical `STATUS.md`, синхронизированы четыре языка.
+- Browser regression прошёл для dark contact inverse background/header, form content и no overflow; проверены CTA после Russian и Japanese locale switch.
+- Full regression прошёл: 21/21 test files, 101/101 tests, production build, 9-file security gate и `git diff --check`.
+
+---
+
+## 2026-08-08 — Commit, push и preview CI redesign завершены
+
+- Portfolio-inspired redesign закоммичен как `83bc7e0` (`feat: redesign frontend in portfolio style`) и branch `agent/portfolio-inspired-redesign` отправлен в `origin`.
+- Открыт PR #2: https://github.com/sherzot/ai-business-concierge/pull/2
+- GitHub `frontend-security-gate` run `31240118332` прошёл; Vercel preview прошёл; Netlify Deploy Preview `https://deploy-preview-2--ai-business-concierge1.netlify.app` готов.
+- PR ещё не merged в `main`, production deployment не выполнялся. Далее: Netlify publishable-key handoff, затем PDF/DOCX/Storage Документолога.
+
+---
+
+## 2026-08-08 — Portfolio-inspired полный frontend redesign завершён локально
+
+- В продукт адаптированы warm canvas, чёрная типографика, единый Sher-blue accent, divider-композиция и сдержанный motion из `sherzot/Portfolio`, без копирования его кода.
+- Добавлены global editorial tokens/primitives, reusable brand mark/lockup и SVG operational-system продукта. Сохранены light/dark theme, reduced motion и focus-visible.
+- Переработаны landing, contact/company registration, все auth flows, product shell/dashboard, Inbox, Tasks, Docs, Settings и admin shell. Compatibility layer приводит оставшиеся legacy surfaces к единой warm/ink/blue системе.
+- Повторяющиеся auth layouts объединены в `AuthShell`; улучшены связи label/input и aria labels password toggles.
+- Проверки прошли: `git diff --check`, TypeScript, 21/21 test files и 101/101 tests, production build, 9-file security gate, dependency audit high/critical `0`.
+- Остались известные non-blocking warnings: main chunk ~1.76 MB, mixed imports `supabase.ts`, устаревшие Browserslist data.
+- Установлен Chrome runtime для `agent-browser` и выполнен browser acceptance: desktop landing, mobile landing, login, forgot-password и contact routes отрендерили содержимое; error overlay, browser errors и horizontal overflow не обнаружены. Annotated screenshots сохранены в `/private/tmp/abc-landing.png`, `/private/tmp/abc-mobile.png`, `/private/tmp/abc-login.png`.
+- Повторный Vite route smoke-check вернул `200` и SPA shell для `/`, `/login`, `/forgot-password`, `/contact`, `/app` и `/admin`; сервер корректно остановлен.
+- Работа локальна в branch `agent/portfolio-inspired-redesign` от `df42ecf`; commit/push/deploy ещё не выполнялись.
+
+Далее: commit/push redesign без находок и проверка GitHub CI/Netlify preview, затем возврат к publishable-key handoff и Document Assistant.
+
+---
+
 ## 2026-08-08 — Supabase CLI v2.112.0 и fresh local-infra regression
 
 - Official Supabase Homebrew formula выбрана с узким разрешением `brew trust --formula supabase/tap/supabase`. После промежуточной установки core formula `v2.111.0` official tap обновил CLI до `v2.112.0`; broad tap trust не выдавался.

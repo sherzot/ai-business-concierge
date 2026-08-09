@@ -4,6 +4,62 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-08 — Hero typography va form spacing sinchiklab tuzatildi
+
+- LP hero headline max-size yana pasaytirildi, tracking normalga yaqinlashtirildi va line-height oshirildi; browser screenshotda uzun Uzbek sarlavha endi yumshoqroq, 3 qatorli va o‘qilishi qulay.
+- Global `label + input/select/textarea` oralig‘iga 6px breathing space qo‘shildi; contact form browser computed tekshiruvda label/control overlap topilmadi.
+- Agent-browser visual smoke-check: landing va contact route’lari content bilan render bo‘ldi, Vite overlay yo‘q.
+
+## 2026-08-08 — Visual consolidation va title scale refinement
+
+- Portfolio-inspired visual qoidasi product/admin/HR surface’lariga yanada kuchaytirildi: dekorativ purple/pink ranglar semantic blue/neutral palette’ga bog‘landi, notification/template/HR signal emoji’lari lucide ikonkalarga almashtirildi.
+- Landing hero sarlavhasi va umumiy editorial title scale kichraytirildi; uzun Uzbek hero copy endi birinchi viewportda yengilroq va o‘qilishi qulayroq.
+- Harf tracking va line-height kengaytirildi; title va paragraph matnlari bir-biriga yopishib qolmaydi.
+- TypeScript va landing/docs targeted tests: `PASS`.
+
+## 2026-08-08 — PR #2 review commentlari yopildi
+
+- Dark-system kontrast feedbacki tuzatildi: editorial inverse surface va header endi theme’dan mustaqil `#111318`/`#f4f3ef` tokenlaridan foydalanadi; contact/register/auth inverse content o‘qilishi saqlandi.
+- Landing `Explore system` CTA’si `landingI18n`ga qo‘shilib Uzbek, Russian, English va Japanese bo‘yicha lokalizatsiya qilindi.
+- Canonical `STATUS.md` snapshotidagi browser/commit pending contradictioni tuzatildi va 4 til nusxasi sinxronlashtirildi.
+- Browser regression: dark contact computed inverse background/header, form content va no-overflow; Russian va Japanese locale switch CTA’lari tekshirildi.
+- Full regression: 21/21 test fayli, 101/101 test, production build, 9-file security gate va `git diff --check` — `PASS`.
+
+---
+
+## 2026-08-08 — Redesign commit, push va preview CI yakunlandi
+
+- Portfolio-inspired redesign `83bc7e0` (`feat: redesign frontend in portfolio style`) commit qilindi va `agent/portfolio-inspired-redesign` branchi `origin`ga push qilindi.
+- PR #2 ochiq: https://github.com/sherzot/ai-business-concierge/pull/2
+- GitHub `frontend-security-gate` run `31240118332` `success`; Vercel preview `success`; Netlify Deploy Preview `https://deploy-preview-2--ai-business-concierge1.netlify.app` ready.
+- PR `main`ga merge qilinmagan va production deploy qilinmagan. Keyingi faol ish: Netlify publishable-key handoff, keyin AI Hujjatchi PDF/DOCX/Storage.
+
+---
+
+## 2026-08-08 — Portfolio-inspired to'liq frontend redesign lokal yakunlandi
+
+### Bajarildi
+
+- `sherzot/Portfolio`ning warm canvas, qora tipografiya, yagona Sher-blue accent, divider-based kompozitsiya va yengil motion tili AI Business Concierge'ga mahsulotga mos tarzda ko'chirildi; Portfolio kodi nusxalanmadi.
+- Yangi global tokenlar, editorial primitivlar, brand mark/lockup va product operational-system SVG yaratildi. Light/dark theme, reduced-motion va focus-visible holatlari saqlandi.
+- Landing, contact/company registration, login/forgot/reset/setup-account, product sidebar/topbar, dashboard, Inbox, Tasks, Docs, Settings va admin shell qayta dizayn qilindi. Qolgan eski modullar yagona compatibility layer orqali warm/ink/blue tizimiga moslandi.
+- Auth sahifalaridagi takroriy layout yagona `AuthShell`ga yig'ildi; public form label/input bog'lanishlari va password-toggle aria labellari yaxshilandi.
+
+### Verifikatsiya va chegara
+
+- `git diff --check`, TypeScript, 21/21 test fayli va 101/101 test, production build va 9-file security gate — `PASS`; production dependency audit high/critical `0`.
+- Build muvaffaqiyatli, oldindan ma'lum bloklamaydigan warninglar saqlanadi: ~1.76 MB main chunk, `supabase.ts` mixed import va eski Browserslist data.
+- `agent-browser` Chrome runtime bilan o'rnatildi va browser acceptance bajarildi: desktop landing, mobile landing, login, forgot-password va contact route'lari mazmunli render bo'ldi; error overlay, browser error va horizontal overflow topilmadi. Annotated screenshots `/private/tmp/abc-landing.png`, `/private/tmp/abc-mobile.png`, `/private/tmp/abc-login.png`da saqlandi.
+- Keyingi Vite route smoke-checkda `/`, `/login`, `/forgot-password`, `/contact`, `/app` va `/admin` barchasi `200` status va SPA shell bilan qaytdi; server tartibli to'xtatildi.
+- Ishlar local `agent/portfolio-inspired-redesign` branchida, base `df42ecf`; hali commit/push/deploy qilinmagan.
+
+### Keyingi qadam
+
+1. Browser acceptance topilmalari bo'lmagani uchun redesignni commit/push qilish va GitHub CI/Netlify previewni tekshirish.
+2. Shundan so'ng faol product rejasidagi Netlify publishable-key handoff va AI Hujjatchi ishlariga qaytish.
+
+---
+
 ## 2026-08-08 — Supabase CLI v2.112.0 va fresh local-infra regressiyasi
 
 ### Yangilash va topilmalar

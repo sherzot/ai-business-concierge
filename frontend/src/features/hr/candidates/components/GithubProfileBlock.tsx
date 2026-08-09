@@ -2,6 +2,7 @@
  * GithubProfileBlock — shows raw GitHub signals (stats, languages, pinned repos).
  */
 
+import { Beaker, FileText, Gauge, GitFork } from "lucide-react";
 import { useI18n } from "../../../../app/providers/I18nProvider";
 import type { GithubSignals } from "../types";
 
@@ -73,10 +74,10 @@ export function GithubProfileBlock({ github }: Props) {
                 </div>
                 <div className="mt-1 flex gap-2 text-[11px] text-slate-500">
                   <span>{r.primary_language ?? "—"}</span>
-                  {r.has_readme && <span title="README">📝</span>}
-                  {r.has_tests && <span title="Tests">🧪</span>}
-                  {r.has_ci && <span title="CI">⚙️</span>}
-                  {r.is_fork && <span title="Fork">🍴</span>}
+                  {r.has_readme && <FileText size={12} aria-label="README" />}
+                  {r.has_tests && <Beaker size={12} aria-label="Tests" />}
+                  {r.has_ci && <Gauge size={12} aria-label="CI" />}
+                  {r.is_fork && <GitFork size={12} aria-label="Fork" />}
                 </div>
               </li>
             ))}

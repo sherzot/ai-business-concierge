@@ -1,11 +1,12 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import type { LandingLocale } from "../types";
 import type { landingI18n } from "../i18n";
 import { LocaleSelect } from "../../../shared/components/LocaleSelect";
 import type { Locale } from "../../../app/i18n";
 import { useAuthContext } from "../../auth/context/AuthContext";
+import { BrandLockup } from "../../../shared/components/BrandMark";
 
 type NavT = typeof landingI18n[LandingLocale]["nav"];
 
@@ -42,33 +43,27 @@ export function LandingNavbar({ locale, onLocaleChange, t }: Props) {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/85 backdrop-blur-md">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center">
-            <Sparkles size={18} className="text-white" />
-          </div>
-          <span className="font-bold text-slate-900 text-lg hidden sm:block">
-            AI Business Concierge
-          </span>
-          <span className="font-bold text-slate-900 text-lg sm:hidden">ABC</span>
-        </div>
+    <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
+      <div className="editorial-page flex h-[68px] items-center justify-between">
+        <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+          <BrandLockup compact />
+        </button>
 
         {/* Anchor nav — hidden on mobile */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden items-center gap-7 lg:flex" aria-label="Landing navigation">
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}
               onClick={(e) => scrollTo(e, link.href)}
-              className="px-3 py-1.5 rounded-lg text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+              className="text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
             >
               {link.label(t)}
             </a>
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <LocaleSelect
             variant="light"
             locale={locale as Locale}
@@ -76,9 +71,10 @@ export function LandingNavbar({ locale, onLocaleChange, t }: Props) {
           />
           <button
             onClick={handleLoginClick}
-            className="px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+            className="editorial-btn-primary min-h-10 px-4 py-2 text-xs"
           >
             {t.login}
+            <ArrowUpRight size={14} aria-hidden="true" />
           </button>
         </div>
       </div>

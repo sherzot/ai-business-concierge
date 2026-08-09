@@ -7,7 +7,7 @@ import { useDashboard } from "../hooks/useDashboard";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { healthScoreColor } from "../types";
 import type { Insight, InsightType } from "../types";
-import { staggerContainer, staggerItem, cardHover } from "../../../shared/lib/motionVariants";
+import { staggerContainer, staggerItem } from "../../../shared/lib/motionVariants";
 
 interface DashboardPageProps {
   tenant: { id: string; name: string };
@@ -38,10 +38,17 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* KPI Cards */}
+    <div className="space-y-10">
+      <header className="grid gap-4 border-b border-border pb-6 sm:grid-cols-[1fr_auto] sm:items-end">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">Operational overview</p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-[-0.045em] text-foreground sm:text-4xl">{tenant.name}</h2>
+        </div>
+        <p className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">Live tenant data</p>
+      </header>
+
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        className="grid border-l border-t border-border sm:grid-cols-2 lg:grid-cols-4"
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
@@ -78,83 +85,83 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
         />
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
         {/* Unified Inbox */}
-        <div className="lg:col-span-2 bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-border flex items-center justify-between">
+        <section className="product-panel overflow-hidden lg:col-span-8">
+          <div className="product-panel-header">
             <h3 className="font-semibold text-card-foreground">{translate("dashboard.unifiedInbox")}</h3>
             <div className="flex items-center gap-2">
               {unreadInbox > 0 && (
-                <span className="px-2 py-0.5 text-xs font-medium bg-[var(--status-danger-soft)] text-[var(--status-danger-fg)] rounded-full">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-status-danger">
                   {translate("dashboard.newCount", { count: String(unreadInbox) })}
                 </span>
               )}
-              <button onClick={() => onNavigate?.("inbox")} className="text-sm text-primary font-medium hover:underline">
+              <button onClick={() => onNavigate?.("inbox")} className="text-xs font-bold uppercase tracking-[0.1em] text-primary hover:underline">
                 {translate("dashboard.all")} →
               </button>
             </div>
           </div>
-          <div className="max-h-[320px] overflow-y-auto divide-y divide-border">
+          <div className="max-h-[360px] divide-y divide-border overflow-y-auto">
             {(recentInbox as any[]).map((item) => <InboxRow key={item.id} item={item} />)}
             {recentInbox.length === 0 && (
-              <div className="p-8 text-center text-muted-foreground text-sm">{translate("inbox.empty")}</div>
+              <div className="py-12 text-sm text-muted-foreground">{translate("inbox.empty")}</div>
             )}
           </div>
-        </div>
+        </section>
 
         {/* AI Tahlil */}
-        <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-border flex items-center justify-between">
+        <section className="product-panel overflow-hidden lg:col-span-4">
+          <div className="product-panel-header">
             <h3 className="font-semibold text-card-foreground">{translate("dashboard.aiAnalysis")}</h3>
-            <button onClick={() => onNavigate?.("reports")} className="text-sm text-primary font-medium hover:underline">
+            <button onClick={() => onNavigate?.("reports")} className="text-xs font-bold uppercase tracking-[0.1em] text-primary hover:underline">
               {translate("dashboard.all")} →
             </button>
           </div>
-          <div className="p-4 space-y-4 max-h-[320px] overflow-y-auto">
+          <div className="max-h-[360px] divide-y divide-border overflow-y-auto">
             {insights.slice(0, 3).map((ins, i) => (
               <InsightCard key={i} type={ins.type} title={ins.title} desc={ins.desc} />
             ))}
           </div>
-        </div>
+        </section>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
         {/* Faol vazifalar */}
-        <div className="lg:col-span-2 bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-border flex items-center justify-between">
+        <section className="product-panel overflow-hidden lg:col-span-8">
+          <div className="product-panel-header">
             <h3 className="font-semibold text-card-foreground">{translate("dashboard.activeTasks")}</h3>
             <div className="flex items-center gap-2">
               {overdueTasks > 0 && (
-                <span className="px-2 py-0.5 text-xs font-medium bg-[var(--status-danger-soft)] text-[var(--status-danger-fg)] rounded-full">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-status-danger">
                   {translate("dashboard.overdueCount", { count: String(overdueTasks) })}
                 </span>
               )}
-              <button onClick={() => onNavigate?.("tasks")} className="text-sm text-primary font-medium hover:underline">
+              <button onClick={() => onNavigate?.("tasks")} className="text-xs font-bold uppercase tracking-[0.1em] text-primary hover:underline">
                 {translate("dashboard.all")} →
               </button>
             </div>
           </div>
-          <div className="max-h-[280px] overflow-y-auto divide-y divide-border">
+          <div className="max-h-[320px] divide-y divide-border overflow-y-auto">
             {(recentTasks as any[]).map((task) => <TaskRow key={task.id} task={task} />)}
             {recentTasks.length === 0 && (
-              <div className="p-8 text-center text-muted-foreground text-sm">{translate("tasks.empty")}</div>
+              <div className="py-12 text-sm text-muted-foreground">{translate("tasks.empty")}</div>
             )}
           </div>
-        </div>
+        </section>
 
         {/* Biznes holati */}
-        <div className="bg-card rounded-xl border border-border shadow-sm p-6">
-          <h3 className="font-semibold text-card-foreground mb-2">{translate("dashboard.businessStatus")}</h3>
-          <p className="text-xs text-muted-foreground mb-4">{translate("dashboard.updated", { time: "2 soat" })}</p>
+        <section className="editorial-inverse p-6 lg:col-span-4 lg:p-8">
+          <h3 className="font-semibold text-background">{translate("dashboard.businessStatus")}</h3>
+          <p className="mb-4 mt-2 text-xs text-background/60">{translate("dashboard.updated", { time: "2 soat" })}</p>
           <div className="flex flex-col items-center mb-6">
             <div className="relative w-28 h-28">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--border)" strokeWidth="2.5" />
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="color-mix(in srgb, var(--background) 20%, transparent)" strokeWidth="2.5" />
                 <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke={healthScoreStroke(scoreColor)} strokeWidth="2.5" strokeDasharray={`${healthScore}, 100`} strokeLinecap="round" className="transition-all duration-500" />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className={`text-2xl font-bold ${healthScoreTextClass(scoreColor)}`}>{healthScore}</span>
-                <span className="text-xs text-muted-foreground">{translate("dashboard.good")}</span>
+                <span className="text-xs text-background/60">{translate("dashboard.good")}</span>
               </div>
             </div>
           </div>
@@ -165,13 +172,13 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
               { label: translate("nav.docsTitle"), value: deptScores.docs },
               { label: "Sotuv", value: deptScores.sales },
             ].map((d) => (
-              <div key={d.label} className="p-3 bg-secondary rounded-lg">
-                <p className="text-xs text-muted-foreground">{d.label}</p>
-                <p className="text-sm font-semibold text-foreground">{d.value}%</p>
+              <div key={d.label} className="border-t border-white/20 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-background/50">{d.label}</p>
+                <p className="mt-1 text-sm font-semibold text-background">{d.value}%</p>
               </div>
             ))}
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );
@@ -182,31 +189,24 @@ function KpiCard({ icon, title, value, trend, trendUp, onClick }: {
   trend?: string; trendUp?: boolean; onClick?: () => void;
 }) {
   return (
-    <motion.div
+    <motion.button
       variants={staggerItem}
-      initial="rest"
-      whileHover="hover"
-      animate="rest"
-      role={onClick ? "button" : undefined}
-      tabIndex={onClick ? 0 : undefined}
+      type="button"
+      disabled={!onClick}
       onClick={onClick}
-      onKeyDown={onClick ? (e) => e.key === "Enter" && onClick() : undefined}
-      className={`bg-card p-5 rounded-xl border border-border shadow-sm ${onClick ? "cursor-pointer" : ""}`}
-      style={{ transformOrigin: "center" }}
+      className="group min-h-36 border-b border-r border-border bg-transparent p-5 text-left transition-colors hover:bg-card disabled:cursor-default sm:p-6"
     >
-      <motion.div variants={cardHover}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-muted-foreground">{title}</p>
-          <p className="text-2xl font-bold text-card-foreground mt-1">{value}</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{title}</p>
+          <p className="mt-4 text-4xl font-semibold tracking-[-0.055em] text-card-foreground tabular-nums">{value}</p>
         </div>
-        <div className="p-2 rounded-lg bg-secondary">{icon}</div>
+        <div className="text-muted-foreground transition-colors group-hover:text-primary">{icon}</div>
       </div>
       {trend && (
-        <p className={`text-sm mt-3 font-medium ${trendUp ? "text-status-success" : "text-status-danger"}`}>{trend}</p>
+        <p className={`mt-4 text-xs font-semibold ${trendUp ? "text-status-success" : "text-status-danger"}`}>{trend}</p>
       )}
-      </motion.div>
-    </motion.div>
+    </motion.button>
   );
 }
 
@@ -222,15 +222,15 @@ function InboxRow({ item }: { item: any }) {
     General: "bg-secondary text-muted-foreground",
   };
   return (
-    <div className="p-4 hover:bg-secondary/70 transition-colors">
+    <div className="product-row py-4">
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center border border-border bg-card">
           <Mail size={14} className="text-muted-foreground" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-foreground">{sender}</span>
-            <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${categoryColors[category] ?? categoryColors.General}`}>
+            <span className={`px-1.5 py-0.5 text-[10px] font-medium ${categoryColors[category] ?? categoryColors.General}`}>
               {category}
             </span>
           </div>
@@ -259,7 +259,7 @@ function TaskRow({ task }: { task: any }) {
       })()
     : "—";
   return (
-    <div className="p-4 hover:bg-secondary/70 transition-colors flex items-center gap-3">
+    <div className="product-row flex items-center gap-3 py-4">
       {overdue
         ? <AlertTriangle size={18} className="text-status-danger shrink-0" />
         : <Clock size={18} className="text-status-info shrink-0" />}
@@ -267,7 +267,7 @@ function TaskRow({ task }: { task: any }) {
         <p className="font-medium text-foreground truncate">{task.title}</p>
         <p className="text-xs text-muted-foreground">{task.assignee?.name ?? "Barcha"}</p>
       </div>
-      <span className={`px-2 py-0.5 text-xs font-medium rounded ${overdue ? "bg-[var(--status-danger-soft)] text-[var(--status-danger-fg)]" : "bg-[var(--status-info-soft)] text-[var(--status-info-fg)]"}`}>
+      <span className={`px-2 py-0.5 text-xs font-medium ${overdue ? "bg-[var(--status-danger-soft)] text-[var(--status-danger-fg)]" : "bg-[var(--status-info-soft)] text-[var(--status-info-fg)]"}`}>
         {dueLabel}
       </span>
     </div>
@@ -297,10 +297,10 @@ function healthScoreStroke(color: ReturnType<typeof healthScoreColor>) {
 }
 
 function InsightCard({ type, title, desc }: { type: InsightType; title: string; desc: string }) {
-  const styles: Record<InsightType, string> = {
-    danger: "bg-[var(--status-danger-soft)] border-status-danger/25",
-    warning: "bg-[var(--status-warning-soft)] border-status-warning/25",
-    info: "bg-[var(--status-info-soft)] border-status-info/25",
+  const borderStyles: Record<InsightType, string> = {
+    danger: "border-status-danger",
+    warning: "border-status-warning",
+    info: "border-status-info",
   };
   const icons: Record<InsightType, React.ReactNode> = {
     danger: <AlertTriangle size={18} className="text-status-danger" />,
@@ -313,9 +313,9 @@ function InsightCard({ type, title, desc }: { type: InsightType; title: string; 
     info: "text-[var(--status-info-fg)]",
   };
   return (
-    <div className={`p-3 rounded-lg border ${styles[type]}`}>
+    <div className="product-row py-4">
       <div className="flex items-start gap-2">
-        {icons[type]}
+        <div className={`border-l-2 pl-3 ${borderStyles[type]}`}>{icons[type]}</div>
         <div>
           <h4 className={`text-sm font-semibold ${textStyles[type]}`}>{title}</h4>
           <p className={`text-xs mt-1 ${textStyles[type]} opacity-90`}>{desc}</p>

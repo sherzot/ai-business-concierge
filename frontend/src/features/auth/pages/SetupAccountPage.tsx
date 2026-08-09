@@ -19,7 +19,7 @@ import { useI18n } from "../../../app/providers/I18nProvider";
 import { useAuthContext } from "../context/AuthContext";
 import { supabase } from "../../../shared/lib/supabase";
 import { notifySetupComplete } from "../api/authApi";
-import { LocaleSelect } from "../../../shared/components/LocaleSelect";
+import { AuthShell, authInputClass, authLabelClass } from "../components/AuthShell";
 
 export function SetupAccountPage() {
   const { translate } = useI18n();
@@ -49,8 +49,8 @@ export function SetupAccountPage() {
 
   if (loading || !session) {
     return (
-      <div className="min-h-screen grid place-items-center bg-slate-50">
-        <div className="text-slate-500 animate-pulse">{translate("common.loading")}</div>
+      <div className="grid min-h-screen place-items-center bg-background">
+        <div className="animate-pulse text-muted-foreground">{translate("common.loading")}</div>
       </div>
     );
   }
@@ -105,91 +105,89 @@ export function SetupAccountPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 relative px-4">
-      <div className="absolute top-4 right-4">
-        <LocaleSelect variant="light" />
-      </div>
-
-      <div className="w-full max-w-md">
-        <div className="text-center mb-6">
-          <div className="inline-flex w-16 h-16 rounded-xl bg-indigo-600 items-center justify-center mb-4 shadow-sm">
-            <span className="font-bold text-2xl text-white">C</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900">{translate("setup.title")}</h1>
-          <p className="text-slate-500 mt-1 text-sm">{translate("setup.subtitle")}</p>
-          <p className="text-xs text-slate-400 mt-2">
+    <AuthShell backTo="/login" backLabel={translate("auth.backToLogin")}>
+      <div className="border-y border-border py-8">
+        <div className="mb-8">
+          <p className="editorial-kicker">Workspace activation</p>
+          <h1 className="mt-5 text-4xl font-semibold tracking-[-0.05em] text-foreground">{translate("setup.title")}</h1>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">{translate("setup.subtitle")}</p>
+          <p className="mt-2 text-xs font-semibold text-foreground">
             {session.user.email}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-2xl p-7 space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-slate-900">
+            <label htmlFor="setup-password" className={authLabelClass}>
               {translate("setup.password")}
             </label>
             <input
+              id="setup-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               minLength={8}
               autoComplete="new-password"
               placeholder={translate("setup.passwordPlaceholder")}
-              className="mt-1.5 w-full rounded-lg border border-slate-300 px-4 py-2.5 text-base focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className={authInputClass}
               required
             />
-            <p className="mt-1 text-xs text-slate-500">{translate("setup.passwordHint")}</p>
+            <p className="mt-2 text-xs text-muted-foreground">{translate("setup.passwordHint")}</p>
           </div>
 
           {/* Confirm password */}
           <div>
-            <label className="block text-sm font-medium text-slate-900">
+            <label htmlFor="setup-password-confirm" className={authLabelClass}>
               {translate("setup.confirmPassword")}
             </label>
             <input
+              id="setup-password-confirm"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               minLength={8}
               autoComplete="new-password"
-              className="mt-1.5 w-full rounded-lg border border-slate-300 px-4 py-2.5 text-base focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className={authInputClass}
               required
             />
           </div>
 
           {/* Phone */}
           <div>
-            <label className="block text-sm font-medium text-slate-900">
+            <label htmlFor="setup-phone" className={authLabelClass}>
               {translate("setup.phone")}
             </label>
             <input
+              id="setup-phone"
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+998 XX XXX XX XX"
-              className="mt-1.5 w-full rounded-lg border border-slate-300 px-4 py-2.5 text-base focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className={authInputClass}
               required
             />
-            <p className="mt-1 text-xs text-slate-500">{translate("setup.phoneHint")}</p>
+            <p className="mt-2 text-xs text-muted-foreground">{translate("setup.phoneHint")}</p>
           </div>
 
           {/* DOB */}
           <div>
-            <label className="block text-sm font-medium text-slate-900">
+            <label htmlFor="setup-dob" className={authLabelClass}>
               {translate("setup.dob")}
             </label>
             <input
+              id="setup-dob"
               type="date"
               value={dateOfBirth}
               onChange={(e) => setDateOfBirth(e.target.value)}
               max={new Date().toISOString().slice(0, 10)}
-              className="mt-1.5 w-full rounded-lg border border-slate-300 px-4 py-2.5 text-base focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className={authInputClass}
               required
             />
           </div>
 
           {error && (
-            <div className="rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <div className="border-l-2 border-status-danger py-2 pl-4 text-sm text-[var(--status-danger-fg)]">
               {error}
             </div>
           )}
@@ -197,12 +195,12 @@ export function SetupAccountPage() {
           <button
             type="submit"
             disabled={pending}
-            className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-base font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="editorial-btn-primary mt-2 w-full disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pending ? translate("setup.submitting") : translate("setup.submit")}
           </button>
         </form>
       </div>
-    </div>
+    </AuthShell>
   );
 }

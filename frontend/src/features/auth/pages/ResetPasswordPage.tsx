@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, ArrowLeft, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { Clock3, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { useI18n } from "../../../app/providers/I18nProvider";
 import { supabase } from "../../../shared/lib/supabase";
-import { LocaleSelect } from "../../../shared/components/LocaleSelect";
+import { AuthShell, authInputClass, authLabelClass } from "../components/AuthShell";
 
 export function ResetPasswordPage() {
   const { translate } = useI18n();
@@ -60,74 +60,52 @@ export function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200">
-        <Link
-          to="/login"
-          className="flex items-center gap-2 text-slate-500 hover:text-slate-900 text-sm transition-colors"
-        >
-          <ArrowLeft size={16} />
-          {translate("auth.backToLogin")}
-        </Link>
-        <LocaleSelect variant="light" />
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md">
-          {/* Logo */}
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-sm">
-              <Sparkles size={20} className="text-white" />
-            </div>
-            <span className="font-bold text-slate-900 text-lg">AI Business Concierge</span>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+    <AuthShell backTo="/login" backLabel={translate("auth.backToLogin")}>
+          <div className="border-y border-border py-8">
             {expired ? (
-              <div className="text-center">
-                <div className="inline-flex w-16 h-16 rounded-full bg-amber-100 items-center justify-center mb-4">
-                  <span className="text-3xl">⏰</span>
+              <div>
+                <div className="mb-6 flex h-12 w-12 items-center justify-center border border-status-warning text-status-warning">
+                  <Clock3 size={24} />
                 </div>
-                <h1 className="text-xl font-bold text-slate-900 mb-2">
+                <h1 className="text-3xl font-semibold tracking-[-0.045em] text-foreground">
                   {translate("auth.resetPasswordExpired")}
                 </h1>
                 <Link
                   to="/forgot-password"
-                  className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors"
+                  className="editorial-btn-primary mt-7"
                 >
                   {translate("auth.forgotPasswordSubmit")}
                 </Link>
               </div>
             ) : success ? (
-              <div className="text-center">
-                <div className="inline-flex w-16 h-16 rounded-full bg-emerald-100 items-center justify-center mb-4">
-                  <CheckCircle2 size={32} className="text-emerald-600" />
+              <div>
+                <div className="mb-6 flex h-12 w-12 items-center justify-center border border-status-success text-status-success">
+                  <CheckCircle2 size={24} />
                 </div>
-                <h1 className="text-2xl font-bold text-slate-900 mb-2">
+                <h1 className="text-3xl font-semibold tracking-[-0.045em] text-foreground">
                   {translate("auth.resetPasswordSuccess")}
                 </h1>
-                <p className="text-slate-500 text-sm">{translate("auth.backToLogin")}...</p>
+                <p className="mt-3 text-sm text-muted-foreground">{translate("auth.backToLogin")}...</p>
               </div>
             ) : (
               <>
-                <h1 className="text-2xl font-bold text-slate-900 mb-1">
+                <p className="editorial-kicker">Security update</p>
+                <h1 className="mt-5 text-4xl font-semibold tracking-[-0.05em] text-foreground">
                   {translate("auth.resetPasswordTitle")}
                 </h1>
-                <p className="text-slate-500 text-sm mb-7">
+                <p className="mb-8 mt-3 text-sm leading-6 text-muted-foreground">
                   {translate("auth.resetPasswordSubtitle")}
                 </p>
 
                 {error && (
-                  <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-sm">
+                  <div className="mb-5 border-l-2 border-status-danger py-2 pl-4 text-sm text-[var(--status-danger-fg)]">
                     {error}
                   </div>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">
+                    <label htmlFor="password" className={authLabelClass}>
                       {translate("setup.password")}
                     </label>
                     <div className="relative">
@@ -140,21 +118,22 @@ export function ResetPasswordPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder={translate("setup.passwordPlaceholder")}
-                        className="w-full rounded-xl bg-white border border-slate-300 text-slate-900 placeholder-slate-400 px-4 py-3 pr-11 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                        className={`${authInputClass} pr-11`}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPwd((s) => !s)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                        aria-label={showPwd ? "Parolni yashirish" : "Parolni ko'rsatish"}
                       >
                         {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
-                    <p className="mt-1 text-xs text-slate-400">{translate("setup.passwordHint")}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">{translate("setup.passwordHint")}</p>
                   </div>
 
                   <div>
-                    <label htmlFor="confirm" className="block text-sm font-medium text-slate-700 mb-1.5">
+                    <label htmlFor="confirm" className={authLabelClass}>
                       {translate("setup.confirmPassword")}
                     </label>
                     <input
@@ -164,14 +143,14 @@ export function ResetPasswordPage() {
                       autoComplete="new-password"
                       value={confirm}
                       onChange={(e) => setConfirm(e.target.value)}
-                      className="w-full rounded-xl bg-white border border-slate-300 text-slate-900 placeholder-slate-400 px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                      className={authInputClass}
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full rounded-xl bg-indigo-600 text-white font-semibold py-3 text-sm hover:bg-indigo-700 active:scale-[.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                    className="editorial-btn-primary mt-2 w-full disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {submitting
                       ? translate("auth.resetPasswordSubmitting")
@@ -181,8 +160,6 @@ export function ResetPasswordPage() {
               </>
             )}
           </div>
-        </div>
-      </div>
-    </div>
+    </AuthShell>
   );
 }

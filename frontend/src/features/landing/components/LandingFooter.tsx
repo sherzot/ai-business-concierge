@@ -1,7 +1,7 @@
 import React from "react";
-import { Sparkles } from "lucide-react";
 import type { landingI18n } from "../i18n";
 import type { LandingLocale } from "../types";
+import { BrandLockup } from "../../../shared/components/BrandMark";
 
 type FooterT = typeof landingI18n[LandingLocale]["footer"];
 
@@ -23,15 +23,12 @@ export function LandingFooter({ t }: Props) {
   }
 
   return (
-    <footer className="py-10 bg-white border-t border-slate-200">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-          {/* Brand */}
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-              <Sparkles size={14} className="text-indigo-600" aria-hidden="true" />
-            </div>
-            <span className="text-slate-600 text-sm">{t.tagline}</span>
+    <footer className="border-t border-border bg-background py-10">
+      <div className="editorial-page">
+        <div className="flex flex-col items-start justify-between gap-7 sm:flex-row sm:items-center">
+          <div>
+            <BrandLockup compact />
+            <p className="mt-3 text-sm text-muted-foreground">{t.tagline}</p>
           </div>
 
           {/* Nav links */}
@@ -41,7 +38,7 @@ export function LandingFooter({ t }: Props) {
                 key={link.href}
                 href={link.href}
                 onClick={(e) => scrollTo(e, link.href)}
-                className="px-3 py-1 text-sm text-slate-500 hover:text-slate-900 transition-colors rounded-lg hover:bg-slate-50"
+                className="px-2 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
               >
                 {link.label(t)}
               </a>
@@ -49,7 +46,7 @@ export function LandingFooter({ t }: Props) {
           </nav>
         </div>
 
-        <p className="text-slate-400 text-xs text-center mt-6">{t.rights}</p>
+        <p className="mt-8 border-t border-border pt-6 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{t.rights}</p>
       </div>
     </footer>
   );

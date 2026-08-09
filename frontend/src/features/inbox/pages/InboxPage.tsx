@@ -28,14 +28,14 @@ export function InboxPage({ tenant }: { tenant: { id: string; name: string } }) 
   ];
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+    <div className="flex h-[calc(100vh-8rem)] overflow-hidden border-y border-border bg-transparent">
 
       {/* LEFT: List */}
-      <div className="w-full md:w-1/3 border-r border-slate-200 flex flex-col bg-slate-50">
-        <div className="p-3 border-b border-slate-200 flex items-center justify-between bg-white">
+      <div className="flex w-full flex-col border-r border-border bg-transparent md:w-1/3">
+        <div className="flex min-h-16 items-center justify-between border-b border-border bg-transparent p-3">
           <div className="flex items-center gap-2">
             <h2 className="font-semibold text-slate-700 px-2">{translate("inbox.title")}</h2>
-            <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full">
+            <span className="border-l-2 border-primary pl-2 text-xs font-bold text-primary">
               {filteredItems.length}
             </span>
           </div>
@@ -44,14 +44,14 @@ export function InboxPage({ tenant }: { tenant: { id: string; name: string } }) 
           </button>
         </div>
 
-        <div className="flex gap-2 p-2 overflow-x-auto border-b border-slate-200 bg-white">
+        <div className="flex gap-4 overflow-x-auto border-b border-border bg-transparent px-3 py-2">
           {filterTabs.map((f) => (
             <button
               key={f.id}
               onClick={() => setFilter(f.id)}
               className={clsx(
-                "px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-colors",
-                filter === f.id ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                "whitespace-nowrap border-b-2 px-1 py-2 text-xs font-bold uppercase tracking-[0.08em] transition-colors",
+                filter === f.id ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
               )}
             >
               {f.label}
@@ -71,7 +71,7 @@ export function InboxPage({ tenant }: { tenant: { id: string; name: string } }) 
               onClick={() => setSelectedItem(item)}
               className={clsx(
                 "p-4 border-b border-slate-100 cursor-pointer hover:bg-white transition-colors group relative",
-                selectedItem?.id === item.id ? "bg-white shadow-sm border-l-4 border-l-indigo-600" : "bg-transparent border-l-4 border-l-transparent",
+                selectedItem?.id === item.id ? "bg-card border-l-4 border-l-primary" : "bg-transparent border-l-4 border-l-transparent",
                 !item.isRead && "bg-indigo-50/40"
               )}
             >
@@ -114,10 +114,10 @@ export function InboxPage({ tenant }: { tenant: { id: string; name: string } }) 
       </div>
 
       {/* RIGHT: Detail */}
-      <div className="hidden md:flex flex-1 flex-col bg-white">
+      <div className="hidden flex-1 flex-col bg-transparent md:flex">
         {selectedItem ? (
           <>
-            <div className="h-14 border-b border-slate-200 flex items-center justify-between px-6 bg-white">
+            <div className="flex h-16 items-center justify-between border-b border-border bg-transparent px-6">
               <div className="flex items-center gap-2 text-slate-500">
                 <button className="p-2 hover:bg-slate-100 rounded-lg"><CheckSquare size={18} /></button>
                 <button className="p-2 hover:bg-slate-100 rounded-lg"><Clock size={18} /></button>
@@ -164,7 +164,7 @@ export function InboxPage({ tenant }: { tenant: { id: string; name: string } }) 
                   <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{selectedItem.preview}</p>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-8">
+                <div className="mb-8 border-y border-border py-5">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-5 h-5 bg-indigo-600 rounded flex items-center justify-center">
                       <Star size={12} className="text-white" />
@@ -173,7 +173,7 @@ export function InboxPage({ tenant }: { tenant: { id: string; name: string } }) 
                   </div>
                   <div className="grid gap-2">
                     {selectedItem.category === 'HR' && (
-                      <button className="w-full text-left p-3 bg-white border border-slate-200 hover:border-indigo-300 rounded-lg shadow-sm transition-all flex items-center justify-between group">
+                      <button className="group flex w-full items-center justify-between border-t border-border bg-transparent p-3 text-left transition-colors hover:bg-secondary">
                         <div className="flex items-center gap-3">
                           <FileText size={16} className="text-indigo-500" />
                           <div>
@@ -184,7 +184,7 @@ export function InboxPage({ tenant }: { tenant: { id: string; name: string } }) 
                         <ArrowRightIcon className="text-slate-300 group-hover:text-indigo-500" />
                       </button>
                     )}
-                    <button className="w-full text-left p-3 bg-white border border-slate-200 hover:border-indigo-300 rounded-lg shadow-sm transition-all flex items-center justify-between group">
+                    <button className="group flex w-full items-center justify-between border-y border-border bg-transparent p-3 text-left transition-colors hover:bg-secondary">
                       <div className="flex items-center gap-3">
                         <CheckSquare size={16} className="text-emerald-500" />
                         <div>

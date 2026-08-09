@@ -8,19 +8,19 @@ type Props = { t: StatsT };
 
 export function StatsBar({ t }: Props) {
   return (
-    <div className="bg-indigo-50 border-y border-indigo-100">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+    <section className="border-b border-border bg-background" aria-label="Product metrics">
+      <div className="editorial-page">
+        <dl className="grid grid-cols-2 border-l border-border md:grid-cols-4">
           {t.items.map((item) => (
-            <div key={item.label} className="text-center">
-              <div className="text-3xl sm:text-4xl font-extrabold text-indigo-700 mb-1 tabular-nums">
+            <div key={item.label} className="border-r border-border px-5 py-7 sm:px-7 sm:py-9">
+              <dt className="text-3xl font-semibold tracking-[-0.05em] text-foreground sm:text-4xl tabular-nums">
                 {item.value}
-              </div>
-              <div className="text-sm text-slate-600">{item.label}</div>
+              </dt>
+              <dd className="mt-2 text-[11px] font-semibold uppercase leading-5 tracking-[0.12em] text-muted-foreground">{item.label}</dd>
             </div>
           ))}
-        </div>
+        </dl>
       </div>
-    </div>
+    </section>
   );
 }

@@ -8,34 +8,21 @@ type Props = { t: ForWhoT };
 
 export function ForWhoSection({ t }: Props) {
   return (
-    <section className="py-20 sm:py-24 bg-slate-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">{t.title}</h2>
-          <p className="text-slate-600 text-lg">{t.subtitle}</p>
-        </div>
+    <section className="editorial-section bg-card">
+      <div className="editorial-page grid gap-12 lg:grid-cols-12">
+        <header className="lg:col-span-4">
+          <p className="editorial-kicker">Teams</p>
+          <h2 className="editorial-title mt-6 !text-[clamp(1.9rem,3.4vw,2.75rem)]">{t.title}</h2>
+          <p className="editorial-copy mt-6 text-base">{t.subtitle}</p>
+        </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {t.items.map((item, idx) => (
-            <div
-              key={item.title}
-              className={`rounded-2xl border p-6 flex gap-4 transition-all hover:border-indigo-300 hover:shadow-sm ${
-                idx === t.items.length - 1 && t.items.length % 3 !== 0
-                  ? "lg:col-span-1"
-                  : ""
-              } bg-white border-slate-200`}
-            >
-              <div
-                className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0 text-2xl"
-                aria-hidden="true"
-              >
-                {item.icon}
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 mb-1.5">{item.title}</h3>
-                <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
-              </div>
-            </div>
+        <div className="editorial-rule-list lg:col-span-8">
+          {t.items.map((item, index) => (
+            <article key={item.title} className="grid gap-4 py-6 sm:grid-cols-[3rem_1fr_1.4fr] sm:gap-6">
+              <span className="text-[11px] font-bold tracking-[0.16em] text-primary">0{index + 1}</span>
+              <h3 className="text-base font-semibold text-foreground">{item.title}</h3>
+              <p className="text-sm leading-6 text-muted-foreground">{item.desc}</p>
+            </article>
           ))}
         </div>
       </div>

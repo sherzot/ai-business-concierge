@@ -1,6 +1,6 @@
 # AI Business Concierge — faol reja
 
-> Version: 4.5
+> Version: 4.6
 > Yangilandi: 2026-08-08
 > Bu faylda faqat faol va navbatdagi ishlar turadi. 2026-07-24 gacha bo'lgan katta tarixiy reja [archive/PLAN_LEGACY_2026-07-24.md](archive/PLAN_LEGACY_2026-07-24.md)ga ko'chirilgan.
 
@@ -19,6 +19,16 @@
 - [x] Production dependency auditni scoped gate bilan tekshirish: unexcepted high/critical 0; GHSA-qwww/React Router 7.18.2 metadata exceptioni 2026-08-21gacha.
 - [x] Production `bright-api` health `200`, protected endpoint authsiz `401` ekanini smoke-test qilish.
 - [x] Natijani `DEVLOG.md` va `STATUS.md`ga yozish.
+
+## P1 — Portfolio-inspired frontend redesignni yetkazish
+
+- [x] Portfolio visual tilini audit qilib warm canvas, ink typography, Sher-blue accent, divider va restrained-motion design system yaratish.
+- [x] Landing/public forms, auth oqimlari, product shell/dashboard, Inbox, Tasks, Docs, Settings va admin shellni redesign qilish.
+- [x] Qolgan legacy modullar uchun semantic compatibility layer, light/dark, reduced-motion va focus-visible holatlarini saqlash.
+- [x] TypeScript, 101/101 test, production build, security gate va dependency auditni o'tkazish.
+- [x] Browser-enabled muhitda desktop/mobile landing, login, forgot-password va contact route'larni vizual acceptance qilish; overlay, browser error va horizontal overflow topilmadi.
+- [x] Topilmasiz redesignni `83bc7e0` bilan commit/push qilish, PR #2 ochish, GitHub CI/Vercel/Netlify previewni tekshirish.
+- [ ] Portfolio visual consolidationni yakunlash: qolgan legacy status/category surface’larini audit qilish, decorative emoji/stickerlarni olib tashlash va barcha route’larda editorial palette/cardless compositionni browser bilan tasdiqlash.
 
 ## P1 — Supabase/Netlify security handoffini yakunlash
 

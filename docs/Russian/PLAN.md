@@ -1,6 +1,6 @@
 # AI Business Concierge — активный план
 
-> Версия 4.5 · Обновлено 2026-08-08
+> Версия 4.6 · Обновлено 2026-08-08
 > Здесь только активные и следующие задачи. Старый master plan: [../archive/Russian/PLAN_LEGACY_2026-07-24.md](../archive/Russian/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — безопасное начало сессии
@@ -11,6 +11,15 @@
 - [x] Scoped production audit: 0 unexcepted high/critical; GHSA-qwww exception до 2026-08-21.
 - [x] Проверить production health `200` и protected route без auth `401`.
 - [x] Записать доказательства в DEVLOG и STATUS.
+
+## P1 — доставить Portfolio-inspired frontend redesign
+
+- [x] Проанализировать visual language Portfolio и создать warm canvas, ink typography, Sher-blue, dividers и restrained-motion foundation.
+- [x] Переработать landing/public forms, auth flows, product shell/dashboard, Inbox, Tasks, Docs, Settings и admin shell.
+- [x] Выровнять оставшиеся legacy modules через semantic compatibility с сохранением light/dark, reduced motion и focus-visible.
+- [x] Пройти TypeScript, 101/101 tests, production build, security gate и dependency audit.
+- [x] Выполнить browser acceptance desktop/mobile landing, login, forgot-password и contact routes; overlay, browser errors и horizontal overflow не обнаружены.
+- [x] Commit/push redesign без находок как `83bc7e0`, открыть PR #2 и проверить GitHub CI/Vercel/Netlify preview.
 
 ## P1 — завершить Supabase/Netlify security handoff
 

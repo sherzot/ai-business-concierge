@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { clsx } from "clsx";
-import { Bell, BellOff, CheckCheck } from "lucide-react";
+import { Bell, BellOff, CheckCheck, CreditCard, ListTodo, UserRound, Wrench } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,12 +13,12 @@ import { formatDistanceToNow } from "date-fns";
 import { enUS, ja, ru, uz } from "date-fns/locale";
 import { useI18n } from "../../../app/providers/I18nProvider";
 
-// Icon per notification type
-const TYPE_ICON: Record<string, string> = {
-  task: "✅",
-  hr: "👤",
-  invoice: "💳",
-  system: "🔧",
+// Lucide icons keep notification type legible without decorative emoji.
+const TYPE_ICON = {
+  task: ListTodo,
+  hr: UserRound,
+  invoice: CreditCard,
+  system: Wrench,
 };
 
 type Props = {
@@ -115,8 +115,11 @@ export function NotificationsDropdown({ tenantId, userId, onViewAll }: Props) {
                 )}
               >
                 {/* Type icon */}
-                <span className="text-base mt-0.5 shrink-0">
-                  {TYPE_ICON[(n as any).type ?? ""] ?? "🔔"}
+                <span className="mt-0.5 shrink-0 text-muted-foreground">
+                  {(() => {
+                    const Icon = TYPE_ICON[(n as any).type as keyof typeof TYPE_ICON] ?? Bell;
+                    return <Icon size={16} aria-hidden="true" />;
+                  })()}
                 </span>
 
                 <div className="flex-1 min-w-0">

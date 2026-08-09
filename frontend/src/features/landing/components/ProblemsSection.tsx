@@ -9,44 +9,36 @@ type Props = { t: ProblemsT };
 
 export function ProblemsSection({ t }: Props) {
   return (
-    <section className="py-20 sm:py-24 bg-slate-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">{t.title}</h2>
-          <p className="text-slate-600 text-lg">{t.subtitle}</p>
-        </div>
+    <section className="editorial-section bg-card">
+      <div className="editorial-page">
+        <header className="mb-12 grid gap-7 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-8">
+            <p className="editorial-kicker">Before / after</p>
+            <h2 className="editorial-title mt-6">{t.title}</h2>
+          </div>
+          <p className="editorial-copy text-base lg:col-span-4">{t.subtitle}</p>
+        </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {t.items.map((item) => (
-            <div
-              key={item.problem}
-              className="rounded-2xl bg-white border border-slate-200 overflow-hidden"
-            >
-              <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-                <span className="text-2xl" aria-hidden="true">{item.emoji}</span>
-                <h3 className="text-base font-bold text-slate-900">{item.problem}</h3>
+        <div className="editorial-rule-list">
+          {t.items.map((item, index) => (
+            <article key={item.problem} className="grid gap-6 py-8 lg:grid-cols-12 lg:gap-10">
+              <div className="lg:col-span-4">
+                <span className="text-[11px] font-bold tracking-[0.16em] text-primary">0{index + 1}</span>
+                <h3 className="mt-4 text-xl font-semibold tracking-[-0.025em] text-foreground">{item.problem}</h3>
               </div>
-              <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="rounded-xl bg-red-50 border border-red-100 p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <X size={14} className="text-red-600" aria-hidden="true" />
-                    <span className="text-xs font-semibold text-red-700 uppercase tracking-wide">
-                      {t.beforeLabel}
-                    </span>
-                  </div>
-                  <p className="text-slate-700 text-sm leading-relaxed">{item.before}</p>
+              <div className="lg:col-span-4">
+                <div className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-status-danger">
+                  <X size={13} /> {t.beforeLabel}
                 </div>
-                <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Check size={14} className="text-emerald-600" aria-hidden="true" />
-                    <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">
-                      {t.afterLabel}
-                    </span>
-                  </div>
-                  <p className="text-slate-700 text-sm leading-relaxed">{item.after}</p>
-                </div>
+                <p className="text-sm leading-7 text-muted-foreground">{item.before}</p>
               </div>
-            </div>
+              <div className="lg:col-span-4">
+                <div className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-status-success">
+                  <Check size={13} /> {t.afterLabel}
+                </div>
+                <p className="text-sm leading-7 text-foreground">{item.after}</p>
+              </div>
+            </article>
           ))}
         </div>
       </div>

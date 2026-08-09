@@ -15,80 +15,62 @@ export function CompanyOnboardingSection({ t, tNav }: Props) {
   return (
     <section
       id="company-onboarding"
-      className="py-20 sm:py-24 bg-white"
+      className="editorial-section bg-card"
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Header */}
-        <div className="text-center mb-14">
-          <span className="inline-block px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold uppercase tracking-widest mb-4">
-            {t.badge}
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">{t.title}</h2>
-          <p className="text-slate-600 text-lg max-w-2xl mx-auto">{t.subtitle}</p>
-        </div>
+      <div className="editorial-page">
+        <header className="mb-12 grid gap-8 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-8">
+            <p className="editorial-kicker">{t.badge}</p>
+            <h2 className="editorial-title mt-6">{t.title}</h2>
+          </div>
+          <p className="editorial-copy text-base lg:col-span-4">{t.subtitle}</p>
+        </header>
 
         {/* 4-step process */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
+        <div className="grid border-l border-t border-border sm:grid-cols-2 lg:grid-cols-4">
           {t.steps.map((step, idx) => (
-            <div key={step.step} className="relative">
-              {/* Connector line (desktop only) */}
-              {idx < t.steps.length - 1 && (
-                <div
-                  className="hidden lg:block absolute top-9 left-[calc(100%-8px)] w-5 z-10"
-                  aria-hidden="true"
-                >
-                  <ArrowRight size={16} className="text-indigo-300" />
-                </div>
-              )}
-              <div className="rounded-2xl bg-white border border-slate-200 p-6 hover:border-indigo-300 hover:shadow-sm transition-all h-full">
-                {/* Step number + icon */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-xl flex-shrink-0">
-                    {step.icon}
-                  </div>
-                  <span className="text-xs font-bold text-indigo-700 uppercase tracking-wider">
-                    {step.step}
-                  </span>
-                </div>
-                <h3 className="text-base font-bold text-slate-900 mb-2">{step.title}</h3>
-                <p className="text-slate-600 text-sm leading-relaxed">{step.desc}</p>
+            <article key={step.step} className="relative min-h-60 border-b border-r border-border p-6 transition-colors hover:bg-background lg:p-7">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">{step.step}</span>
+                {idx < t.steps.length - 1 && <ArrowRight size={16} className="text-muted-foreground" />}
               </div>
-            </div>
+              <h3 className="mt-16 text-lg font-semibold tracking-[-0.02em] text-foreground">{step.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">{step.desc}</p>
+            </article>
           ))}
         </div>
 
         {/* Features grid */}
-        <div className="rounded-2xl bg-slate-50 border border-indigo-100 p-8 mb-10">
-          <h3 className="text-lg font-bold text-slate-900 mb-6 text-center">{t.featuresTitle}</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="mt-14 grid gap-8 border-y border-border py-8 lg:grid-cols-12">
+          <h3 className="text-lg font-semibold tracking-[-0.02em] text-foreground lg:col-span-4">{t.featuresTitle}</h3>
+          <div className="grid gap-4 sm:grid-cols-2 lg:col-span-8">
             {t.features.map((f) => (
               <div key={f.text} className="flex items-center gap-3">
-                <CheckCircle2 size={16} className="text-indigo-600 flex-shrink-0" aria-hidden="true" />
-                <span className="text-sm text-slate-700">{f.text}</span>
+                <CheckCircle2 size={15} className="shrink-0 text-primary" aria-hidden="true" />
+                <span className="text-sm text-foreground">{f.text}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* CTA */}
-        <div className="text-center">
+        <div className="mt-10 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+          <div>
+            <p className="text-sm text-muted-foreground">{t.ctaNote}</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {t.alreadyAccount}{" "}
+              <button onClick={() => navigate("/login")} className="font-semibold text-foreground underline underline-offset-4 hover:text-primary">
+                {tNav.login}
+              </button>
+            </p>
+          </div>
           <button
             onClick={() => navigate("/contact")}
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-indigo-600 text-white font-semibold text-base hover:bg-indigo-700 active:scale-95 transition-all shadow-sm mb-3"
+            className="editorial-btn-primary"
           >
             {t.cta}
             <ArrowRight size={18} aria-hidden="true" />
           </button>
-          <p className="text-slate-500 text-sm mb-4">{t.ctaNote}</p>
-          <p className="text-slate-600 text-sm">
-            {t.alreadyAccount}{" "}
-            <button
-              onClick={() => navigate("/login")}
-              className="text-indigo-700 hover:text-indigo-800 underline underline-offset-2 transition-colors"
-            >
-              {tNav.login}
-            </button>
-          </p>
         </div>
       </div>
     </section>

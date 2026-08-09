@@ -75,19 +75,23 @@ export function TasksPage({ tenant }: { tenant: { id: string } }) {
   }
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col">
+    <div className="flex h-[calc(100vh-8rem)] flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
         <div className="flex items-center gap-4">
+          <div className="mr-2">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary">Workflow</p>
+            <h2 className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-foreground">{translate("nav.tasksTitle")}</h2>
+          </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
               type="text"
               placeholder={translate("tasks.search")}
-              className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 w-64"
+              className="w-56 border-0 border-b border-border bg-transparent py-2 pl-9 pr-4 text-sm outline-none transition-colors focus:border-primary"
             />
           </div>
-          <div className="flex items-center bg-white border border-slate-200 rounded-lg p-1">
+          <div className="flex items-center border border-border bg-transparent p-1">
             <button
               onClick={() => setViewMode('board')}
               className={clsx("p-1.5 rounded-md transition-all", viewMode === 'board' ? "bg-indigo-50 text-indigo-600 shadow-sm" : "text-slate-500 hover:bg-slate-50")}
@@ -108,7 +112,7 @@ export function TasksPage({ tenant }: { tenant: { id: string } }) {
           </button>
           <button
             onClick={() => setCreatingTask(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 shadow-sm shadow-indigo-200 transition-all"
+            className="editorial-btn-primary min-h-10 px-4 py-2 text-sm"
           >
             <Plus size={18} /> {translate("tasks.newTask")}
           </button>
@@ -124,7 +128,7 @@ export function TasksPage({ tenant }: { tenant: { id: string } }) {
         ) : viewMode === 'board' ? (
           <div className="flex gap-6 h-full min-w-[1000px] pb-4">
             {columns.map((col) => (
-              <div key={col.id} className="flex-1 flex flex-col bg-slate-50/50 rounded-xl border border-slate-200/60">
+              <section key={col.id} className="flex flex-1 flex-col border-y border-border bg-transparent">
                 <div className="p-4 flex items-center justify-between border-b border-slate-100">
                   <div className="flex items-center gap-2">
                     <span className={`w-2.5 h-2.5 rounded-full ${col.color}`} />
@@ -152,11 +156,11 @@ export function TasksPage({ tenant }: { tenant: { id: string } }) {
                     <Plus size={16} /> {translate("tasks.addTask")}
                   </button>
                 </div>
-              </div>
+              </section>
             ))}
           </div>
         ) : (
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <div className="overflow-hidden border-y border-border bg-transparent">
             <table className="w-full text-left border-collapse">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
@@ -275,7 +279,7 @@ function TaskCard({ task, currentUserId, onEdit, onDelete, onAcknowledge }: {
 }) {
   const { translate } = useI18n();
   return (
-    <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all group">
+    <article className="group border border-border bg-card p-4 transition-colors hover:border-primary/35">
       <div className="flex justify-between items-start mb-2">
         <PriorityBadge priority={task.priority} />
         <div className="flex items-center gap-1">
@@ -346,7 +350,7 @@ function TaskCard({ task, currentUserId, onEdit, onDelete, onAcknowledge }: {
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 

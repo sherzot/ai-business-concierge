@@ -1,38 +1,42 @@
 /* ============================================================================
-   Blue + Teal operational theme — AI Business Concierge
+   Portfolio-inspired editorial operations theme — AI Business Concierge
 
    Product fit:
-     - Dashboards are daily work surfaces, so neutrals carry most of the UI.
-     - Blue is the trust/action color.
-     - Teal is the secondary AI/automation accent.
+     - Warm neutral canvas and ink carry the interface.
+     - Sher blue is the only brand/action accent.
      - Status colors are explicit tokens, not ad hoc component colors.
 ============================================================================ */
 
 :root {
   color-scheme: light;
 
-  --brand-primary:        #2563eb;
-  --brand-primary-hover:  #1d4ed8;
-  --brand-primary-active: #1e40af;
-  --brand-primary-soft:   #dbeafe;
+  --brand-primary:        #315ef5;
+  --brand-primary-hover:  #2348c8;
+  --brand-primary-active: #18389f;
+  --brand-primary-soft:   #e7ebff;
   --brand-primary-fg:     #ffffff;
-  --brand-primary-ring:   rgba(37, 99, 235, 0.32);
+  --brand-primary-ring:   rgba(49, 94, 245, 0.28);
 
-  --brand-accent:         #0d9488;
-  --brand-accent-hover:   #0f766e;
-  --brand-accent-soft:    #ccfbf1;
-  --brand-accent-fg:      #042f2e;
+  --brand-accent:         #315ef5;
+  --brand-accent-hover:   #2348c8;
+  --brand-accent-soft:    #e7ebff;
+  --brand-accent-fg:      #18389f;
 
-  --brand-bg:             #f8fafc;
-  --brand-bg-soft:        #eef2f7;
+  --brand-bg:             #f4f3ef;
+  --brand-bg-soft:        #ecebe6;
   --brand-surface:        #ffffff;
-  --brand-surface-alt:    #f1f5f9;
-  --brand-border:         #e2e8f0;
-  --brand-border-strong:  #cbd5e1;
+  --brand-surface-alt:    #efeee9;
+  --brand-border:         #d9d9d4;
+  --brand-border-strong:  #b9bab5;
 
-  --brand-text:           #0f172a;
-  --brand-text-muted:     #64748b;
-  --brand-text-soft:      #94a3b8;
+  --brand-text:           #111318;
+  --brand-text-muted:     #686b73;
+  --brand-text-soft:      #7c8088;
+
+  /* Editorial inverse surfaces stay dark in both color schemes so public forms
+     using white-on-ink content retain readable contrast. */
+  --editorial-inverse-bg: #111318;
+  --editorial-inverse-fg: #f4f3ef;
 
   --status-success:       #16a34a;
   --status-success-soft:  #dcfce7;
@@ -78,47 +82,50 @@
   --sidebar-border:       var(--brand-border);
   --sidebar-ring:         var(--brand-primary-ring);
 
-  --chart-1: #2563eb;
-  --chart-2: #0d9488;
+  --chart-1: #315ef5;
+  --chart-2: #5f7cff;
   --chart-3: #16a34a;
   --chart-4: #d97706;
   --chart-5: #dc2626;
 
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
 
-  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
-  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.06), 0 1px 3px 0 rgba(15, 23, 42, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-xs: 0 1px 1px rgba(17, 19, 24, 0.025);
+  --shadow-sm: 0 1px 2px rgba(17, 19, 24, 0.04);
+  --shadow-md: 0 10px 28px rgba(17, 19, 24, 0.08);
 }
 
 .dark {
   color-scheme: dark;
 
-  --brand-primary:        #60a5fa;
-  --brand-primary-hover:  #93c5fd;
-  --brand-primary-active: #bfdbfe;
-  --brand-primary-soft:   rgba(37, 99, 235, 0.18);
-  --brand-primary-fg:     #082f49;
-  --brand-primary-ring:   rgba(96, 165, 250, 0.38);
+  --brand-primary:        #5f7cff;
+  --brand-primary-hover:  #8ca0ff;
+  --brand-primary-active: #b6c1ff;
+  --brand-primary-soft:   rgba(95, 124, 255, 0.16);
+  --brand-primary-fg:     #ffffff;
+  --brand-primary-ring:   rgba(95, 124, 255, 0.34);
 
-  --brand-accent:         #2dd4bf;
-  --brand-accent-hover:   #5eead4;
-  --brand-accent-soft:    rgba(13, 148, 136, 0.18);
-  --brand-accent-fg:      #ccfbf1;
+  --brand-accent:         #5f7cff;
+  --brand-accent-hover:   #8ca0ff;
+  --brand-accent-soft:    rgba(95, 124, 255, 0.16);
+  --brand-accent-fg:      #e7ebff;
 
-  --brand-bg:             #0b1120;
-  --brand-bg-soft:        #0f172a;
-  --brand-surface:        #111827;
-  --brand-surface-alt:    #1f2937;
-  --brand-border:         #334155;
-  --brand-border-strong:  #475569;
+  --brand-bg:             #0b0d10;
+  --brand-bg-soft:        #0e1115;
+  --brand-surface:        #111419;
+  --brand-surface-alt:    #181c22;
+  --brand-border:         #292d34;
+  --brand-border-strong:  #3b4049;
 
-  --brand-text:           #f8fafc;
-  --brand-text-muted:     #cbd5e1;
-  --brand-text-soft:      #94a3b8;
+  --brand-text:           #f3f4f6;
+  --brand-text-muted:     #a2a6af;
+  --brand-text-soft:      #7d828c;
+
+  --editorial-inverse-bg: #111318;
+  --editorial-inverse-fg: #f4f3ef;
 
   --status-success:       #4ade80;
   --status-success-soft:  rgba(22, 163, 74, 0.18);
@@ -188,6 +195,45 @@
   color: var(--accent-foreground);
   font-weight: 500;
 }
+
+/* Portfolio migration bridge for older feature modules.
+   This deliberately changes presentation only; existing component behavior and
+   status semantics remain untouched while all routes inherit one visual system. */
+.bg-white { background-color: var(--brand-surface); }
+.bg-slate-50, .bg-gray-50 { background-color: var(--brand-bg-soft); }
+.bg-slate-100, .bg-gray-100 { background-color: var(--brand-surface-alt); }
+.bg-slate-200, .bg-gray-200 { background-color: var(--brand-border); }
+
+.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700,
+.text-gray-950, .text-gray-900, .text-gray-800, .text-gray-700 { color: var(--brand-text); }
+.text-slate-600, .text-slate-500, .text-gray-600, .text-gray-500 { color: var(--brand-text-muted); }
+.text-slate-400, .text-slate-300, .text-gray-400, .text-gray-300 { color: var(--brand-text-soft); }
+
+.border-slate-100, .border-slate-200, .border-gray-100, .border-gray-200 { border-color: var(--brand-border); }
+.border-slate-300, .border-gray-300 { border-color: var(--brand-border-strong); }
+
+.bg-indigo-50, .bg-indigo-100, .bg-blue-50, .bg-blue-100 { background-color: var(--brand-primary-soft); }
+.bg-indigo-500, .bg-indigo-600, .bg-blue-500, .bg-blue-600 { background-color: var(--brand-primary); }
+.text-indigo-500, .text-indigo-600, .text-indigo-700,
+.text-blue-500, .text-blue-600, .text-blue-700 { color: var(--brand-primary); }
+.border-indigo-200, .border-indigo-300, .border-blue-200, .border-blue-300 { border-color: var(--brand-primary-ring); }
+.hover\:bg-indigo-700:hover, .hover\:bg-blue-700:hover { background-color: var(--brand-primary-hover); }
+.hover\:text-indigo-600:hover, .hover\:text-indigo-700:hover,
+.hover\:text-blue-600:hover, .hover\:text-blue-700:hover { color: var(--brand-primary-hover); }
+
+/* Keep legacy feature modules inside the editorial palette. Purple and pink
+   were decorative category colors, not product state, so they now resolve to
+   the same restrained blue/neutral system as the rest of the application. */
+[class*="bg-purple-"], [class*="bg-pink-"] { background-color: var(--brand-primary-soft); }
+[class*="text-purple-"], [class*="text-pink-"] { color: var(--brand-primary); }
+[class*="border-purple-"], [class*="border-pink-"] { border-color: var(--brand-primary-ring); }
+[class*="hover:bg-purple-"]:hover, [class*="hover:bg-pink-"]:hover { background-color: var(--brand-primary-soft); }
+[class*="hover:text-purple-"]:hover, [class*="hover:text-pink-"]:hover { color: var(--brand-primary-hover); }
+
+[class~="shadow-sm"], [class~="shadow-md"], [class~="shadow-lg"],
+[class~="shadow-xl"], [class~="shadow-2xl"] { box-shadow: none; }
+[class~="rounded-2xl"] { border-radius: var(--radius-xl); }
+[class~="rounded-xl"] { border-radius: var(--radius-lg); }
 
 /* Legacy utility compatibility.
    Existing feature surfaces still contain literal Tailwind neutral/status colors.
