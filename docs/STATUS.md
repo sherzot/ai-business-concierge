@@ -1,6 +1,6 @@
 # AI Business Concierge — joriy holat
 
-> Kod/platforma bo'yicha oxirgi tasdiqlangan snapshot: **2026-08-08**
+> Kod/platforma bo'yicha oxirgi tasdiqlangan snapshot: **2026-08-10**
 > Hujjatlar tartiblangan sana: **2026-08-07**
 > Lokal runtime, production health/auth va remote GitHub Actions baseline'i 2026-08-07 kuni qayta tekshirildi. P0 commitlari push qilindi va yangi CI run to'liq green yakunlandi.
 > 2026-08-08: publishable-key commit push/CI/Netlify deploy qilindi, ammo production bundle hali legacy fallback ishlatmoqda. Risk scanner jadvallarining browser Data API ruxsatlari productionda yopildi.
@@ -10,6 +10,7 @@
 > 2026-08-08: Supabase CLI `v2.112.0`ga yangilandi; yangi local key/grant contractiga mos fresh replay va barcha acceptance/regression gate'lar o'tdi.
 > 2026-08-08: Portfolio-inspired frontend redesign browser acceptance bilan yakunlandi, `83bc7e0`/`509bc2d` push qilindi, PR #2 ochiq va CI green.
 > 2026-08-08: Visual consolidation davom etdi: decorative emoji/purple/pink legacy UI semantic palette’ga yig‘ildi, landing title scale kichraytirildi; targeted checks green.
+> 2026-08-10: PR #2 `65abe2f` bilan `main`ga merge qilingani tasdiqlandi. To'rt til landing copy, global form/dark-hover, tenant profile context va Super Admin AI-stats crash fixlari `agent/fix-landing-localization-copy` branchida lokal yakunlandi; deploy pending.
 
 ## Hozir qayerdamiz
 
@@ -24,18 +25,18 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | `agent/portfolio-inspired-redesign` pushed through `e379137`; PR #2 open against `main`; production merge/deploy yo'q |
+| Git | PR #2 `main`ga merge qilingan (`65abe2f`); joriy tuzatishlar lokal `agent/fix-landing-localization-copy` branchida, commit/push/deploy qilinmagan |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Supabase Edge Function `bright-api` v74 |
 | Health smoke-test | `200` |
 | Type-check | Muvaffaqiyatli |
-| Unit test | 21/21 fayl, 101/101 test |
+| Unit test | 22/22 fayl, 107/107 test |
 | Production build | Muvaffaqiyatli |
 | Security check | 9 ta build/Netlify fayli muvaffaqiyatli |
 | Production dependency audit | Scoped gate o'tdi: unexcepted high/critical 0; GHSA-qwww metadata exceptioni 2026-08-21 gacha |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue tokenlari; landing, public/auth, product core va admin shell redesign lokal yakunlangan |
-| Visual browser acceptance | `agent-browser`: desktop/mobile landing, login, forgot-password, contact passed; no overlay, browser errors, or horizontal overflow |
+| Visual browser acceptance | 4/4 landing locale desktopda, Uzbek landing 390×844 mobile, dark login input/hover computed checks: page error va horizontal overflow yo'q |
 | Preview CI | GitHub run `31240118332` passed; Vercel passed; Netlify Deploy Preview ready |
 | Remote GitHub Actions | Run `31193931735`, commit `3e383b1`: `success`; barcha `frontend-security-gate` qadamlari green |
 | Frontend Supabase key contract | Kod/deploy: publishable primary + vaqtinchalik fallback; production bundle legacy anon fallback ishlatmoqda, Netlify env/login **pending** |
@@ -51,7 +52,7 @@
 | Core web modullar | **Done** | Reports, Inbox, Tasks, HR, Docs, Integrations, Settings |
 | Realtime | **Done** | Inbox, Tasks va Notifications subscriptionlari |
 | Task assignment notifications | **Done** | Biriktirish, read va acknowledge oqimi |
-| Admin platforma | **Partial** | Dashboard, companies, contacts, users, audit, KB, risk, health va AI stats mavjud; advanced agent/billing monitoring keyin |
+| Admin platforma | **Partial** | Dashboard, companies, contacts, users, audit, KB, risk, health va AI stats mavjud; AI stats `cost/cost_usd` crash fixi lokal, deploy pending |
 | Telegram bot | **Partial / operational block** | Bot funksiyalari mavjud; `TELEGRAM_WEBHOOK_SECRET` productionda qayta tekshirilishi kerak |
 | Resend email inbox | **Partial** | Webhook va mapping kodi mavjud; real receiving/delivery smoke-test tasdiqlanmagan |
 | AI Concierge / RAG | **Partial** | Claude router, OpenAI embedding va RAG fundamenti bor; explicit document search/citation va to'liq smoke-test qarzi bor |
@@ -71,7 +72,7 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. PR #2 review/merge qarorini qabul qilish; production deploy qilinmagan.
+1. `agent/fix-landing-localization-copy`ni review/commit/push qilish, CI'dan keyin frontend va `bright-api`ni deploy qilib Rahbar Kompaniya profili hamda Super Admin loginini productionda smoke-test qilish.
 2. Netlify CLI loginini tiklash, production `VITE_SUPABASE_PUBLISHABLE_KEY`ni o'rnatish, qayta deploy va Auth/Realtime smoke-test qilish; legacy fallbackni faqat keyin olib tashlash.
 3. 2026-08-21gacha GHSA-qwww metadata exceptionini qayta ko'rish; keyin AI Hujjatchi PDF/DOCX/Storage ishlariga o'tish.
 

@@ -132,7 +132,7 @@ export function EmployeeDetailPage({
 
   function load() {
     setLoading(true);
-    apiRequest<EmployeeData>(`/tenants/${tenantId}/members/${userId}`)
+    apiRequest<EmployeeData>(`/tenants/${tenantId}/members/${userId}`, { tenantId })
       .then((d) => { setData(d); if (d.profile) setForm(profileToForm(d.profile)); })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -159,6 +159,7 @@ export function EmployeeDetailPage({
       await apiRequest(`/tenants/${tenantId}/members/${userId}/profile`, {
         method: "PATCH",
         body: JSON.stringify(body),
+        tenantId,
       });
       setEditing(false);
       load();

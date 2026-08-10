@@ -81,7 +81,7 @@ export const translations: Record<Locale, Dictionary> = {
     "auth.loginSubtitle": "Biznesingizni boshqaring",
     "auth.platformSubtitle": "O'zbekiston biznes uchun yagona AI yordamchi platformasi.",
     "auth.forgotPassword": "Parolni unutdingizmi?",
-    "auth.noAccount": "Kompaniya accountingiz yo'qmi?",
+    "auth.noAccount": "Kompaniya hisobingiz yo'qmi?",
     "auth.contactUs": "Murojaat qiling",
     "auth.backToHome": "Bosh sahifaga",
     "auth.backToLogin": "Kirishga qaytish",

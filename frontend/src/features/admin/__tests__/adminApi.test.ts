@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getAdminCompanies, updateCompanyStatus, getAdminHealth } from "../api/adminApi";
+import { getAdminAiStats, getAdminCompanies, updateCompanyStatus, getAdminHealth } from "../api/adminApi";
 import * as apiClientModule from "../../../shared/lib/apiClient";
 
 vi.mock("../../../shared/lib/apiClient");
@@ -78,5 +78,44 @@ describe("getAdminHealth", () => {
     const result = await getAdminHealth();
     expect(result.status).toBe("degraded");
     expect(result.db_latency_ms).toBe(500);
+  });
+});
+
+describe("getAdminAiStats", () => {
+  it("backend cost maydonini cost_usd kontraktiga moslaydi", async () => {
+    mockApiRequest.mockResolvedValue({
+      period_days: 30,
+      total_requests: 2,
+      total_tokens: 120,
+      total_cost_usd: 0.012,
+      by_model: [{ model: "test-model", requests: 2, tokens: 120, cost: 0.01 }],
+      top_tenants: [{ tenant_id: "tenant-1", requests: 2, cost: 0.01 }],
+      daily: [{ date: "2026-08-10", requests: 2, tokens: 120, cost: 0.01 }],
+    });
+
+    const result = await getAdminAiStats(30);
+
+    expect(result.by_model[0].cost_usd).toBe(0.01);
+    expect(result.top_tenants[0].cost_usd).toBe(0.01);
+    expect(result.daily[0].cost_usd).toBe(0.01);
+  });
+
+  it("qisman javobda raqamlarni nolga normallashtiradi", async () => {
+    mockApiRequest.mockResolvedValue({
+      by_model: [{ model: "legacy-model" }],
+      top_tenants: [],
+      daily: [],
+    });
+
+    const result = await getAdminAiStats(7);
+
+    expect(result.period_days).toBe(7);
+    expect(result.total_cost_usd).toBe(0);
+    expect(result.by_model[0]).toMatchObject({
+      model: "legacy-model",
+      requests: 0,
+      tokens: 0,
+      cost_usd: 0,
+    });
   });
 });

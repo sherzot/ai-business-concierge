@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Save, RefreshCw, Building2 } from "lucide-react";
-import { apiRequest } from "../../../shared/lib/apiClient";
 import { useI18n } from "../../../app/providers/I18nProvider";
+import {
+  getTenantProfile,
+  updateTenantProfile,
+  type TenantProfile,
+  type TenantProfileUpdate,
+} from "../api/tenantsApi";
 
-type TenantProfile = {
-  id: string; name: string; status: string;
-  legal_form: string | null; stir: string | null;
-  legal_address: string | null; activity_type: string | null;
-  reg_date: string | null; website: string | null;
-  description: string | null; contact_phone: string | null;
-  contact_email: string | null; bank_name: string | null;
-  bank_account: string | null; employee_count_range: string | null;
-  created_at: string; updated_at: string;
-};
-
-type FormData = Omit<TenantProfile, "id" | "status" | "created_at" | "updated_at">;
+type FormData = TenantProfileUpdate;
 
 const LEGAL_FORMS = ["yatt", "llc", "jsc", "other"] as const;
 
@@ -44,7 +38,7 @@ export function TenantSettingsPage({ tenant }: { tenant: { id: string; name: str
 
   useEffect(() => {
     setLoading(true);
-    apiRequest<TenantProfile>(`/tenants/${tenant.id}/profile`)
+    getTenantProfile(tenant.id)
       .then((p) => { setProfile(p); setForm(toForm(p)); })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -73,10 +67,7 @@ export function TenantSettingsPage({ tenant }: { tenant: { id: string; name: str
     setError(null);
     setSuccess(false);
     try {
-      const updated = await apiRequest<TenantProfile>(`/tenants/${tenant.id}/profile`, {
-        method: "PATCH",
-        body: JSON.stringify(form),
-      });
+      const updated = await updateTenantProfile(tenant.id, form);
       setProfile(updated);
       setForm(toForm(updated));
       setSuccess(true);

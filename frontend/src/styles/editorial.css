@@ -66,13 +66,39 @@ body {
   line-height: 1.18;
 }
 
-/* Give form labels a quiet breathing line before the control border. This
-   applies consistently to public, auth, and product forms without requiring
-   every legacy field component to maintain its own spacing value. */
+/* Form controls share one comfortable inset across public, auth, admin, and
+   product screens. Legacy pages sometimes use px-0, so the contract is
+   intentionally important; directional icon space is restored below. */
+:where(
+  input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="hidden"]),
+  select,
+  textarea
+) {
+  box-sizing: border-box;
+  padding-block: 0.75rem !important;
+  padding-inline: 1rem !important;
+  line-height: 1.5;
+}
+
+textarea {
+  min-height: 6rem;
+}
+
+input[class~="pl-9"] { padding-left: 2.25rem !important; }
+input[class~="pl-10"] { padding-left: 2.5rem !important; }
+input[class~="pl-11"] { padding-left: 2.75rem !important; }
+input[class~="pl-12"] { padding-left: 3rem !important; }
+input[class~="pr-8"] { padding-right: 2rem !important; }
+input[class~="pr-9"] { padding-right: 2.25rem !important; }
+input[class~="pr-10"] { padding-right: 2.5rem !important; }
+input[class~="pr-11"] { padding-right: 2.75rem !important; }
+input[class~="pr-12"] { padding-right: 3rem !important; }
+
+/* Give form labels a clear breathing line before the control border. */
 label + input,
 label + select,
 label + textarea {
-  margin-top: 0.375rem;
+  margin-top: 0.5rem;
 }
 
 label {

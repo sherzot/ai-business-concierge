@@ -4,6 +4,34 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-10 — Lokalizatsiya, form/hover kontrasti va dashboard regressiyalari tuzatildi
+
+### Kontekst va bajarilgan ish
+
+- PR #2 `65abe2f` bilan `main`ga merge qilingan holat qayta tekshirildi; ish `main`dan ochilgan `agent/fix-landing-localization-copy` branchida bajarildi. Mavjud uchta untracked user fayliga tegilmadi.
+- Landingning o'zbek, rus, ingliz va yapon nusxalari imlo/uslub bo'yicha tekshirildi. Aralash yozuvdagi `Nimalар avtomatlashadi?` to'liq lotincha `Nimalar avtomatlashadi?`ga almashtirildi. “Kim uchun?” qismida tizimda yo'q xitoy/turk/koreys tillari olib tashlanib, faqat o'zbek, rus, ingliz va yapon tillari qoldirildi; til statistikasi va pricing copy ham shu kontraktga moslandi.
+- Barcha matnli input/select/textarea uchun 16 px gorizontal va 12 px vertikal ichki padding markazlashtirildi; password/search icon offsetlari saqlandi, label-control oralig'i 8 px qilindi. Shared Input/Textarea/Select 44 px control kontraktiga o'tdi.
+- Dark mode'dagi solid light `hover:bg-*` utilitylari neutral/brand/status dark tokenlariga bog'landi; white-on-white ko'rinmas hover holati yopildi.
+- Rahbarning Kompaniya profili GET/PATCH so'rovlari tenant ID'ni URL'da bergan, lekin `apiRequest`ga `tenantId` uzatmagani sabab `X-Tenant-Id` yuborilmagan va backend `Tenant context topilmadi.` qaytargan. Tenant profile API helperi yaratilib ikkala so'rov tuzatildi; Employee Detail'dagi ayni pattern ham yopildi.
+- Super Admin crashining sababi Edge AI stats javobidagi `cost` va frontend kutgan `cost_usd` nomlari mos emasligi edi. Server contracti `cost_usd`ga tuzatildi, frontend eski/qisman javoblarni finite raqamlarga normallashtiradi. `/admin` uchun maxfiy stackni ko'rsatmaydigan route error fallback qo'shildi.
+
+### Verifikatsiya va qolgan ish
+
+- Node `22.18.0`: TypeScript `PASS`; Vitest 22/22 fayl, 107/107 test `PASS`; production build `PASS` (3700 modul); security gate 9 build/Netlify fayli `PASS`; `git diff --check` `PASS`.
+- Agent-browser: 4/4 landing locale desktopda tekshirildi; obsolete tillar yo'q va horizontal overflow `0`. 390×844 mobil Uzbek landingda title/copy va overflow `0`; browser page error yo'q. Dark login computed padding emailda `12/16/12/16`, passwordda `12/44/12/16`; hover fon `rgb(24, 28, 34)`, matn `rgb(243, 244, 246)`.
+- Lokal `deno` mavjud emasligi sabab Edge Function alohida Deno typecheck qilinmadi. Kod hali commit/push/deploy qilinmagan; productiondagi tenant/admin tuzatishlari branch merge va frontend/`bright-api` deploydan keyin kuchga kiradi. Birinchi keyingi action: branchni review/commit/push qilish, CI'dan keyin frontend va Edge'ni deploy qilib Rahbar profile hamda Super Admin login smoke-testini bajarish.
+
+### Fayllar
+
+- `frontend/src/features/landing/{i18n.ts,__tests__/landingDomain.test.ts}` va `frontend/src/app/i18n.ts`
+- `frontend/src/styles/{editorial.css,theme-indigo-slate.css}` va `frontend/src/shared/ui/{input,textarea,select}.tsx`
+- `frontend/src/features/tenants/{api/tenantsApi.ts,pages/TenantSettingsPage.tsx,__tests__/tenantsApi.test.ts}`
+- `frontend/src/features/hr/pages/EmployeeDetailPage.tsx`
+- `frontend/src/features/admin/{api/adminApi.ts,__tests__/adminApi.test.ts}`
+- `frontend/src/app/{router.tsx,RouteErrorPage.tsx}`
+- `supabase/functions/server/index.ts`
+- `docs/{STATUS,PLAN,DEVLOG}.md` va uchta tarjima to'plami
+
 ## 2026-08-08 — Hero typography va form spacing sinchiklab tuzatildi
 
 - LP hero headline max-size yana pasaytirildi, tracking normalga yaqinlashtirildi va line-height oshirildi; browser screenshotda uzun Uzbek sarlavha endi yumshoqroq, 3 qatorli va o‘qilishi qulay.

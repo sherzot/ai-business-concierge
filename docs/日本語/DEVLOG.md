@@ -4,6 +4,18 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-10 — Localization、form/hover contrast、dashboard regressionを修正
+
+- PR #2が`65abe2f`として`main`へmerge済みと確認。作業はlocal branch `agent/fix-landing-localization-copy`で行い、既存の3 untracked user filesには触れていない。
+- Landing 4 localeを校正。Mixed-scriptの`Nimalар avtomatlashadi?`を修正し、international-company copy/stat/pricingを実際の対応言語（ウズベク語・ロシア語・英語・日本語）へ統一。中国語・トルコ語・韓国語の記載を削除。
+- Form insetを横16 px・縦12 px、label/control間を8 px、shared controlsを44 pxへ統一しicon offsetを維持。Dark modeのsolid light hover utilitiesをneutral/brand/status tokensへmapping。
+- Company Profile GET/PATCHが`tenantId`を渡さず`X-Tenant-Id`が欠落し、backendが`Tenant context topilmadi.`を返していた。両callと同じEmployee Detail patternを修正。
+- Super Admin crashはEdgeの`cost`とUIが期待する`cost_usd`の不一致が原因。Edgeをcanonical fieldへ変更し、frontendでlegacy/partial responsesをfinite valuesへ正規化。Production stackを表示しない`/admin` route error fallbackも追加。
+- 検証: Node `22.18.0` TypeScript PASS、Vitest 22/22 files・107/107 tests PASS、production build（3700 modules）、9-file security gate、`git diff --check` PASS。Browser acceptanceはdesktop 4/4 localeとUzbek mobile 390×844でpage error/horizontal overflowなし。Dark login paddingは`12/16/12/16`と`12/44/12/16`、hover contrastも可読。
+- Localに`deno`がないためEdge Deno typecheckは未実行。変更は未commit/push/deploy。次はreview/commit/push、CI後にfrontendと`bright-api`をdeployし、Leader Company ProfileとSuper Admin loginをproduction smoke-testする。
+
+Files: landing i18n/tests、editorial/theme/shared controls、tenant/employee API/tests、admin API/tests/route fallback、canonical Edge server、4言語STATUS/PLAN/DEVLOG。
+
 ## 2026-08-08 — Hero typographyとform spacingを精密調整
 
 - LP hero headlineのmax-sizeをさらに縮小し、trackingをnormal寄りに戻し、line-heightを拡大。長いUzbek headlineがbrowser screenshotで柔らかい3行構成になり読みやすくなった。

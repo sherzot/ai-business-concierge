@@ -4,6 +4,18 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-10 — Localization, form/hover contrast, and dashboard regressions fixed
+
+- Verified PR #2 merged into `main` as `65abe2f`; work was completed on local branch `agent/fix-landing-localization-copy` while preserving the three pre-existing untracked user files.
+- Proofread all four landing locales. Fixed mixed-script Uzbek `Nimalар avtomatlashadi?`, aligned international-company copy/stat/pricing labels to the only supported languages—Uzbek, Russian, English, and Japanese—and removed Chinese/Turkish/Korean language claims.
+- Centralized form insets (16 px horizontal, 12 px vertical), 8 px label spacing, and 44 px shared controls while retaining icon offsets. Mapped solid light hover utilities to dark neutral/brand/status tokens.
+- Fixed Company Profile GET/PATCH calls that omitted `tenantId`, and therefore `X-Tenant-Id`, causing `Tenant context topilmadi.`; the same Employee Detail pattern was repaired.
+- Fixed the Super Admin crash: Edge returned nested AI costs as `cost`, while the UI read `cost_usd`. Edge now emits the canonical name and the frontend normalizes legacy/partial responses to finite values. Added an `/admin` route error fallback without production stack disclosure.
+- Verification: Node `22.18.0` TypeScript passed; Vitest 22/22 files and 107/107 tests passed; production build passed (3700 modules); the 9-file security gate and `git diff --check` passed. Browser acceptance covered 4/4 desktop locales and 390×844 Uzbek mobile with zero horizontal overflow/page errors; dark login padding measured `12/16/12/16` and `12/44/12/16`, with readable dark hover colors.
+- Local `deno` is unavailable, so a separate Edge Deno typecheck was not run. Changes remain uncommitted/unpushed/undeployed. Next: review/commit/push, pass CI, deploy frontend and `bright-api`, then production-smoke Company Profile as Leader and Super Admin login.
+
+Files: landing i18n/tests; editorial/theme and shared controls; tenant/employee APIs and tests; admin API/tests and route fallback; canonical Edge server; synchronized four-language STATUS/PLAN/DEVLOG.
+
 ## 2026-08-08 — Hero typography and form spacing refined
 
 - Lowered the LP hero headline max-size again, relaxed tracking toward normal, and increased line-height; the long Uzbek headline now renders as a softer, readable three-line composition in the browser screenshot.
