@@ -4,6 +4,17 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-10 — Исправлен inverse contrast Landing и Company Dashboard
+
+- User подтвердил успешное прохождение предыдущих authenticated production smoke-tests Leader Company Profile и Super Admin dashboard.
+- Шесть title/description в Why Us использовали theme-dependent token `background` внутри fixed dark inverse panel, поэтому в dark mode текст сливался с фоном. Titles переведены на `--editorial-inverse-fg`, descriptions — на `editorial-inverse-muted`; `c59ed82`/PR #4 merged в `main` как `700483d`.
+- Тот же pattern затрагивал Company Dashboard Business Status: heading, timestamp, status, department labels/percentages и SVG track. Все переведены на inverse foreground/muted contract; добавлен `DashboardPage` regression test, запрещающий `text-background` внутри panel (`4184ddb`, PR #5).
+- Единственный unresolved P1 Codex thread PR #4 потребовал обязательный DEVLOG closeout; эта синхронная four-language правка DEVLOG/STATUS/PLAN закрывает feedback без изменения behavior.
+- Проверки: Node `22.18.0` TypeScript PASS; Vitest 23/23 files и 108/108 tests PASS; production build PASS (3700 modules); 9-file security gate и `git diff --check` PASS. Browser dark/light checks: 6/6 причин, title `rgb(244,243,239)`, descriptions 65% inverse-muted, background `rgb(17,19,24)`, overflow 0, console/Vite-overlay errors нет. Screenshot: `/private/tmp/abc-why-us-dark.png`.
+- Authenticated dashboard browser flow без credentials повторно не запускался; общий token подтверждён в browser, dashboard markup закрыт новым test. PR #5 GitHub CI, Netlify preview и Vercel preview green. Далее: merge, production deploy и user dark-mode smoke-test.
+
+Files: WhyUsSection, DashboardPage и regression test, синхронные four-language STATUS/PLAN/DEVLOG.
+
 ## 2026-08-10 — Завершены PR #3 review hotfix и production rollout
 
 - Изменения `agent/fix-landing-localization-copy` committed/pushed как `be047c4`; после успешного GitHub Actions run `31393176016` PR #3 squash-merged в `main` как `79be466`.

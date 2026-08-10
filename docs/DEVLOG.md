@@ -4,6 +4,29 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-10 — Landing va Company Dashboard inverse kontrasti tuzatildi
+
+### Kontekst va bajarilgan ish
+
+- User Rahbar Kompaniya profili va Super Admin dashboardining oldingi authenticated production smoke-testlari muvaffaqiyatli o'tganini tasdiqladi.
+- Landingdagi “Nega global bozorda aynan biz?” blokining 01–06 sarlavha/izohlari fixed qora inverse panel ichida theme-dependent `background` tokenini ishlatgan. Dark mode'da token ham qorayib matn fon bilan qo'shilgan. Title'lar `--editorial-inverse-fg`, izohlar shared `editorial-inverse-muted` tokeniga o'tkazildi; fix `c59ed82`/PR #4 orqali `700483d` bilan `main`ga merge qilindi.
+- Company Dashboard “Biznes holati” panelida ayni pattern heading, update, status, bo'lim label/foizlari va SVG trackda topildi. Barchasi inverse foreground/muted contractiga o'tkazildi; panel ichida `text-background` qaytishini bloklaydigan `DashboardPage` regressiya testi qo'shildi (`4184ddb`, PR #5).
+- PR #4 Codex reviewidagi yagona unresolved P1 topilma majburiy DEVLOG closeout yo'qligi edi; ushbu 4-tilli entry va STATUS/PLAN sinxronizatsiyasi shu feedbackni kod o'zgartirmasdan yopadi.
+
+### Verifikatsiya va qolgan ish
+
+- Node `22.18.0`: TypeScript `PASS`; Vitest 23/23 fayl, 108/108 test `PASS`; production build `PASS` (3700 modul); security gate 9 build/Netlify fayli `PASS`; `git diff --check` `PASS`.
+- Lokal browser dark/light mode'da Why Us 6/6 sababni topdi: title `rgb(244,243,239)`, izoh inverse foreground 65%, fon `rgb(17,19,24)`; overflow `0`, console error va Vite overlay yo'q. Screenshot: `/private/tmp/abc-why-us-dark.png`.
+- Authenticated dashboard browser sessiyasi credential'siz takrorlanmadi; ayni inverse tokenning computed browser kontrasti landingda, dashboard markup contracti esa yangi unit testda tasdiqlandi. PR #5 GitHub CI, Netlify preview va Vercel preview green; keyingi action merge, Netlify production deploy va user dark-mode smoke-testidir.
+
+### Fayllar
+
+- `frontend/src/features/landing/components/WhyUsSection.tsx`
+- `frontend/src/features/reports/pages/DashboardPage.tsx`
+- `frontend/src/features/reports/__tests__/DashboardPage.test.tsx`
+- `docs/{STATUS,PLAN,DEVLOG}.md`
+- `docs/{English,Russian,日本語}/{STATUS,PLAN,DEVLOG}.md`
+
 ## 2026-08-10 — PR #3 review hotfixi va production rollout yakunlandi
 
 ### Kontekst va bajarilgan ish

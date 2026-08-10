@@ -1,6 +1,6 @@
 # AI Business Concierge — faol reja
 
-> Version: 4.8
+> Version: 4.9
 > Yangilandi: 2026-08-10
 > Bu faylda faqat faol va navbatdagi ishlar turadi. 2026-07-24 gacha bo'lgan katta tarixiy reja [archive/PLAN_LEGACY_2026-07-24.md](archive/PLAN_LEGACY_2026-07-24.md)ga ko'chirilgan.
 
@@ -28,7 +28,7 @@
 - [x] TypeScript, 101/101 test, production build, security gate va dependency auditni o'tkazish.
 - [x] Browser-enabled muhitda desktop/mobile landing, login, forgot-password va contact route'larni vizual acceptance qilish; overlay, browser error va horizontal overflow topilmadi.
 - [x] Topilmasiz redesignni `83bc7e0` bilan commit/push qilish, PR #2 ochish, GitHub CI/Vercel/Netlify previewni tekshirish va PR #2ni `65abe2f` bilan `main`ga merge qilish.
-- [ ] Production credentiallari bilan Rahbar Kompaniya profili va Super Admin dashboardini authenticated smoke-test qilish; tenant context hamda AI-stats natijalarini tasdiqlash.
+- [ ] PR #5dagi Company Dashboard inverse-contrast fixi va regressiya testini merge qilish; PR #4 landing fixi bilan birga Netlify productionga deploy va dark-mode smoke-test qilish.
 
 ## P1 — Supabase/Netlify security handoffini yakunlash
 

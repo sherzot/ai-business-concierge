@@ -4,6 +4,17 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-10 — Landing and Company Dashboard inverse contrast fixed
+
+- The user confirmed the previous authenticated production smoke tests for Leader Company Profile and the Super Admin dashboard passed.
+- The six Why Us reason titles/descriptions used the theme-dependent `background` token inside a fixed dark inverse panel, so dark mode made the copy blend into the surface. Titles now use `--editorial-inverse-fg` and descriptions use `editorial-inverse-muted`; `c59ed82`/PR #4 was merged into `main` as `700483d`.
+- The same pattern affected the Company Dashboard Business Status heading, timestamp, status, department labels/percentages, and SVG track. They now follow the inverse foreground/muted contract, with a new `DashboardPage` regression test rejecting `text-background` inside the panel (`4184ddb`, PR #5).
+- The only unresolved P1 Codex thread on PR #4 requested the mandatory DEVLOG closeout; this synchronized four-language DEVLOG/STATUS/PLAN update addresses it without another behavior change.
+- Verification: Node `22.18.0` TypeScript PASS; Vitest 23/23 files and 108/108 tests PASS; production build PASS (3700 modules); 9-file security gate and `git diff --check` PASS. Browser dark/light checks found all 6/6 reasons with title `rgb(244,243,239)`, 65% inverse-muted descriptions, background `rgb(17,19,24)`, overflow 0, and no console/Vite-overlay errors. Screenshot: `/private/tmp/abc-why-us-dark.png`.
+- The authenticated dashboard browser flow was not repeated without credentials; the shared token is verified in the browser and dashboard markup is covered by the new test. PR #5 GitHub CI, Netlify preview, and Vercel preview are green. Next: merge, production deploy, and user dark-mode smoke test.
+
+Files: WhyUsSection, DashboardPage and its regression test, plus synchronized four-language STATUS/PLAN/DEVLOG.
+
 ## 2026-08-10 — PR #3 review hotfix and production rollout completed
 
 - The `agent/fix-landing-localization-copy` changes were committed/pushed as `be047c4`; after GitHub Actions run `31393176016` passed, PR #3 was squash-merged into `main` as `79be466`.
