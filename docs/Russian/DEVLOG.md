@@ -4,6 +4,15 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-10 — Inverse contrast hotfixes выпущены в production
+
+- Codex finding PR #4 по DEVLOG closeout закрыт four-language docs commit в PR #5. Единственный P1 Codex finding PR #5 требовал конкретные green-gate IDs; GitHub run, Netlify preview и Vercel deployment identifiers добавлены в STATUS/DEVLOG и pushed в `main` как `67ab618`. GitHub threads не получили reply/resolve.
+- Landing fix squash-merged как PR #4 `700483d`, Company Dashboard fix/test/docs как PR #5 `2466200`. Netlify production deploy `6a79e664a453161423131204` ready, build `6a79e664a453161423131202`, published `2026-08-10T14:56:55.975Z`, deploy time 81s, plugin success; 0 secret matches в 87,160 scanned files.
+- Production browser dark mode нашёл 6/6 Why Us reasons: title `rgb(244,243,239)`, descriptions 65% inverse foreground, background `rgb(17,19,24)`, overflow 0, console/Vite-overlay errors нет, page content meaningful.
+- Company Dashboard code находится в production bundle, baseline 23/23 files и 108/108 tests green. Без credentials agent browser не открыл authenticated Business Status panel. Первый next action: user visual recheck в production dark mode, затем publishable-key handoff.
+
+Files/state: PR #4/PR #5 frontend fixes, frontend deploy source `67ab618`, Netlify production deploy и synchronized four-language STATUS/PLAN/DEVLOG.
+
 ## 2026-08-10 — Исправлен inverse contrast Landing и Company Dashboard
 
 - User подтвердил успешное прохождение предыдущих authenticated production smoke-tests Leader Company Profile и Super Admin dashboard.

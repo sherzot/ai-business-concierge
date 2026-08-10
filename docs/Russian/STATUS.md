@@ -10,7 +10,7 @@
 > 2026-08-08: Supabase CLI обновлён до `v2.112.0`; fresh replay и все acceptance/regression gates прошли с новым local key/grant contract.
 > 2026-08-08: Portfolio-inspired frontend redesign прошёл browser acceptance, commits `83bc7e0`/`509bc2d` отправлены, PR #2 открыт, CI green.
 > 2026-08-10: PR #3 merged в `main` как `79be466`; Codex review hotfix `aee6692` также pushed в `main`. Netlify production deploy `6a79d69c9aa5a6bcf326e83c` ready, `bright-api` v75 ACTIVE; остаются authenticated smoke-tests двух ролей.
-> 2026-08-10: User подтвердил успешные authenticated production checks Leader Company Profile и Super Admin dashboard. Landing Why Us fix из PR #4 и Company Dashboard fix из PR #5 merged в `main`; production rollout pending.
+> 2026-08-10: User подтвердил успешные authenticated production checks Leader Company Profile и Super Admin dashboard. Landing Why Us fix из PR #4 и Company Dashboard fix из PR #5 merged в `main` и shipped в Netlify production deploy `6a79e664a453161423131204`; остаётся authenticated dashboard visual recheck.
 
 ## Текущая фаза
 
@@ -38,7 +38,7 @@
 | Visual browser acceptance | Все 6/6 причин Why Us отображаются inverse text в dark/light modes: title `rgb(244,243,239)`, background `rgb(17,19,24)`, overflow `0`, console/overlay errors нет; dashboard inverse markup закрыт regression test |
 | Preview CI | PR #5 code preview Netlify deploy `6a79e27ae3c42e00088ffd45` ready; latest docs-only deploy `6a79e3b03648850008d64852` canceled; Vercel deployment `Cg6Bt5HG1JJrGvwzDYaJqokQQU2q` ready |
 | Remote GitHub Actions | PR #5 run `31399751738`, commit `04cd48f`: success; previous code-only run `31399285836` также success |
-| Production frontend | Netlify deploy `6a79d69c9aa5a6bcf326e83c` ready, published 2026-08-10T13:50:02.498Z |
+| Production frontend | Netlify deploy `6a79e664a453161423131204` ready, published 2026-08-10T14:56:55.975Z; deploy 81s, plugin success, 0 secret matches в 87,160 scanned files |
 | Frontend Supabase key contract | Code/deploy: publishable primary + temporary fallback; production bundle использует legacy anon fallback, Netlify env/login pending |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; real Auth-token Edge tests 8/8; Realtime tables SELECT-only и требуют active membership/tenant |
 | Migration history | Local/remote 32/32 совпадают; production `db push --dry-run`: up to date |
@@ -50,7 +50,7 @@
 |---|---|---|
 | Auth, multi-tenant, RBAC и основные web-модули | Done | Основной фундамент работает |
 | Realtime и task notifications | Done | Inbox, Tasks, Notifications, acknowledge |
-| Admin platform | Partial | Основное управление/monitoring есть; user подтвердил tenant-profile/AI-stats authenticated smoke tests, dashboard dark-contrast production deploy pending |
+| Admin platform | Partial | Основное управление/monitoring есть; user подтвердил tenant-profile/AI-stats authenticated smoke tests, dashboard dark contrast в production, остаётся user visual recheck |
 | Telegram | Partial / operational block | Проверить `TELEGRAM_WEBHOOK_SECRET` и webhook |
 | Resend inbox | Partial | Код есть; receiving/delivery E2E не подтверждён |
 | AI Concierge/RAG и cost tracking | Partial | Основа есть; citation UX, plan enforcement и smoke-test остаются |
@@ -60,7 +60,7 @@
 
 ## Ближайший порядок
 
-1. Deploy landing + Company Dashboard dark-contrast hotfixes в Netlify production и повторить smoke-test.
+1. Визуально перепроверить Company Dashboard Business Status panel в authenticated production dark mode.
 2. Восстановить Netlify CLI login, установить publishable env, redeploy и Auth/Realtime smoke-test до удаления legacy fallback.
 3. До 2026-08-21 пересмотреть GHSA-qwww, затем продолжить PDF/DOCX/Storage Документолога.
 

@@ -4,6 +4,15 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-10 — Inverse contrast hotfixをproductionへrelease
+
+- PR #4のDEVLOG closeout Codex findingはPR #5の4-language docs commitで対応。PR #5唯一のP1 Codex findingは具体的なgreen-gate ID不足で、GitHub run、Netlify preview、Vercel deployment identifiersをSTATUS/DEVLOGへ追加し`67ab618`として`main`へpush。GitHub threadへのreply/resolveは未実施。
+- Landing fixはPR #4 `700483d`、Company Dashboard fix/test/docsはPR #5 `2466200`としてsquash-merge。Netlify production deploy `6a79e664a453161423131204` ready、build `6a79e664a453161423131202`、published `2026-08-10T14:56:55.975Z`、deploy time 81s、plugin success。87,160 scanned filesでsecret match 0。
+- Production browser dark modeでWhy Us 6/6 reasonsを確認。Title `rgb(244,243,239)`、description 65% inverse foreground、background `rgb(17,19,24)`、overflow 0、console/Vite-overlay errorなし、page contentあり。
+- Company Dashboard codeはproduction bundle内、23/23 files・108/108 tests baselineはgreen。Credentialsなしのためauthenticated Business Status panelはagent browserで未確認。First next actionはuserのproduction dark-mode visual recheck、その後publishable-key handoff。
+
+Files/state: PR #4/PR #5 frontend fixes、frontend deploy source `67ab618`、Netlify production deploy、同期済み4-language STATUS/PLAN/DEVLOG。
+
 ## 2026-08-10 — LandingとCompany Dashboardのinverse contrastを修正
 
 - UserがLeader Company ProfileとSuper Admin dashboardの既存authenticated production smoke-test成功を確認。

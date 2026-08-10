@@ -4,6 +4,15 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-10 — Inverse kontrast hotfixlari productionga chiqarildi
+
+- PR #4 Codex reviewidagi DEVLOG closeout topilmasi PR #5ning 4-tilli hujjat commitida bajarildi. PR #5 Codex reviewidagi yagona P1 topilma green gate identifikatorlari yetishmasligi edi; GitHub run, Netlify preview va Vercel deployment ID'lari STATUS/DEVLOGga qo'shilib `67ab618` bilan `main`ga push qilindi. GitHub threadlariga reply/resolve berilmadi.
+- Landing fixi PR #4 `700483d`, Company Dashboard fix/test/docs PR #5 `2466200` bilan `main`ga squash-merge qilingan. Netlify production deploy `6a79e664a453161423131204` `ready`, build `6a79e664a453161423131202`, published `2026-08-10T14:56:55.975Z`, deploy time 81s, plugin state `success`; 87,160 scanned faylda secret match `0`.
+- Production browser dark mode'da Why Us 6/6 sababni topdi: title ranglari `rgb(244,243,239)`, izohlar 65% inverse foreground, fon `rgb(17,19,24)`; overflow `0`, console error/Vite overlay yo'q va sahifa mazmunli render bo'ldi.
+- Company Dashboard kodi production bundle ichida va 23/23 fayl, 108/108 test baseline'i green. Credential bo'lmagani uchun authenticated “Biznes holati” paneli agent browserda ochilmadi; birinchi keyingi action userning shu panelni production dark mode'da vizual qayta tekshirishidir. Shundan keyin publishable-key handoff davom etadi.
+
+Fayllar/state: PR #4/PR #5 frontend fixlari, frontend deploy source `67ab618`, Netlify production deploy va 4-tilli STATUS/PLAN/DEVLOG.
+
 ## 2026-08-10 — Landing va Company Dashboard inverse kontrasti tuzatildi
 
 ### Kontekst va bajarilgan ish

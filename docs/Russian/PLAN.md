@@ -1,6 +1,6 @@
 # AI Business Concierge — активный план
 
-> Версия 4.9 · Обновлено 2026-08-10
+> Версия 5.0 · Обновлено 2026-08-10
 > Здесь только активные и следующие задачи. Старый master plan: [../archive/Russian/PLAN_LEGACY_2026-07-24.md](../archive/Russian/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — безопасное начало сессии
@@ -20,7 +20,7 @@
 - [x] Пройти TypeScript, 101/101 tests, production build, security gate и dependency audit.
 - [x] Выполнить browser acceptance desktop/mobile landing, login, forgot-password и contact routes; overlay, browser errors и horizontal overflow не обнаружены.
 - [x] Commit/push redesign без находок как `83bc7e0`, открыть PR #2, проверить GitHub CI/Vercel/Netlify preview и merge PR #2 в `main` как `65abe2f`.
-- [ ] Deploy merged PR #4/PR #5 landing и Company Dashboard inverse-contrast fixes из `main` в Netlify production и выполнить dark-mode smoke-test.
+- [ ] Визуально перепроверить Company Dashboard Business Status panel в authenticated production dark mode.
 
 ## P1 — завершить Supabase/Netlify security handoff
 

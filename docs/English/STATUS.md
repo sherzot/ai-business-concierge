@@ -10,7 +10,7 @@
 > 2026-08-08: Supabase CLI was upgraded to `v2.112.0`; fresh replay and all acceptance/regression gates passed under the new local key/grant contract.
 > 2026-08-08: the Portfolio-inspired frontend redesign passed browser acceptance, commits `83bc7e0`/`509bc2d` were pushed, PR #2 is open, and CI is green.
 > 2026-08-10: PR #3 was merged into `main` as `79be466`; Codex review hotfix `aee6692` was also pushed to `main`. Netlify production deploy `6a79d69c9aa5a6bcf326e83c` is ready and `bright-api` v75 is ACTIVE; authenticated two-role smoke tests remain.
-> 2026-08-10: The user confirmed successful authenticated production checks for Leader Company Profile and the Super Admin dashboard. The landing Why Us fix from PR #4 and Company Dashboard fix from PR #5 are merged into `main`; production rollout is pending.
+> 2026-08-10: The user confirmed successful authenticated production checks for Leader Company Profile and the Super Admin dashboard. The landing Why Us fix from PR #4 and Company Dashboard fix from PR #5 are merged into `main` and shipped in Netlify production deploy `6a79e664a453161423131204`; an authenticated dashboard visual recheck remains.
 
 ## Current phase
 
@@ -38,7 +38,7 @@
 | Visual browser acceptance | All 6/6 Why Us reasons render with inverse text in dark/light modes: title `rgb(244,243,239)`, background `rgb(17,19,24)`, overflow `0`, no console/overlay errors; dashboard inverse markup is covered by a regression test |
 | Preview CI | PR #5 code preview Netlify deploy `6a79e27ae3c42e00088ffd45` ready; latest docs-only deploy `6a79e3b03648850008d64852` canceled; Vercel deployment `Cg6Bt5HG1JJrGvwzDYaJqokQQU2q` ready |
 | Remote GitHub Actions | PR #5 run `31399751738`, commit `04cd48f`: success; prior code-only run `31399285836` also succeeded |
-| Production frontend | Netlify deploy `6a79d69c9aa5a6bcf326e83c` ready, published at 2026-08-10T13:50:02.498Z |
+| Production frontend | Netlify deploy `6a79e664a453161423131204` ready, published at 2026-08-10T14:56:55.975Z; 81s deploy, plugin success, 0 secret matches across 87,160 scanned files |
 | Frontend Supabase key contract | Code/deploy: publishable primary + temporary fallback; production bundle uses legacy anon fallback, Netlify env/login pending |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; real Auth-token Edge tests 8/8; Realtime tables are SELECT-only and require active membership/tenant |
 | Migration history | Local/remote 32/32 aligned; production `db push --dry-run`: up to date |
@@ -50,7 +50,7 @@
 |---|---|---|
 | Auth, multi-tenant, RBAC and core web modules | Done | Main product foundation works |
 | Realtime and task notifications | Done | Inbox, Tasks, Notifications, acknowledgement |
-| Admin platform | Partial | Core management/monitoring exists; the user confirmed tenant-profile/AI-stats authenticated smoke tests, while the dashboard dark-contrast production deploy is pending |
+| Admin platform | Partial | Core management/monitoring exists; the user confirmed tenant-profile/AI-stats authenticated smoke tests, dashboard dark contrast is in production, and a user visual recheck remains |
 | Telegram | Partial / operational block | Verify `TELEGRAM_WEBHOOK_SECRET` and webhook |
 | Resend inbox | Partial | Code exists; receiving/delivery E2E is unverified |
 | AI Concierge/RAG and cost tracking | Partial | Foundation exists; citation UX, plan enforcement and full smoke tests remain |
@@ -60,7 +60,7 @@
 
 ## Immediate order
 
-1. Deploy the landing + Company Dashboard dark-contrast hotfixes to Netlify production and repeat the smoke test.
+1. Visually recheck the Company Dashboard Business Status panel in authenticated production dark mode.
 2. Restore Netlify CLI login, set the production publishable env, redeploy, and smoke-test Auth/Realtime before removing the legacy fallback.
 3. Re-review GHSA-qwww by 2026-08-21, then continue Document Assistant PDF/DOCX/Storage work.
 

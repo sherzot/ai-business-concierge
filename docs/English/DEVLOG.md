@@ -4,6 +4,15 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-10 — Inverse contrast hotfixes shipped to production
+
+- PR #4's DEVLOG-closeout Codex finding was addressed by the four-language docs commit in PR #5. PR #5's only P1 Codex finding requested concrete green-gate identifiers; the GitHub run, Netlify preview, and Vercel deployment IDs were added to STATUS/DEVLOG and pushed to `main` as `67ab618`. No GitHub threads were replied to or resolved.
+- The landing fix was squash-merged as PR #4 `700483d`; the Company Dashboard fix/test/docs as PR #5 `2466200`. Netlify production deploy `6a79e664a453161423131204` is ready, build `6a79e664a453161423131202`, published at `2026-08-10T14:56:55.975Z`, deploy time 81s, plugin state success; 0 secret matches in 87,160 scanned files.
+- Production browser dark mode found all 6/6 Why Us reasons with title `rgb(244,243,239)`, 65% inverse-foreground descriptions, background `rgb(17,19,24)`, overflow 0, no console/Vite-overlay errors, and meaningful page content.
+- Company Dashboard code is in the production bundle and the 23/23-file, 108/108-test baseline is green. Without credentials, the authenticated Business Status panel was not opened by the agent browser. First next action: user visual recheck in production dark mode, then continue the publishable-key handoff.
+
+Files/state: PR #4/PR #5 frontend fixes, frontend deploy source `67ab618`, Netlify production deploy, and synchronized four-language STATUS/PLAN/DEVLOG.
+
 ## 2026-08-10 — Landing and Company Dashboard inverse contrast fixed
 
 - The user confirmed the previous authenticated production smoke tests for Leader Company Profile and the Super Admin dashboard passed.
