@@ -4,6 +4,17 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-10 — LandingとCompany Dashboardのinverse contrastを修正
+
+- UserがLeader Company ProfileとSuper Admin dashboardの既存authenticated production smoke-test成功を確認。
+- Why Us 6項目のtitle/descriptionはfixed dark inverse panel内でtheme-dependent `background` tokenを使用し、dark modeでtextがsurfaceと同化していた。Titleを`--editorial-inverse-fg`、descriptionを`editorial-inverse-muted`へ変更。`c59ed82`/PR #4は`700483d`として`main`へmerge。
+- 同じpatternがCompany Dashboard Business Statusのheading、timestamp、status、department labels/percentages、SVG trackにも存在。Inverse foreground/muted contractへ統一し、panel内の`text-background`を拒否する`DashboardPage` regression testを追加（`4184ddb`、PR #5）。
+- PR #4の唯一のunresolved P1 Codex threadは必須DEVLOG closeoutを要求。この4-language DEVLOG/STATUS/PLAN同期でbehavior変更なしにfeedbackへ対応。
+- 検証: Node `22.18.0` TypeScript PASS、Vitest 23/23 files・108/108 tests PASS、production build PASS（3700 modules）、9-file security gateと`git diff --check` PASS。Browser dark/light checksは6/6 reasons、title `rgb(244,243,239)`、description 65% inverse-muted、background `rgb(17,19,24)`、overflow 0、console/Vite-overlay errorsなし。Screenshot: `/private/tmp/abc-why-us-dark.png`。
+- Credentialsなしのためauthenticated dashboard browser flowは再実行せず。Shared tokenはbrowserで確認しdashboard markupはnew testで保護。PR #5 GitHub CI、Netlify preview、Vercel preview green。Next: merge、production deploy、user dark-mode smoke-test。
+
+Files: WhyUsSection、DashboardPageとregression test、同期済み4-language STATUS/PLAN/DEVLOG。
+
 ## 2026-08-10 — PR #3 review hotfixとproduction rolloutを完了
 
 - `agent/fix-landing-localization-copy`の変更を`be047c4`としてcommit/push。GitHub Actions run `31393176016`成功後、PR #3を`79be466`として`main`へsquash-merge。
