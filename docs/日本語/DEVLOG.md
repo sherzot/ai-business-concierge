@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-10 — PR #3 review hotfixとproduction rolloutを完了
+
+- `agent/fix-landing-localization-copy`の変更を`be047c4`としてcommit/push。GitHub Actions run `31393176016`成功後、PR #3を`79be466`として`main`へsquash-merge。
+- Codex reviewのP2 findings 2件を確認。Global form-padding ruleがicon付き`pl-8` inputのleft insetを上書きし、Admin AuditとKnowledge Baseのsearch placeholderがiconへ近づいていた。`pl-8`へ`32px` overrideを追加し、`aee6692`として直接`main`へpush。このcloseoutでSTATUS/PLANの古い「local/deploy pending」状態も更新。
+- Supabase `bright-api`をversion 75（`ACTIVE`、`verify_jwt=false`）としてdeploy。Netlify production hotfix deploy `6a79d69c9aa5a6bcf326e83c`はreadyとなり、2026-08-10T13:50:02.498Zにpublished。
+- 検証: Node `22.18.0` TypeScript PASS、Vitest 22/22 files・107/107 tests PASS、production build PASS（3700 modules）、9-file build/Netlify security gateと`git diff --check` PASS。Local browserの`input.pl-8` computed paddingはleft 32px、right 16px、top 12pxで、overlay/page error/overflowなし。Productionでは修正済みUzbek copy、Chinese/Turkish/Korean copyなし、overflow 0、`pl-8` left padding 32px、console/page errorなしを確認。Unauthenticated `/admin`は安全に`/login`へredirect。
+- Production Edge healthはHTTP `200`と`{"status":"ok"}`を返した。User credentialsがないためLeader Company ProfileとSuper Admin dashboardのauthenticated flowは未実行。最初のnext actionは2-role production smoke-test。
+
+Files: `frontend/src/styles/editorial.css`、同期済み4-language STATUS/PLAN/DEVLOG。
+
 ## 2026-08-10 — Localization、form/hover contrast、dashboard regressionを修正
 
 - PR #2が`65abe2f`として`main`へmerge済みと確認。作業はlocal branch `agent/fix-landing-localization-copy`で行い、既存の3 untracked user filesには触れていない。

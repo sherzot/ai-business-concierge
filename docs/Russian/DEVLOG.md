@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-10 — Завершены PR #3 review hotfix и production rollout
+
+- Изменения `agent/fix-landing-localization-copy` committed/pushed как `be047c4`; после успешного GitHub Actions run `31393176016` PR #3 squash-merged в `main` как `79be466`.
+- Проверены обе P2 находки Codex review. Global form-padding rule перезаписывал левый inset icon-bearing `pl-8` inputs и прижимал search placeholders в Admin Audit и Knowledge Base к иконкам; добавлен `32px` override для `pl-8`, pushed прямо в `main` как `aee6692`. Этот closeout также заменяет устаревший статус “local/deploy pending” в STATUS/PLAN.
+- Supabase `bright-api` deployed как version 75 (`ACTIVE`, `verify_jwt=false`). Netlify production hotfix deploy `6a79d69c9aa5a6bcf326e83c` стал ready и published 2026-08-10T13:50:02.498Z.
+- Проверки: Node `22.18.0` TypeScript PASS; Vitest 22/22 files и 107/107 tests PASS; production build PASS (3700 modules); 9-file build/Netlify security gate и `git diff --check` PASS. Local browser computed padding `input.pl-8`: 32px слева, 16px справа, 12px сверху; overlay/page error/overflow нет. Production показал исправленный Uzbek copy, отсутствие Chinese/Turkish/Korean copy, overflow 0, left padding `pl-8` 32px и отсутствие console/page errors. Unauthenticated `/admin` безопасно redirected на `/login`.
+- Production Edge health вернул HTTP `200` и `{"status":"ok"}`. Authenticated flows Leader Company Profile и Super Admin dashboard не запускались без user credentials; первый следующий шаг — production smoke-test с двумя ролями.
+
+Files: `frontend/src/styles/editorial.css` и синхронные four-language STATUS/PLAN/DEVLOG.
+
 ## 2026-08-10 — Исправлены локализация, form/hover contrast и dashboard regressions
 
 - Подтверждён merge PR #2 в `main` как `65abe2f`; работа выполнена в локальной ветке `agent/fix-landing-localization-copy`, три существующих untracked user files сохранены без изменений.

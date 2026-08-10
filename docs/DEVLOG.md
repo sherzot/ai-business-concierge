@@ -4,6 +4,26 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-10 — PR #3 review hotfixi va production rollout yakunlandi
+
+### Kontekst va bajarilgan ish
+
+- `agent/fix-landing-localization-copy`dagi o'zgarishlar `be047c4` bilan commit/push qilindi; PR #3 GitHub Actions run `31393176016` green bo'lgach `79be466` bilan `main`ga squash-merge qilindi.
+- Codex reviewidagi ikki P2 topilma tekshirildi. Global form padding qoidasi ikonali `pl-8` inputlarning chap insetini bosib, Admin Audit va Knowledge Base qidiruv placeholderlarini ikonaga yaqinlashtirayotgani tasdiqlandi; `pl-8` uchun `32px` override qo'shilib `aee6692` bilan bevosita `main`ga push qilindi. Ikkinchi topilma bo'yicha STATUS/PLAN'dagi eski “lokal/deploy pending” holati ushbu closeout bilan yangilandi.
+- Supabase `bright-api` productionga deploy qilindi: version 75, `ACTIVE`, `verify_jwt=false`. Netlify production hotfix deploy `6a79d69c9aa5a6bcf326e83c` `ready` holatda 2026-08-10T13:50:02.498Z da published bo'ldi.
+
+### Verifikatsiya va qolgan ish
+
+- Node `22.18.0`: TypeScript `PASS`; Vitest 22/22 fayl, 107/107 test `PASS`; production build `PASS` (3700 modul); security gate 9 build/Netlify fayli `PASS`; `git diff --check` `PASS`.
+- Lokal browser computed checkda dinamik `input.pl-8` chap paddingi `32px`, o'ng `16px`, yuqori `12px`; login mazmunli render bo'ldi, overlay/page error/overflow topilmadi. Production landingda `Nimalar avtomatlashadi?` mavjud, xitoy/turk/koreys copy yo'q, overflow `0`, `pl-8` chap padding `32px`, console/page error yo'q. Authsiz `/admin` `/login`ga xavfsiz redirect bo'ldi.
+- Production Edge health `200` va `{"status":"ok"}` qaytardi. User credentiallari berilmagani uchun Rahbar Kompaniya profili va Super Admin dashboardining authenticated oqimi bajarilmadi; birinchi keyingi action shu ikki rol bilan production smoke-testdir.
+
+### Fayllar
+
+- `frontend/src/styles/editorial.css`
+- `docs/{STATUS,PLAN,DEVLOG}.md`
+- `docs/{English,Russian,日本語}/{STATUS,PLAN,DEVLOG}.md`
+
 ## 2026-08-10 — Lokalizatsiya, form/hover kontrasti va dashboard regressiyalari tuzatildi
 
 ### Kontekst va bajarilgan ish

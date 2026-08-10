@@ -9,7 +9,7 @@
 > 2026-08-08: production migration history was aligned with local; local Storage/Auth pin drift was closed and enabled full-stack health was verified.
 > 2026-08-08: Supabase CLI was upgraded to `v2.112.0`; fresh replay and all acceptance/regression gates passed under the new local key/grant contract.
 > 2026-08-08: the Portfolio-inspired frontend redesign passed browser acceptance, commits `83bc7e0`/`509bc2d` were pushed, PR #2 is open, and CI is green.
-> 2026-08-10: PR #2 was verified merged as `65abe2f`. Four-locale copy, global form/dark-hover, tenant-context, and Super Admin AI-stats crash fixes are locally complete on `agent/fix-landing-localization-copy`; deployment is pending.
+> 2026-08-10: PR #3 was merged into `main` as `79be466`; Codex review hotfix `aee6692` was also pushed to `main`. Netlify production deploy `6a79d69c9aa5a6bcf326e83c` is ready and `bright-api` v75 is ACTIVE; authenticated two-role smoke tests remain.
 
 ## Current phase
 
@@ -24,19 +24,20 @@
 
 | Check | Status |
 |---|---|
-| Git | PR #2 merged into `main` as `65abe2f`; current fixes are local on `agent/fix-landing-localization-copy`, not committed/pushed/deployed |
+| Git | PR #3 squash-merged into `main` as `79be466`; the Codex-review input-padding hotfix was pushed to `main` as `aee6692` |
 | Runtime | Node.js `22.18.0`; `.nvmrc` and package engine pin `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; verified with a fresh local volume |
-| Backend | Supabase Edge Function `bright-api` v74 |
+| Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
 | Health | `200` |
 | Type-check | Passed |
 | Unit tests | 22/22 files, 107/107 tests |
 | Production build/security check | Passed |
 | Production dependency audit | Scoped gate passed: 0 unexcepted high/critical; GHSA-qwww metadata exception expires 2026-08-21 |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue system; landing, public/auth, product core, and admin shell redesign completed locally |
-| Visual browser acceptance | 4/4 landing locales on desktop, Uzbek landing at 390×844, and dark login input/hover computed checks; no page errors or horizontal overflow |
-| Preview CI | GitHub run `31240118332` passed; Vercel passed; Netlify Deploy Preview ready |
-| Remote GitHub Actions | Run `31193931735`, commit `3e383b1`: success; every `frontend-security-gate` step passed |
+| Visual browser acceptance | Local and production landing copy/locale, no-overflow and no-error checks passed; icon-bearing `pl-8` input computed left padding is `32px`; unauthenticated `/admin` safely redirects to `/login` |
+| Preview CI | PR #3 Netlify preview deploy `6a79d24ae3c42e00088b058f` ready; Vercel ready |
+| Remote GitHub Actions | PR #3 run `31393176016`, commit `be047c4`: success; every `frontend-security-gate` step passed |
+| Production frontend | Netlify deploy `6a79d69c9aa5a6bcf326e83c` ready, published at 2026-08-10T13:50:02.498Z |
 | Frontend Supabase key contract | Code/deploy: publishable primary + temporary fallback; production bundle uses legacy anon fallback, Netlify env/login pending |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; real Auth-token Edge tests 8/8; Realtime tables are SELECT-only and require active membership/tenant |
 | Migration history | Local/remote 32/32 aligned; production `db push --dry-run`: up to date |
@@ -48,7 +49,7 @@
 |---|---|---|
 | Auth, multi-tenant, RBAC and core web modules | Done | Main product foundation works |
 | Realtime and task notifications | Done | Inbox, Tasks, Notifications, acknowledgement |
-| Admin platform | Partial | Core management/monitoring exists; the AI-stats `cost/cost_usd` crash fix is local and pending deployment |
+| Admin platform | Partial | Core management/monitoring exists; the AI-stats `cost/cost_usd` crash fix is in production, with an authenticated Super Admin smoke test remaining |
 | Telegram | Partial / operational block | Verify `TELEGRAM_WEBHOOK_SECRET` and webhook |
 | Resend inbox | Partial | Code exists; receiving/delivery E2E is unverified |
 | AI Concierge/RAG and cost tracking | Partial | Foundation exists; citation UX, plan enforcement and full smoke tests remain |
@@ -58,7 +59,7 @@
 
 ## Immediate order
 
-1. Review/commit/push `agent/fix-landing-localization-copy`; after CI, deploy frontend and `bright-api`, then production-smoke Leader Company Profile and Super Admin login.
+1. With production credentials, smoke-test Leader Company Profile and the Super Admin dashboard to verify tenant context and AI stats in authenticated flows.
 2. Restore Netlify CLI login, set the production publishable env, redeploy, and smoke-test Auth/Realtime before removing the legacy fallback.
 3. Re-review GHSA-qwww by 2026-08-21, then continue Document Assistant PDF/DOCX/Storage work.
 

@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 4.7 · 更新 2026-08-10
+> Version 4.8 · 更新 2026-08-10
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -20,7 +20,7 @@
 - [x] TypeScript、101/101 tests、production build、security gate、dependency audit成功。
 - [x] Browser-enabled environmentでdesktop/mobile landing、login、forgot-password、contact routesをbrowser acceptance。Overlay、browser errors、horizontal overflowなし。
 - [x] Findingsなしのredesignを`83bc7e0`でcommit/push、PR #2を作成しGitHub CI/Vercel/Netlify previewを確認、`65abe2f`として`main`へmerge。
-- [ ] `agent/fix-landing-localization-copy`の4-locale copy、form/hover、tenant-context、Super Admin stats fixesをreview/commit/pushし、CI後にfrontend/Edge deployと2 role production smoke-testsを実行。
+- [ ] Production credentialsでLeader Company ProfileとSuper Admin dashboardのauthenticated smoke-testを行い、tenant contextとAI-stats behaviorを確認。
 
 ## P1 — Supabase/Netlify security handoff完了
 

@@ -10,7 +10,7 @@
 > 2026-08-08: Supabase CLI `v2.112.0`ga yangilandi; yangi local key/grant contractiga mos fresh replay va barcha acceptance/regression gate'lar o'tdi.
 > 2026-08-08: Portfolio-inspired frontend redesign browser acceptance bilan yakunlandi, `83bc7e0`/`509bc2d` push qilindi, PR #2 ochiq va CI green.
 > 2026-08-08: Visual consolidation davom etdi: decorative emoji/purple/pink legacy UI semantic palette’ga yig‘ildi, landing title scale kichraytirildi; targeted checks green.
-> 2026-08-10: PR #2 `65abe2f` bilan `main`ga merge qilingani tasdiqlandi. To'rt til landing copy, global form/dark-hover, tenant profile context va Super Admin AI-stats crash fixlari `agent/fix-landing-localization-copy` branchida lokal yakunlandi; deploy pending.
+> 2026-08-10: PR #3 `79be466` bilan `main`ga merge qilindi; Codex review hotfixi `aee6692` ham `main`ga push qilindi. Frontend Netlify production deploy `6a79d69c9aa5a6bcf326e83c`da ready, `bright-api` v75 ACTIVE; authenticated ikki-rolli smoke-test qolgan.
 
 ## Hozir qayerdamiz
 
@@ -25,10 +25,10 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | PR #2 `main`ga merge qilingan (`65abe2f`); joriy tuzatishlar lokal `agent/fix-landing-localization-copy` branchida, commit/push/deploy qilinmagan |
+| Git | PR #3 `main`ga squash-merge qilingan (`79be466`); Codex review input-padding hotfixi `aee6692` bilan `main`ga push qilingan |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
-| Backend | Supabase Edge Function `bright-api` v74 |
+| Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
 | Health smoke-test | `200` |
 | Type-check | Muvaffaqiyatli |
 | Unit test | 22/22 fayl, 107/107 test |
@@ -36,9 +36,10 @@
 | Security check | 9 ta build/Netlify fayli muvaffaqiyatli |
 | Production dependency audit | Scoped gate o'tdi: unexcepted high/critical 0; GHSA-qwww metadata exceptioni 2026-08-21 gacha |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue tokenlari; landing, public/auth, product core va admin shell redesign lokal yakunlangan |
-| Visual browser acceptance | 4/4 landing locale desktopda, Uzbek landing 390×844 mobile, dark login input/hover computed checks: page error va horizontal overflow yo'q |
-| Preview CI | GitHub run `31240118332` passed; Vercel passed; Netlify Deploy Preview ready |
-| Remote GitHub Actions | Run `31193931735`, commit `3e383b1`: `success`; barcha `frontend-security-gate` qadamlari green |
+| Visual browser acceptance | Lokal va production landingda copy/locale, no-overflow va no-error tekshirildi; ikonali `pl-8` input computed left padding `32px`; `/admin` authsiz `/login`ga xavfsiz redirect bo'ldi |
+| Preview CI | PR #3 Netlify preview deploy `6a79d24ae3c42e00088b058f` ready; Vercel ready |
+| Remote GitHub Actions | PR #3 run `31393176016`, commit `be047c4`: `success`; barcha `frontend-security-gate` qadamlari green |
+| Production frontend | Netlify deploy `6a79d69c9aa5a6bcf326e83c` `ready`, 2026-08-10T13:50:02.498Z da published |
 | Frontend Supabase key contract | Kod/deploy: publishable primary + vaqtinchalik fallback; production bundle legacy anon fallback ishlatmoqda, Netlify env/login **pending** |
 | DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; real Auth tokenli Edge `8/8`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |
 | Migration history | Local/remote 32/32 teng; production `db push --dry-run`: up to date |
@@ -52,7 +53,7 @@
 | Core web modullar | **Done** | Reports, Inbox, Tasks, HR, Docs, Integrations, Settings |
 | Realtime | **Done** | Inbox, Tasks va Notifications subscriptionlari |
 | Task assignment notifications | **Done** | Biriktirish, read va acknowledge oqimi |
-| Admin platforma | **Partial** | Dashboard, companies, contacts, users, audit, KB, risk, health va AI stats mavjud; AI stats `cost/cost_usd` crash fixi lokal, deploy pending |
+| Admin platforma | **Partial** | Dashboard, companies, contacts, users, audit, KB, risk, health va AI stats mavjud; `cost/cost_usd` crash fixi productionda, authenticated Super Admin smoke-test qolgan |
 | Telegram bot | **Partial / operational block** | Bot funksiyalari mavjud; `TELEGRAM_WEBHOOK_SECRET` productionda qayta tekshirilishi kerak |
 | Resend email inbox | **Partial** | Webhook va mapping kodi mavjud; real receiving/delivery smoke-test tasdiqlanmagan |
 | AI Concierge / RAG | **Partial** | Claude router, OpenAI embedding va RAG fundamenti bor; explicit document search/citation va to'liq smoke-test qarzi bor |
@@ -72,7 +73,7 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. `agent/fix-landing-localization-copy`ni review/commit/push qilish, CI'dan keyin frontend va `bright-api`ni deploy qilib Rahbar Kompaniya profili hamda Super Admin loginini productionda smoke-test qilish.
+1. Rahbar sifatida Kompaniya profili va Super Admin dashboardini production credentiallari bilan smoke-test qilib, tenant context hamda AI-stats tuzatishlarini authenticated oqimda tasdiqlash.
 2. Netlify CLI loginini tiklash, production `VITE_SUPABASE_PUBLISHABLE_KEY`ni o'rnatish, qayta deploy va Auth/Realtime smoke-test qilish; legacy fallbackni faqat keyin olib tashlash.
 3. 2026-08-21gacha GHSA-qwww metadata exceptionini qayta ko'rish; keyin AI Hujjatchi PDF/DOCX/Storage ishlariga o'tish.
 

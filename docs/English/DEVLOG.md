@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-10 — PR #3 review hotfix and production rollout completed
+
+- The `agent/fix-landing-localization-copy` changes were committed/pushed as `be047c4`; after GitHub Actions run `31393176016` passed, PR #3 was squash-merged into `main` as `79be466`.
+- Both Codex P2 review findings were verified. The global form-padding rule overrode the left inset of icon-bearing `pl-8` inputs, crowding Admin Audit and Knowledge Base search placeholders; a `32px` `pl-8` override was added and pushed directly to `main` as `aee6692`. This closeout also replaces the stale STATUS/PLAN “local/deploy pending” state.
+- Supabase `bright-api` was deployed as version 75 (`ACTIVE`, `verify_jwt=false`). Netlify production hotfix deploy `6a79d69c9aa5a6bcf326e83c` became ready and was published at 2026-08-10T13:50:02.498Z.
+- Verification: Node `22.18.0` TypeScript PASS; Vitest 22/22 files and 107/107 tests PASS; production build PASS (3700 modules); 9-file build/Netlify security gate PASS; `git diff --check` PASS. Local browser computed `input.pl-8` padding was 32px left, 16px right, 12px top, with no overlay/page error/overflow. Production showed the corrected Uzbek copy, no obsolete Chinese/Turkish/Korean copy, zero overflow, 32px `pl-8` left padding, and no console/page errors. Unauthenticated `/admin` safely redirected to `/login`.
+- Production Edge health returned HTTP `200` with `{"status":"ok"}`. Leader Company Profile and Super Admin dashboard authenticated flows were not exercised because user credentials were unavailable; the first next action is a two-role production smoke test.
+
+Files: `frontend/src/styles/editorial.css` and synchronized four-language STATUS/PLAN/DEVLOG files.
+
 ## 2026-08-10 — Localization, form/hover contrast, and dashboard regressions fixed
 
 - Verified PR #2 merged into `main` as `65abe2f`; work was completed on local branch `agent/fix-landing-localization-copy` while preserving the three pre-existing untracked user files.
