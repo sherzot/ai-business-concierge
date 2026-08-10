@@ -17,7 +17,7 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 - Node `22.18.0`: TypeScript `PASS`; Vitest 23/23 fayl, 108/108 test `PASS`; production build `PASS` (3700 modul); security gate 9 build/Netlify fayli `PASS`; `git diff --check` `PASS`.
 - Lokal browser dark/light mode'da Why Us 6/6 sababni topdi: title `rgb(244,243,239)`, izoh inverse foreground 65%, fon `rgb(17,19,24)`; overflow `0`, console error va Vite overlay yo'q. Screenshot: `/private/tmp/abc-why-us-dark.png`.
-- Authenticated dashboard browser sessiyasi credential'siz takrorlanmadi; ayni inverse tokenning computed browser kontrasti landingda, dashboard markup contracti esa yangi unit testda tasdiqlandi. PR #5 GitHub CI, Netlify preview va Vercel preview green; keyingi action merge, Netlify production deploy va user dark-mode smoke-testidir.
+- Authenticated dashboard browser sessiyasi credential'siz takrorlanmadi; ayni inverse tokenning computed browser kontrasti landingda, dashboard markup contracti esa yangi unit testda tasdiqlandi. PR #5 code-only GitHub run `31399285836` va final docs run `31399751738` `success`; Netlify code preview `6a79e27ae3c42e00088ffd45` ready, latest docs-only deploy `6a79e3b03648850008d64852` canceled; Vercel final deployment `Cg6Bt5HG1JJrGvwzDYaJqokQQU2q` ready. PR #5 `2466200` bilan `main`ga merge qilindi; keyingi action Netlify production deploy va user dark-mode smoke-testidir.
 
 ### Fayllar
 

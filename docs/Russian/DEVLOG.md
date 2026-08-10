@@ -11,7 +11,7 @@
 - Тот же pattern затрагивал Company Dashboard Business Status: heading, timestamp, status, department labels/percentages и SVG track. Все переведены на inverse foreground/muted contract; добавлен `DashboardPage` regression test, запрещающий `text-background` внутри panel (`4184ddb`, PR #5).
 - Единственный unresolved P1 Codex thread PR #4 потребовал обязательный DEVLOG closeout; эта синхронная four-language правка DEVLOG/STATUS/PLAN закрывает feedback без изменения behavior.
 - Проверки: Node `22.18.0` TypeScript PASS; Vitest 23/23 files и 108/108 tests PASS; production build PASS (3700 modules); 9-file security gate и `git diff --check` PASS. Browser dark/light checks: 6/6 причин, title `rgb(244,243,239)`, descriptions 65% inverse-muted, background `rgb(17,19,24)`, overflow 0, console/Vite-overlay errors нет. Screenshot: `/private/tmp/abc-why-us-dark.png`.
-- Authenticated dashboard browser flow без credentials повторно не запускался; общий token подтверждён в browser, dashboard markup закрыт новым test. PR #5 GitHub CI, Netlify preview и Vercel preview green. Далее: merge, production deploy и user dark-mode smoke-test.
+- Authenticated dashboard browser flow без credentials повторно не запускался; общий token подтверждён в browser, dashboard markup закрыт новым test. PR #5 code-only GitHub run `31399285836` и final docs run `31399751738` success; Netlify code preview `6a79e27ae3c42e00088ffd45` ready, latest docs-only deploy `6a79e3b03648850008d64852` canceled, Vercel final deployment `Cg6Bt5HG1JJrGvwzDYaJqokQQU2q` ready. PR #5 merged в `main` как `2466200`. Далее: Netlify production deploy и user dark-mode smoke-test.
 
 Files: WhyUsSection, DashboardPage и regression test, синхронные four-language STATUS/PLAN/DEVLOG.
 

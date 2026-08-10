@@ -11,7 +11,7 @@
 > 2026-08-08: Portfolio-inspired frontend redesign browser acceptance bilan yakunlandi, `83bc7e0`/`509bc2d` push qilindi, PR #2 ochiq va CI green.
 > 2026-08-08: Visual consolidation davom etdi: decorative emoji/purple/pink legacy UI semantic palette’ga yig‘ildi, landing title scale kichraytirildi; targeted checks green.
 > 2026-08-10: PR #3 `79be466` bilan `main`ga merge qilindi; Codex review hotfixi `aee6692` ham `main`ga push qilindi. Frontend Netlify production deploy `6a79d69c9aa5a6bcf326e83c`da ready, `bright-api` v75 ACTIVE; authenticated ikki-rolli smoke-test qolgan.
-> 2026-08-10: User Rahbar Kompaniya profili va Super Admin dashboardining authenticated production oqimlarini muvaffaqiyatli tekshirganini tasdiqladi. Landing Why Us kontrast fixi PR #4 orqali `main`da; Company Dashboard kontrast fixi va regressiya testi PR #5da green, production rollout pending.
+> 2026-08-10: User Rahbar Kompaniya profili va Super Admin dashboardining authenticated production oqimlarini muvaffaqiyatli tekshirganini tasdiqladi. Landing Why Us kontrast fixi PR #4, Company Dashboard fixi PR #5 orqali `main`ga merge qilindi; production rollout pending.
 
 ## Hozir qayerdamiz
 
@@ -26,7 +26,7 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | PR #4 `main`ga squash-merge qilingan (`700483d`); Company Dashboard kontrast fixi `4184ddb` bilan PR #5da, remote gate'lar green |
+| Git | PR #4 `700483d` va PR #5 `2466200` bilan `main`ga squash-merge qilingan |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -38,8 +38,8 @@
 | Production dependency audit | Scoped gate o'tdi: unexcepted high/critical 0; GHSA-qwww metadata exceptioni 2026-08-21 gacha |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue tokenlari; landing, public/auth, product core va admin shell redesign lokal yakunlangan |
 | Visual browser acceptance | Landing Why Us 6/6 sabab dark/light mode'da inverse text bilan ko'rindi: title `rgb(244,243,239)`, fon `rgb(17,19,24)`, overflow `0`, console/overlay error yo'q; dashboard inverse markup regressiya testi bilan yopildi |
-| Preview CI | PR #3 Netlify preview deploy `6a79d24ae3c42e00088b058f` ready; Vercel ready |
-| Remote GitHub Actions | PR #3 run `31393176016`, commit `be047c4`: `success`; barcha `frontend-security-gate` qadamlari green |
+| Preview CI | PR #5 code preview Netlify deploy `6a79e27ae3c42e00088ffd45` ready; latest docs-only deploy `6a79e3b03648850008d64852` canceled; Vercel deployment `Cg6Bt5HG1JJrGvwzDYaJqokQQU2q` ready |
+| Remote GitHub Actions | PR #5 run `31399751738`, commit `04cd48f`: `success`; oldingi code-only run `31399285836` ham `success` |
 | Production frontend | Netlify deploy `6a79d69c9aa5a6bcf326e83c` `ready`, 2026-08-10T13:50:02.498Z da published |
 | Frontend Supabase key contract | Kod/deploy: publishable primary + vaqtinchalik fallback; production bundle legacy anon fallback ishlatmoqda, Netlify env/login **pending** |
 | DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; real Auth tokenli Edge `8/8`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |
@@ -54,7 +54,7 @@
 | Core web modullar | **Done** | Reports, Inbox, Tasks, HR, Docs, Integrations, Settings |
 | Realtime | **Done** | Inbox, Tasks va Notifications subscriptionlari |
 | Task assignment notifications | **Done** | Biriktirish, read va acknowledge oqimi |
-| Admin platforma | **Partial** | Dashboard, companies, contacts, users, audit, KB, risk, health va AI stats mavjud; tenant profile/AI-stats authenticated smoke user tomonidan tasdiqlangan, dashboard dark-contrast rollout pending |
+| Admin platforma | **Partial** | Dashboard, companies, contacts, users, audit, KB, risk, health va AI stats mavjud; tenant profile/AI-stats authenticated smoke user tomonidan tasdiqlangan, dashboard dark-contrast production deploy pending |
 | Telegram bot | **Partial / operational block** | Bot funksiyalari mavjud; `TELEGRAM_WEBHOOK_SECRET` productionda qayta tekshirilishi kerak |
 | Resend email inbox | **Partial** | Webhook va mapping kodi mavjud; real receiving/delivery smoke-test tasdiqlanmagan |
 | AI Concierge / RAG | **Partial** | Claude router, OpenAI embedding va RAG fundamenti bor; explicit document search/citation va to'liq smoke-test qarzi bor |
@@ -74,7 +74,7 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. PR #5ni merge qilib landing + Company Dashboard dark-contrast hotfixlarini Netlify productionga deploy va qayta smoke-test qilish.
+1. Landing + Company Dashboard dark-contrast hotfixlarini Netlify productionga deploy va qayta smoke-test qilish.
 2. Netlify CLI loginini tiklash, production `VITE_SUPABASE_PUBLISHABLE_KEY`ni o'rnatish, qayta deploy va Auth/Realtime smoke-test qilish; legacy fallbackni faqat keyin olib tashlash.
 3. 2026-08-21gacha GHSA-qwww metadata exceptionini qayta ko'rish; keyin AI Hujjatchi PDF/DOCX/Storage ishlariga o'tish.
 

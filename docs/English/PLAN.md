@@ -20,7 +20,7 @@
 - [x] Pass TypeScript, 101/101 tests, production build, security gate, and dependency audit.
 - [x] Run browser acceptance for desktop/mobile landing, login, forgot-password, and contact routes; no overlay, browser errors, or horizontal overflow found.
 - [x] Commit/push the finding-free redesign as `83bc7e0`, open PR #2, verify GitHub CI/Vercel/Netlify preview, and merge PR #2 into `main` as `65abe2f`.
-- [ ] Merge the Company Dashboard inverse-contrast fix and regression test from PR #5; deploy it with the PR #4 landing fix to Netlify production and run a dark-mode smoke test.
+- [ ] Deploy the merged PR #4/PR #5 landing and Company Dashboard inverse-contrast fixes from `main` to Netlify production and run a dark-mode smoke test.
 
 ## P1 — finish the Supabase/Netlify security handoff
 

@@ -28,7 +28,7 @@
 - [x] TypeScript, 101/101 test, production build, security gate va dependency auditni o'tkazish.
 - [x] Browser-enabled muhitda desktop/mobile landing, login, forgot-password va contact route'larni vizual acceptance qilish; overlay, browser error va horizontal overflow topilmadi.
 - [x] Topilmasiz redesignni `83bc7e0` bilan commit/push qilish, PR #2 ochish, GitHub CI/Vercel/Netlify previewni tekshirish va PR #2ni `65abe2f` bilan `main`ga merge qilish.
-- [ ] PR #5dagi Company Dashboard inverse-contrast fixi va regressiya testini merge qilish; PR #4 landing fixi bilan birga Netlify productionga deploy va dark-mode smoke-test qilish.
+- [ ] `main`dagi PR #4/PR #5 landing va Company Dashboard inverse-contrast fixlarini Netlify productionga deploy va dark-mode smoke-test qilish.
 
 ## P1 — Supabase/Netlify security handoffini yakunlash
 

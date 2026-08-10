@@ -11,7 +11,7 @@
 - 同じpatternがCompany Dashboard Business Statusのheading、timestamp、status、department labels/percentages、SVG trackにも存在。Inverse foreground/muted contractへ統一し、panel内の`text-background`を拒否する`DashboardPage` regression testを追加（`4184ddb`、PR #5）。
 - PR #4の唯一のunresolved P1 Codex threadは必須DEVLOG closeoutを要求。この4-language DEVLOG/STATUS/PLAN同期でbehavior変更なしにfeedbackへ対応。
 - 検証: Node `22.18.0` TypeScript PASS、Vitest 23/23 files・108/108 tests PASS、production build PASS（3700 modules）、9-file security gateと`git diff --check` PASS。Browser dark/light checksは6/6 reasons、title `rgb(244,243,239)`、description 65% inverse-muted、background `rgb(17,19,24)`、overflow 0、console/Vite-overlay errorsなし。Screenshot: `/private/tmp/abc-why-us-dark.png`。
-- Credentialsなしのためauthenticated dashboard browser flowは再実行せず。Shared tokenはbrowserで確認しdashboard markupはnew testで保護。PR #5 GitHub CI、Netlify preview、Vercel preview green。Next: merge、production deploy、user dark-mode smoke-test。
+- Credentialsなしのためauthenticated dashboard browser flowは再実行せず。Shared tokenはbrowserで確認しdashboard markupはnew testで保護。PR #5 code-only GitHub run `31399285836`とfinal docs run `31399751738`はsuccess。Netlify code preview `6a79e27ae3c42e00088ffd45` ready、latest docs-only deploy `6a79e3b03648850008d64852` canceled、Vercel final deployment `Cg6Bt5HG1JJrGvwzDYaJqokQQU2q` ready。PR #5は`2466200`として`main`へmerge。Next: Netlify production deployとuser dark-mode smoke-test。
 
 Files: WhyUsSection、DashboardPageとregression test、同期済み4-language STATUS/PLAN/DEVLOG。
 

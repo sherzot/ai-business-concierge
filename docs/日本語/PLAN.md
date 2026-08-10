@@ -20,7 +20,7 @@
 - [x] TypeScript、101/101 tests、production build、security gate、dependency audit成功。
 - [x] Browser-enabled environmentでdesktop/mobile landing、login、forgot-password、contact routesをbrowser acceptance。Overlay、browser errors、horizontal overflowなし。
 - [x] Findingsなしのredesignを`83bc7e0`でcommit/push、PR #2を作成しGitHub CI/Vercel/Netlify previewを確認、`65abe2f`として`main`へmerge。
-- [ ] PR #5のCompany Dashboard inverse-contrast fixとregression testをmergeし、PR #4 landing fixと共にNetlify productionへdeployしてdark-mode smoke-test。
+- [ ] `main`へmerged済みのPR #4/PR #5 landing・Company Dashboard inverse-contrast fixesをNetlify productionへdeployし、dark-mode smoke-test。
 
 ## P1 — Supabase/Netlify security handoff完了
 
