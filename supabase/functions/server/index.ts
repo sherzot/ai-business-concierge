@@ -4563,9 +4563,24 @@ const registerRoutes = (prefix: string) => {
       total_requests: totalRequests,
       total_tokens:   totalTokens,
       total_cost_usd: Math.round(totalCostUsd * 10_000) / 10_000,
-      by_model:  Object.entries(modelMap).map(([model, v]) => ({ model, ...v })),
-      top_tenants: topTenants,
-      daily: dailyChart,
+      by_model: Object.entries(modelMap).map(([model, v]) => ({
+        model,
+        requests: v.requests,
+        tokens: v.tokens,
+        cost_usd: v.cost,
+      })),
+      top_tenants: topTenants.map((tenant) => ({
+        tenant_id: tenant.tenant_id,
+        requests: tenant.requests,
+        tokens: tenant.tokens,
+        cost_usd: tenant.cost,
+      })),
+      daily: dailyChart.map((day) => ({
+        date: day.date,
+        requests: day.requests,
+        tokens: day.tokens,
+        cost_usd: day.cost,
+      })),
     });
   });
 

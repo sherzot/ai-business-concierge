@@ -4,6 +4,18 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-10 — Исправлены локализация, form/hover contrast и dashboard regressions
+
+- Подтверждён merge PR #2 в `main` как `65abe2f`; работа выполнена в локальной ветке `agent/fix-landing-localization-copy`, три существующих untracked user files сохранены без изменений.
+- Проверены четыре landing locale. Исправлено смешанное написание `Nimalар avtomatlashadi?`; international-company copy, stat и pricing приведены к реально поддерживаемым языкам: узбекскому, русскому, английскому и японскому. Упоминания китайского/турецкого/корейского удалены.
+- Централизованы form insets: 16 px по горизонтали, 12 px по вертикали, 8 px между label/control и 44 px shared controls с сохранением icon offsets. Solid light hover utilities в dark mode переведены на neutral/brand/status tokens.
+- Company Profile GET/PATCH не передавали `tenantId`, поэтому отсутствовал `X-Tenant-Id` и backend отвечал `Tenant context topilmadi.`. Оба вызова и аналогичный Employee Detail pattern исправлены.
+- Причиной Super Admin crash было несоответствие `cost` от Edge и ожидаемого UI `cost_usd`. Edge теперь возвращает canonical field, а frontend нормализует legacy/partial responses до finite values. Для `/admin` добавлен route error fallback без раскрытия production stack.
+- Проверки: Node `22.18.0`, TypeScript PASS; Vitest 22/22 files и 107/107 tests PASS; production build (3700 modules), 9-file security gate и `git diff --check` PASS. Browser acceptance: 4/4 desktop locale и Uzbek mobile 390×844 без page errors/horizontal overflow; dark login padding `12/16/12/16` и `12/44/12/16`, hover contrast читаемый.
+- Local `deno` отсутствует, отдельный Edge Deno typecheck не выполнен. Изменения ещё не committed/pushed/deployed. Далее: review/commit/push, CI, frontend + `bright-api` deploy, затем production smoke-test Company Profile для Leader и Super Admin login.
+
+Files: landing i18n/tests; editorial/theme/shared controls; tenant/employee API и tests; admin API/tests/route fallback; canonical Edge server; синхронные STATUS/PLAN/DEVLOG на четырёх языках.
+
 ## 2026-08-08 — Точная настройка hero typography и form spacing
 
 - Ещё раз уменьшен max-size LP hero headline, tracking приближен к normal, line-height увеличен; длинный Uzbek headline теперь выглядит мягче и читается в три строки.

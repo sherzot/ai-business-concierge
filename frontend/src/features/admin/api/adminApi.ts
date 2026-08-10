@@ -93,8 +93,44 @@ export type AiStats = {
   daily: AiDailyStat[];
 };
 
+type RawAiStats = Partial<Omit<AiStats, "by_model" | "top_tenants" | "daily">> & {
+  by_model?: Array<Partial<AiModelStat> & { cost?: number }>;
+  top_tenants?: Array<Partial<AiTenantStat> & { cost?: number }>;
+  daily?: Array<Partial<AiDailyStat> & { cost?: number }>;
+};
+
+function finiteNumber(value: unknown): number {
+  const number = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(number) ? number : 0;
+}
+
 export async function getAdminAiStats(days = 30): Promise<AiStats> {
-  return apiRequest<AiStats>(`/admin/ai-stats?days=${days}`);
+  const stats = await apiRequest<RawAiStats>(`/admin/ai-stats?days=${days}`);
+
+  return {
+    period_days: finiteNumber(stats.period_days) || days,
+    total_requests: finiteNumber(stats.total_requests),
+    total_tokens: finiteNumber(stats.total_tokens),
+    total_cost_usd: finiteNumber(stats.total_cost_usd),
+    by_model: (stats.by_model ?? []).map((item) => ({
+      model: item.model ?? "unknown",
+      requests: finiteNumber(item.requests),
+      tokens: finiteNumber(item.tokens),
+      cost_usd: finiteNumber(item.cost_usd ?? item.cost),
+    })),
+    top_tenants: (stats.top_tenants ?? []).map((item) => ({
+      tenant_id: item.tenant_id ?? "unknown",
+      tenant_name: item.tenant_name ?? "",
+      requests: finiteNumber(item.requests),
+      cost_usd: finiteNumber(item.cost_usd ?? item.cost),
+    })),
+    daily: (stats.daily ?? []).map((item) => ({
+      date: item.date ?? "",
+      requests: finiteNumber(item.requests),
+      tokens: finiteNumber(item.tokens),
+      cost_usd: finiteNumber(item.cost_usd ?? item.cost),
+    })),
+  };
 }
 
 export type AdminUser = {

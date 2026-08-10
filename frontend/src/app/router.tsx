@@ -21,6 +21,7 @@ import { AdminAuditPage } from "../features/admin/pages/AdminAuditPage";
 import { AdminRiskPage } from "../features/admin/pages/AdminRiskPage";
 import { AdminUsersPage } from "../features/admin/pages/AdminUsersPage";
 import { AdminAiStatsPage } from "../features/admin/pages/AdminAiStatsPage";
+import { RouteErrorPage } from "./RouteErrorPage";
 
 export const router = createBrowserRouter([
   { path: "/",                element: <LandingPage /> },
@@ -34,6 +35,7 @@ export const router = createBrowserRouter([
 
   {
     path: "/admin",
+    errorElement: <RouteErrorPage />,
     element: (
       <RequireAuth>
         <RequireRole roles={["super_admin", "sub_admin"]}>
