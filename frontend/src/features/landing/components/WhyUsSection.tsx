@@ -21,8 +21,8 @@ export function WhyUsSection({ t }: Props) {
               <article key={item.title} className="grid grid-cols-[2.5rem_1fr] gap-4 border-t border-white/20 py-6 last:border-b">
                 <span className="text-xs font-bold text-[var(--brand-primary-hover)]">0{index + 1}</span>
                 <div>
-                  <h3 className="text-base font-semibold text-background">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-background/70">{item.desc}</p>
+                  <h3 className="text-base font-semibold text-[var(--editorial-inverse-fg)]">{item.title}</h3>
+                  <p className="editorial-inverse-muted mt-2 text-sm leading-6">{item.desc}</p>
                 </div>
               </article>
             ))}
