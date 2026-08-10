@@ -84,6 +84,7 @@ textarea {
   min-height: 6rem;
 }
 
+input[class~="pl-8"] { padding-left: 2rem !important; }
 input[class~="pl-9"] { padding-left: 2.25rem !important; }
 input[class~="pl-10"] { padding-left: 2.5rem !important; }
 input[class~="pl-11"] { padding-left: 2.75rem !important; }
