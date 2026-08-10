@@ -151,17 +151,17 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
 
         {/* Biznes holati */}
         <section className="editorial-inverse p-6 lg:col-span-4 lg:p-8">
-          <h3 className="font-semibold text-background">{translate("dashboard.businessStatus")}</h3>
-          <p className="mb-4 mt-2 text-xs text-background/60">{translate("dashboard.updated", { time: "2 soat" })}</p>
+          <h3 className="font-semibold text-[var(--editorial-inverse-fg)]">{translate("dashboard.businessStatus")}</h3>
+          <p className="editorial-inverse-muted mb-4 mt-2 text-xs">{translate("dashboard.updated", { time: "2 soat" })}</p>
           <div className="flex flex-col items-center mb-6">
             <div className="relative w-28 h-28">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="color-mix(in srgb, var(--background) 20%, transparent)" strokeWidth="2.5" />
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="color-mix(in srgb, var(--editorial-inverse-fg) 20%, transparent)" strokeWidth="2.5" />
                 <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke={healthScoreStroke(scoreColor)} strokeWidth="2.5" strokeDasharray={`${healthScore}, 100`} strokeLinecap="round" className="transition-all duration-500" />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className={`text-2xl font-bold ${healthScoreTextClass(scoreColor)}`}>{healthScore}</span>
-                <span className="text-xs text-background/60">{translate("dashboard.good")}</span>
+                <span className="editorial-inverse-muted text-xs">{translate("dashboard.good")}</span>
               </div>
             </div>
           </div>
@@ -173,8 +173,8 @@ export function DashboardPage({ tenant, onNavigate }: DashboardPageProps) {
               { label: "Sotuv", value: deptScores.sales },
             ].map((d) => (
               <div key={d.label} className="border-t border-white/20 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-background/50">{d.label}</p>
-                <p className="mt-1 text-sm font-semibold text-background">{d.value}%</p>
+                <p className="editorial-inverse-muted text-[10px] font-bold uppercase tracking-[0.1em]">{d.label}</p>
+                <p className="mt-1 text-sm font-semibold text-[var(--editorial-inverse-fg)]">{d.value}%</p>
               </div>
             ))}
           </div>
