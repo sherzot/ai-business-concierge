@@ -254,7 +254,7 @@ curl "https://ufhepwdkjqptjvxrmpjn.supabase.co/functions/v1/bright-api/make-serv
 | Key | Value | Статус |
 |---|---|---|
 | `VITE_SUPABASE_PROJECT_ID` | `ufhepwdkjqptjvxrmpjn` | ✅ уже есть |
-| `VITE_SUPABASE_ANON_KEY` | Dashboard → Settings → API → anon | ✅ уже есть |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Dashboard → Settings → API Keys → Publishable key | ✅ modern public key |
 | `VITE_FEATURE_HR_CANDIDATES` | `true` | новое (для отображения скелета) |
 | `VITE_SENTRY_DSN` | (Phase 1) | оставьте пустым |
 | `VITE_TELEGRAM_BOT_USERNAME` | (Phase 1) | оставьте пустым |

@@ -254,7 +254,7 @@ Check:
 | Key | Value | Status |
 |---|---|---|
 | `VITE_SUPABASE_PROJECT_ID` | `ufhepwdkjqptjvxrmpjn` | ✅ already set |
-| `VITE_SUPABASE_ANON_KEY` | Dashboard → Settings → API → anon | ✅ already set |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Dashboard → Settings → API Keys → Publishable key | ✅ modern public key |
 | `VITE_FEATURE_HR_CANDIDATES` | `true` | new (to show skeleton) |
 | `VITE_SENTRY_DSN` | (Phase 1) | leave empty |
 | `VITE_TELEGRAM_BOT_USERNAME` | (Phase 1) | leave empty |

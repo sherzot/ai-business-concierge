@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-11 — Supabase publishable-key production handoffi bajarildi, source publish tayyorlandi
+
+- Oldingi holatda frontend yangi publishable keyni birinchi tanlasa-da, Netlify'da modern env yo'q va production bundle legacy anon fallbackni ishlatar edi. Supabase production projectida faol modern `sb_publishable_...` key mavjudligi qiymatini loglamasdan tekshirildi; Netlify'da `VITE_SUPABASE_PUBLISHABLE_KEY` public build env sifatida barcha Personal-plan scope/contextlariga o'rnatildi.
+- `main`ning clean tracked snapshoti Netlify productionga deploy qilindi: deploy `6a7a9c1ec552d009a42c6f97`, build `6a7a9c1ec552d009a42c6f95`, `ready`, published `2026-08-11T03:51:28.742Z`, 33s, plugin `success`, 87,160 scanned faylda secret match `0`. Bundle ichida modern key prefixi 1 marta, project legacy JWT esa 0 marta topildi; Auth settings HTTP `200`, Realtime WebSocket `OPEN`, login console/Vite overlay errorlari va horizontal overflow `0` bo'ldi.
+- Rollout tasdiqlangach Netlify'dagi faqat `VITE_SUPABASE_ANON_KEY` frontend env o'chirildi; modern publishable env saqlandi. Supabase legacy API keyning o'zi revoke qilinmadi. `config.ts` endi faqat `VITE_SUPABASE_PUBLISHABLE_KEY`ni qabul qiladi va `sb_publishable_` formatini fail-fast tekshiradi; eski env tipi/fallback va fallback testi olib tashlandi, negative contract test qo'shildi. 4-tilli `FIRST_PUSH` ko'rsatmasi modern keyga o'tkazildi.
+- Verifikatsiya: targeted config 3/3 test `PASS`; TypeScript `PASS`; modern test env bilan Vitest 23/23 fayl, 108/108 test `PASS`; production build 3700 modul `PASS`; security gate 9 fayl `PASS`; `git diff --check` `PASS`. Lokal `.env`da modern key yo'qligini ko'rsatgan dastlabki full run 13 suite/56 testni o'tkazib, 10 suite'ni aynan config fail-fastda to'xtatdi; maxfiy lokal fayl o'zgartirilmadi.
+- Source va hujjatlar lokal `agent/remove-legacy-supabase-anon-fallback` branchida. Dastlab sandbox ichidagi `gh auth status` tokenni invalid ko'rsatdi; user loginidan keyin system keyring bilan qayta tekshiruv `sherzot` accounti va `repo/workflow` scope'larini tasdiqladi. Birinchi keyingi amal: explicit staging/commit/push/PR, CI va final bundle/Auth/Realtime recheck.
+
+Fayllar/state: `frontend/src/app/config.ts`, `frontend/src/app/__tests__/config.test.ts`, `frontend/src/env.d.ts`, `docs/FIRST_PUSH.md`, 4-tilli STATUS/PLAN/DEVLOG/FIRST_PUSH, Netlify env va production deploy.
+
 ## 2026-08-10 — Inverse kontrast hotfixlari productionga chiqarildi
 
 - PR #4 Codex reviewidagi DEVLOG closeout topilmasi PR #5ning 4-tilli hujjat commitida bajarildi. PR #5 Codex reviewidagi yagona P1 topilma green gate identifikatorlari yetishmasligi edi; GitHub run, Netlify preview va Vercel deployment ID'lari STATUS/DEVLOGga qo'shilib `67ab618` bilan `main`ga push qilindi. GitHub threadlariga reply/resolve berilmadi.

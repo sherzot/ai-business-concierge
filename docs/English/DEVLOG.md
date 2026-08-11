@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Supabase publishable-key production handoff completed; source publish prepared
+
+- Previously the frontend preferred the publishable key but Netlify had no modern env and production used the legacy anon fallback. An active modern `sb_publishable_...` production key was verified without logging its value, then `VITE_SUPABASE_PUBLISHABLE_KEY` was configured as a public build variable across the Personal-plan scopes/context.
+- A clean tracked `main` snapshot was deployed to Netlify production: deploy `6a7a9c1ec552d009a42c6f97`, build `6a7a9c1ec552d009a42c6f95`, `ready`, published `2026-08-11T03:51:28.742Z`, 33s, plugin `success`, 0 secret matches across 87,160 files. The bundle contained one modern-key prefix and zero project legacy JWTs; Auth settings returned HTTP `200`, Realtime WebSocket reached `OPEN`, and login had zero console/Vite-overlay errors and zero horizontal overflow.
+- After rollout verification, only Netlify's `VITE_SUPABASE_ANON_KEY` frontend env was deleted and the modern publishable env remained. The Supabase legacy API key itself was not revoked. `config.ts` now accepts only `VITE_SUPABASE_PUBLISHABLE_KEY` and fail-fast validates the `sb_publishable_` format; the legacy env type/fallback and fallback test were removed, with a negative contract test added. Four-language `FIRST_PUSH` guidance now names the modern key.
+- Verification: targeted config 3/3 tests PASS; TypeScript PASS; Vitest 23/23 files and 108/108 tests PASS with a non-secret modern test env; production build of 3700 modules PASS; 9-file security gate PASS; `git diff --check` PASS. The first full run, without a modern local env, passed 13 suites/56 tests and stopped 10 suites at the intended config fail-fast; the private local env was not changed.
+- Source and docs are on local branch `agent/remove-legacy-supabase-anon-fallback`. The first sandboxed `gh auth status` reported an invalid token; after the user's login, a system-keyring check verified the `sherzot` account and `repo/workflow` scopes. First next action: explicit stage/commit/push/PR, CI, and final bundle/Auth/Realtime recheck.
+
+Files/state: `frontend/src/app/config.ts`, `frontend/src/app/__tests__/config.test.ts`, `frontend/src/env.d.ts`, `docs/FIRST_PUSH.md`, synchronized four-language STATUS/PLAN/DEVLOG/FIRST_PUSH, Netlify env and production deploy.
+
 ## 2026-08-10 — Inverse contrast hotfixes shipped to production
 
 - PR #4's DEVLOG-closeout Codex finding was addressed by the four-language docs commit in PR #5. PR #5's only P1 Codex finding requested concrete green-gate identifiers; the GitHub run, Netlify preview, and Vercel deployment IDs were added to STATUS/DEVLOG and pushed to `main` as `67ab618`. No GitHub threads were replied to or resolved.

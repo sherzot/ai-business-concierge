@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Production handoff Supabase publishable key выполнен; source publish подготовлен
+
+- Ранее frontend предпочитал publishable key, но modern env отсутствовал в Netlify и production использовал legacy anon fallback. Наличие active modern `sb_publishable_...` key в production подтверждено без вывода значения; `VITE_SUPABASE_PUBLISHABLE_KEY` настроен как public build env для всех scopes/context Personal plan.
+- Clean tracked snapshot `main` deployed в Netlify production: deploy `6a7a9c1ec552d009a42c6f97`, build `6a7a9c1ec552d009a42c6f95`, `ready`, published `2026-08-11T03:51:28.742Z`, 33s, plugin `success`, secret matches 0 в 87,160 files. В bundle найден один modern-key prefix и 0 project legacy JWT; Auth settings вернул HTTP `200`, Realtime WebSocket достиг `OPEN`, login имел 0 console/Vite-overlay errors и horizontal overflow 0.
+- После проверки rollout удалён только Netlify frontend env `VITE_SUPABASE_ANON_KEY`; modern publishable env сохранён. Сам Supabase legacy API key не revoke. `config.ts` теперь принимает только `VITE_SUPABASE_PUBLISHABLE_KEY` и fail-fast проверяет формат `sb_publishable_`; legacy env type/fallback и fallback test удалены, добавлен negative contract test. Инструкция `FIRST_PUSH` на четырёх языках переведена на modern key.
+- Проверки: targeted config 3/3 tests PASS; TypeScript PASS; Vitest 23/23 files и 108/108 tests PASS с non-secret modern test env; production build 3700 modules PASS; security gate 9 files PASS; `git diff --check` PASS. Первый full run без modern local env прошёл 13 suites/56 tests и остановил 10 suites на ожидаемом config fail-fast; private local env не менялся.
+- Source и docs находятся в local branch `agent/remove-legacy-supabase-anon-fallback`. Первый sandboxed `gh auth status` сообщил invalid token; после login пользователя проверка через system keyring подтвердила account `sherzot` и scopes `repo/workflow`. Первый следующий шаг: explicit stage/commit/push/PR, CI и final bundle/Auth/Realtime recheck.
+
+Files/state: `frontend/src/app/config.ts`, `frontend/src/app/__tests__/config.test.ts`, `frontend/src/env.d.ts`, `docs/FIRST_PUSH.md`, синхронизированные four-language STATUS/PLAN/DEVLOG/FIRST_PUSH, Netlify env и production deploy.
+
 ## 2026-08-10 — Inverse contrast hotfixes выпущены в production
 
 - Codex finding PR #4 по DEVLOG closeout закрыт four-language docs commit в PR #5. Единственный P1 Codex finding PR #5 требовал конкретные green-gate IDs; GitHub run, Netlify preview и Vercel deployment identifiers добавлены в STATUS/DEVLOG и pushed в `main` как `67ab618`. GitHub threads не получили reply/resolve.

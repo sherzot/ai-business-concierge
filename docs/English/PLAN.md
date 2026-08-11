@@ -1,6 +1,6 @@
 # AI Business Concierge — active plan
 
-> Version 5.0 · Updated 2026-08-10
+> Version 5.1 · Updated 2026-08-11
 > Only active and next work belongs here. The previous master plan is archived at [../archive/English/PLAN_LEGACY_2026-07-24.md](../archive/English/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — safe session start
@@ -27,7 +27,8 @@
 - [ ] Re-review/remove the GHSA-qwww metadata exception by 2026-08-21.
 - [x] Confirm a production publishable key exists; migrate config, env type/example and CI while keeping a temporary rollout fallback.
 - [x] Push publishable-key commit `35d4b91`, confirm GitHub CI run `31192041119` green and Netlify production deploy ready; identify that the bundle uses the legacy fallback.
-- [ ] After Netlify CLI login, set the production publishable env, redeploy, smoke-test Auth/Realtime, then remove the legacy frontend env/fallback.
+- [x] Set the Netlify production publishable env, redeploy, pass Auth `200`/Realtime `OPEN` smoke tests, and remove the legacy frontend env.
+- [ ] Commit/push/PR the local no-fallback source and four-language docs, then verify green CI, final Netlify deploy, and bundle/Auth/Realtime again.
 - [x] Keep direct browser Supabase access limited to Auth/Realtime and add a `from/rpc/storage/functions` regression gate.
 - [x] Inventory public RLS/grants/views/functions: 32/32 tables use RLS, 8/8 views use `security_invoker`, and 6/6 `SECURITY DEFINER` functions deny browser EXECUTE.
 - [x] Harden the server-only risk-scanner boundary by removing browser CRUD grants/policies and applying the production migration.
