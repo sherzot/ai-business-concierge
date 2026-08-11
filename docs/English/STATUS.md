@@ -18,6 +18,7 @@
 > 2026-08-11: The GHSA exception removal was pushed directly to `main` as `1fb6c0c`; GitHub CI run `31466592524` completed green across every security-gate step.
 > 2026-08-11: Netlify + Supabase was fixed as the only active delivery platform and the Vercel Git integration was disconnected. The `$0/month` staging Supabase project was created after two-step user confirmation; 32/32 migrations, `bright-api` v1, Auth hardening, and Netlify context isolation are green 4/4.
 > 2026-08-11: Isolation PR #7 merged into `main` as `3fb1592`; PR and main CI are green. Netlify preview and production smoke tests confirmed the appropriate staging/production ref, Auth/health `200`, Realtime `OPEN`, CSP, and preview noindex/no-store; Vercel created no new deployment.
+> 2026-08-11: The Vite `.env`/build-time CSP P2 finding from the PR #7 Codex review was fixed locally; with two regressions, environment tests are 12/12 and TypeScript, 108 tests, `.env`-only build, and the security gate are green. Hotfix branch/PR closeout remains.
 
 ## Current phase
 
@@ -32,7 +33,7 @@
 
 | Check | Status |
 |---|---|
-| Git | `main` and `origin/main` aligned at `3fb1592`; Netlify/Supabase isolation merged through PR #7 |
+| Git | `agent/fix-vite-env-file-security-headers` branches from main closeout `b4c7c3c`; the Codex P2 hotfix is local and uncommitted |
 | Runtime | Node.js `22.18.0`; `.nvmrc` and package engine pin `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; verified with a fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -41,7 +42,7 @@
 | Staging Auth | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false |
 | Type-check | Passed |
 | Unit tests | 23/23 files, 108/108 tests |
-| Deployment environment guard | 10/10 Node tests; production accepts only the approved project ref and deploy-preview/branch-deploy/dev reject it |
+| Deployment environment guard | 12/12 Node tests: 10 isolation-contract checks plus 2 Vite `.env` fallback/runtime-precedence regressions |
 | Production build/security check | Build passed with a synthetic non-production ref; CSP was generated from that ref; security checked 10 build/Netlify files |
 | Production dependency audit | Raw audit: 0 total vulnerabilities; scoped gate: 0 high/critical with no exceptions |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue system; landing, public/auth, product core, and admin shell redesign completed locally |

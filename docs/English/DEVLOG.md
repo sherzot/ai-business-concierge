@@ -4,6 +4,14 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Fixed the Vite `.env` CSP finding from the PR #7 Codex review
+
+- The post-merge Codex review on PR #7 identified one P2 issue: Vite loaded application `.env` values into `import.meta.env`, while the build-time CSP plugin and standalone security gate read only `process.env`. The documented local `frontend/.env` workflow could therefore fail the build even with valid application config. Netlify production/preview were unaffected because they provide shell environment variables.
+- A shared `vite-environment.mjs` now reads mode-aware Vite env files through `loadEnv` while preserving runtime environment precedence. Both `vite.config.ts` and `security-check.mjs` use the same resolved project ref. Two regression tests cover local `.env` fallback and runtime precedence, bringing environment tests to 12/12.
+- Verification: TypeScript PASS; Vitest 23/23 files and 108/108 tests PASS; with shell `VITE_*` values unset, a temporary `.env.codex-review-test` alone drove a 3700-module build PASS and the 10-file build/Netlify security gate PASS. The temporary env file was deleted after the test and no credential was logged. Remaining work: ship the hotfix through branch/PR CI and Netlify preview.
+
+Files: `frontend/vite.config.ts`, `frontend/scripts/security-check.mjs`, `frontend/scripts/vite-environment.mjs`, `frontend/scripts/vite-environment.node.mjs`, `frontend/package.json`, synchronized four-language STATUS/PLAN/DEVLOG.
+
 ## 2026-08-11 — Shipped Netlify/Supabase isolation to production through PR #7
 
 - Committed and pushed the isolation work as `4a29773` on `agent/netlify-supabase-environment-isolation` and opened PR #7. GitHub Actions PR run `31478289472` succeeded. Netlify deploy-preview `6a7aec950715d300093248d8` was ready with build `6a7aec950715d300093248d6`, plugin success, and zero normal/enhanced secret matches across 87,162 scanned files.

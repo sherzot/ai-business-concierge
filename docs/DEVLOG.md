@@ -4,6 +4,14 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-11 — PR #7 Codex reviewidagi Vite `.env` CSP topilmasi tuzatildi
+
+- PR #7 merge'dan keyingi Codex review bitta P2 topilmani ko'rsatdi: Vite application `.env` qiymatlarini `import.meta.env`ga yuklasa ham, build-time CSP plugin va standalone security gate faqat `process.env`ni o'qirdi. Shu sabab hujjatdagi `frontend/.env` lokal workflowida application config valid bo'lsa ham build noto'g'ri yiqilishi mumkin edi; Netlify production/preview shell env ishlatgani uchun deployed runtime ta'sirlanmagan.
+- Shared `vite-environment.mjs` Vite `loadEnv` orqali mode-aware env fayllarini o'qiydi va runtime env precedence'ini saqlaydi. `vite.config.ts` hamda `security-check.mjs` bir xil resolved project-refdan foydalanadi. Lokal `.env` fallbacki va runtime precedence uchun 2 ta regression test qo'shilib environment testlari 12/12ga yetdi.
+- Verifikatsiya: TypeScript PASS; Vitest 23/23 fayl, 108/108 test PASS; shell `VITE_*` qiymatlari unset holatda faqat vaqtinchalik `.env.codex-review-test` orqali build 3700 modul PASS va security gate 10 build/Netlify fayli PASS. Vaqtinchalik env fayli testdan keyin o'chirildi, credential loglanmadi. Qolgan ish: hotfixni branch/PR orqali CI va Netlify previewdan o'tkazish.
+
+Fayllar: `frontend/vite.config.ts`, `frontend/scripts/security-check.mjs`, `frontend/scripts/vite-environment.mjs`, `frontend/scripts/vite-environment.node.mjs`, `frontend/package.json`, 4-tilli STATUS/PLAN/DEVLOG.
+
 ## 2026-08-11 — Netlify/Supabase isolation PR #7 orqali productionga chiqarildi
 
 - Isolation o'zgarishlari `4a29773` bilan `agent/netlify-supabase-environment-isolation` branchiga commit/push qilindi va PR #7 ochildi. GitHub Actions PR run `31478289472` `success`; Netlify deploy-preview `6a7aec950715d300093248d8` `ready`, build `6a7aec950715d300093248d6`, plugin `success`, 87,162 scanned faylda normal/enhanced secret match `0`.

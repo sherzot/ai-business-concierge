@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "audit:production": "node scripts/audit-production.mjs",
     "validate:deploy-env": "node scripts/validate-deploy-environment.mjs",
-    "test:deploy-env": "node --test scripts/validate-deploy-environment.node.mjs",
+    "test:deploy-env": "node --test scripts/validate-deploy-environment.node.mjs scripts/vite-environment.node.mjs",
     "security:check": "node scripts/security-check.mjs",
     "test": "vitest",
     "test:run": "vitest run",

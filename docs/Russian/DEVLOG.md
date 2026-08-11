@@ -4,6 +4,14 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Исправлена Vite `.env` CSP находка Codex review PR #7
+
+- Post-merge Codex review PR #7 обнаружил один P2 issue: Vite загружал application `.env` values в `import.meta.env`, но build-time CSP plugin и standalone security gate читали только `process.env`. Поэтому documented local workflow `frontend/.env` мог ошибочно останавливать build при valid application config. Netlify production/preview не были затронуты, поскольку передают shell environment variables.
+- Shared `vite-environment.mjs` теперь читает mode-aware Vite env files через `loadEnv`, сохраняя precedence runtime environment. `vite.config.ts` и `security-check.mjs` используют один resolved project ref. Два regression tests покрывают local `.env` fallback и runtime precedence; environment tests теперь 12/12.
+- Verification: TypeScript PASS; Vitest 23/23 files и 108/108 tests PASS; при unset shell `VITE_*` только временный `.env.codex-review-test` обеспечил build 3700 modules PASS и security gate 10 build/Netlify files PASS. Temporary env file удалён после теста, credentials не логировались. Remaining work: провести hotfix через branch/PR CI и Netlify preview.
+
+Files: `frontend/vite.config.ts`, `frontend/scripts/security-check.mjs`, `frontend/scripts/vite-environment.mjs`, `frontend/scripts/vite-environment.node.mjs`, `frontend/package.json`, синхронизированные 4-language STATUS/PLAN/DEVLOG.
+
 ## 2026-08-11 — Netlify/Supabase isolation выпущена в production через PR #7
 
 - Isolation changes committed/pushed как `4a29773` в branch `agent/netlify-supabase-environment-isolation`, открыт PR #7. GitHub Actions PR run `31478289472` завершён со статусом `success`; Netlify deploy-preview `6a7aec950715d300093248d8` ready, build `6a7aec950715d300093248d6`, plugin success, normal/enhanced secret matches `0` в 87,162 scanned files.

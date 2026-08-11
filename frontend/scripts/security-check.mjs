@@ -1,9 +1,15 @@
 import { readdir, readFile } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 
+import { resolveViteEnvironmentValue } from "./vite-environment.mjs";
+
 const frontendDir = resolve(import.meta.dirname, "..");
 const repoDir = resolve(frontendDir, "..");
 const distDir = join(frontendDir, "dist");
+const projectId = resolveViteEnvironmentValue("VITE_SUPABASE_PROJECT_ID", {
+  mode: process.env.MODE ?? "production",
+  envDir: frontendDir,
+});
 
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -71,8 +77,8 @@ assert(
 );
 assert(
   generatedHeaders.includes(
-    `connect-src 'self' https://${process.env.VITE_SUPABASE_PROJECT_ID}.supabase.co ` +
-      `wss://${process.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`,
+    `connect-src 'self' https://${projectId}.supabase.co ` +
+      `wss://${projectId}.supabase.co`,
   ),
   "CSP tanlangan Supabase project bilan mos emas.",
 );
