@@ -45,7 +45,7 @@
 
 ## P1 — Phase 2 AI文書作成を完了
 
-- [ ] Draft PR #10をreview/mergeし、stacked `agent/ai-document-binary-storage`をpushしてPR、GitHub CI、Netlify preview、Codex reviewを通す。
+- [ ] Draft PR #10をreview/mergeし、stacked draft PR #11を`main`へretargetしてGitHub CI、Netlify preview、Codex reviewを通す（`d8bec96` push済み。Current baseが`main`ではないためchecksは未trigger）。
 - [ ] Approved merge後、`20260811131308_ai_document_binary_storage.sql`と`bright-api`をproductionへrolloutし、authenticated実PDF/DOCX signed download、cross-tenant deny、direct Storage deny、delete cleanupをsmoke-testする。
 - [ ] LLM質問/polishingを追加。
 - [ ] Web flow安定後、Telegram wizardとfile送信を追加。

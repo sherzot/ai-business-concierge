@@ -38,7 +38,7 @@
 
 | Check | Status |
 |---|---|
-| Git | `agent/ai-document-binary-storage` is stacked on draft PR #10; PR #10 is OPEN/DRAFT/MERGEABLE with green latest CI/Netlify checks; binary changes are not pushed or in a PR yet |
+| Git | AI Document Assistant commit `d8bec96` is pushed to `agent/ai-document-binary-storage`; draft PR #11 is stacked on the PR #10 branch and MERGEABLE. Because workflows run only for PRs targeting `main`, #11 CI/preview will trigger after PR #10 merges and the PR is retargeted |
 | Runtime | Node.js `22.18.0`; `.nvmrc` and package engine pin `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; verified with a fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -80,7 +80,7 @@
 
 ## Immediate order
 
-1. Review/merge draft PR #10, then push the stacked AI Document Assistant branch and pass PR/CI/preview review.
+1. Review/merge draft PR #10, then retarget draft PR #11 to `main` and pass GitHub CI/Netlify preview/Codex review.
 2. After merge approval, roll out the production migration and `bright-api`, then run authenticated PDF/DOCX/Storage smoke tests.
 3. Next, connect the AI question/polishing flow through the LLM Router.
 

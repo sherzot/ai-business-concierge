@@ -45,7 +45,7 @@
 
 ## P1 — завершить Phase 2 AI Документолог
 
-- [ ] Review/merge draft PR #10; push stacked `agent/ai-document-binary-storage` и пройти PR, GitHub CI, Netlify preview и Codex review.
+- [ ] Review/merge draft PR #10; retarget stacked draft PR #11 на `main` и пройти GitHub CI, Netlify preview и Codex review (`d8bec96` push; checks ещё не trigger, потому что current base не `main`).
 - [ ] После approved merges выпустить `20260811131308_ai_document_binary_storage.sql` и `bright-api` в production; smoke-test authenticated real PDF/DOCX signed download, cross-tenant deny, direct Storage deny и delete cleanup.
 - [ ] Добавить LLM-вопросы и polishing.
 - [ ] После стабильного web flow подключить Telegram wizard и отправку файла.

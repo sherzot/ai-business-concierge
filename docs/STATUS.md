@@ -39,7 +39,7 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | `agent/ai-document-binary-storage` draft PR #10 ustiga stack qilingan; PR #10 OPEN/DRAFT/MERGEABLE va latest CI/Netlify checklari green; binary o'zgarishlari hali push/PR qilinmagan |
+| Git | AI Hujjatchi commit `d8bec96` `agent/ai-document-binary-storage`ga push qilindi; draft PR #11 PR #10 branchiga stacked va MERGEABLE. Workflow faqat `main` target PRlarda ishlagani uchun #11 CI/preview PR #10 merge va retargetdan keyin trigger bo'ladi |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -95,7 +95,7 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. Draft PR #10ni review/merge qilish, so'ng stacked AI Hujjatchi branchini push/PR/CI/previewdan o'tkazish.
+1. Draft PR #10ni review/merge qilish, so'ng draft PR #11ni `main`ga retarget qilib GitHub CI/Netlify preview/Codex reviewdan o'tkazish.
 2. Merge tasdig'idan keyin production migration va `bright-api` rolloutini bajarib authenticated PDF/DOCX/Storage smoke-test o'tkazish.
 3. Keyin AI savol-javob/polishing oqimini LLM Router orqali ulash.
 

@@ -45,7 +45,7 @@
 
 ## P1 — complete Phase 2 AI Document Assistant
 
-- [ ] Review/merge draft PR #10; push stacked `agent/ai-document-binary-storage` and pass PR, GitHub CI, Netlify preview, and Codex review.
+- [ ] Review/merge draft PR #10; retarget stacked draft PR #11 to `main` and pass GitHub CI, Netlify preview, and Codex review (`d8bec96` is pushed; checks have not triggered because the current base is not `main`).
 - [ ] After approved merges, roll out `20260811131308_ai_document_binary_storage.sql` and `bright-api` to production; smoke-test authenticated real PDF/DOCX signed download, cross-tenant deny, direct Storage deny, and delete cleanup.
 - [ ] Add LLM-guided questions and polishing.
 - [ ] After the web flow is stable, add Telegram step-by-step generation and file delivery.

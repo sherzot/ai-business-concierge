@@ -38,7 +38,7 @@
 
 | Check | 状態 |
 |---|---|
-| Git | `agent/ai-document-binary-storage`はdraft PR #10上のstacked branch。PR #10はOPEN/DRAFT/MERGEABLEでlatest CI/Netlify checks green。Binary changesはまだpush/PR前 |
+| Git | AI文書作成commit `d8bec96`を`agent/ai-document-binary-storage`へpush。Draft PR #11はPR #10 branch上にstackされMERGEABLE。Workflowはtarget `main` PRのみのため、#11 CI/previewはPR #10 mergeとretarget後にtrigger |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Supabase Edge Function `bright-api` v75、`ACTIVE`、`verify_jwt=false` |
@@ -80,7 +80,7 @@
 
 ## 直近の順序
 
-1. Draft PR #10をreview/merge後、stacked AI文書作成branchをpushしPR/CI/preview reviewを通す。
+1. Draft PR #10をreview/merge後、draft PR #11を`main`へretargetしGitHub CI/Netlify preview/Codex reviewを通す。
 2. Merge approval後にproduction migrationと`bright-api`をrolloutし、authenticated PDF/DOCX/Storage smoke-testを実施。
 3. 次にLLM Router経由のAI questions/polishingを接続。
 
