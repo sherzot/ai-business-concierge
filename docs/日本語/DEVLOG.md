@@ -4,6 +4,14 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-11 — PR #9 Codex bundled endpoint drift findingをclose
+
+- PR #9をmerge前にCodex待機したことで追加P2 drift caseを検出。CSP refがbundle内のどこかに存在するだけでは不十分で、optional `VITE_SUPABASE_URL`/`VITE_API_BASE_URL`が別Supabase project endpointを参照できた。
+- `security-artifacts.mjs`はescaped URL stringsを含むbundled HTTPS/WSS Supabase endpointsから全20-character project refsを抽出。Security gateはgenerated CSP refがbundleに存在し、検出した全runtime endpoint refが同じCSP refと一致することを検査する。Regression testsを2件追加しdeployment/security environment testsは14/14。
+- Node 22.18 acceptance: mismatched synthetic API projectでnon-default-mode build 3700 modules PASS、security gateは期待通りFAIL。FixtureをCSP projectへ揃えると3700-module buildと10-file security gate PASS。TypeScript PASS、Vitest baseline 23/23 files・108/108 tests PASS。一時env fixtureは削除。Remaining work: PR #9へfollow-up commit push、CI/preview再green、Codex re-review、merge/production smoke。
+
+Files: `frontend/scripts/security-artifacts.mjs`、`frontend/scripts/security-artifacts.node.mjs`、`frontend/scripts/security-check.mjs`、`frontend/package.json`、同期済み4-language STATUS/DEVLOG。
+
 ## 2026-08-11 — PR #8 Codexのmode・STATUS follow-upを修正
 
 - PR #8を`e2b3e78`としてmergeしproduction rollout後、Codexから2件の正しいfinding: non-default `vite build --mode ...` valueはstandalone `security:check`へ自動伝播せず、canonical STATUSはhotfixをまだuncommittedと記載していた。

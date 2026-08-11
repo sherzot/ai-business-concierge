@@ -1,6 +1,8 @@
 import { readdir, readFile } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 
+import { extractSupabaseEndpointProjectIds } from "./security-artifacts.mjs";
+
 const frontendDir = resolve(import.meta.dirname, "..");
 const repoDir = resolve(frontendDir, "..");
 const distDir = join(frontendDir, "dist");
@@ -44,6 +46,7 @@ const textFiles = distFiles.filter((file) =>
 const bundleText = (
   await Promise.all(textFiles.map((file) => readFile(file, "utf8")))
 ).join("\n");
+const bundledEndpointProjectIds = extractSupabaseEndpointProjectIds(bundleText);
 
 assert(
   netlifyConfig.includes("SECRETS_SCAN_SMART_DETECTION_ENABLED = \"true\""),
@@ -79,6 +82,12 @@ assert(
 assert(
   bundleText.includes(generatedProjectId),
   "Generated CSP Supabase project-refi build bundle bilan mos emas.",
+);
+assert(
+  [...bundledEndpointProjectIds].every(
+    (projectId) => projectId === generatedProjectId,
+  ),
+  "Build bundle ichidagi Supabase endpointlar generated CSP project-refi bilan mos emas.",
 );
 
 if (["deploy-preview", "branch-deploy"].includes(process.env.CONTEXT)) {

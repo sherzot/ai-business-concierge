@@ -4,6 +4,14 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Closed the PR #9 Codex bundled-endpoint drift finding
+
+- Waiting for Codex before merging PR #9 exposed one more P2 drift case: mere presence of the CSP ref somewhere in the bundle was insufficient because optional `VITE_SUPABASE_URL`/`VITE_API_BASE_URL` could point to another Supabase project endpoint.
+- `security-artifacts.mjs` extracts every 20-character project ref from bundled HTTPS/WSS Supabase endpoints, including escaped URL strings. The security gate verifies that the generated CSP ref exists in the bundle and that every detected runtime endpoint ref equals that CSP ref. Two regression tests bring deployment/security environment tests to 14/14.
+- Node 22.18 acceptance: with a mismatched synthetic API project, the non-default-mode 3700-module build passed and the security gate failed as expected; after aligning the fixture with the CSP project, the 3700-module build and 10-file security gate passed. TypeScript passed and the Vitest baseline remains 23/23 files and 108/108 tests. The temporary env fixture was deleted. Remaining work: push the follow-up commit to PR #9, rerun CI/preview, wait for Codex re-review, then merge and production-smoke.
+
+Files: `frontend/scripts/security-artifacts.mjs`, `frontend/scripts/security-artifacts.node.mjs`, `frontend/scripts/security-check.mjs`, `frontend/package.json`, synchronized four-language STATUS/DEVLOG.
+
 ## 2026-08-11 — Fixed the PR #8 Codex mode and STATUS follow-ups
 
 - After PR #8 merged as `e2b3e78` and shipped to production, Codex reported two valid findings: a non-default `vite build --mode ...` value is not propagated automatically to standalone `security:check`, and canonical STATUS still described the hotfix as uncommitted.

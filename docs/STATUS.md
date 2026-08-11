@@ -20,6 +20,7 @@
 > 2026-08-11: Faol delivery platformasi Netlify + Supabase deb qat'iy belgilandi; Vercel Git integrationi uzildi. `$0/oy` staging Supabase project ikki bosqichli user tasdig'i bilan yaratildi; 32/32 migration, `bright-api` v1, Auth hardening va Netlify context isolation 4/4 green.
 > 2026-08-11: Isolation PR #7 `3fb1592` bilan `main`ga merge qilindi; PR/main CI green. Netlify preview va production smoke-testlarida tegishli staging/production ref, Auth/health `200`, Realtime `OPEN`, CSP hamda preview noindex/no-store tasdiqlandi; Vercel yangi deploy yaratmagan.
 > 2026-08-11: PR #7 Codex `.env`/CSP hotfixi PR #8 orqali `e2b3e78` bilan main/productionga chiqdi; CI `31479695709`/`31479985070` green, preview/production smoke green. PR #8 Codex mode/STATUS follow-uplari `agent/fix-security-check-build-mode` branchida faol.
+> 2026-08-11: PR #9 Codex endpoint-drift P2 topilmasi merge'dan oldin tuzatildi; security gate generated CSP refni barcha bundled Supabase HTTPS/WSS endpoint reflari bilan solishtiradi. Deploy/security environment tests 14/14, mismatched fixture kutilganidek bloklandi.
 
 ## Hozir qayerdamiz
 
@@ -43,7 +44,7 @@
 | Staging Auth | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false |
 | Type-check | Muvaffaqiyatli |
 | Unit test | 23/23 fayl, 108/108 test |
-| Deploy environment guard | Node test 12/12: 10 isolation contracti + 2 Vite `.env` fallback/runtime-precedence regressiyasi |
+| Deploy environment guard | Node test 14/14: 10 isolation contracti + 2 Vite `.env` fallback/runtime-precedence + 2 bundled endpoint extraction regressiyasi |
 | Production build | Synthetic non-production project-ref bilan muvaffaqiyatli; CSP tanlangan refdan yaratildi |
 | Security check | 10 ta build/Netlify fayli muvaffaqiyatli |
 | Production dependency audit | Raw audit: jami 0 vulnerability; scoped gate exception'siz high/critical 0 |
