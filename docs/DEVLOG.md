@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-12 — AI Hujjatchi production rollouti yakunlandi
+
+- PR #10 `55d1468` bilan, PR #11 esa final head `6db478d` uchun CI run `31545572719`, backend-only Netlify PASS va Codex “major issue yo'q” re-reviewidan keyin `8f179da` bilan `main`ga squash-merge qilindi. Merge commit uchun GitHub Actions run `31545917894` muvaffaqiyatli yakunlandi.
+- Production Supabase `ufhepwdkjqptjvxrmpjn`ga to'rtta document migration dry-run natijasiga aynan mos holda qo'llandi; local/staging/production history 36/36 bo'ldi. Ikki private document bucket, `documents.row_version`, `doc_generated.download_expires_at` va eski retained ustunining yo'qligi read-back bilan tasdiqlandi. `bright-api` v76 ACTIVE, staging v10 bilan SHA teng; health `200`, authsiz docs `401`, production pgTAPning oxirgi assertioni `ok 15`. Security advisor yangi document Storage topilmasi qaytarmadi.
+- Netlify production deploy `6a7bad961b16200007cfd88e` / build `6a7bad961b16200007cfd88c` commit `8f179da` uchun 32 soniyada ready bo'ldi; plugin success, 87,166 faylda secret match `0`. `/` va `/dashboard/docs` `200`; CSP va `index-DRUqHIdd.js` bundle faqat production Supabase refini saqlaydi, staging ref hamda legacy env nomi `0`.
+- Production authenticated synthetic acceptance Supabase Auth Admin oldidagi Cloudflare `403` sabab birinchi user fixture yaratilishidan oldin bloklandi va qayta urinish qilinmadi. Yakuniy SQL read-back Auth user/tenant/template/document/generated/object qoldig'ini 0/0/0/0/0/0 tasdiqladi. Shu sabab production rollout yakunlangan, ammo authenticated signed-download/cross-tenant/direct-Storage/delete-cleanup recheck alohida operatsion vazifa bo'lib qoladi.
+- Keyingi mahsulot ishi: LLM Router orqali AI savol-javob/polishing oqimini ulash; undan keyin Telegram step-by-step document yaratish va yuborish. Uchta mavjud untracked user fayliga tegilmadi.
+
+Fayllar/state: PR #10/#11, production Supabase migrations/`bright-api` v76, Netlify deploy `6a7bad961b16200007cfd88e`, `docs/{DEVLOG,STATUS,PLAN,REQUIREMENTS}.md` va ularning `English`/`Russian`/`日本語` ekvivalentlari.
+
 ## 2026-08-12 — Generate publish tartibi va PDF wrapping qotirildi
 
 - `661401a` CI run `31544880764` 40 soniyada PASS, Netlify `6a7ba9f3a8c5ab0009f8474f` canceled/PASS. Codex review `4911510535` binary xatosidan keyingi document cleanup muvaffaqiyatsiz bo'lsa file-less duplicate qolishi va uzun newline'siz PDF paragraf O(n²) o'lchanishini 2 ta P2 sifatida topdi.

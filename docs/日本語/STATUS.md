@@ -1,6 +1,6 @@
 # AI Business Concierge — 現在の状態
 
-> 最終確認済みcode/platform snapshot: **2026-08-11**
+> 最終確認済みcode/platform snapshot: **2026-08-12**
 > ドキュメント整理日: **2026-08-07**
 > 2026-08-07にlocal runtime、production health/auth、remote GitHub Actions baselineを再確認。P0 commitsをpushし、new CI runはfully greenで完了。
 > 2026-08-08: publishable-key commitをpushしCI/Netlify deploy成功。ただしproduction bundleはまだlegacy fallbackを使用。Risk scanner tablesへのdirect browser Data API accessをproductionで閉鎖。
@@ -28,6 +28,7 @@
 > 2026-08-12: Green `35fa078`後のCodex P2によりretained cleanupを65秒export leaseと`documents.row_version` CASへ置換。Stagingは36/36 migrations、`bright-api` v8、health `200`。
 > 2026-08-12: `0532a74`のCodex P2をpost-signing final lease pinとdelete/export row-version CASでclose。Staging `bright-api` v9 ACTIVE、health `200`。
 > 2026-08-12: `661401a`のCodex P2をbinary-before-DB publishとO(n) PDF wrappingでclose。Staging `bright-api` v10 ACTIVE、health `200`、Deno 7/7。
+> 2026-08-12: PR #11 final head `6db478d`はCI/Netlify gatesとmajor issueなしのCodex re-reviewを通過し、`8f179da`として`main`へmerge。Productionへ36/36 migrations、`bright-api` v76、Netlify deploy `6a7bad961b16200007cfd88e`をrolloutし、public/protected smoke testsはgreen。Authenticated synthetic acceptanceはfixture作成前にCloudflare `403`でblockされ、final residueは0/0/0/0/0/0。
 
 ## 現在のPhase
 
@@ -42,10 +43,10 @@
 
 | Check | 状態 |
 |---|---|
-| Git | PR #10は`55d1468`としてmerged。PR #11 head `661401a`はCI green。Generate/PDF Codex fixesはlocal/staging greenでcommit/push待ち |
+| Git | PR #10は`55d1468`、PR #11は`8f179da`としてmerged。PR #11 final head `6db478d`はCIとCodex re-review green |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
-| Backend | Supabase Edge Function `bright-api` v75、`ACTIVE`、`verify_jwt=false` |
+| Backend | Production Supabase Edge Function `bright-api` v76、`ACTIVE`、`verify_jwt=false`。SHAはstaging v10と一致 |
 | Health | `200` |
 | Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。36/36 migrations、`bright-api` v10 ACTIVE、health `200`、unauth docs `401` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list。Email confirmation ON、8-digit/1-minute OTP、TOTP ON。Auth settings HTTP `200`、autoconfirm false。Edgeはmodern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overridesを使用しlegacy anon/service-role API keysはdisabled |
@@ -59,13 +60,13 @@
 | Delivery platform | Netlifyのみ。RepositoryにVercel config/dependencyなし。External Vercel projectは保持し、`gitRepositoryConnected=false`を確認 |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase、`deploy-preview`/`branch-deploy`/`dev` -> staging。Optional URL envなし。Personalではbrowser-public `VITE_*`のみ`All` scopeを使用 |
 | Staging security advisor | Error `0`、既知`vector` public-schema warning `1`、server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | PR #11 run `31544880764`、commit `661401a`: 40sでsuccess。Generate/PDF follow-up push後のnew run待ち |
+| Remote GitHub Actions | PR #11 final run `31545572719` success。Merge commit `8f179da`のmain run `31545917894` success |
 | Netlify preview | Frontend artifact `6a7b2e774d8b4a00084583b0` ready。Backend-only incremental deploy `6a7b9cd2d9412e000833a5c8`はcanceled/PASS |
-| Production frontend | Deploy `6a7af6d8233dfa000954ac24` ready、build `6a7af6d8233dfa000954ac22`、32s、plugin success、87,166 filesでsecret match 0。Production-only CSP/bundle、page/Auth/health `200`、Realtime `OPEN` |
+| Production frontend | Deploy `6a7bad961b16200007cfd88e` ready、build `6a7bad961b16200007cfd88c`、commit `8f179da`、32s、plugin success、87,166 filesでsecret match 0。`/`と`/dashboard/docs`は`200`、production-only CSP/bundle |
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |
 | DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、local real Auth-token Edge tests 8/8。Staging modern-key remote Edge 8/8、2 tenants/5 Auth users cleanup、final fixture 0/0。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |
-| Document binary/Storage acceptance | 実PDF/DOCX、immutable paths、binary-before-DB publish、O(n) PDF wrap、active-download lease、export/edit/delete CAS、DB-first cleanupはDeno 7/7。Staging schema read-backとpgTAP最終`ok 15`。Remote Auth acceptanceはCloudflare IP `403`でBLOCKED |
-| Migration history | Local/staging 36/36。Productionは32 migrations、document buckets/new `doc_generated` columns `0`のまま。Preflightはlegacy rows 2、`storage_path`/incompatible rows `0`。PR #11 merge待ち |
+| Document binary/Storage acceptance | 実PDF/DOCX lifecycleはDeno 7/7。Production private-bucket/schema read-back、pgTAP最終`ok 15`、health `200`、unauth docs `401`はgreen。Authenticated synthetic acceptanceはfirst fixture前にCloudflare `403`でBLOCKED、final Auth/tenant/template/document/generated/object residueは0/0/0/0/0/0 |
+| Migration history | Local、staging、productionは36/36。4 document migrationsを適用し、`documents.row_version`、`doc_generated.download_expires_at`、2/2 private document bucketsを確認 |
 | Local Supabase services | Last full-stack snapshot: Storage `v1.68.1`、Auth `v2.195.0`、enabled containers healthy、Storage/Auth/Studio HTTP `200`。2026-08-11 closeout時はstack stoppedで、remote staging acceptanceは非依存 |
 
 ## Capability状態
@@ -78,14 +79,14 @@
 | Telegram | Partial / operational block | `TELEGRAM_WEBHOOK_SECRET`とwebhook確認が必要 |
 | Resend inbox | Partial | Codeあり、receiving/delivery E2E未確認 |
 | AI Concierge/RAGとcost tracking | Partial | 基盤あり、citation UX、plan enforcement、smoke-testが残る |
-| AI文書作成 | Staging-ready / production pending | 15 templates、4言語、実PDF/DOCX、embedded Noto Sans JP、private Storage、60秒signed URL、tenant-scoped export/deleteを実装済み |
+| AI文書作成 | Production deployed / authenticated recheck pending | 15 templates、4言語、実PDF/DOCX、embedded Noto Sans JP、private Storage、60秒signed URL、tenant-scoped export/deleteをproductionへdeploy済み。Public/protected gatesはgreen、authenticated synthetic recheckはCloudflare block中 |
 | HR Candidate Analysis | Skeleton | Scaffoldあり、production endpointは`501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme と AI Sales Bot | Planned | Phase 3 |
 
 ## 直近の順序
 
-1. Active-download lease/document row-version follow-upをPR #11へpushし、GitHub CI/Netlify preview/Codex re-reviewを通してmergeする。
-2. Merge後にproduction migrationsと`bright-api`/Netlifyをrolloutし、環境が許す最大範囲のauthenticated PDF/DOCX/Storage smoke-testを行う。
-3. 次にLLM Router経由のAI questions/polishingを接続。
+1. LLM Router経由のAI questions/polishingを接続する。
+2. Web flow安定後、Telegram step-by-step document generationとdeliveryを追加する。
+3. Cloudflare blockを安全に解決後、production authenticated PDF/DOCX/Storage synthetic acceptanceを再実行する。
 
 詳細: [PLAN.md](PLAN.md)。Canonical: [Uzbek STATUS](../STATUS.md)。

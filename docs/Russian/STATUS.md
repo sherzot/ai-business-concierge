@@ -1,6 +1,6 @@
 # AI Business Concierge — текущее состояние
 
-> Последний подтверждённый snapshot кода/platform: **2026-08-11**
+> Последний подтверждённый snapshot кода/platform: **2026-08-12**
 > Документация упорядочена: **2026-08-07**
 > Local runtime, production health/auth и remote GitHub Actions baseline повторно проверены 2026-08-07. P0 commits отправлены, новый CI run завершён полностью green.
 > 2026-08-08: commit publishable key отправлен и прошёл CI/Netlify deploy, но production bundle пока использует legacy fallback. Прямой browser Data API доступ к risk scanner tables закрыт в production.
@@ -28,6 +28,7 @@
 > 2026-08-12: P2 Codex после green `35fa078` заменили retained cleanup на 65-second export lease и `documents.row_version` CAS. Staging 36/36 migrations, `bright-api` v8, health `200`.
 > 2026-08-12: P2 Codex для `0532a74` закрыты post-signing final lease pin и delete/export row-version CAS. Staging `bright-api` v9 ACTIVE, health `200`.
 > 2026-08-12: P2 Codex для `661401a` закрыты binary-before-DB publish и O(n) PDF wrapping. Staging `bright-api` v10 ACTIVE, health `200`, Deno 7/7.
+> 2026-08-12: Final head PR #11 `6db478d` прошёл CI/Netlify gates и Codex re-review без major issues, затем merged в `main` как `8f179da`. В production выпущены 36/36 migrations, `bright-api` v76 и Netlify deploy `6a7bad961b16200007cfd88e`; public/protected smoke tests green. Authenticated synthetic acceptance заблокирован Cloudflare `403` до создания fixture, финальный residue 0/0/0/0/0/0.
 
 ## Текущая фаза
 
@@ -42,10 +43,10 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | PR #10 merged как `55d1468`. PR #11 head `661401a` CI green; generate/PDF Codex fixes green local/staging и ожидают commit/push |
+| Git | PR #10 merged как `55d1468`, PR #11 как `8f179da`; final head PR #11 `6db478d` прошёл CI и Codex re-review |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
-| Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
+| Backend | Production Supabase Edge Function `bright-api` v76, `ACTIVE`, `verify_jwt=false`; SHA совпадает со staging v10 |
 | Health | `200` |
 | Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 36/36 migrations, `bright-api` v10 ACTIVE, health `200`, unauth docs `401` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge использует modern overrides `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY`; legacy anon/service-role API keys disabled |
@@ -59,13 +60,13 @@
 | Delivery platform | Только Netlify. В repository нет Vercel config/dependency; внешний Vercel project сохранён, `gitRepositoryConnected=false` подтверждён |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs отсутствуют; на Personal только browser-public `VITE_*` используют `All` scope |
 | Staging security advisor | Errors `0`; известный `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | PR #11 run `31544880764`, commit `661401a`: success за 40s; новый run ожидается после generate/PDF follow-up push |
+| Remote GitHub Actions | Final run PR #11 `31545572719` success; main run `31545917894` для merge commit `8f179da` success |
 | Netlify preview | Frontend artifact `6a7b2e774d8b4a00084583b0` ready; backend-only incremental deploy `6a7b9cd2d9412e000833a5c8` canceled/PASS |
-| Production frontend | Deploy `6a7af6d8233dfa000954ac24` ready, build `6a7af6d8233dfa000954ac22`, 32s, plugin success, 0 secret matches в 87,166 files; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
+| Production frontend | Deploy `6a7bad961b16200007cfd88e` ready, build `6a7bad961b16200007cfd88c`, commit `8f179da`, 32s, plugin success, 0 secret matches в 87,166 files; `/` и `/dashboard/docs` `200`, production-only CSP/bundle |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup двух tenants/пяти Auth users и final fixture 0/0; Realtime tables SELECT-only и требуют active membership/tenant |
-| Document binary/Storage acceptance | Real PDF/DOCX, immutable paths, binary-before-DB publish, O(n) PDF wrap, active-download lease, export/edit/delete CAS и DB-first cleanup Deno 7/7. Staging schema read-back и последний pgTAP `ok 15`; remote Auth acceptance BLOCKED Cloudflare IP `403` |
-| Migration history | Local/staging 36/36; production остаётся на 32 migrations, document buckets/new `doc_generated` columns `0`; preflight: 2 legacy rows и `storage_path`/incompatible rows `0`, до merge PR #11 |
+| Document binary/Storage acceptance | Real PDF/DOCX lifecycle Deno 7/7. Production private-bucket/schema read-back, последний pgTAP `ok 15`, health `200` и unauth docs `401` green; authenticated synthetic acceptance BLOCKED Cloudflare `403` до первого fixture, final Auth/tenant/template/document/generated/object residue 0/0/0/0/0/0 |
+| Migration history | Local, staging и production 36/36; четыре document migrations применены, `documents.row_version`, `doc_generated.download_expires_at` и 2/2 private document buckets подтверждены |
 | Local Supabase services | Последний full-stack snapshot: Storage `v1.68.1`, Auth `v2.195.0`, enabled containers healthy, Storage/Auth/Studio HTTP `200`. На closeout 2026-08-11 stack был stopped; remote staging acceptance от него не зависел |
 
 ## Состояние возможностей
@@ -78,14 +79,14 @@
 | Telegram | Partial / operational block | Проверить `TELEGRAM_WEBHOOK_SECRET` и webhook |
 | Resend inbox | Partial | Код есть; receiving/delivery E2E не подтверждён |
 | AI Concierge/RAG и cost tracking | Partial | Основа есть; citation UX, plan enforcement и smoke-test остаются |
-| AI Документолог | Staging-ready / production pending | 15 templates, 4 языка, real PDF/DOCX, embedded Noto Sans JP, private Storage, 60-second signed URL и tenant-scoped export/delete готовы |
+| AI Документолог | Production deployed / authenticated recheck pending | 15 templates, 4 языка, real PDF/DOCX, embedded Noto Sans JP, private Storage, 60-second signed URL и tenant-scoped export/delete работают в production; public/protected gates green, authenticated synthetic recheck заблокирован Cloudflare |
 | HR Candidate Analysis | Skeleton | Scaffold есть; production endpoint возвращает `501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme и AI Sales Bot | Planned | Phase 3 |
 
 ## Ближайший порядок
 
-1. Push active-download lease/document row-version follow-up в PR #11, пройти GitHub CI/Netlify preview/Codex re-review и merge PR.
-2. После merge выполнить production migrations и `bright-api`/Netlify rollout, затем максимально доступный authenticated PDF/DOCX/Storage smoke-test.
-3. Затем подключить AI questions/polishing через LLM Router.
+1. Подключить AI questions/polishing через LLM Router.
+2. После стабилизации web flow добавить Telegram step-by-step document generation и delivery.
+3. После безопасного решения Cloudflare block повторить production authenticated PDF/DOCX/Storage synthetic acceptance.
 
 Подробности: [PLAN.md](PLAN.md). Основной источник: [узбекский STATUS](../STATUS.md).

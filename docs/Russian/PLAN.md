@@ -1,6 +1,6 @@
 # AI Business Concierge — активный план
 
-> Версия 5.9 · Обновлено 2026-08-11
+> Версия 6.0 · Обновлено 2026-08-12
 > Здесь только активные и следующие задачи. Старый master plan: [../archive/Russian/PLAN_LEGACY_2026-07-24.md](../archive/Russian/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — безопасное начало сессии
@@ -45,10 +45,9 @@
 
 ## P1 — завершить Phase 2 AI Документолог
 
-- [ ] Push generate/PDF follow-up PR #11: binary-before-DB publication, O(n) glyph wrapping и delete/export CAS; пройти новые GitHub CI, Netlify preview и Codex re-review, затем merge.
-- [ ] После merge выпустить четыре document migrations (`20260811131308`, `20260811142919`, `20260811221503`, `20260811223321`) и `bright-api` в production; проверить Netlify production и максимально доступный authenticated PDF/DOCX signed-download, cross-tenant deny, direct Storage deny и delete-cleanup smoke-test.
 - [ ] Добавить LLM-вопросы и polishing.
 - [ ] После стабильного web flow подключить Telegram wizard и отправку файла.
+- [ ] После безопасного решения Cloudflare Auth Admin `403` повторить production authenticated PDF/DOCX signed-download, cross-tenant deny, direct Storage deny и delete-cleanup synthetic acceptance.
 
 ## P2 — operational integrations
 

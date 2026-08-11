@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-12 — AI Document Assistant production rollout completed
+
+- PR #10 merged as `55d1468`. PR #11 final head `6db478d` passed CI run `31545572719`, a backend-only Netlify PASS, and a Codex re-review with no major issues, then squash-merged to `main` as `8f179da`. GitHub Actions run `31545917894` passed for the merge commit.
+- The four document migrations were applied to production Supabase `ufhepwdkjqptjvxrmpjn` exactly as preflighted, bringing local/staging/production history to 36/36. Read-back verified both private document buckets, `documents.row_version`, `doc_generated.download_expires_at`, and removal of the old retained column. `bright-api` v76 is ACTIVE with the same SHA as staging v10; health is `200`, unauthenticated docs return `401`, and the last production pgTAP assertion is `ok 15`. The security advisor reported no new document Storage finding.
+- Netlify production deploy `6a7bad961b16200007cfd88e` / build `6a7bad961b16200007cfd88c` became ready for commit `8f179da` in 32 seconds; plugin success and 0 secret matches across 87,166 files. `/` and `/dashboard/docs` return `200`; CSP and bundle `index-DRUqHIdd.js` contain only the production Supabase ref, with 0 staging refs or legacy env names.
+- Production authenticated synthetic acceptance was blocked by Cloudflare `403` in front of Supabase Auth Admin before the first user fixture was created, so it was not retried. Final SQL read-back confirms 0/0/0/0/0/0 residual Auth users, tenants, templates, documents, generated metadata, and Storage objects. Production rollout is complete, while authenticated signed-download/cross-tenant/direct-Storage/delete-cleanup recheck remains an operational follow-up.
+- Next product work: connect AI questions/polishing through the LLM Router, followed by Telegram step-by-step document generation and delivery. Three existing user-owned untracked files remain untouched.
+
+Files/state: PR #10/#11, production Supabase migrations/`bright-api` v76, Netlify deploy `6a7bad961b16200007cfd88e`, `docs/{DEVLOG,STATUS,PLAN,REQUIREMENTS}.md`, and their `English`/`Russian`/`日本語` equivalents.
+
 ## 2026-08-12 — Generate publication order and PDF wrapping hardened
 
 - `661401a` CI run `31544880764` passed in 40 seconds; Netlify `6a7ba9f3a8c5ab0009f8474f` was canceled/PASS. Codex review `4911510535` found two P2s: failed cleanup after a binary error could leave a file-less duplicate document, and long newline-free PDF paragraphs were measured in O(n²).

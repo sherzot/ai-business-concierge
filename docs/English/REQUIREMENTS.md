@@ -2,7 +2,7 @@
 
 This document defines project requirements and future directions. Refer to this document when adding new features.
 
-> Updated 2026-08-11. Current operational snapshot: [STATUS.md](STATUS.md). Status terms are Done, Partial, Skeleton, and Planned.
+> Updated 2026-08-12. Current operational snapshot: [STATUS.md](STATUS.md). Status terms are Done, Partial, Skeleton, and Planned.
 
 ---
 
@@ -46,7 +46,7 @@ This document defines project requirements and future directions. Refer to this 
 | R-018 | AI cost tracking | Partial; logging exists, tenant usage dashboard/enforcement remains | Backend |
 | R-019 | Vector Search (RAG) | Partial; vector/embedding foundation exists, explicit tool/citations remain | Docs |
 | R-020 | Admin Dashboard | Partial; core pages exist, billing/advanced agents remain | Admin |
-| R-021 | AI Document Maker binary output | Staging verified / production pending; real PDF/DOCX, embedded Noto Sans JP, O(n) PDF wrap, binary-before-DB publish, private immutable Storage, provisional/final download lease, export/edit/delete CAS, DB-first compensation/delete, restrictive RLS, and 60s signed URLs are green | Docs |
+| R-021 | AI Document Maker binary output | Production deployed / authenticated recheck pending; real PDF/DOCX, embedded Noto Sans JP, O(n) PDF wrap, binary-before-DB publish, private immutable Storage, provisional/final download lease, export/edit/delete CAS, DB-first compensation/delete, restrictive RLS, and 60s signed URLs are live. Production 36/36 migrations, `bright-api` v76, private-bucket/schema checks, public/protected smoke tests, and final pgTAP assertion `ok 15` are green; authenticated synthetic acceptance was blocked by Cloudflare `403` before fixture creation, with zero residue | Docs |
 | R-003 | Billing/Payments | Subscription, plans, payment history | New |
 | R-004 | Audit log view | Admin audit log page and backend endpoint ✅ | Settings |
 | R-005 | Export/Import | Excel, CSV export; bulk import | Reports, Tasks |

@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-12 — Production rollout AI Документолога завершён
+
+- PR #10 merged как `55d1468`. Final head PR #11 `6db478d` прошёл CI run `31545572719`, backend-only Netlify PASS и Codex re-review без major issues, затем squash-merged в `main` как `8f179da`. GitHub Actions run `31545917894` для merge commit завершён успешно.
+- Четыре document migrations применены в production Supabase `ufhepwdkjqptjvxrmpjn` точно по preflight; local/staging/production history достигла 36/36. Read-back подтвердил два private document buckets, `documents.row_version`, `doc_generated.download_expires_at` и удаление старого retained column. `bright-api` v76 ACTIVE и имеет тот же SHA, что staging v10; health `200`, unauthenticated docs `401`, последний production pgTAP assertion `ok 15`. Security advisor не вернул новых document Storage findings.
+- Netlify production deploy `6a7bad961b16200007cfd88e` / build `6a7bad961b16200007cfd88c` для commit `8f179da` стал ready за 32 секунды; plugin success, 0 secret matches в 87,166 files. `/` и `/dashboard/docs` возвращают `200`; CSP и bundle `index-DRUqHIdd.js` содержат только production Supabase ref, staging ref и legacy env name — `0`.
+- Production authenticated synthetic acceptance заблокирован Cloudflare `403` перед Supabase Auth Admin до создания первого user fixture, повторный запуск не выполнялся. Final SQL read-back подтверждает 0/0/0/0/0/0 остаточных Auth users, tenants, templates, documents, generated metadata и Storage objects. Production rollout завершён, а authenticated signed-download/cross-tenant/direct-Storage/delete-cleanup recheck остаётся отдельной operational задачей.
+- Следующая product работа: подключить AI questions/polishing через LLM Router, затем Telegram step-by-step document generation и delivery. Три существующих user-owned untracked files не изменены.
+
+Files/state: PR #10/#11, production Supabase migrations/`bright-api` v76, Netlify deploy `6a7bad961b16200007cfd88e`, `docs/{DEVLOG,STATUS,PLAN,REQUIREMENTS}.md` и эквиваленты `English`/`Russian`/`日本語`.
+
 ## 2026-08-12 — Усилены generate publication order и PDF wrapping
 
 - `661401a` CI run `31544880764` прошёл за 40 секунд, Netlify `6a7ba9f3a8c5ab0009f8474f` canceled/PASS. Codex review `4911510535` нашёл два P2: failed cleanup после binary error мог оставить file-less duplicate document, а длинный PDF paragraph без newline измерялся O(n²).

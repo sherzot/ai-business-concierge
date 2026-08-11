@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 5.9 · 更新 2026-08-11
+> Version 6.0 · 更新 2026-08-12
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -45,10 +45,9 @@
 
 ## P1 — Phase 2 AI文書作成を完了
 
-- [ ] PR #11のgenerate/PDF follow-up（binary-before-DB publication、O(n) glyph wrapping、delete/export CAS）をpushし、新GitHub CI、Netlify preview、Codex re-reviewを通してmergeする。
-- [ ] Merge後、4 document migrations（`20260811131308`、`20260811142919`、`20260811221503`、`20260811223321`）と`bright-api`をproductionへrolloutし、Netlify productionと環境が許す最大範囲のauthenticated PDF/DOCX signed-download、cross-tenant deny、direct Storage deny、delete-cleanup smoke-testを確認する。
 - [ ] LLM質問/polishingを追加。
 - [ ] Web flow安定後、Telegram wizardとfile送信を追加。
+- [ ] Cloudflare Auth Admin `403`を安全に解決後、production authenticated PDF/DOCX signed-download、cross-tenant deny、direct Storage deny、delete-cleanup synthetic acceptanceを再実行する。
 
 ## P2 — Operational integrations
 

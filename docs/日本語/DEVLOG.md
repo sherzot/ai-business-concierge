@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-12 — AI文書作成production rollout完了
+
+- PR #10を`55d1468`としてmerge。PR #11 final head `6db478d`はCI run `31545572719`、backend-only Netlify PASS、major issueなしのCodex re-reviewを通過し、`8f179da`として`main`へsquash-merge。Merge commitのGitHub Actions run `31545917894`も成功。
+- 4 document migrationsをpreflight通りproduction Supabase `ufhepwdkjqptjvxrmpjn`へ適用し、local/staging/production historyは36/36。2 private document buckets、`documents.row_version`、`doc_generated.download_expires_at`、旧retained column削除をread-backで確認。`bright-api` v76 ACTIVE、SHAはstaging v10と一致。Health `200`、unauthenticated docs `401`、production pgTAP最終assertion `ok 15`。Security advisorに新規document Storage findingなし。
+- Netlify production deploy `6a7bad961b16200007cfd88e` / build `6a7bad961b16200007cfd88c`はcommit `8f179da`を32秒でready化。Plugin success、87,166 filesでsecret match 0。`/`と`/dashboard/docs`は`200`。CSPとbundle `index-DRUqHIdd.js`はproduction Supabase refのみを含み、staging refとlegacy env nameは0。
+- Production authenticated synthetic acceptanceはSupabase Auth Admin前段のCloudflare `403`によりfirst user fixture作成前にblockされ、再試行しなかった。Final SQL read-backでAuth users、tenants、templates、documents、generated metadata、Storage objectsのresidueが0/0/0/0/0/0と確認。Production rolloutは完了し、authenticated signed-download/cross-tenant/direct-Storage/delete-cleanup recheckはoperational follow-upとして残る。
+- 次のproduct workはLLM Router経由のAI questions/polishing、その後Telegram step-by-step document generationとdelivery。既存3 user-owned untracked filesは未変更。
+
+Files/state: PR #10/#11、production Supabase migrations/`bright-api` v76、Netlify deploy `6a7bad961b16200007cfd88e`、`docs/{DEVLOG,STATUS,PLAN,REQUIREMENTS}.md`と`English`/`Russian`/`日本語` equivalents。
+
 ## 2026-08-12 — Generate publication orderとPDF wrappingをhardening
 
 - `661401a`のCI run `31544880764`は40秒でPASS、Netlify `6a7ba9f3a8c5ab0009f8474f`はcanceled/PASS。Codex review `4911510535`は2件P2を検出。Binary error後のfailed cleanupでfile-less duplicate documentが残り得て、newlineなし長文PDF paragraphはO(n²)測定だった。

@@ -1,6 +1,6 @@
 # AI Business Concierge — joriy holat
 
-> Kod/platforma bo'yicha oxirgi tasdiqlangan snapshot: **2026-08-11**
+> Kod/platforma bo'yicha oxirgi tasdiqlangan snapshot: **2026-08-12**
 > Hujjatlar tartiblangan sana: **2026-08-07**
 > Lokal runtime, production health/auth va remote GitHub Actions baseline'i 2026-08-07 kuni qayta tekshirildi. P0 commitlari push qilindi va yangi CI run to'liq green yakunlandi.
 > 2026-08-08: publishable-key commit push/CI/Netlify deploy qilindi, ammo production bundle hali legacy fallback ishlatmoqda. Risk scanner jadvallarining browser Data API ruxsatlari productionda yopildi.
@@ -29,6 +29,7 @@
 > 2026-08-12: `35fa078` CI greenidan keyingi Codex P2lari retained modelni 65 soniyalik export lease va `documents.row_version` CAS bilan almashtirish orqali yopildi. Staging 36/36 migration, `bright-api` v8, health `200`.
 > 2026-08-12: `0532a74` Codex P2lari URL-signingdan keyingi final lease pin va delete/export row-version CAS bilan yopildi. Staging `bright-api` v9 ACTIVE, health `200`.
 > 2026-08-12: `661401a` Codex P2lari binary-before-DB publish va O(n) PDF wrapping bilan yopildi. Staging `bright-api` v10 ACTIVE, health `200`, Deno 7/7.
+> 2026-08-12: PR #11 final head `6db478d` uchun CI/Netlify gate'lari va Codex “major issue yo'q” re-reviewi green bo'ldi; PR `8f179da` bilan `main`ga merge qilindi. Production 36/36 migration, `bright-api` v76 va Netlify deploy `6a7bad961b16200007cfd88e` bilan chiqarildi; public/protected smoke-testlar green, authenticated synthetic acceptance Cloudflare `403` sabab fixture yaratilishidan oldin bloklandi va qoldiq 0/0/0/0/0/0.
 
 ## Hozir qayerdamiz
 
@@ -43,10 +44,10 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | PR #10 `55d1468` bilan merged. PR #11 head `661401a` uchun CI green; generate/PDF Codex fixlari lokal/stagingda green, commit/push navbatda |
+| Git | PR #10 `55d1468`, PR #11 `8f179da` bilan `main`ga merged; final PR #11 head `6db478d` uchun CI va Codex re-review green |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
-| Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
+| Backend | Production Supabase Edge Function `bright-api` v76, `ACTIVE`, `verify_jwt=false`; SHA staging v10 bilan teng |
 | Health smoke-test | `200` |
 | Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 36/36 migration, `bright-api` v10 ACTIVE, health `200`, authsiz docs `401` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` modern key override'larida; legacy anon/service-role API keylari disabled |
@@ -61,13 +62,13 @@
 | Delivery platform | Faol platforma faqat Netlify. Repo ichida Vercel config/dependency yo'q; external Vercel project saqlangan, `gitRepositoryConnected=false` tasdiqlandi |
 | Environment isolation | Netlify CLI authoritative read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envlari yo'q; Personal rejada faqat browser-public `VITE_*` qiymatlar `All` scope'da |
 | Staging security advisor | Error `0`; ma'lum `vector` public-schema warningi `1`; server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | PR #11 run `31544880764`, commit `661401a`: `success` 40s; generate/PDF follow-up pushidan keyin yangi run kutiladi |
+| Remote GitHub Actions | PR #11 final run `31545572719` success; merge commit `8f179da` uchun main run `31545917894` success |
 | Netlify preview | Frontend artifact `6a7b2e774d8b4a00084583b0` ready; backend-only `7837778` incremental deployi `6a7b9cd2d9412e000833a5c8` canceled/PASS |
-| Production frontend | Deploy `6a7af6d8233dfa000954ac24` ready, build `6a7af6d8233dfa000954ac22`, 32s, plugin success, secret match 0/87,166; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
+| Production frontend | Deploy `6a7bad961b16200007cfd88e` ready, build `6a7bad961b16200007cfd88c`, commit `8f179da`, 32s, plugin success, secret match 0/87,166; `/` va `/dashboard/docs` `200`, production-only CSP/bundle |
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |
 | DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; local real Auth tokenli Edge `8/8`; staging modern-key remote Edge `8/8`, cleanup 2 tenant/5 Auth user va yakuniy fixture `0/0`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |
-| Document binary/Storage acceptance | Real PDF/DOCX, immutable paths, binary-before-DB publish, O(n) PDF wrap, active-download lease, export/edit/delete CAS va DB-first cleanup Deno 7/7. Staging schema read-back va pgTAP oxirgi `ok 15`; remote Auth acceptance Cloudflare IP `403` sabab BLOCKED |
-| Migration history | Local va staging 36/36; production ataylab oldingi 32 migrationda, document bucketlari `0` va yangi `doc_generated` ustunlari `0`; preflightda 2 legacy row, `storage_path`li/incompatible row `0` — PR #11 merge'ini kutmoqda |
+| Document binary/Storage acceptance | Real PDF/DOCX lifecycle Deno 7/7. Production private bucket/schema read-back, pgTAP oxirgi `ok 15`, health `200` va authsiz docs `401` green; authenticated synthetic acceptance Cloudflare `403` sabab birinchi fixturedan oldin BLOCKED, yakuniy Auth/tenant/template/document/generated/object qoldig'i 0/0/0/0/0/0 |
+| Migration history | Local, staging va production 36/36; to'rtta document migration productionga qo'llangan, `documents.row_version`/`doc_generated.download_expires_at` va 2/2 private document bucket tasdiqlangan |
 | Local Supabase services | Oxirgi full-stack snapshot: Storage `v1.68.1`, Auth `v2.195.0`, enabled containerlar healthy va Storage/Auth/Studio HTTP `200`. 2026-08-11 closeoutida stack ishlamayotgan edi; remote staging acceptance bunga bog'lanmadi |
 
 ## Mahsulot va integratsiyalar holati
@@ -83,7 +84,7 @@
 | Resend email inbox | **Partial** | Webhook va mapping kodi mavjud; real receiving/delivery smoke-test tasdiqlanmagan |
 | AI Concierge / RAG | **Partial** | Claude router, OpenAI embedding va RAG fundamenti bor; explicit document search/citation va to'liq smoke-test qarzi bor |
 | AI usage/cost tracking | **Partial** | Log wiring va DB tracking bor; tenant billing dashboard/plan enforcement yo'q |
-| AI Hujjatchi | **Staging-ready / production pending** | 15 shablon, 4 til, real PDF/DOCX, embedded Noto Sans JP, private Storage, 60 soniyali signed URL va tenant-scoped export/delete mavjud |
+| AI Hujjatchi | **Production deployed / authenticated recheck pending** | 15 shablon, 4 til, real PDF/DOCX, embedded Noto Sans JP, private Storage, 60 soniyali signed URL va tenant-scoped export/delete productionda; public/protected gate'lar green, authenticated synthetic recheck Cloudflare bilan bloklangan |
 | HR Candidate Analysis | **Skeleton** | Backend/frontend scaffold bor; production endpoint `501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme | **Planned** | Phase 3 |
 | AI Sotuvchi | **Planned** | Phase 3 |
@@ -99,9 +100,9 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. Active-download lease va document row-version follow-upini PR #11ga push qilib GitHub CI/Netlify preview/Codex re-reviewni green qilish va PRni merge qilish.
-2. Merge'dan keyin production migration va `bright-api`/Netlify rolloutini bajarib mavjud muhit imkon bergan authenticated PDF/DOCX/Storage smoke-testni o'tkazish.
-3. Keyin AI savol-javob/polishing oqimini LLM Router orqali ulash.
+1. AI savol-javob/polishing oqimini LLM Router orqali ulash.
+2. Web oqimi barqarorlashgach Telegram step-by-step hujjat yaratish va document yuborishni ulash.
+3. Cloudflare blokini xavfsiz yo'l bilan yechgach production authenticated PDF/DOCX/Storage synthetic acceptance'ni qayta o'tkazish.
 
 Batafsil tartib: [PLAN.md](PLAN.md).
 
