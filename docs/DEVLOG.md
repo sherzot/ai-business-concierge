@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-11 — Staging authenticated Edge acceptance va legacy-key cleanup yakunlandi
+
+- Oldingi holatda staging `bright-api` health va migrationlari green edi, ammo Supabase CLI `v2.112.0` API-key metadata timestampini parse qila olmagani sabab real remote Auth/tenant acceptance o'tmagan edi. Integration skripti local stackka bog'langan va cleanup javoblarini tekshirmas edi.
+- `edge_tenant_authorization.test.mjs` endi explicit remote `SUPABASE_URL` hamda modern publishable/secret keylarni process environment orqali qabul qiladi, signed-user Edge requestiga `apikey` qo'shadi, legacy JWT bo'lmagan secretni `Authorization` sifatida yubormaydi va cleanupda 2 tenant/5 Auth user o'chirilganini qat'iy tekshiradi. Local fallback saqlandi.
+- CLI `v2.102.0`ning maskalanishi kutilmaganda staging legacy `service_role` qiymatini tool outputga to'liq chiqargani aniqlangach, qiymat Git yoki hujjatga yozilmadi va darhol yaroqsizlantirildi: staging Edge uchun `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` modern publishable/secret override'lari o'rnatildi, legacy anon/service-role API keylari stagingda disable qilindi. Productionga tegilmadi; `bright-api` secret reload natijasida v2 bo'ldi.
+- Remote synthetic acceptance modern keylar bilan 8/8 PASS: active own-tenant `200`, cross-tenant/blocked/terminated `401 TENANT_REQUIRED`, super-admin cross-tenant va admin route `200`, blocked admin `403 FORBIDDEN`, employee mutation `403 FORBIDDEN_ROLE`. Cleanup 2/2 tenant va 5/5 Auth user uchun PASS; yakuniy SQL read-back `acceptance_tenants=0`, `acceptance_users=0`, Auth loglarda 5 delete `200` va Edge loglarda kutilgan statuslar tasdiqlandi.
+- `node --check` PASS. Local regression ishga tushmadi, chunki closeout paytida local Supabase stack ishlamayotgan edi; ayni skriptning remote yo'li to'liq o'tdi. Keyingi ish: AI Hujjatchi PDF/DOCX binary generation va private Storage kontraktini amalga oshirish.
+
+Fayllar/state: `supabase/tests/integration/edge_tenant_authorization.test.mjs`, staging Supabase `piqsyfwrjtormrlenjix` Edge v2 va modern-key overrides/legacy-key disable, 4-tilli STATUS/PLAN/DEVLOG.
+
 ## 2026-08-11 — PR #9 endpoint-drift hardening main/production closeouti yakunlandi
 
 - PR #9 follow-up `57d4dbc`ga push qilindi; GitHub CI run `31481174852` `success`. Netlify preview `6a7af589fd49aa00082aa968` `ready`, build `6a7af589fd49aa00082aa966`, 29s, plugin success, secret match 0/87,166; staging-only CSP/bundle va noindex/no-store green.

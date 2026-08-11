@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Завершены staging authenticated Edge acceptance и cleanup legacy keys
+
+- Ранее migrations и health `bright-api` в staging были green, но remote Auth/tenant acceptance блокировался parser'ом timestamp API keys в Supabase CLI `v2.112.0`. Integration script был привязан к local stack и не проверял ответы cleanup.
+- `edge_tenant_authorization.test.mjs` теперь принимает remote URL и modern publishable/secret keys через process environment, добавляет `apikey` к signed-user Edge requests, не отправляет non-JWT secret как Bearer token и строго проверяет удаление двух tenants и пяти Auth users. Local fallback сохранён.
+- Когда CLI `v2.102.0` неожиданно вывел полный staging legacy `service_role` value при предполагавшемся masked read, значение не было записано в Git/docs и было немедленно обезврежено. Для staging Edge установлены modern-key overrides `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY`, legacy anon/service-role API keys отключены. Production не затронут; reload secrets создал `bright-api` v2.
+- Remote synthetic acceptance с modern keys прошёл 8/8. Cleanup прошёл для 2/2 tenants и 5/5 users; final SQL read-back — `acceptance_tenants=0`, `acceptance_users=0`, Auth logs подтвердили пять delete `200`, Edge logs — ожидаемые statuses.
+- `node --check` прошёл. Local regression не запустился, поскольку local Supabase stack был stopped на closeout; remote path того же script прошёл полностью. Следующий шаг: PDF/DOCX binary generation AI Документолога и private Storage contract.
+
+Files/state: `supabase/tests/integration/edge_tenant_authorization.test.mjs`, staging Supabase `piqsyfwrjtormrlenjix` Edge v2 и modern-key overrides/legacy-key disable, синхронизированные STATUS/PLAN/DEVLOG на четырёх языках.
+
 ## 2026-08-11 — Завершён main/production closeout endpoint-drift hardening PR #9
 
 - Follow-up `57d4dbc` push в PR #9; GitHub CI run `31481174852` success. Netlify preview `6a7af589fd49aa00082aa968` ready, build `6a7af589fd49aa00082aa966`, 29s, plugin success, secret matches 0/87,166; staging-only CSP/bundle и noindex/no-store green.

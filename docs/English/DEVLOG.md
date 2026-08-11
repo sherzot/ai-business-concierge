@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Staging authenticated Edge acceptance and legacy-key cleanup completed
+
+- Previously, staging migrations and `bright-api` health were green, but remote Auth/tenant acceptance was blocked by the Supabase CLI `v2.112.0` API-key timestamp parser. The integration script was local-stack-only and did not assert cleanup responses.
+- `edge_tenant_authorization.test.mjs` now accepts explicit remote URL and modern publishable/secret keys through process environment, sends `apikey` on signed-user Edge requests, avoids treating a non-JWT secret as a Bearer token, and strictly verifies cleanup of two tenants and five Auth users. The local fallback remains.
+- When CLI `v2.102.0` unexpectedly printed the staging legacy `service_role` value despite the intended masked read, the value was not written to Git/docs and was invalidated immediately. Staging Edge received modern-key `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overrides and legacy anon/service-role API keys were disabled. Production was untouched; the Edge secret reload produced `bright-api` v2.
+- Remote synthetic acceptance passed 8/8 with modern keys. Cleanup passed for 2/2 tenants and 5/5 users; final SQL read-back was `acceptance_tenants=0`, `acceptance_users=0`, with five Auth delete `200` logs and matching Edge statuses.
+- `node --check` passed. The local regression could not start because the local Supabase stack was stopped at closeout; the same script's remote path passed completely. Next work: AI Document Assistant PDF/DOCX binary generation and private Storage contract.
+
+Files/state: `supabase/tests/integration/edge_tenant_authorization.test.mjs`, staging Supabase `piqsyfwrjtormrlenjix` Edge v2 and modern-key overrides/legacy-key disable, synchronized four-language STATUS/PLAN/DEVLOG.
+
 ## 2026-08-11 — Completed the PR #9 endpoint-drift hardening main/production closeout
 
 - Pushed PR #9 follow-up `57d4dbc`; GitHub CI run `31481174852` succeeded. Netlify preview `6a7af589fd49aa00082aa968` was ready with build `6a7af589fd49aa00082aa966`, 29 seconds, plugin success, zero secret matches across 87,166 files, staging-only CSP/bundle, and correct noindex/no-store.

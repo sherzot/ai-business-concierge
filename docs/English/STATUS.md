@@ -21,6 +21,7 @@
 > 2026-08-11: The PR #7 Codex `.env`/CSP hotfix shipped through PR #8 as `e2b3e78` to main/production; CI `31479695709`/`31479985070` and preview/production smoke tests are green. PR #8 Codex mode/STATUS follow-ups are active on `agent/fix-security-check-build-mode`.
 > 2026-08-11: The PR #9 Codex endpoint-drift P2 finding was fixed before merge; the security gate compares the generated CSP ref with every bundled Supabase HTTPS/WSS endpoint ref. Deployment/security environment tests are 14/14 and the mismatched fixture was blocked as expected.
 > 2026-08-11: PR #9 merged as `c00362a` to main/production; PR and main CI are green. Preview and production CSP/bundle isolation, Auth/health, and production Realtime smoke tests passed.
+> 2026-08-11: Staging moved to modern Edge key overrides and disabled legacy anon/service-role keys. Real synthetic authenticated Edge acceptance passed 8/8 with mandatory cleanup of two tenants/five Auth users and a final fixture count of 0/0.
 
 ## Current phase
 
@@ -40,8 +41,8 @@
 | Supabase CLI | Official Homebrew tap `v2.112.0`; verified with a fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 32/32 migrations, `bright-api` v1 ACTIVE, health `200` |
-| Staging Auth | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 32/32 migrations, `bright-api` v2, health `200` |
+| Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge uses modern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overrides; legacy anon/service-role API keys are disabled |
 | Type-check | Passed |
 | Unit tests | 23/23 files, 108/108 tests |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks, 2 Vite `.env` fallback/runtime-precedence regressions, and 2 bundled-endpoint extraction regressions |
@@ -56,9 +57,9 @@
 | Netlify preview | PR #9 deploy `6a7af589fd49aa00082aa968` ready; staging-only CSP/bundle, noindex/no-store, 0 secret matches across 87,166 files |
 | Production frontend | Deploy `6a7af6d8233dfa000954ac24` ready, build `6a7af6d8233dfa000954ac22`, 32s, plugin success, 0 secret matches across 87,166 files; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
 | Frontend Supabase key contract | Code and production accept only the modern publishable key; bundle has 1 modern key, 0 JWT-like keys, no legacy env name, and the format guard; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env deleted |
-| DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; real Auth-token Edge tests 8/8; Realtime tables are SELECT-only and require active membership/tenant |
+| DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup of two tenants/five Auth users, final fixture 0/0; Realtime tables are SELECT-only and require active membership/tenant |
 | Migration history | Local/remote 32/32 aligned; production `db push --dry-run`: up to date |
-| Local Supabase services | Storage `v1.68.1`, Auth `v2.195.0`; all enabled containers healthy; Storage/Auth/Studio HTTP `200`; `imgproxy` stopped because transformations are disabled |
+| Local Supabase services | Last full-stack snapshot: Storage `v1.68.1`, Auth `v2.195.0`, enabled containers healthy, Storage/Auth/Studio HTTP `200`. The stack was stopped at the 2026-08-11 closeout; remote staging acceptance did not depend on it |
 
 ## Capability status
 
@@ -76,7 +77,6 @@
 
 ## Immediate order
 
-1. Run authenticated Edge acceptance with an ephemeral synthetic Auth/tenant fixture in staging, then clean it up.
-2. Continue Document Assistant PDF/DOCX/Storage work.
+1. Continue AI Document Assistant PDF/DOCX binary generation and private Supabase Storage work.
 
 Detailed tasks: [PLAN.md](PLAN.md). Canonical source: [Uzbek STATUS](../STATUS.md).

@@ -21,6 +21,7 @@
 > 2026-08-11: PR #7 Codex `.env`/CSP hotfixをPR #8経由で`e2b3e78`としてmain/productionへship。CI `31479695709`/`31479985070`とpreview/production smokeはgreen。PR #8 Codex mode/STATUS follow-upは`agent/fix-security-check-build-mode`でactive。
 > 2026-08-11: PR #9 Codex endpoint-drift P2 findingをmerge前に修正。Security gateはgenerated CSP refを全bundled Supabase HTTPS/WSS endpoint refsと比較する。Deployment/security environment tests 14/14、mismatched fixtureは期待通りblock。
 > 2026-08-11: PR #9を`c00362a`としてmain/productionへmerge。PR/main CI green。Preview/production CSP/bundle isolation、Auth/health、production Realtime smoke tests成功。
+> 2026-08-11: Stagingをmodern Edge key overridesへ移行しlegacy anon/service-role keysをdisable。Real synthetic authenticated Edge acceptanceは8/8成功し、2 tenants/5 Auth usersのmandatory cleanupとfinal fixture count 0/0を確認。
 
 ## 現在のPhase
 
@@ -40,8 +41,8 @@
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Supabase Edge Function `bright-api` v75、`ACTIVE`、`verify_jwt=false` |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。32/32 migrations、`bright-api` v1 ACTIVE、health `200` |
-| Staging Auth | Netlify preview wildcard + local Vite redirect allow-list。Email confirmation ON、8-digit/1-minute OTP、TOTP ON。Auth settings HTTP `200`、autoconfirm false |
+| Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。32/32 migrations、`bright-api` v2、health `200` |
+| Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list。Email confirmation ON、8-digit/1-minute OTP、TOTP ON。Auth settings HTTP `200`、autoconfirm false。Edgeはmodern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overridesを使用しlegacy anon/service-role API keysはdisabled |
 | Type-check | 成功 |
 | Unit tests | 23/23 files、108/108 tests |
 | Deployment environment guard | Node tests 14/14: isolation contract 10件 + Vite `.env` fallback/runtime-precedence 2件 + bundled-endpoint extraction regressions 2件 |
@@ -56,9 +57,9 @@
 | Netlify preview | PR #9 deploy `6a7af589fd49aa00082aa968` ready。Staging-only CSP/bundle、noindex/no-store、87,166 filesでsecret match 0 |
 | Production frontend | Deploy `6a7af6d8233dfa000954ac24` ready、build `6a7af6d8233dfa000954ac22`、32s、plugin success、87,166 filesでsecret match 0。Production-only CSP/bundle、page/Auth/health `200`、Realtime `OPEN` |
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |
-| DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、real Auth-token Edge tests 8/8。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |
+| DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、local real Auth-token Edge tests 8/8。Staging modern-key remote Edge 8/8、2 tenants/5 Auth users cleanup、final fixture 0/0。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |
 | Migration history | Local/remote 32/32整合、production `db push --dry-run`: up to date |
-| Local Supabase services | Storage `v1.68.1`、Auth `v2.195.0`。全enabled containers healthy、Storage/Auth/Studio HTTP `200`、transformations無効のため`imgproxy` stopped |
+| Local Supabase services | Last full-stack snapshot: Storage `v1.68.1`、Auth `v2.195.0`、enabled containers healthy、Storage/Auth/Studio HTTP `200`。2026-08-11 closeout時はstack stoppedで、remote staging acceptanceは非依存 |
 
 ## Capability状態
 
@@ -76,7 +77,6 @@
 
 ## 直近の順序
 
-1. Stagingでephemeral synthetic Auth/tenant fixtureを使ったauthenticated Edge acceptanceを実行しfixtureを削除。
-2. Document Assistant PDF/DOCX/Storageを継続。
+1. AI文書作成のPDF/DOCX binary generationとprivate Supabase Storageを継続。
 
 詳細: [PLAN.md](PLAN.md)。Canonical: [Uzbek STATUS](../STATUS.md)。

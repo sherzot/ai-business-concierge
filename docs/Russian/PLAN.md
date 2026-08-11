@@ -1,6 +1,6 @@
 # AI Business Concierge — активный план
 
-> Версия 5.7 · Обновлено 2026-08-11
+> Версия 5.8 · Обновлено 2026-08-11
 > Здесь только активные и следующие задачи. Старый master plan: [../archive/Russian/PLAN_LEGACY_2026-07-24.md](../archive/Russian/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — безопасное начало сессии
@@ -41,7 +41,6 @@
 - [x] Применить 32/32 migrations в staging, deploy `bright-api` v1 и пройти health/Auth-settings/security-advisor smoke tests.
 - [x] Ограничить staging Auth redirects Netlify preview wildcard/local Vite URLs; явно pin email confirmation, 8-digit/1-minute OTP и TOTP.
 - [x] Разделить Netlify production и deploy-preview/branch-deploy/dev env, удалить optional URL envs и пройти authoritative CLI read-back 4/4 contexts. На Personal только browser-public `VITE_*` используют `All` scope.
-- [ ] Выполнить authenticated Edge acceptance с ephemeral synthetic Auth/tenant fixture в staging и очистить fixture.
 - [x] Отключить external Vercel Git integration, сохранив project/deployment history; сразу удалить созданные CLI OIDC `.env.local` и `.vercel` metadata.
 
 ## P1 — завершить Phase 2 AI Документолог

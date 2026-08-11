@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-11 — Staging authenticated Edge acceptanceとlegacy-key cleanup完了
+
+- 以前はstaging migrationsと`bright-api` healthはgreenだったが、Supabase CLI `v2.112.0`のAPI-key timestamp parserによりremote Auth/tenant acceptanceがblockされていた。Integration scriptはlocal stack専用でcleanup responsesをassertしていなかった。
+- `edge_tenant_authorization.test.mjs`はprocess environment経由でexplicit remote URLとmodern publishable/secret keysを受け取り、signed-user Edge requestへ`apikey`を追加し、non-JWT secretをBearer tokenとして送信せず、2 tenants/5 Auth usersのcleanupを厳格に確認する。Local fallbackは維持。
+- CLI `v2.102.0`がmasked readの想定に反してstaging legacy `service_role` valueを完全表示したため、値はGit/docsへ保存せず直ちに無効化した。Staging Edgeへmodern-key `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overridesを設定し、legacy anon/service-role API keysをdisable。Productionは未変更で、secret reloadにより`bright-api` v2となった。
+- Modern keysでremote synthetic acceptance 8/8 PASS。Cleanupは2/2 tenantsと5/5 usersでPASSし、final SQL read-backは`acceptance_tenants=0`、`acceptance_users=0`。Auth logsで5 delete `200`、Edge logsで期待statusを確認。
+- `node --check` PASS。Closeout時にlocal Supabase stackがstoppedだったためlocal regressionは開始できなかったが、同scriptのremote pathは完全成功。次: AI文書作成のPDF/DOCX binary generationとprivate Storage contract。
+
+Files/state: `supabase/tests/integration/edge_tenant_authorization.test.mjs`、staging Supabase `piqsyfwrjtormrlenjix` Edge v2とmodern-key overrides/legacy-key disable、同期済み4-language STATUS/PLAN/DEVLOG。
+
 ## 2026-08-11 — PR #9 endpoint-drift hardeningのmain/production closeout完了
 
 - PR #9 follow-up `57d4dbc`をpushし、GitHub CI run `31481174852` success。Netlify preview `6a7af589fd49aa00082aa968` ready、build `6a7af589fd49aa00082aa966`、29s、plugin success、87,166 filesでsecret match 0。Staging-only CSP/bundleとnoindex/no-store green。
