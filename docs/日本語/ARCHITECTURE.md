@@ -38,7 +38,7 @@
 ### 1.2 AI文書作成private binary境界
 
 - PDF/DOCXは`bright-api`内だけで生成する。Browserはbinaryを生成せず、Supabase Storageへdirect CRUDしない。
-- Binaryはprivate `generated-documents` bucketのimmutable `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>` pathへ保存する。各re-exportは新しいUUID versionを作成しmetadata commit後のみ旧objectをcleanupする。Legacy unversioned pathsはrollout compatibilityのためread可能。Restrictive Storage policyが`anon`/`authenticated`による同bucketとprivate `document-assets`へのdirect accessを遮断する。
+- Binaryはprivate `generated-documents`のimmutable `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>` pathへ保存する。Export metadata replacementは`storage_path` compare-and-swapでserialize。Superseded pathsはURL TTL 60s + safety window 60sをJSONB retention metadataで保持し、新URL署名後だけcleanupする。Document deleteはDB-first後にactive/retained pathsを削除し、legacy unversioned pathsはread可能。Restrictive policyが`anon`/`authenticated` direct accessを遮断する。
 - `bright-api`はservice role使用前にactive tenant membershipを確認する。Downloadは60秒signed URLのみ。Exportはcurrent editable contentから再生成し、deleteはDB rowより先にprivate objectを削除する。
 - Pinned Noto Sans JP OTFをSHA-256検証し4言語をcoverする。PDFへfull embed、DOCXへobfuscated `.odttf`としてembedし、private `document-assets`へcacheする。
 

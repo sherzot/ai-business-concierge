@@ -3,6 +3,8 @@ import {
   documentStoragePath,
   generateAndStoreDocumentBinary,
   generateDocumentBinary,
+  parseRetainedDocumentStoragePaths,
+  retainSupersededDocumentStoragePath,
   safeDownloadName,
   sha256Hex,
 } from "./document-binary.ts";
@@ -37,6 +39,43 @@ Deno.test("private document path tenant/user/resource contractini saqlaydi", () 
 Deno.test("download nomi xavfli path belgilarini olib tashlaydi", () => {
   const name = safeDownloadName("  Shartnoma / 契約書: 2026  ", "docx");
   assert(name === "Shartnoma - 契約書- 2026.docx", `unexpected name: ${name}`);
+});
+
+Deno.test("retained Storage metadata faqat o'z tenant yo'llarini qabul qiladi", () => {
+  const retained = parseRetainedDocumentStoragePaths([
+    {
+      path: "tenant-a/user/documents/document-a/document-version.pdf",
+      delete_after: "2026-08-12T00:00:00.000Z",
+    },
+    {
+      path: "tenant-b/user/documents/document-b/document-version.pdf",
+      delete_after: "2026-08-12T00:00:00.000Z",
+    },
+    { path: "tenant-a/invalid.pdf", delete_after: "invalid" },
+  ], "tenant-a");
+
+  assert(
+    retained.length === 1,
+    `unexpected retained count: ${retained.length}`,
+  );
+  assert(
+    retained[0].path.startsWith("tenant-a/"),
+    "cross-tenant path retained",
+  );
+});
+
+Deno.test("superseded binary signed URL TTLdan keyingacha saqlanadi", () => {
+  const retained = retainSupersededDocumentStoragePath({
+    retained: [],
+    previousPath: "tenant-a/user/documents/document-a/document-version.pdf",
+    now: new Date("2026-08-12T00:00:00.000Z"),
+  });
+
+  assert(retained.length === 1, "superseded path saqlanmadi");
+  assert(
+    retained[0].delete_after === "2026-08-12T00:02:00.000Z",
+    `unexpected retention deadline: ${retained[0].delete_after}`,
+  );
 });
 
 const fontPath = Deno.env.get("DOCUMENT_TEST_FONT_PATH");

@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-12 — Закрыты concurrency/compensation findings Codex re-review PR #11
+
+- После follow-up `7837778` CI run `31540938092` прошёл за 52 секунды. Netlify canceled incremental preview `6a7b9cd2d9412e000833a5c8` с passing status, потому что frontend не менялся; тот же frontend artifact остаётся ready в `6a7b2e774d8b4a00084583b0`. Codex re-review `4911171318` для `7837778` нашёл ещё два P2: initial signed-URL compensation был Storage-first, а concurrent export мог сразу удалить object с ещё действующим 60-second signed URL.
+- Generate signed-URL compensation теперь проверяет tenant-scoped document delete до binary cleanup. Export replacement использует `storage_path` compare-and-swap для сериализации metadata commits; stale parallel request удаляет свой новый upload и возвращает `409 EXPORT_CONFLICT`.
+- Superseded binaries tracked в `retained_storage_paths` как `path/delete_after` и сохраняются 120 секунд: TTL URL 60 секунд плюс safety window 60 секунд. Expired objects удаляются только после подписи нового URL, cleanup metadata защищён compare-and-swap. Document delete остаётся DB-first, затем удаляет active и все retained paths. Migration `20260811221503_retain_document_storage_versions.sql` добавляет JSONB-array contract.
+- Staging: 35/35 migrations, `bright-api` v7 ACTIVE, health `200`; retained column/constraint green, последний pgTAP assertion `ok 14`, retained/acceptance residue 0. Security advisor показывает только pre-existing debt, новых document Storage findings нет. Deno binary/lifecycle `7/7`, focused service check, integration syntax и diff check PASS. Full API check остаётся на тех же 22 pre-existing typing errors. Remote authenticated fixture остаётся BLOCKED Cloudflare Auth Admin IP `403`.
+- Remaining: commit/push второго follow-up, новые CI/Netlify/Codex, затем merge и production migrations/Edge/Netlify rollout. Три существующих untracked user files не изменены.
+
+Files/state: `supabase/functions/server/{index.ts,services/document-binary.ts}`, `supabase/functions/server/services/document-binary.test.ts`, `supabase/migrations/20260811221503_retain_document_storage_versions.sql`, `supabase/tests/{database/document_storage_contract.test.sql,integration/document_binary_storage.test.mjs}`, синхронизированные 4-language STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/DEVLOG.
+
 ## 2026-08-11 — Исправлены transactional Storage findings Codex в PR #11
 
 - PR #10 повторно подтверждён green на `adab3fe` и squash-merged в `main` как `55d1468`. PR #11 retargeted на `main`; конфликт squash-history устранён replay только двух его commits. Для head `50a46c2` CI run `31500547178` прошёл за 53 секунды, Netlify preview `6a7b2e774d8b4a00084583b0` ready; `/` и `/dashboard/docs` дали `200`, staging-only CSP и `noindex` подтверждены.

@@ -38,7 +38,7 @@
 ### 1.2 AI Document Assistant private binary boundary
 
 - PDF and DOCX are generated only inside `bright-api`; the browser neither generates binaries nor performs direct Supabase Storage CRUD.
-- Binaries live in the private `generated-documents` bucket at immutable `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>` paths. Every re-export creates a new UUID version and cleans the prior object only after metadata commits; legacy unversioned paths remain readable for rollout compatibility. A restrictive Storage policy blocks `anon` and `authenticated` direct access to this bucket and private `document-assets`.
+- Binaries live in private `generated-documents` at immutable `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>` paths. Export metadata replacement is serialized by `storage_path` compare-and-swap. Superseded paths remain in JSONB retention metadata for the 60s URL TTL plus a 60s safety window and are cleaned only after a new URL is signed. Document delete is DB-first and then removes active plus retained paths; legacy unversioned paths remain readable. Restrictive Storage policy blocks `anon`/`authenticated` direct access.
 - `bright-api` validates active tenant membership before using the service role. Downloads use 60-second signed URLs; export regenerates current editable content, and delete removes the private object before the database row.
 - A pinned SHA-256-verified `Noto Sans JP` OTF covers all four languages. It is fully embedded in PDF, embedded as obfuscated `.odttf` in DOCX, and cached in private `document-assets`.
 

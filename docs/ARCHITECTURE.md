@@ -38,7 +38,7 @@
 ### 1.2 AI Hujjatchi private binary chegarasi
 
 - PDF va DOCX faqat `bright-api` ichida yaratiladi; browser binary yaratmaydi va Supabase Storage bilan direct CRUD qilmaydi.
-- Binarylar private `generated-documents` bucketida immutable `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>` yo'lida saqlanadi. Har re-export yangi UUID version yaratadi va metadata commitidan keyin oldingi object tozalanadi; legacy unversioned yo'llar rollout compatibility uchun o'qiladi. `anon` va `authenticated` rollari uchun restrictive Storage policy bu bucket hamda private `document-assets` bucketini to'g'ridan-to'g'ri yopadi.
+- Binarylar private `generated-documents` bucketida immutable `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>` yo'lida saqlanadi. Export metadata replacementi `storage_path` compare-and-swap bilan serializatsiya qilinadi; superseded pathlar signed URL 60s TTL + 60s safety window davomida JSONB retention metadata bilan saqlanadi, keyin yangi URL sign qilingach tozalanadi. Document delete DB-first bo'lib active va retained pathlarni birga cleanup qiladi; legacy unversioned yo'llar rollout compatibility uchun o'qiladi. Restrictive Storage policy `anon`/`authenticated` direct accessni yopadi.
 - `bright-api` service role ishlatishdan oldin active tenant membershipni tekshiradi. Yuklab olish faqat 60 soniyali signed URL bilan beriladi; export joriy editable contentdan qayta generatsiya qiladi, delete esa DB qatoridan oldin private obyektni o'chiradi.
 - To'rt til uchun pinned va SHA-256 bilan tasdiqlangan `Noto Sans JP` OTF ishlatiladi. Font PDFga to'liq, DOCXga obfuscated `.odttf` sifatida embed qilinadi va private `document-assets` bucketida cache qilinadi.
 

@@ -53,8 +53,8 @@
 
 ## P1 — Phase 2 AI Hujjatchini tugallash
 
-- [ ] PR #11 Codex topgan immutable re-export va DB-first delete follow-upini push qilish; yangi GitHub CI, Netlify preview va Codex re-reviewni green qilib PRni merge qilish.
-- [ ] Merge'dan keyin `20260811131308_ai_document_binary_storage.sql`, `20260811142919_version_document_storage_objects.sql` va `bright-api`ni productionga chiqarish; Netlify production deploy hamda mavjud muhit imkon bergan authenticated PDF/DOCX signed-download, cross-tenant deny, direct Storage deny va delete cleanup smoke-testini o'tkazish.
+- [ ] PR #11 ikkinchi Codex re-review follow-upini — DB-first signed-URL compensation, export CAS va 120s retained-version lifecycle — push qilish; yangi GitHub CI, Netlify preview va Codex re-reviewni green qilib PRni merge qilish.
+- [ ] Merge'dan keyin `20260811131308_ai_document_binary_storage.sql`, `20260811142919_version_document_storage_objects.sql`, `20260811221503_retain_document_storage_versions.sql` va `bright-api`ni productionga chiqarish; Netlify production deploy hamda mavjud muhit imkon bergan authenticated PDF/DOCX signed-download, cross-tenant deny, direct Storage deny va delete cleanup smoke-testini o'tkazish.
 - [ ] AI savol-javob/polishing oqimini LLM Router orqali ulash.
 - [ ] Web oqimi barqarorlashgach Telegram step-by-step hujjat yaratish va document yuborishni ulash.
 

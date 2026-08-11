@@ -46,7 +46,7 @@
 | R-018 | AI cost tracking | Partial; logging есть, tenant dashboard/enforcement остаётся | Backend |
 | R-019 | Vector Search (RAG) | Partial; vector/embedding основа есть, explicit tool/citations остаются | Docs |
 | R-020 | Admin Dashboard | Partial; core pages есть, billing/advanced agents остаются | Admin |
-| R-021 | AI Документовед binary output | Staging verified / production pending; real PDF/DOCX, embedded Noto Sans JP, private Storage, immutable UUID-versioned paths, post-metadata replacement cleanup, DB-first delete, restrictive RLS и 60-second signed URL green | Docs |
+| R-021 | AI Документовед binary output | Staging verified / production pending; real PDF/DOCX, embedded Noto Sans JP, private Storage, immutable UUID-versioned paths, export CAS, 120s retained-version grace, DB-first compensation/delete, restrictive RLS и 60s signed URL green | Docs |
 | R-003 | Биллинг/Платежи | Подписка, планы, история платежей | Новый |
 | R-004 | Просмотр журнала аудита | Admin audit log страница и backend endpoint ✅ | Settings |
 | R-005 | Экспорт/Импорт | Excel, CSV экспорт; массовый импорт | Reports, Tasks |

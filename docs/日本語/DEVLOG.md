@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-12 — PR #11 Codex re-reviewのconcurrency/compensation findingsをclose
+
+- Follow-up `7837778`後、CI run `31540938092`は52秒でPASS。Frontend変更なしのためNetlifyはincremental preview `6a7b9cd2d9412e000833a5c8`をcancelしpassing status、同一frontend artifact `6a7b2e774d8b4a00084583b0`はready。Codex re-review `4911171318`は`7837778`でさらに2件P2を検出。Initial signed-URL compensationがStorage-firstで、concurrent exportが有効な60秒signed URLのobjectを即時削除できた。
+- Generate signed-URL compensationはtenant-scoped document deleteを確認してからbinary cleanupする。Export replacementは`storage_path` compare-and-swapでmetadata commitsをserializeし、stale parallel requestは新uploadをcleanupして`409 EXPORT_CONFLICT`を返す。
+- Superseded binariesは`retained_storage_paths`へ`path/delete_after`として記録し120秒保持する。内訳はURL TTL 60秒とsafety window 60秒。Expired objectは新URL署名後だけcleanupし、cleanup metadataもcompare-and-swap。Document deleteはDB-first後にactiveと全retained pathsを削除。Migration `20260811221503_retain_document_storage_versions.sql`でJSONB-array contractを追加。
+- Stagingは35/35 migrations、`bright-api` v7 ACTIVE、health `200`。Retained column/constraint green、pgTAP最終assertion `ok 14`、retained/acceptance residue 0。Security advisorはpre-existing debtのみで新document Storage findingなし。Deno binary/lifecycle `7/7`、focused service check、integration syntax、diff check PASS。Full API checkは同じ22 pre-existing typing errors。Remote authenticated fixtureはCloudflare Auth Admin IP `403`でBLOCKEDのまま。
+- Remaining: 2nd follow-upをcommit/pushし、新CI/Netlify/Codex後にmerge、production migrations/Edge/Netlify rollout。既存3 untracked user filesは未変更。
+
+Files/state: `supabase/functions/server/{index.ts,services/document-binary.ts}`、`supabase/functions/server/services/document-binary.test.ts`、`supabase/migrations/20260811221503_retain_document_storage_versions.sql`、`supabase/tests/{database/document_storage_contract.test.sql,integration/document_binary_storage.test.mjs}`、同期済み4-language STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/DEVLOG。
+
 ## 2026-08-11 — PR #11 Codex transactional Storage findingsを修正
 
 - PR #10の`adab3fe`を再確認しgreenのため`55d1468`として`main`へsquash-merge。PR #11を`main`へretargetし、squash-history conflictは同PRの2 commitsだけをreplayして解消。Head `50a46c2`でCI run `31500547178`は53秒でPASS、Netlify preview `6a7b2e774d8b4a00084583b0` ready。`/`と`/dashboard/docs`は`200`、staging-only CSPと`noindex`を確認。

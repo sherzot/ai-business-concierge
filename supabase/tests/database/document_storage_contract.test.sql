@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(13);
+select plan(14);
 
 select is(
   (select public from storage.buckets where id = 'generated-documents'),
@@ -66,6 +66,18 @@ select ok(
       and data_type = 'uuid'
   ),
   'doc_generated has immutable storage version metadata'
+);
+
+select ok(
+  exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'doc_generated'
+      and column_name = 'retained_storage_paths'
+      and data_type = 'jsonb'
+      and is_nullable = 'NO'
+  ),
+  'doc_generated tracks retained signed-URL versions'
 );
 
 select ok(

@@ -45,8 +45,8 @@
 
 ## P1 — завершить Phase 2 AI Документолог
 
-- [ ] Push Codex follow-up PR #11 для immutable re-export и DB-first delete; пройти новые GitHub CI, Netlify preview и Codex re-review, затем merge PR.
-- [ ] После merge выпустить `20260811131308_ai_document_binary_storage.sql`, `20260811142919_version_document_storage_objects.sql` и `bright-api` в production; проверить Netlify production deploy и максимально доступный authenticated PDF/DOCX signed-download, cross-tenant deny, direct Storage deny и delete-cleanup smoke-test.
+- [ ] Push второй Codex re-review follow-up PR #11: DB-first signed-URL compensation, export CAS и 120s retained-version lifecycle; пройти новые GitHub CI, Netlify preview и Codex re-review, затем merge.
+- [ ] После merge выпустить `20260811131308_ai_document_binary_storage.sql`, `20260811142919_version_document_storage_objects.sql`, `20260811221503_retain_document_storage_versions.sql` и `bright-api` в production; проверить Netlify production и максимально доступный authenticated PDF/DOCX signed-download, cross-tenant deny, direct Storage deny и delete-cleanup smoke-test.
 - [ ] Добавить LLM-вопросы и polishing.
 - [ ] После стабильного web flow подключить Telegram wizard и отправку файла.
 

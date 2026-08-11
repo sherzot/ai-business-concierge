@@ -24,7 +24,7 @@
 > 2026-08-11: Staging переведён на modern Edge key overrides, legacy anon/service-role keys отключены. Real synthetic authenticated Edge acceptance прошёл 8/8 с обязательным cleanup двух tenants/пяти Auth users и final fixture count 0/0.
 > 2026-08-11: Acceptance changes push как `cc31fe7` в draft PR #10; GitHub CI run `31485875838` и Netlify deploy-preview `6a7b047d3150bc00088fc18d` green.
 > 2026-08-11: Real PDF/DOCX AI Документолога, embedded Noto Sans JP и private Storage contract завершены в staging; pgTAP 12/12 и binary/frontend gates green, `bright-api` v5 ACTIVE. Production намеренно не изменён.
-> 2026-08-11: PR #10 merged в main как `55d1468`; PR #11 retargeted/rebased на main и прошёл CI/Netlify preview. Два P2 partial-failure finding Codex исправлены immutable UUID-versioned objects и DB-first delete; staging 34/34 migrations, `bright-api` v6, health `200`.
+> 2026-08-12: CI PR #11 green на `7837778`; P2 Codex re-review по signed-URL compensation и concurrent export исправлены DB-first cleanup, compare-and-swap и 120-second retained-version grace. Staging 35/35 migrations, `bright-api` v7, health `200`.
 
 ## Текущая фаза
 
@@ -39,15 +39,15 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | PR #10 merged как `55d1468`. PR #11 retargeted/rebased на `main`, head `50a46c2` MERGEABLE; локальные Codex follow-up fixes ожидают push/re-review |
+| Git | PR #10 merged как `55d1468`. PR #11 head `7837778` MERGEABLE, CI green; вторые Codex re-review fixes локальны и ожидают commit/push |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 34/34 migrations, `bright-api` v6 ACTIVE, health `200` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 35/35 migrations, `bright-api` v7 ACTIVE, health `200` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge использует modern overrides `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY`; legacy anon/service-role API keys disabled |
 | Type-check | Успешно |
-| Unit tests | Frontend 23/23 файлов, 109/109 тестов; Deno document binary/lifecycle 5/5 |
+| Unit tests | Frontend 23/23 файлов, 109/109 тестов; Deno document binary/lifecycle 7/7 |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks + 2 Vite `.env` fallback/runtime-precedence + 2 bundled-endpoint extraction regressions |
 | Production build/security check | Build прошёл с synthetic non-production ref; CSP создан из этого ref; проверено 10 build/Netlify файлов |
 | Production dependency audit | Raw audit: всего 0 vulnerabilities; scoped gate без исключений: high/critical 0 |
@@ -56,13 +56,13 @@
 | Delivery platform | Только Netlify. В repository нет Vercel config/dependency; внешний Vercel project сохранён, `gitRepositoryConnected=false` подтверждён |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs отсутствуют; на Personal только browser-public `VITE_*` используют `All` scope |
 | Staging security advisor | Errors `0`; известный `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | PR #11 run `31500547178`, commit `50a46c2`: success; новый run ожидается после Codex follow-up push |
-| Netlify preview | PR #11 deploy `6a7b2e774d8b4a00084583b0` ready; `/` и `/dashboard/docs` `200`, staging-only CSP/noindex green; follow-up deploy ожидается |
+| Remote GitHub Actions | PR #11 run `31540938092`, commit `7837778`: success за 52s; новый run ожидается после второго follow-up push |
+| Netlify preview | Frontend artifact `6a7b2e774d8b4a00084583b0` ready; backend-only incremental deploy `6a7b9cd2d9412e000833a5c8` canceled/PASS |
 | Production frontend | Deploy `6a7af6d8233dfa000954ac24` ready, build `6a7af6d8233dfa000954ac22`, 32s, plugin success, 0 secret matches в 87,166 files; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup двух tenants/пяти Auth users и final fixture 0/0; Realtime tables SELECT-only и требуют active membership/tenant |
-| Document binary/Storage acceptance | Real 4-language PDF/DOCX baseline green; immutable same-format re-export PASS в Deno 5/5. Staging schema/constraint/private buckets green, fixture residue 0; новый remote Auth acceptance BLOCKED Cloudflare IP `403` |
-| Migration history | Local/staging 34/34; production намеренно остаётся на 32 migrations, document buckets/new `doc_generated` columns `0`; preflight: 2 legacy rows и `storage_path`/incompatible rows `0`, до merge PR #11 |
+| Document binary/Storage acceptance | Real PDF/DOCX baseline green; immutable/CAS/120s retained-version lifecycle Deno 7/7. Staging JSONB/constraint/private buckets и pgTAP `ok 14`, fixture residue 0; remote Auth acceptance BLOCKED Cloudflare IP `403` |
+| Migration history | Local/staging 35/35; production остаётся на 32 migrations, document buckets/new `doc_generated` columns `0`; preflight: 2 legacy rows и `storage_path`/incompatible rows `0`, до merge PR #11 |
 | Local Supabase services | Последний full-stack snapshot: Storage `v1.68.1`, Auth `v2.195.0`, enabled containers healthy, Storage/Auth/Studio HTTP `200`. На closeout 2026-08-11 stack был stopped; remote staging acceptance от него не зависел |
 
 ## Состояние возможностей

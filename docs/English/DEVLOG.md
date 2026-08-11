@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-12 — PR #11 Codex re-review concurrency and compensation findings closed
+
+- After follow-up `7837778`, CI run `31540938092` passed in 52 seconds. Netlify canceled incremental preview `6a7b9cd2d9412e000833a5c8` with a passing status because the frontend was unchanged; the same frontend artifact remains ready at `6a7b2e774d8b4a00084583b0`. Codex re-review `4911171318` on `7837778` found two more P2 issues: initial signed-URL compensation was Storage-first, and concurrent export could immediately delete an object still covered by a 60-second signed URL.
+- Generate signed-URL compensation now verifies tenant-scoped document deletion before binary cleanup. Export replacement uses a `storage_path` compare-and-swap to serialize metadata commits; a stale parallel request cleans its new upload and returns `409 EXPORT_CONFLICT`.
+- Superseded binaries are tracked in `retained_storage_paths` with `path/delete_after` and retained for 120 seconds: the 60-second URL TTL plus a 60-second safety window. Expired objects are cleaned only after the new URL is signed, and cleanup metadata uses a compare-and-swap. Document delete remains DB-first and then removes active plus all retained paths. Migration `20260811221503_retain_document_storage_versions.sql` adds the JSONB-array contract.
+- Staging is at 35/35 migrations, `bright-api` v7 ACTIVE, health `200`; retained column/constraint read-back is green, the last pgTAP assertion is `ok 14`, and retained/acceptance residue is zero. Security advisors show only pre-existing debt and no new document Storage finding. Deno binary/lifecycle tests are `7/7`; focused service check, integration syntax, and diff check pass. The full API check remains at the same 22 pre-existing typing errors. Remote authenticated fixture creation remains BLOCKED by the Cloudflare Auth Admin IP `403`.
+- Remaining: commit/push the second follow-up, rerun CI/Netlify/Codex, then merge and roll out production migrations, Edge, and Netlify. The three pre-existing untracked user files remain untouched.
+
+Files/state: `supabase/functions/server/{index.ts,services/document-binary.ts}`, `supabase/functions/server/services/document-binary.test.ts`, `supabase/migrations/20260811221503_retain_document_storage_versions.sql`, `supabase/tests/{database/document_storage_contract.test.sql,integration/document_binary_storage.test.mjs}`, synchronized four-language STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/DEVLOG.
+
 ## 2026-08-11 — PR #11 Codex transactional Storage findings fixed
 
 - PR #10 was re-verified green at `adab3fe` and squash-merged to `main` as `55d1468`. PR #11 was retargeted to `main`; the squash-history conflict was removed by replaying only its two commits. On head `50a46c2`, CI run `31500547178` passed in 53 seconds and Netlify preview `6a7b2e774d8b4a00084583b0` was ready. `/` and `/dashboard/docs` returned `200` with staging-only CSP and `noindex`.

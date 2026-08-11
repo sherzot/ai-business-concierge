@@ -45,8 +45,8 @@
 
 ## P1 — Phase 2 AI文書作成を完了
 
-- [ ] PR #11のimmutable re-exportとDB-first delete Codex follow-upをpushし、新GitHub CI、Netlify preview、Codex re-reviewを通してPRをmergeする。
-- [ ] Merge後、`20260811131308_ai_document_binary_storage.sql`、`20260811142919_version_document_storage_objects.sql`、`bright-api`をproductionへrolloutし、Netlify production deployと環境が許す最大範囲のauthenticated PDF/DOCX signed-download、cross-tenant deny、direct Storage deny、delete-cleanup smoke-testを確認する。
+- [ ] PR #11の2nd Codex re-review follow-up（DB-first signed-URL compensation、export CAS、120s retained-version lifecycle）をpushし、新GitHub CI、Netlify preview、Codex re-reviewを通してmergeする。
+- [ ] Merge後、`20260811131308_ai_document_binary_storage.sql`、`20260811142919_version_document_storage_objects.sql`、`20260811221503_retain_document_storage_versions.sql`、`bright-api`をproductionへrolloutし、Netlify productionと環境が許す最大範囲のauthenticated PDF/DOCX signed-download、cross-tenant deny、direct Storage deny、delete-cleanup smoke-testを確認する。
 - [ ] LLM質問/polishingを追加。
 - [ ] Web flow安定後、Telegram wizardとfile送信を追加。
 

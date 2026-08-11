@@ -286,12 +286,15 @@ try {
     /document-([0-9a-f-]{36})\.pdf$/,
   )?.[1]);
 
-  const removedPreviousExport = await fetch(exported.body.data.download_url);
-  assert.ok(
-    removedPreviousExport.status === 400 || removedPreviousExport.status === 404,
-    `old re-export object kutilmaganda ${removedPreviousExport.status}`,
+  const retainedPreviousExport = await fetch(exported.body.data.download_url);
+  assert.equal(retainedPreviousExport.status, 200);
+  assert.equal(
+    new TextDecoder().decode(
+      new Uint8Array(await retainedPreviousExport.arrayBuffer()).slice(0, 5),
+    ),
+    "%PDF-",
   );
-  console.log("ok - same-format re-export preserved metadata commit ordering");
+  console.log("ok - same-format re-export retained previous signed URL");
 
   const deleted = await edgeRequest(tokenA, tenantA, `/docs/${documentId}`, {
     method: "DELETE",
@@ -302,6 +305,11 @@ try {
   assert.ok(
     removedDeletedExport.status === 400 || removedDeletedExport.status === 404,
     `deleted document object kutilmaganda ${removedDeletedExport.status}`,
+  );
+  const removedRetainedExport = await fetch(exported.body.data.download_url);
+  assert.ok(
+    removedRetainedExport.status === 400 || removedRetainedExport.status === 404,
+    `retained document object kutilmaganda ${removedRetainedExport.status}`,
   );
 
   const [documentRows, generatedRows] = await Promise.all([
