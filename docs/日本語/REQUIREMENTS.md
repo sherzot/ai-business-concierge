@@ -46,7 +46,7 @@
 | R-018 | AI cost tracking | Partial; loggingあり、tenant dashboard/enforcementが残る | Backend |
 | R-019 | Vector Search (RAG) | Partial; vector/embedding基盤あり、explicit tool/citationsが残る | Docs |
 | R-020 | Admin Dashboard | Partial; core pagesあり、billing/advanced agentsが残る | Admin |
-| R-021 | AI書類メーカーbinary output | Staging verified / production pending。実PDF/DOCX、embedded Noto Sans JP、private Storage、immutable UUID-versioned path、65s active-download lease、export/document row-version CAS、DB-first compensation/delete、restrictive RLS、60s signed URLはgreen | Docs |
+| R-021 | AI書類メーカーbinary output | Staging verified / production pending。実PDF/DOCX、embedded Noto Sans JP、private Storage、immutable UUID-versioned path、5分provisional + post-signing 65秒lease、export/edit/delete row-version CAS、DB-first compensation/delete、restrictive RLS、60s signed URLはgreen | Docs |
 | R-003 | 課金/支払い | サブスクリプション、プラン、支払い履歴 | 新規 |
 | R-004 | 監査ログ表示 | Admin audit logページとbackend endpoint ✅ | Settings |
 | R-005 | エクスポート/インポート | Excel、CSVエクスポート、一括インポート | Reports、Tasks |

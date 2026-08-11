@@ -4,6 +4,15 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-12 — PR #11のURL leaseとdelete/export raceをclose
+
+- `0532a74`のCI run `31543616548`は50秒でPASS、Netlify `6a7ba58c7a91150008320965`はcanceled/PASS。Codex review `4911406530`はURL leaseがsigning前に開始する点とdeleteがin-flight exportとserializeされない点を2件P2として検出。
+- Binary metadata publish時に5分provisional leaseを取得し、URL signing成功時点からfinal 65秒leaseへpin。Final lease write失敗はDB metadata/objectをcompensationしURLを返さない。
+- Deleteは`documents.row_version` CASを使用。Export publishが勝てばdeleteは`409 DOCUMENT_CONFLICT`、deleteが勝てばstale exportはdocument不在を検出し新immutable uploadをcleanup。Staging `bright-api` v9 ACTIVE、health `200`。Deno 6/6、focused/syntax/diff green、full APIは既知22 typing errorsのみ。
+- Remaining: commit/push、新CI/Netlify/Codex、PR #11 merge、production rollout。既存3 user-owned untracked filesは未変更。
+
+Files: `supabase/functions/server/{index.ts,services/document-binary.ts,services/document-binary.test.ts}`と同期4-language DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE。
+
 ## 2026-08-12 — PR #11の3rd Codex concurrency findingsをserializationでclose
 
 - `35fa078`のCI run `31542246103`は55秒でPASS、backend/docs-only Netlify preview `6a7ba1042a94de0008d79759`はcanceled/PASS。Codex review `4911297037`は2件P2を検出。Retained cleanupが将来request依存で、parallel document editがstale metadata/binaryをcurrentにできた。

@@ -4,6 +4,15 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-12 — PR #11 URL-lease and delete/export races closed
+
+- For `0532a74`, CI run `31543616548` passed in 50 seconds and Netlify `6a7ba58c7a91150008320965` was canceled/PASS. Codex review `4911406530` found two P2s: the URL lease began before signing and delete was not serialized with an in-flight export.
+- Binary metadata publication now takes a five-minute provisional lease, then pins the final 65-second lease after successful URL signing. A failed final lease write compensates DB metadata/object state and never returns the URL.
+- Delete uses `documents.row_version` CAS: an export winner makes delete return `409 DOCUMENT_CONFLICT`; when delete wins, the stale export detects the absent document and removes its immutable new upload. Staging `bright-api` v9 is ACTIVE, health `200`; Deno 6/6 and focused/syntax/diff gates pass, with only the known 22 full-API typing errors.
+- Remaining: commit/push, pass fresh CI/Netlify/Codex, merge PR #11, and roll out production. The three user-owned untracked files remain untouched.
+
+Files: `supabase/functions/server/{index.ts,services/document-binary.ts,services/document-binary.test.ts}` and synchronized four-language DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE.
+
 ## 2026-08-12 — Third PR #11 Codex concurrency findings closed with serialization
 
 - For `35fa078`, CI run `31542246103` passed in 55 seconds and backend/docs-only Netlify preview `6a7ba1042a94de0008d79759` was canceled/PASS. Codex review `4911297037` found two P2s on that commit: retained cleanup depended on a future request, and a parallel document edit could let export republish stale metadata/binary as current.

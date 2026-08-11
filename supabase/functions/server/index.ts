@@ -27,6 +27,7 @@ import {
   GENERATED_DOCUMENTS_BUCKET,
   SIGNED_DOWNLOAD_TTL_SECONDS,
   documentDownloadLeaseExpiresAt,
+  documentExportProvisionalLeaseExpiresAt,
   generateAndStoreDocumentBinary,
   isDocumentDownloadLeaseActive,
   safeDownloadName,
@@ -3892,7 +3893,7 @@ const registerRoutes = (prefix: string) => {
         storage_bucket: storedBinary.storageBucket,
         storage_path: storedBinary.storagePath,
         storage_version: storedBinary.storageVersion,
-        download_expires_at: documentDownloadLeaseExpiresAt(),
+        download_expires_at: documentExportProvisionalLeaseExpiresAt(),
         mime_type: storedBinary.mimeType,
         file_size: storedBinary.fileSize,
         sha256: storedBinary.sha256,
@@ -3970,6 +3971,36 @@ const registerRoutes = (prefix: string) => {
         "SIGNED_URL_ERROR",
         "Yuklab olish havolasi yaratilmadi. Qayta urinib ko'ring.",
       );
+    }
+
+    const { data: generatedLease, error: generatedLeaseError } = await supabase
+      .from("doc_generated")
+      .update({ download_expires_at: documentDownloadLeaseExpiresAt() })
+      .eq("id", generated.id)
+      .eq("tenant_id", tenantId)
+      .eq("storage_path", storedBinary.storagePath)
+      .select("id")
+      .maybeSingle();
+    if (generatedLeaseError || !generatedLease) {
+      console.error("Generated document final lease error", generatedLeaseError);
+      const { data: deletedDocument, error: deleteError } = await supabase
+        .from("documents")
+        .delete()
+        .eq("id", document.id)
+        .eq("tenant_id", tenantId)
+        .select("id")
+        .maybeSingle();
+      if (deleteError || !deletedDocument) {
+        console.error("Generated document lease compensation error", deleteError);
+      } else {
+        const { error: cleanupError } = await supabase.storage
+          .from(storedBinary.storageBucket)
+          .remove([storedBinary.storagePath]);
+        if (cleanupError) {
+          console.error("Generated document lease cleanup error", cleanupError);
+        }
+      }
+      return failure(c, 500, "DB_ERROR", "Yuklab olish muddati saqlanmadi.");
     }
 
     await recordUsage(
@@ -4226,7 +4257,7 @@ const registerRoutes = (prefix: string) => {
       storage_bucket: storedBinary.storageBucket,
       storage_path: storedBinary.storagePath,
       storage_version: storedBinary.storageVersion,
-      download_expires_at: documentDownloadLeaseExpiresAt(),
+      download_expires_at: documentExportProvisionalLeaseExpiresAt(),
       mime_type: storedBinary.mimeType,
       file_size: storedBinary.fileSize,
       sha256: storedBinary.sha256,
@@ -4310,7 +4341,19 @@ const registerRoutes = (prefix: string) => {
 
       if (rollback.error || !rollback.data) {
         console.error("Document export metadata rollback error", rollback.error);
-        return false;
+        const { data: owningDocument, error: owningDocumentError } =
+          await supabase
+            .from("documents")
+            .select("id")
+            .eq("tenant_id", tenantId)
+            .eq("id", id)
+            .maybeSingle();
+        if (owningDocumentError || owningDocument) {
+          if (owningDocumentError) {
+            console.error("Document export owner rollback check error", owningDocumentError);
+          }
+          return false;
+        }
       }
       const { error: cleanupError } = await supabase.storage
         .from(storedBinary.storageBucket)
@@ -4333,6 +4376,20 @@ const registerRoutes = (prefix: string) => {
       console.error("Document export signed URL error", signedError);
       await rollbackGeneratedWrite();
       return failure(c, 503, "SIGNED_URL_ERROR", "Yuklab olish havolasi yaratilmadi.");
+    }
+
+    const { data: leaseWrite, error: leaseError } = await supabase
+      .from("doc_generated")
+      .update({ download_expires_at: documentDownloadLeaseExpiresAt() })
+      .eq("id", generatedId)
+      .eq("tenant_id", tenantId)
+      .eq("storage_path", storedBinary.storagePath)
+      .select("id")
+      .maybeSingle();
+    if (leaseError || !leaseWrite) {
+      console.error("Document export final lease error", leaseError);
+      await rollbackGeneratedWrite();
+      return failure(c, 500, "DB_ERROR", "Yuklab olish muddati saqlanmadi.");
     }
 
     const nextMetadata = {
@@ -4519,7 +4576,7 @@ const registerRoutes = (prefix: string) => {
     const id = c.req.param("id");
     const { data: existing, error: existingError } = await supabase
       .from("documents")
-      .select("id")
+      .select("id, row_version")
       .eq("tenant_id", ctx.tenantId)
       .eq("id", id)
       .maybeSingle();
@@ -4547,14 +4604,23 @@ const registerRoutes = (prefix: string) => {
       .delete()
       .eq("tenant_id", ctx.tenantId)
       .eq("id", id)
+      .eq("row_version", existing.row_version)
       .select("id")
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       if (error) {
         console.error("Docs delete error", error);
       }
-      return failure(c, 404, "NOT_FOUND", "Document topilmadi.");
+      if (!error) {
+        return failure(
+          c,
+          409,
+          "DOCUMENT_CONFLICT",
+          "Hujjat ayni paytda o'zgartirilmoqda. Qayta urinib ko'ring.",
+        );
+      }
+      return failure(c, 500, "DB_ERROR", "Document o'chirilmadi.");
     }
 
     // The document row owns the lifecycle. Delete it first so a database

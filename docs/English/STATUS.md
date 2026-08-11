@@ -26,6 +26,7 @@
 > 2026-08-11: Real AI Document Assistant PDF/DOCX, embedded Noto Sans JP, and the private Storage contract are complete in staging; 12/12 pgTAP and binary/frontend gates are green, and `bright-api` v5 is ACTIVE. Production was intentionally left unchanged.
 > 2026-08-12: PR #11 CI is green at `7837778`; Codex re-review P2s for signed-URL compensation and concurrent export were fixed with DB-first cleanup, compare-and-swap, and a 120-second retained-version grace. Staging is at 35/35 migrations, `bright-api` v7, health `200`.
 > 2026-08-12: Codex P2s after green `35fa078` replaced retained cleanup with a 65-second export lease and `documents.row_version` CAS. Staging is at 36/36 migrations, `bright-api` v8, health `200`.
+> 2026-08-12: Codex P2s on `0532a74` were closed with post-signing final lease pinning and delete/export row-version CAS. Staging `bright-api` v9 is ACTIVE, health `200`.
 
 ## Current phase
 
@@ -40,12 +41,12 @@
 
 | Check | Status |
 |---|---|
-| Git | PR #10 merged as `55d1468`. PR #11 head `35fa078` has green CI; third Codex review fixes are green locally/staging and await commit/push |
+| Git | PR #10 merged as `55d1468`. PR #11 head `0532a74` has green CI; URL-lease/delete-race Codex fixes are green locally/staging and await commit/push |
 | Runtime | Node.js `22.18.0`; `.nvmrc` and package engine pin `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; verified with a fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 36/36 migrations, `bright-api` v8 ACTIVE, health `200`, unauthenticated docs `401` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 36/36 migrations, `bright-api` v9 ACTIVE, health `200`, unauthenticated docs `401` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge uses modern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overrides; legacy anon/service-role API keys are disabled |
 | Type-check | Passed |
 | Unit tests | Frontend 23/23 files, 109/109 tests; Deno document binary/lifecycle 6/6 |

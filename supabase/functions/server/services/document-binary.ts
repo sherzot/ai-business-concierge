@@ -21,6 +21,7 @@ export const DOCUMENT_ASSETS_BUCKET = "document-assets";
 export const SIGNED_DOWNLOAD_TTL_SECONDS = 60;
 export const DOCUMENT_EXPORT_SERIALIZATION_SECONDS =
   SIGNED_DOWNLOAD_TTL_SECONDS + 5;
+export const DOCUMENT_EXPORT_PROVISIONAL_LEASE_SECONDS = 5 * 60;
 export const MAX_GENERATED_FILE_BYTES = 10 * 1024 * 1024;
 
 const DOCUMENT_FONT_NAME = "Noto Sans JP";
@@ -100,6 +101,12 @@ export function safeDownloadName(title: string, format: DocumentFormat) {
 export function documentDownloadLeaseExpiresAt(now = new Date()) {
   return new Date(
     now.getTime() + DOCUMENT_EXPORT_SERIALIZATION_SECONDS * 1000,
+  ).toISOString();
+}
+
+export function documentExportProvisionalLeaseExpiresAt(now = new Date()) {
+  return new Date(
+    now.getTime() + DOCUMENT_EXPORT_PROVISIONAL_LEASE_SECONDS * 1000,
   ).toISOString();
 }
 

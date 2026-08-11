@@ -45,7 +45,7 @@
 
 ## P1 — завершить Phase 2 AI Документолог
 
-- [ ] Push третий Codex follow-up PR #11: active-download lease, immutable export CAS и `documents.row_version` conflict rollback; пройти новые GitHub CI, Netlify preview и Codex re-review, затем merge.
+- [ ] Push URL-lease/delete-race follow-up PR #11: provisional-to-final signed-URL lease, immutable export rollback и delete `row_version` CAS; пройти новые GitHub CI, Netlify preview и Codex re-review, затем merge.
 - [ ] После merge выпустить четыре document migrations (`20260811131308`, `20260811142919`, `20260811221503`, `20260811223321`) и `bright-api` в production; проверить Netlify production и максимально доступный authenticated PDF/DOCX signed-download, cross-tenant deny, direct Storage deny и delete-cleanup smoke-test.
 - [ ] Добавить LLM-вопросы и polishing.
 - [ ] После стабильного web flow подключить Telegram wizard и отправку файла.

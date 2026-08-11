@@ -38,7 +38,7 @@
 ### 1.2 Private binary boundary AI Документолога
 
 - PDF/DOCX генерируются только внутри `bright-api`; browser не создаёт binary и не выполняет direct Supabase Storage CRUD.
-- Binary хранятся в private `generated-documents` по immutable path `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>`. `storage_path` CAS сериализует parallel commits, а 65-second `download_expires_at` lease запрещает замену при active 60-second signed URL; после expiry прежний object удаляется после commit новой metadata/document. `documents.row_version` CAS сериализует parallel edit и export publication. Legacy unversioned paths читаются, restrictive policy блокирует direct `anon`/`authenticated` access.
+- Binary хранятся в private `generated-documents` по immutable path `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>`. `storage_path` CAS сериализует parallel exports; publish получает 5-minute provisional lease и pin `download_expires_at` на 65 секунд после URL signing. `documents.row_version` — CAS boundary для edit/export/delete; прежний object удаляется только после commit новой metadata/document. Legacy paths читаются, restrictive policy блокирует direct browser access.
 - `bright-api` проверяет active tenant membership до использования service role. Download выдаётся через 60-second signed URL; export регенерирует current editable content, delete и compensation выполняются DB-first и затем cleanup private object.
 - Pinned Noto Sans JP OTF проверяется SHA-256, покрывает 4 языка, полностью embedded в PDF, как obfuscated `.odttf` в DOCX и cached в private `document-assets`.
 

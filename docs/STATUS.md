@@ -27,6 +27,7 @@
 > 2026-08-11: AI Hujjatchi real PDF/DOCX, embedded Noto Sans JP va private Storage kontrakti stagingda yakunlandi; 12/12 pgTAP va binary/unit/frontend gate'lar green, `bright-api` v5 ACTIVE. Production ataylab o'zgartirilmadi.
 > 2026-08-12: PR #11 `7837778` uchun CI green; Codex re-review topgan signed-URL compensation va parallel export P2lari DB-first cleanup, compare-and-swap hamda 120 soniyalik retained-version grace bilan tuzatildi. Staging 35/35 migration, `bright-api` v7 va health `200`.
 > 2026-08-12: `35fa078` CI greenidan keyingi Codex P2lari retained modelni 65 soniyalik export lease va `documents.row_version` CAS bilan almashtirish orqali yopildi. Staging 36/36 migration, `bright-api` v8, health `200`.
+> 2026-08-12: `0532a74` Codex P2lari URL-signingdan keyingi final lease pin va delete/export row-version CAS bilan yopildi. Staging `bright-api` v9 ACTIVE, health `200`.
 
 ## Hozir qayerdamiz
 
@@ -41,12 +42,12 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | PR #10 `55d1468` bilan merged. PR #11 head `35fa078` uchun CI green; uchinchi Codex review P2 fixlari lokal/stagingda green, commit/push navbatda |
+| Git | PR #10 `55d1468` bilan merged. PR #11 head `0532a74` uchun CI green; URL-lease/delete-race Codex fixlari lokal/stagingda green, commit/push navbatda |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
 | Health smoke-test | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 36/36 migration, `bright-api` v8 ACTIVE, health `200`, authsiz docs `401` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 36/36 migration, `bright-api` v9 ACTIVE, health `200`, authsiz docs `401` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` modern key override'larida; legacy anon/service-role API keylari disabled |
 | Type-check | Muvaffaqiyatli |
 | Unit test | Frontend 23/23 fayl, 109/109 test; document binary/lifecycle Deno 6/6 |

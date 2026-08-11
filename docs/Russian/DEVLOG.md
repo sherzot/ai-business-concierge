@@ -4,6 +4,15 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-12 — Закрыты URL-lease и delete/export races PR #11
+
+- Для `0532a74` CI run `31543616548` прошёл за 50 секунд, Netlify `6a7ba58c7a91150008320965` canceled/PASS. Codex review `4911406530` нашёл два P2: URL lease начинался до signing, delete не был serialized с in-flight export.
+- Binary metadata publish сначала получает 5-minute provisional lease, затем после успешного URL signing pin final 65-second lease. Ошибка final lease write выполняет compensation DB metadata/object и не возвращает URL.
+- Delete использует `documents.row_version` CAS: если export publish выиграл, delete возвращает `409 DOCUMENT_CONFLICT`; если delete выиграл, stale export обнаруживает отсутствующий document и удаляет новый immutable upload. Staging `bright-api` v9 ACTIVE, health `200`; Deno 6/6 и focused/syntax/diff green, full API содержит только известные 22 typing errors.
+- Remaining: commit/push, новые CI/Netlify/Codex, merge PR #11 и production rollout. Три user-owned untracked files не изменены.
+
+Files: `supabase/functions/server/{index.ts,services/document-binary.ts,services/document-binary.test.ts}` и синхронные 4-language DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE.
+
 ## 2026-08-12 — Третьи concurrency findings Codex в PR #11 закрыты serialization
 
 - Для `35fa078` CI run `31542246103` прошёл за 55 секунд, backend/docs-only Netlify preview `6a7ba1042a94de0008d79759` canceled/PASS. Codex review `4911297037` нашёл два P2: retained cleanup зависел от будущего request, а parallel document edit мог сделать stale metadata/binary current.

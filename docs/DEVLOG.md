@@ -4,6 +4,15 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-12 — PR #11 URL lease va delete/export race yopildi
+
+- `0532a74` uchun CI run `31543616548` 50 soniyada PASS, Netlify `6a7ba58c7a91150008320965` canceled/PASS bo'ldi. Codex review `4911406530` URL TTL lease signingdan oldin boshlanishi va delete in-flight export bilan serializatsiya qilinmaganini 2 ta P2 sifatida topdi.
+- Binary metadata commitida 5 daqiqalik provisional lease olinadi; signed URL muvaffaqiyatli yaratilgan vaqtdan keyin lease 65 soniyaga qayta pin qilinadi. Final lease write muvaffaqiyatsiz bo'lsa generate/export DB metadata va objectni compensation bilan qaytaradi, URL clientga berilmaydi.
+- Delete `documents.row_version` CAS ishlatadi: export publish yutsa delete `409 DOCUMENT_CONFLICT`, delete yutsa stale export document yo'qligini aniqlab immutable yangi uploadni cleanup qiladi. Staging `bright-api` v9 ACTIVE, health `200`; Deno 6/6, focused check/integration syntax/diff green, full API faqat avvalgi 22 typing qarzida.
+- Qolgan ish: follow-up commit/push, yangi CI/Netlify/Codex greenidan keyin PR #11 merge va production rollout. Mavjud uch untracked user fayliga tegilmadi.
+
+Fayllar: `supabase/functions/server/{index.ts,services/document-binary.ts,services/document-binary.test.ts}` va 4-tilli DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE.
+
 ## 2026-08-12 — PR #11 uchinchi Codex concurrency topilmalari serializatsiya bilan yopildi
 
 - `35fa078` uchun GitHub CI run `31542246103` 55 soniyada PASS bo'ldi; backend/docs-only Netlify preview `6a7ba1042a94de0008d79759` canceled/PASS. Codex review `4911297037` aynan shu commitda 2 ta P2 topdi: 120 soniyalik retained object cleanupi kelajak requestga bog'langan va parallel document edit exportning eski metadata/binarysini current qilib qo'yishi mumkin edi.

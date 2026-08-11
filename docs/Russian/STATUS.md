@@ -26,6 +26,7 @@
 > 2026-08-11: Real PDF/DOCX AI Документолога, embedded Noto Sans JP и private Storage contract завершены в staging; pgTAP 12/12 и binary/frontend gates green, `bright-api` v5 ACTIVE. Production намеренно не изменён.
 > 2026-08-12: CI PR #11 green на `7837778`; P2 Codex re-review по signed-URL compensation и concurrent export исправлены DB-first cleanup, compare-and-swap и 120-second retained-version grace. Staging 35/35 migrations, `bright-api` v7, health `200`.
 > 2026-08-12: P2 Codex после green `35fa078` заменили retained cleanup на 65-second export lease и `documents.row_version` CAS. Staging 36/36 migrations, `bright-api` v8, health `200`.
+> 2026-08-12: P2 Codex для `0532a74` закрыты post-signing final lease pin и delete/export row-version CAS. Staging `bright-api` v9 ACTIVE, health `200`.
 
 ## Текущая фаза
 
@@ -40,12 +41,12 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | PR #10 merged как `55d1468`. PR #11 head `35fa078` CI green; третьи Codex review fixes green local/staging и ожидают commit/push |
+| Git | PR #10 merged как `55d1468`. PR #11 head `0532a74` CI green; URL-lease/delete-race Codex fixes green local/staging и ожидают commit/push |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 36/36 migrations, `bright-api` v8 ACTIVE, health `200`, unauth docs `401` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 36/36 migrations, `bright-api` v9 ACTIVE, health `200`, unauth docs `401` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge использует modern overrides `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY`; legacy anon/service-role API keys disabled |
 | Type-check | Успешно |
 | Unit tests | Frontend 23/23 файлов, 109/109 тестов; Deno document binary/lifecycle 6/6 |

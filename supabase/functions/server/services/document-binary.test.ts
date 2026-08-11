@@ -1,5 +1,6 @@
 import {
   documentDownloadLeaseExpiresAt,
+  documentExportProvisionalLeaseExpiresAt,
   documentMimeType,
   documentStoragePath,
   generateAndStoreDocumentBinary,
@@ -58,6 +59,11 @@ Deno.test("document export lease signed URL muddatidan keyin tugaydi", () => {
       new Date("2026-08-12T00:01:05.000Z"),
     ),
     "deadline yetganda export lease tugashi kerak",
+  );
+  assert(
+    documentExportProvisionalLeaseExpiresAt(now) ===
+      "2026-08-12T00:05:00.000Z",
+    "provisional lease signing tugaguncha exportni bloklashi kerak",
   );
 });
 

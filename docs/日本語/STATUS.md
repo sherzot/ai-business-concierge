@@ -26,6 +26,7 @@
 > 2026-08-11: AI文書作成の実PDF/DOCX、embedded Noto Sans JP、private Storage contractをstagingで完了。pgTAP 12/12とbinary/frontend gatesはgreen、`bright-api` v5 ACTIVE。Productionは意図的に未変更。
 > 2026-08-12: PR #11 CIは`7837778`でgreen。Codex re-reviewのsigned-URL compensation/concurrent export P2をDB-first cleanup、compare-and-swap、120秒retained-version graceで修正。Stagingは35/35 migrations、`bright-api` v7、health `200`。
 > 2026-08-12: Green `35fa078`後のCodex P2によりretained cleanupを65秒export leaseと`documents.row_version` CASへ置換。Stagingは36/36 migrations、`bright-api` v8、health `200`。
+> 2026-08-12: `0532a74`のCodex P2をpost-signing final lease pinとdelete/export row-version CASでclose。Staging `bright-api` v9 ACTIVE、health `200`。
 
 ## 現在のPhase
 
@@ -40,12 +41,12 @@
 
 | Check | 状態 |
 |---|---|
-| Git | PR #10は`55d1468`としてmerged。PR #11 head `35fa078`はCI green。3rd Codex review fixesはlocal/staging greenでcommit/push待ち |
+| Git | PR #10は`55d1468`としてmerged。PR #11 head `0532a74`はCI green。URL-lease/delete-race Codex fixesはlocal/staging greenでcommit/push待ち |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Supabase Edge Function `bright-api` v75、`ACTIVE`、`verify_jwt=false` |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。36/36 migrations、`bright-api` v8 ACTIVE、health `200`、unauth docs `401` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。36/36 migrations、`bright-api` v9 ACTIVE、health `200`、unauth docs `401` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list。Email confirmation ON、8-digit/1-minute OTP、TOTP ON。Auth settings HTTP `200`、autoconfirm false。Edgeはmodern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overridesを使用しlegacy anon/service-role API keysはdisabled |
 | Type-check | 成功 |
 | Unit tests | Frontend 23/23 files、109/109 tests。Deno document binary/lifecycle 6/6 |

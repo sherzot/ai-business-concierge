@@ -45,7 +45,7 @@
 
 ## P1 — Phase 2 AI文書作成を完了
 
-- [ ] PR #11の3rd Codex follow-up（active-download lease、immutable export CAS、`documents.row_version` conflict rollback）をpushし、新GitHub CI、Netlify preview、Codex re-reviewを通してmergeする。
+- [ ] PR #11のURL-lease/delete-race follow-up（provisional-to-final signed-URL lease、immutable export rollback、delete `row_version` CAS）をpushし、新GitHub CI、Netlify preview、Codex re-reviewを通してmergeする。
 - [ ] Merge後、4 document migrations（`20260811131308`、`20260811142919`、`20260811221503`、`20260811223321`）と`bright-api`をproductionへrolloutし、Netlify productionと環境が許す最大範囲のauthenticated PDF/DOCX signed-download、cross-tenant deny、direct Storage deny、delete-cleanup smoke-testを確認する。
 - [ ] LLM質問/polishingを追加。
 - [ ] Web flow安定後、Telegram wizardとfile送信を追加。
