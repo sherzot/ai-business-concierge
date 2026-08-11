@@ -4,6 +4,15 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-11 — PR #9 endpoint-drift hardeningのmain/production closeout完了
+
+- PR #9 follow-up `57d4dbc`をpushし、GitHub CI run `31481174852` success。Netlify preview `6a7af589fd49aa00082aa968` ready、build `6a7af589fd49aa00082aa966`、29s、plugin success、87,166 filesでsecret match 0。Staging-only CSP/bundleとnoindex/no-store green。
+- PR #9を`c00362a`としてsquash-merge。Main CI run `31481586911` success。Netlify production deploy `6a7af6d8233dfa000954ac24` ready、build `6a7af6d8233dfa000954ac22`、32s、plugin success、87,166 filesでsecret match 0。Production page/Auth/health HTTP `200`、Realtime `OPEN`。CSP/bundleはproduction refのみでstaging refなし。
+- New commitのCodex re-reviewを5分以上待機したが、GitHubは旧`c7a489a` reviewのみ保持。Userが別途依頼していないためreply/resolveは未実施。Findingは14/14 regressions、mismatch-FAIL/aligned-PASS integration acceptance、remote CI、previewでcover。既存3 untracked user filesはcommitしていない。
+- Remaining active work: staging ephemeral synthetic Auth/tenant authenticated Edge acceptanceとcleanup、その後AI文書作成PDF/DOCX/Storage。
+
+Files/state: PR #9、merge `c00362a`、CI `31481174852`/`31481586911`、Netlify preview `6a7af589fd49aa00082aa968`、production `6a7af6d8233dfa000954ac24`、同期済み4-language STATUS/PLAN/DEVLOG。
+
 ## 2026-08-11 — PR #9 Codex bundled endpoint drift findingをclose
 
 - PR #9をmerge前にCodex待機したことで追加P2 drift caseを検出。CSP refがbundle内のどこかに存在するだけでは不十分で、optional `VITE_SUPABASE_URL`/`VITE_API_BASE_URL`が別Supabase project endpointを参照できた。

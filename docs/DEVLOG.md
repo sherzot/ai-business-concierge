@@ -4,6 +4,15 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-11 — PR #9 endpoint-drift hardening main/production closeouti yakunlandi
+
+- PR #9 follow-up `57d4dbc`ga push qilindi; GitHub CI run `31481174852` `success`. Netlify preview `6a7af589fd49aa00082aa968` `ready`, build `6a7af589fd49aa00082aa966`, 29s, plugin success, secret match 0/87,166; staging-only CSP/bundle va noindex/no-store green.
+- PR #9 `c00362a` bilan squash-merge qilindi. Main CI run `31481586911` `success`. Netlify production deploy `6a7af6d8233dfa000954ac24` `ready`, build `6a7af6d8233dfa000954ac22`, 32s, plugin success, secret match 0/87,166. Production sahifa/Auth/health HTTP `200`, Realtime `OPEN`; CSP/bundle faqat production refni o'z ichiga oldi, staging ref yo'q.
+- Codex re-review yangi commit uchun 5 daqiqadan ko'proq kutilgan, lekin GitHub faqat eski `c7a489a` reviewini saqlagan; threadga user alohida so'ramagani uchun reply/resolve berilmadi. Finding 14/14 regression, mismatch-FAIL/aligned-PASS integration acceptance, remote CI va preview bilan yopildi. Uchta mavjud untracked user fayli commit qilinmadi.
+- Qolgan faol ish: staging ephemeral synthetic Auth/tenant authenticated Edge acceptance va cleanup; undan keyin AI Hujjatchi PDF/DOCX/Storage.
+
+Fayllar/state: PR #9, merge `c00362a`, CI `31481174852`/`31481586911`, Netlify preview `6a7af589fd49aa00082aa968`, production `6a7af6d8233dfa000954ac24`, 4-tilli STATUS/PLAN/DEVLOG.
+
 ## 2026-08-11 — PR #9 Codex bundled endpoint drift topilmasi yopildi
 
 - PR #9ni merge'dan oldin kutish natijasida Codex yana bitta P2 drift holatini topdi: CSP ref bundle ichida biror joyda mavjud bo'lishi yetarli, optional `VITE_SUPABASE_URL`/`VITE_API_BASE_URL` esa boshqa Supabase project endpointiga qarashi mumkin edi.

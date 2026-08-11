@@ -21,6 +21,7 @@
 > 2026-08-11: Isolation PR #7 `3fb1592` bilan `main`ga merge qilindi; PR/main CI green. Netlify preview va production smoke-testlarida tegishli staging/production ref, Auth/health `200`, Realtime `OPEN`, CSP hamda preview noindex/no-store tasdiqlandi; Vercel yangi deploy yaratmagan.
 > 2026-08-11: PR #7 Codex `.env`/CSP hotfixi PR #8 orqali `e2b3e78` bilan main/productionga chiqdi; CI `31479695709`/`31479985070` green, preview/production smoke green. PR #8 Codex mode/STATUS follow-uplari `agent/fix-security-check-build-mode` branchida faol.
 > 2026-08-11: PR #9 Codex endpoint-drift P2 topilmasi merge'dan oldin tuzatildi; security gate generated CSP refni barcha bundled Supabase HTTPS/WSS endpoint reflari bilan solishtiradi. Deploy/security environment tests 14/14, mismatched fixture kutilganidek bloklandi.
+> 2026-08-11: PR #9 `c00362a` bilan main/productionga merge qilindi; PR/main CI green. Preview va production CSP/bundle isolation, Auth/health va production Realtime smoke-testlari o'tdi.
 
 ## Hozir qayerdamiz
 
@@ -35,7 +36,7 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | `main` va `origin/main` `e2b3e78`da teng; PR #8 merged, Codex mode/STATUS follow-upi `agent/fix-security-check-build-mode` branchida faol |
+| Git | `main` va `origin/main` `c00362a`da teng; PR #9 merged, tracked tree clean |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -53,9 +54,9 @@
 | Delivery platform | Faol platforma faqat Netlify. Repo ichida Vercel config/dependency yo'q; external Vercel project saqlangan, `gitRepositoryConnected=false` tasdiqlandi |
 | Environment isolation | Netlify CLI authoritative read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envlari yo'q; Personal rejada faqat browser-public `VITE_*` qiymatlar `All` scope'da |
 | Staging security advisor | Error `0`; ma'lum `vector` public-schema warningi `1`; server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | PR #8 run `31479695709` va main run `31479985070`, commit `e2b3e78`: `success`; 12 env test, type-check, 108 test, audit, build va security steps green |
-| Netlify preview | PR #8 deploy `6a7af0f72a34e60009692db9` ready; staging-only CSP/bundle, noindex/no-store, page/Auth/health `200`, secret match 0/87,164 |
-| Production frontend | Deploy `6a7af1de285a110008fa6d31` ready, build `6a7af1de285a110008fa6d2f`, 41s, plugin success, secret match 0/87,164; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
+| Remote GitHub Actions | PR #9 run `31481174852` va main run `31481586911`, commit `c00362a`: `success`; 14 env/security test, type-check, 108 test, audit, build va security steps green |
+| Netlify preview | PR #9 deploy `6a7af589fd49aa00082aa968` ready; staging-only CSP/bundle, noindex/no-store, secret match 0/87,166 |
+| Production frontend | Deploy `6a7af6d8233dfa000954ac24` ready, build `6a7af6d8233dfa000954ac22`, 32s, plugin success, secret match 0/87,166; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |
 | DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; real Auth tokenli Edge `8/8`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |
 | Migration history | Local/remote 32/32 teng; production `db push --dry-run`: up to date |

@@ -4,6 +4,15 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Completed the PR #9 endpoint-drift hardening main/production closeout
+
+- Pushed PR #9 follow-up `57d4dbc`; GitHub CI run `31481174852` succeeded. Netlify preview `6a7af589fd49aa00082aa968` was ready with build `6a7af589fd49aa00082aa966`, 29 seconds, plugin success, zero secret matches across 87,166 files, staging-only CSP/bundle, and correct noindex/no-store.
+- Squash-merged PR #9 as `c00362a`. Main CI run `31481586911` succeeded. Netlify production deploy `6a7af6d8233dfa000954ac24` was ready with build `6a7af6d8233dfa000954ac22`, 32 seconds, plugin success, and zero secret matches across 87,166 files. Production page/Auth/health returned HTTP `200`, Realtime was `OPEN`, and CSP/bundle contained only the production ref with no staging ref.
+- Codex re-review was awaited for more than five minutes on the new commit, but GitHub retained only the old `c7a489a` review; no reply/resolve was posted because the user did not separately request it. The finding is covered by 14/14 regressions, mismatch-FAIL/aligned-PASS integration acceptance, remote CI, and preview. The three existing untracked user files were not committed.
+- Remaining active work: staging ephemeral synthetic Auth/tenant authenticated Edge acceptance and cleanup, then AI Document Assistant PDF/DOCX/Storage.
+
+Files/state: PR #9, merge `c00362a`, CI `31481174852`/`31481586911`, Netlify preview `6a7af589fd49aa00082aa968`, production `6a7af6d8233dfa000954ac24`, synchronized four-language STATUS/PLAN/DEVLOG.
+
 ## 2026-08-11 — Closed the PR #9 Codex bundled-endpoint drift finding
 
 - Waiting for Codex before merging PR #9 exposed one more P2 drift case: mere presence of the CSP ref somewhere in the bundle was insufficient because optional `VITE_SUPABASE_URL`/`VITE_API_BASE_URL` could point to another Supabase project endpoint.
