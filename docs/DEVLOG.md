@@ -4,6 +4,14 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-11 — GHSA exception removal main push va remote CI closeout yakunlandi
+
+- Tekshirilgan audit gate va sinxron 4-tilli hujjatlar `1fb6c0c` (`chore: remove obsolete GHSA audit exception [skip netlify]`) sifatida bevosita `main`ga commit/push qilindi. Lokal `main` va `origin/main` shu commitda teng; uchta mavjud untracked user fayli stage/commit qilinmadi.
+- GitHub Actions CI run `31466592524` 57 soniyada `success`: install, type-check, unit tests, exception'siz production dependency audit, production build va bundle/hosting security bosqichlarining barchasi green. `[skip netlify]` audit/CI script va docs o'zgarishi uchun keraksiz production frontend deployni oldini oldi.
+- Keyingi faol ish o'zgarmadi: production/preview environment, secret va data ajratish qarori; undan keyin AI Hujjatchi PDF/DOCX/Storage.
+
+Fayllar/state: commit `1fb6c0c`, GitHub CI `31466592524`, sinxron 4-tilli STATUS/DEVLOG.
+
 ## 2026-08-11 — GHSA-qwww vaqtinchalik metadata exceptioni olib tashlandi
 
 - Oldingi holatda npm/global advisory va React Router upstream advisory orasidagi `react-router@7.18.2` patched-range tafovuti sabab production audit gate'da faqat GHSA-qwww uchun exact-versiyali, 2026-08-21gacha amal qiladigan exception bor edi. User va agent alohida raw `npm audit --omit=dev --json` tekshiruvlarida jami vulnerability `0` natijasini oldi; scoped gate ham warning'siz green bo'ldi, ya'ni exception endi hech qanday advisory'ni filtrlab o'tkazmayotgan edi.

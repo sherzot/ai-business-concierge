@@ -15,6 +15,7 @@
 > 2026-08-11: No-fallback sourceをPR #6経由で`2b71a49`として`main`へmerge。GitHub CI green、final Netlify deploy `6a7ab5474835d660f21249cd` ready。Production bundle/Auth/Realtime recheck成功、publishable-key handoff完了。
 > 2026-08-11: UserがLeaderとしてauthenticated production sessionを開き、Company Dashboard Business Status panelをcomputed contrastとvisual screenshotでdark mode完全確認。Textは可読、overlap/overflow/browser errorなし、acceptance完了。
 > 2026-08-11: Raw npm production auditはvulnerability 0件。Temporary GHSA-qwww metadata exceptionを削除し、exceptionなしのproduction audit gate成功を確認。
+> 2026-08-11: GHSA exception removalを`1fb6c0c`として`main`へdirect push。GitHub CI run `31466592524`は全security-gate steps greenで完了。
 
 ## 現在のPhase
 
@@ -29,7 +30,7 @@
 
 | Check | 状態 |
 |---|---|
-| Git | PR #6を`2b71a49`として`main`へsquash-merge; source commit `85cb241` |
+| Git | `main`と`origin/main`は`1fb6c0c`で一致。GHSA exception removalをdirect push |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Supabase Edge Function `bright-api` v75、`ACTIVE`、`verify_jwt=false` |
@@ -41,7 +42,7 @@
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue。Landing、public/auth、product core、admin shell redesignをlocal完了 |
 | Visual browser acceptance | Landing Why Us 6/6 inverse text green。Authenticated Company Dashboard dark mode: Business Status background `rgb(17,19,24)`、title/percentage contrast `16.73:1`、muted text `7.5:1`、success signal `10.66:1`。12/12 text nodesがpanel内、overlap/overflow/console error `0` |
 | Preview CI | PR #6 Netlify preview deploy `6a7ab3ed99861d0008a32837` ready。Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready |
-| Remote GitHub Actions | Main closeout run `31462960098`、commit `f9152c6`: success (58s)。PR #6 run `31461980468`、commit `85cb241`: success (48s) |
+| Remote GitHub Actions | GHSA closeout run `31466592524`、commit `1fb6c0c`: success (57s)。Type-check、108 tests、exceptionなしproduction audit、build、security steps green |
 | Production frontend | Latest docs-only Netlify deploy `6a7ab804ea3f550008240f11` ready、build `6a7ab804ea3f550008240f0f`、2026-08-11T05:50:30.225Zにpublished。32s、plugin success、87,160 filesでsecret match 0。No-fallback app rollout artifact: `6a7ab5474835d660f21249cd` |
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |
 | DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、real Auth-token Edge tests 8/8。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |

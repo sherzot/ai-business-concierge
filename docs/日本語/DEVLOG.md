@@ -4,6 +4,14 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-11 — GHSA exception removalのmain pushとremote CI closeout完了
+
+- Verified audit gateと同期済み4-language docsを`1fb6c0c` (`chore: remove obsolete GHSA audit exception [skip netlify]`)として`main`へdirect commit/push。Local `main`と`origin/main`は同commitで一致し、既存の3 untracked user filesはstage/commitしていない。
+- GitHub Actions CI run `31466592524`は57秒でsuccess。Install、type-check、unit tests、exceptionなしproduction dependency audit、production build、bundle/hosting security stepsがすべてgreen。`[skip netlify]`によりaudit/CI scriptとdocs変更の不要なproduction frontend deployを防止。
+- Active orderは変更なし: production/preview environment、secret、data分離を決定し、その後AI文書作成PDF/DOCX/Storageを継続。
+
+Files/state: commit `1fb6c0c`、GitHub CI `31466592524`、同期済み4-language STATUS/DEVLOG。
+
 ## 2026-08-11 — Temporary GHSA-qwww metadata exceptionを削除
 
 - 以前はnpm/globalとupstream React Router advisoryで`react-router@7.18.2`のpatched statusが一致しなかったため、production audit gateに2026-08-21までのexact-version GHSA-qwww exceptionがあった。Userとagentがそれぞれraw `npm audit --omit=dev --json`を実行し、両方ともvulnerability合計0件。Scoped gateもexception warningなしで成功し、exceptionがadvisoryをfilterしていないことを確認した。

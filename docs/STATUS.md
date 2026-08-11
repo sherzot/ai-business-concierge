@@ -16,6 +16,7 @@
 > 2026-08-11: No-fallback source PR #6 orqali `2b71a49` bilan `main`ga merge qilindi; GitHub CI green va final Netlify deploy `6a7ab5474835d660f21249cd` ready. Production bundle/Auth/Realtime recheck to'liq o'tdi; publishable-key handoff yakunlandi.
 > 2026-08-11: User productionda Rahbar sifatida authenticated session ochdi; Company Dashboard “Biznes holati” paneli dark mode'da computed contrast va vizual screenshot bilan to'liq tekshirildi. Matn ko'rinadi, overlap/overflow/browser error yo'q; acceptance yakunlandi.
 > 2026-08-11: Raw npm production audit 0 ta vulnerability qaytardi; GHSA-qwww vaqtinchalik metadata exceptioni olib tashlandi va exception'siz production audit gate green tasdiqlandi.
+> 2026-08-11: GHSA exception removal `1fb6c0c` bilan bevosita `main`ga push qilindi; GitHub CI run `31466592524` barcha security-gate bosqichlari bilan green yakunlandi.
 
 ## Hozir qayerdamiz
 
@@ -30,7 +31,7 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | PR #6 `2b71a49` bilan `main`ga squash-merge qilingan; source commit `85cb241` |
+| Git | `main` va `origin/main` `1fb6c0c`da teng; GHSA exception removal bevosita push qilingan |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -43,7 +44,7 @@
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue tokenlari; landing, public/auth, product core va admin shell redesign lokal yakunlangan |
 | Visual browser acceptance | Landing Why Us 6/6 inverse text bilan green. Authenticated Company Dashboard dark mode'da “Biznes holati” fon `rgb(17,19,24)`; title/foiz kontrasti `16.73:1`, muted text `7.5:1`, success signal `10.66:1`; 12/12 text node panel ichida, overlap/overflow/console error `0` |
 | Preview CI | PR #6 Netlify preview deploy `6a7ab3ed99861d0008a32837` ready; Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready |
-| Remote GitHub Actions | Main closeout run `31462960098`, commit `f9152c6`: `success` (58s); PR #6 run `31461980468`, commit `85cb241`: `success` (48s) |
+| Remote GitHub Actions | GHSA closeout run `31466592524`, commit `1fb6c0c`: `success` (57s); type-check, 108 test, exception'siz production audit, build va security steps green |
 | Production frontend | Eng so'nggi docs-only Netlify deploy `6a7ab804ea3f550008240f11` `ready`, build `6a7ab804ea3f550008240f0f`, 2026-08-11T05:50:30.225Z da published; 32s, plugin success, secret matches 0/87,160. No-fallback app rollout artifacti `6a7ab5474835d660f21249cd` |
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |
 | DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; real Auth tokenli Edge `8/8`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |

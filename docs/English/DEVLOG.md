@@ -4,6 +4,14 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Completed the main push and remote CI closeout for the GHSA exception removal
+
+- Committed and pushed the verified audit gate and synchronized four-language documentation directly to `main` as `1fb6c0c` (`chore: remove obsolete GHSA audit exception [skip netlify]`). Local `main` and `origin/main` align at that commit; the three existing untracked user files were not staged or committed.
+- GitHub Actions CI run `31466592524` completed successfully in 57 seconds: install, type-check, unit tests, exception-free production dependency audit, production build, and bundle/hosting security steps all passed. `[skip netlify]` prevented an unnecessary production frontend deploy for the audit/CI script and documentation change.
+- The active order is unchanged: decide production/preview environment, secret, and data separation; then continue AI Document Assistant PDF/DOCX/Storage.
+
+Files/state: commit `1fb6c0c`, GitHub CI `31466592524`, synchronized four-language STATUS/DEVLOG.
+
 ## 2026-08-11 — Removed the temporary GHSA-qwww metadata exception
 
 - Previously the production audit gate carried an exact-version GHSA-qwww exception through 2026-08-21 because npm/global and upstream React Router advisories disagreed on whether `react-router@7.18.2` was patched. The user and agent independently ran raw `npm audit --omit=dev --json` checks and both received zero total vulnerabilities; the scoped gate also passed without an exception warning, proving that the exception was no longer filtering an advisory.
