@@ -1,15 +1,31 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 
-const status = JSON.parse(
-  execFileSync("supabase", ["status", "-o", "json"], {
-    cwd: new URL("../../..", import.meta.url),
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "ignore"],
-  }),
-);
+const remoteConfigProvided = [
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
+  process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY,
+].some(Boolean);
 
-const apiUrl = status.API_URL;
+const status = remoteConfigProvided
+  ? {
+      API_URL: process.env.SUPABASE_URL,
+      PUBLISHABLE_KEY:
+        process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
+      SECRET_KEY:
+        process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY,
+      SERVICE_ROLE_KEY:
+        process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY,
+    }
+  : JSON.parse(
+      execFileSync("supabase", ["status", "-o", "json"], {
+        cwd: new URL("../../..", import.meta.url),
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }),
+    );
+
+const apiUrl = status.API_URL?.replace(/\/$/, "");
 const publishableKey = status.PUBLISHABLE_KEY ?? status.ANON_KEY;
 const secretKey = status.SECRET_KEY ?? status.SERVICE_ROLE_KEY;
 const serviceRoleToken = status.SERVICE_ROLE_KEY ?? status.SECRET_KEY;
@@ -29,9 +45,12 @@ const createdUsers = [];
 
 const serviceHeaders = {
   apikey: secretKey,
-  Authorization: `Bearer ${serviceRoleToken}`,
   "Content-Type": "application/json",
 };
+
+if (serviceRoleToken.split(".").length === 3) {
+  serviceHeaders.Authorization = `Bearer ${serviceRoleToken}`;
+}
 
 async function readBody(response) {
   const text = await response.text();
@@ -93,6 +112,7 @@ async function edgeRequest(token, tenantId, path, options = {}) {
   return request(`${edgeBase}${path}`, {
     ...options,
     headers: {
+      apikey: publishableKey,
       Authorization: `Bearer ${token}`,
       "X-Tenant-Id": tenantId,
       "Content-Type": "application/json",
@@ -226,17 +246,27 @@ try {
 
   console.log("Edge tenant authorization acceptance: PASS (8/8)");
 } finally {
-  await request(
+  const tenantCleanup = await request(
     `${apiUrl}/rest/v1/tenants?id=in.(${encodeURIComponent(tenantA)},${encodeURIComponent(tenantB)})`,
     { method: "DELETE", headers: serviceHeaders },
-  ).catch(() => {});
+  ).catch((error) => ({ error }));
 
-  await Promise.all(
+  const userCleanup = await Promise.all(
     createdUsers.map((userId) =>
       request(`${apiUrl}/auth/v1/admin/users/${userId}`, {
         method: "DELETE",
         headers: serviceHeaders,
-      }).catch(() => {}),
+      }).catch((error) => ({ error })),
     ),
   );
+
+  const tenantCleanupPassed =
+    "response" in tenantCleanup && tenantCleanup.response.status === 204;
+  const userCleanupPassed = userCleanup.every(
+    (result) => "response" in result && result.response.status === 200,
+  );
+
+  assert.ok(tenantCleanupPassed, "Acceptance tenant fixture tozalanmadi");
+  assert.ok(userCleanupPassed, "Acceptance Auth user fixture tozalanmadi");
+  console.log(`Fixture cleanup: PASS (2 tenants, ${createdUsers.length} users)`);
 }

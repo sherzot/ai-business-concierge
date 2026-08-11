@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 5.7 · 更新 2026-08-11
+> Version 5.8 · 更新 2026-08-11
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -41,7 +41,6 @@
 - [x] Stagingへ32/32 migrationsを適用し、`bright-api` v1をdeploy、health/Auth-settings/security-advisor smoke testsをpass。
 - [x] Staging Auth redirectsをNetlify preview wildcard/local Vite URLsへ制限し、email confirmation、8-digit/1-minute OTP、TOTPをexplicit pin。
 - [x] Netlify productionとdeploy-preview/branch-deploy/dev envを分離し、optional URL envを削除、authoritative CLI read-back 4/4 contextsをpass。Personalではbrowser-public `VITE_*`のみ`All` scopeを使用。
-- [ ] Stagingでephemeral synthetic Auth/tenant fixtureを使ったauthenticated Edge acceptanceを実行しfixtureを削除。
 - [x] External Vercel Git integrationを切断しproject/deployment historyを保持。CLIが作成したOIDC `.env.local`と`.vercel` metadataを直ちに削除。
 
 ## P1 — Phase 2 AI文書作成を完了
