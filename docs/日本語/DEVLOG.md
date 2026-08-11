@@ -11,6 +11,7 @@
 - CLI `v2.102.0`がmasked readの想定に反してstaging legacy `service_role` valueを完全表示したため、値はGit/docsへ保存せず直ちに無効化した。Staging Edgeへmodern-key `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overridesを設定し、legacy anon/service-role API keysをdisable。Productionは未変更で、secret reloadにより`bright-api` v2となった。
 - Modern keysでremote synthetic acceptance 8/8 PASS。Cleanupは2/2 tenantsと5/5 usersでPASSし、final SQL read-backは`acceptance_tenants=0`、`acceptance_users=0`。Auth logsで5 delete `200`、Edge logsで期待statusを確認。
 - `node --check` PASS。Closeout時にlocal Supabase stackがstoppedだったためlocal regressionは開始できなかったが、同scriptのremote pathは完全成功。次: AI文書作成のPDF/DOCX binary generationとprivate Storage contract。
+- Changesを`cc31fe7`として`agent/staging-authenticated-edge-acceptance`へpushしdraft PR #10を作成。GitHub CI run `31485875838` success。`frontend-security-gate`のtype-check、unit tests、deploy-environment、production audit/build、bundle/hosting securityの全stepsがgreen。Netlify deploy-preview `6a7b047d3150bc00088fc18d`はstatus `success`。Frontend behavior変更なしのため新browser smokeは不要。
 
 Files/state: `supabase/tests/integration/edge_tenant_authorization.test.mjs`、staging Supabase `piqsyfwrjtormrlenjix` Edge v2とmodern-key overrides/legacy-key disable、同期済み4-language STATUS/PLAN/DEVLOG。
 

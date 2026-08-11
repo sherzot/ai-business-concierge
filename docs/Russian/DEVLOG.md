@@ -11,6 +11,7 @@
 - Когда CLI `v2.102.0` неожиданно вывел полный staging legacy `service_role` value при предполагавшемся masked read, значение не было записано в Git/docs и было немедленно обезврежено. Для staging Edge установлены modern-key overrides `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY`, legacy anon/service-role API keys отключены. Production не затронут; reload secrets создал `bright-api` v2.
 - Remote synthetic acceptance с modern keys прошёл 8/8. Cleanup прошёл для 2/2 tenants и 5/5 users; final SQL read-back — `acceptance_tenants=0`, `acceptance_users=0`, Auth logs подтвердили пять delete `200`, Edge logs — ожидаемые statuses.
 - `node --check` прошёл. Local regression не запустился, поскольку local Supabase stack был stopped на closeout; remote path того же script прошёл полностью. Следующий шаг: PDF/DOCX binary generation AI Документолога и private Storage contract.
+- Изменения push в `agent/staging-authenticated-edge-acceptance` как `cc31fe7`, открыт draft PR #10. GitHub CI run `31485875838` success: все steps `frontend-security-gate` — type-check, unit tests, deploy-environment, production audit/build и bundle/hosting security — green. Netlify deploy-preview `6a7b047d3150bc00088fc18d` получил status `success`; новый browser smoke не требовался, так как frontend behavior не менялся.
 
 Files/state: `supabase/tests/integration/edge_tenant_authorization.test.mjs`, staging Supabase `piqsyfwrjtormrlenjix` Edge v2 и modern-key overrides/legacy-key disable, синхронизированные STATUS/PLAN/DEVLOG на четырёх языках.
 

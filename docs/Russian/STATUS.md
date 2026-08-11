@@ -22,6 +22,7 @@
 > 2026-08-11: Codex endpoint-drift P2 finding PR #9 исправлен до merge; security gate сравнивает generated CSP ref со всеми bundled Supabase HTTPS/WSS endpoint refs. Deployment/security environment tests 14/14, mismatched fixture ожидаемо blocked.
 > 2026-08-11: PR #9 merged как `c00362a` в main/production; PR/main CI green. Preview/production CSP/bundle isolation, Auth/health и production Realtime smoke tests прошли.
 > 2026-08-11: Staging переведён на modern Edge key overrides, legacy anon/service-role keys отключены. Real synthetic authenticated Edge acceptance прошёл 8/8 с обязательным cleanup двух tenants/пяти Auth users и final fixture count 0/0.
+> 2026-08-11: Acceptance changes push как `cc31fe7` в draft PR #10; GitHub CI run `31485875838` и Netlify deploy-preview `6a7b047d3150bc00088fc18d` green.
 
 ## Текущая фаза
 
@@ -36,7 +37,7 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | `main` и `origin/main` синхронизированы; latest application merge `c00362a`, final docs-only closeout в main, tracked tree clean |
+| Git | Latest application merge `main`/`origin/main` — `c00362a`; staging acceptance commit `cc31fe7` находится в draft PR #10, tracked branch clean |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -53,8 +54,8 @@
 | Delivery platform | Только Netlify. В repository нет Vercel config/dependency; внешний Vercel project сохранён, `gitRepositoryConnected=false` подтверждён |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs отсутствуют; на Personal только browser-public `VITE_*` используют `All` scope |
 | Staging security advisor | Errors `0`; известный `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | PR #9 run `31481174852` и main run `31481586911`, commit `c00362a`: success; 14 env/security tests, type-check, 108 tests, audit, build и security steps green |
-| Netlify preview | PR #9 deploy `6a7af589fd49aa00082aa968` ready; staging-only CSP/bundle, noindex/no-store, 0 secret matches в 87,166 files |
+| Remote GitHub Actions | PR #10 run `31485875838`, commit `cc31fe7`: success; frontend security-gate type-check, unit, deploy-env, audit, build и security steps green |
+| Netlify preview | PR #10 deploy `6a7b047d3150bc00088fc18d` status `success`; frontend behavior не менялся |
 | Production frontend | Deploy `6a7af6d8233dfa000954ac24` ready, build `6a7af6d8233dfa000954ac22`, 32s, plugin success, 0 secret matches в 87,166 files; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup двух tenants/пяти Auth users и final fixture 0/0; Realtime tables SELECT-only и требуют active membership/tenant |
