@@ -4,6 +4,14 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-11 — Main closeout CIとdocs-only production stateを確認
+
+- Codex P1 closeoutとfinal rollout evidenceをdocs-only commit `f9152c6`として`main`へdirect push。Main GitHub CI run `31462960098`は58sでsuccess。Type-check、108/108 unit tests、production dependency audit、build、bundle/hosting security stepsはgreen。
+- Pushによりautomatic docs-only Netlify production deployを作成: deploy `6a7ab804ea3f550008240f11`、build `6a7ab804ea3f550008240f0f`、ready、commit `f9152c6`、published `2026-08-11T05:50:30.225Z`、32s、plugin success。87,160 filesでnormal/enhanced secret match 0。
+- Latest production bundleを再確認: modern publishable key 1、JWT-like legacy key 0、legacy env nameなし、format guardあり。Auth `200`、Realtime `OPEN`、console error/Vite overlay/overflow 0。次のdocumentation commitでは不要なproduction rebuild cycleを避けるためNetlify commit marker `[skip netlify]`を使用。
+
+Files/state: `f9152c6`、GitHub CI `31462960098`、Netlify `6a7ab804ea3f550008240f11`、同期済み4-language STATUS/DEVLOG。
+
 ## 2026-08-11 — PR #6 merge、Codex P1 closeout、final no-fallback deploy完了
 
 - No-fallback codeと同期済み4-language docsをcommit `85cb241`として`agent/remove-legacy-supabase-anon-fallback`へpush。Draft PR #6をreadyに変更し、GitHub `frontend-security-gate` run `31461980468`は48sでsuccess、Netlify preview `6a7ab3ed99861d0008a32837` ready、Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready。PR #6を`2b71a4990e6cdba5c822379821c27816b6854185`として`main`へsquash-merge。

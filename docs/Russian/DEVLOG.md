@@ -4,6 +4,14 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Main closeout CI и docs-only production state подтверждены
+
+- Codex P1 closeout и final rollout evidence pushed напрямую в `main` в docs-only commit `f9152c6`. Main GitHub CI run `31462960098` прошёл за 58s; type-check, 108/108 unit tests, production dependency audit, build и bundle/hosting security steps green.
+- Push создал automatic docs-only Netlify production deploy: deploy `6a7ab804ea3f550008240f11`, build `6a7ab804ea3f550008240f0f`, ready, commit `f9152c6`, published `2026-08-11T05:50:30.225Z`, 32s, plugin success; normal/enhanced secret matches 0 в 87,160 files.
+- Latest production bundle повторно проверен: modern publishable key 1, JWT-like legacy keys 0, legacy env name отсутствует, format guard есть; Auth `200`, Realtime `OPEN`, console errors/Vite overlay/overflow 0. Следующий documentation commit использует Netlify commit marker `[skip netlify]`, чтобы избежать нового ненужного production rebuild cycle.
+
+Files/state: `f9152c6`, GitHub CI `31462960098`, Netlify `6a7ab804ea3f550008240f11`, синхронизированные four-language STATUS/DEVLOG.
+
 ## 2026-08-11 — PR #6 merge, Codex P1 closeout и final no-fallback deploy завершены
 
 - No-fallback code и синхронизированные four-language docs pushed как commit `85cb241` в `agent/remove-legacy-supabase-anon-fallback`. Draft PR #6 переведён ready; GitHub `frontend-security-gate` run `31461980468` прошёл за 48s, Netlify preview `6a7ab3ed99861d0008a32837` ready, Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready. PR #6 squash-merged в `main` как `2b71a4990e6cdba5c822379821c27816b6854185`.

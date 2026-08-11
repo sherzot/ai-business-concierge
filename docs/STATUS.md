@@ -41,8 +41,8 @@
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue tokenlari; landing, public/auth, product core va admin shell redesign lokal yakunlangan |
 | Visual browser acceptance | Landing Why Us 6/6 sabab dark/light mode'da inverse text bilan ko'rindi: title `rgb(244,243,239)`, fon `rgb(17,19,24)`, overflow `0`, console/overlay error yo'q; dashboard inverse markup regressiya testi bilan yopildi |
 | Preview CI | PR #6 Netlify preview deploy `6a7ab3ed99861d0008a32837` ready; Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready |
-| Remote GitHub Actions | PR #6 `frontend-security-gate` run `31461980468`, commit `85cb241`: `success` (48s) |
-| Production frontend | Netlify deploy `6a7ab5474835d660f21249cd` `ready`, build `6a7ab5464835d660f21249cb`, 2026-08-11T05:39:38.297Z da published; deploy time 82s, plugin success, secret matches 0/87,160 scanned files |
+| Remote GitHub Actions | Main closeout run `31462960098`, commit `f9152c6`: `success` (58s); PR #6 run `31461980468`, commit `85cb241`: `success` (48s) |
+| Production frontend | Eng so'nggi docs-only Netlify deploy `6a7ab804ea3f550008240f11` `ready`, build `6a7ab804ea3f550008240f0f`, 2026-08-11T05:50:30.225Z da published; 32s, plugin success, secret matches 0/87,160. No-fallback app rollout artifacti `6a7ab5474835d660f21249cd` |
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |
 | DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; real Auth tokenli Edge `8/8`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |
 | Migration history | Local/remote 32/32 teng; production `db push --dry-run`: up to date |

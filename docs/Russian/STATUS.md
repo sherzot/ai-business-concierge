@@ -39,8 +39,8 @@
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue; landing, public/auth, product core и admin shell redesign завершён локально |
 | Visual browser acceptance | Все 6/6 причин Why Us отображаются inverse text в dark/light modes: title `rgb(244,243,239)`, background `rgb(17,19,24)`, overflow `0`, console/overlay errors нет; dashboard inverse markup закрыт regression test |
 | Preview CI | PR #6 Netlify preview deploy `6a7ab3ed99861d0008a32837` ready; Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready |
-| Remote GitHub Actions | PR #6 `frontend-security-gate` run `31461980468`, commit `85cb241`: success (48s) |
-| Production frontend | Netlify deploy `6a7ab5474835d660f21249cd` ready, build `6a7ab5464835d660f21249cb`, published 2026-08-11T05:39:38.297Z; deploy 82s, plugin success, 0 secret matches в 87,160 files |
+| Remote GitHub Actions | Main closeout run `31462960098`, commit `f9152c6`: success (58s); PR #6 run `31461980468`, commit `85cb241`: success (48s) |
+| Production frontend | Latest docs-only Netlify deploy `6a7ab804ea3f550008240f11` ready, build `6a7ab804ea3f550008240f0f`, published 2026-08-11T05:50:30.225Z; 32s, plugin success, 0 secret matches в 87,160 files. No-fallback app rollout artifact: `6a7ab5474835d660f21249cd` |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; real Auth-token Edge tests 8/8; Realtime tables SELECT-only и требуют active membership/tenant |
 | Migration history | Local/remote 32/32 совпадают; production `db push --dry-run`: up to date |

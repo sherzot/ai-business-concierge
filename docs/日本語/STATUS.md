@@ -39,8 +39,8 @@
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue。Landing、public/auth、product core、admin shell redesignをlocal完了 |
 | Visual browser acceptance | Why Us 6/6 reasonsはdark/light modeでinverse text表示。Title `rgb(244,243,239)`、background `rgb(17,19,24)`、overflow `0`、console/overlay errorなし。Dashboard inverse markupはregression testで保護 |
 | Preview CI | PR #6 Netlify preview deploy `6a7ab3ed99861d0008a32837` ready。Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready |
-| Remote GitHub Actions | PR #6 `frontend-security-gate` run `31461980468`、commit `85cb241`: success (48s) |
-| Production frontend | Netlify deploy `6a7ab5474835d660f21249cd` ready、build `6a7ab5464835d660f21249cb`、2026-08-11T05:39:38.297Zにpublished。Deploy 82s、plugin success、87,160 filesでsecret match 0 |
+| Remote GitHub Actions | Main closeout run `31462960098`、commit `f9152c6`: success (58s)。PR #6 run `31461980468`、commit `85cb241`: success (48s) |
+| Production frontend | Latest docs-only Netlify deploy `6a7ab804ea3f550008240f11` ready、build `6a7ab804ea3f550008240f0f`、2026-08-11T05:50:30.225Zにpublished。32s、plugin success、87,160 filesでsecret match 0。No-fallback app rollout artifact: `6a7ab5474835d660f21249cd` |
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |
 | DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、real Auth-token Edge tests 8/8。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |
 | Migration history | Local/remote 32/32整合、production `db push --dry-run`: up to date |

@@ -4,6 +4,14 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-11 — Main closeout CI va docs-only production holati tasdiqlandi
+
+- Codex P1 findingi va final rollout dalillari `f9152c6` docs-only commitida bevosita `main`ga push qilindi. Main GitHub CI run `31462960098` 58 soniyada `success`; type-check, 108/108 unit test, production dependency audit, build va bundle/hosting security steps green.
+- Push avtomatik docs-only Netlify production deployni yaratdi: deploy `6a7ab804ea3f550008240f11`, build `6a7ab804ea3f550008240f0f`, `ready`, commit `f9152c6`, published `2026-08-11T05:50:30.225Z`, 32s, plugin `success`; 87,160 scanned faylda normal/enhanced secret match `0`.
+- Eng so'nggi production bundle qayta tekshirildi: modern publishable key 1, JWT-like legacy key 0, legacy env nomi yo'q, format guard mavjud; Auth `200`, Realtime `OPEN`, console error/Vite overlay/overflow `0`. Keyingi hujjat commitida keraksiz yangi production rebuild siklini oldini olish uchun Netlify'ning `[skip netlify]` commit markeri ishlatiladi.
+
+Fayllar/state: `f9152c6`, GitHub CI `31462960098`, Netlify `6a7ab804ea3f550008240f11`, 4-tilli STATUS/DEVLOG.
+
 ## 2026-08-11 — PR #6 merge, Codex P1 closeout va final no-fallback deploy yakunlandi
 
 - No-fallback kod va 4-tilli hujjatlar `85cb241` commitida `agent/remove-legacy-supabase-anon-fallback`ga push qilindi. Draft PR #6 ready-for-reviewga o'tkazildi; GitHub `frontend-security-gate` run `31461980468` 48 soniyada `success`, Netlify preview `6a7ab3ed99861d0008a32837` ready, Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready bo'ldi. PR #6 `2b71a4990e6cdba5c822379821c27816b6854185` bilan `main`ga squash-merge qilindi.
