@@ -112,19 +112,30 @@ supabase functions deploy bright-api
 3. リポジトリ: `sherzot/ai-business-concierge`
 4. **Build settings:**
    - Base directory: `frontend`
-   - Build command: `npm run build`
+   - Build command: `npm run validate:deploy-env && npm run build`
    - Publish directory: `dist`
 
 ### 5.3 環境変数
 
-| Key | Value |
-|-----|-------|
-| `VITE_SUPABASE_PROJECT_ID` | `ufhepwdkjqptjvxrmpjn` |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase `sb_publishable_...`、build scopeのみ |
+| Netlify context | `VITE_SUPABASE_PROJECT_ID` | `VITE_SUPABASE_PUBLISHABLE_KEY` | Scope |
+|---|---|---|---|
+| `production` | production ref `ufhepwdkjqptjvxrmpjn` | production `sb_publishable_...` | All (Personal plan) |
+| `deploy-preview` | 別staging project ref | staging `sb_publishable_...` | All (Personal plan) |
+| `branch-deploy` | 別staging project ref | staging `sb_publishable_...` | All (Personal plan) |
+| `dev` | 別staging project ref | staging `sb_publishable_...` | All (Personal plan) |
 
-`VITE_` prefixにはpublishable keyのみ許可。`sb_secret_...`と`service_role`をfrontend environmentへ置かない。
+`VITE_` prefixにはpublishable keyのみ許可。`sb_secret_...`と`service_role`をfrontend environmentへ置かない。Netlify Personalにはgranular build-only scopeがないため、browser-public project ref/publishable keyのみ`All` scopeを使い、context分離でisolationを担保する。
 
-### 5.4 デプロイ
+`VITE_SUPABASE_URL`と`VITE_API_BASE_URL`は任意で、project refから生成される。Netlifyに残す場合、各contextで選択したprojectと一致させる。Production valueを`All` contextへ割り当てない。Build guardがproduction/non-production混在をブロックする。
+
+### 5.4 Staging Supabase要件
+
+- Supabase FreeにはBranchingがないため、previewは別のstaging projectを使用する。
+- 全migrationを順番に適用し、`bright-api`をstagingへ個別deployする。
+- Staging Edge Function secretsはproductionと分離する。実production dataはコピーせず、synthetic fixture/seedのみ使う。
+- Staging Auth redirectとCORS/CSPがNetlify contextsでsmoke testを通るまでpreview handoffは未完了。
+
+### 5.5 デプロイ
 
 - **Deploy**ボタンのクリックまたは`main`ブランチへのプッシュで自動デプロイ
 

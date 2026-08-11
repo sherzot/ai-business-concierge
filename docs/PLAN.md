@@ -1,6 +1,6 @@
 # AI Business Concierge — faol reja
 
-> Version: 5.4
+> Version: 5.5
 > Yangilandi: 2026-08-11
 > Bu faylda faqat faol va navbatdagi ishlar turadi. 2026-07-24 gacha bo'lgan katta tarixiy reja [archive/PLAN_LEGACY_2026-07-24.md](archive/PLAN_LEGACY_2026-07-24.md)ga ko'chirilgan.
 
@@ -27,7 +27,7 @@
 - [x] Qolgan legacy modullar uchun semantic compatibility layer, light/dark, reduced-motion va focus-visible holatlarini saqlash.
 - [x] TypeScript, 101/101 test, production build, security gate va dependency auditni o'tkazish.
 - [x] Browser-enabled muhitda desktop/mobile landing, login, forgot-password va contact route'larni vizual acceptance qilish; overlay, browser error va horizontal overflow topilmadi.
-- [x] Topilmasiz redesignni `83bc7e0` bilan commit/push qilish, PR #2 ochish, GitHub CI/Vercel/Netlify previewni tekshirish va PR #2ni `65abe2f` bilan `main`ga merge qilish.
+- [x] Topilmasiz redesignni `83bc7e0` bilan commit/push qilish, PR #2 ochish, GitHub CI va Netlify previewni tekshirish hamda PR #2ni `65abe2f` bilan `main`ga merge qilish.
 
 ## P1 — Supabase/Netlify security handoffini yakunlash
 
@@ -43,7 +43,15 @@
 - [x] Production bo'lmagan local Auth fixture/tokenlar bilan active/blocked/terminated, super-admin cross-tenant/admin va role-`403` Edge integration testlarini ishlatish: 8/8 pass, production user/data yaratilmagan.
 - [x] Fresh local migration stackni tiklash: core baseline va tarixiy PL/pgSQL replay fixidan keyin 32/32 migratsiya, pgTAP 21/21 pass.
 - [x] Supabase CLI'ni `v2.101.0`dan `v2.112.0`ga yangilash va fresh/full-stack regressiyani qayta ishlatish: 32/32 migration, pgTAP 21/21, Edge 8/8, Storage/Auth/Studio `200`.
-- [ ] Production va preview environment/secret/data ajratish qarorini qabul qilish.
+- [x] Delivery qarorini qabul qilish: faqat Netlify + Supabase; production context production projectga, preview/branch/dev alohida staging projectga ulanadi; Vercel faol arxitekturadan chiqariladi.
+- [x] Context/project aralashuvini bloklaydigan `validate:deploy-env` fail-closed guardi, 10 ta Node testi, dynamic Supabase CSP va CI/security gate wiringini yozish.
+- [x] `sherzot's Org` uchun `$0/oy` costni userga ko'rsatish va ikki bosqichli tasdiqdan keyin `ap-southeast-1`da staging Supabase project yaratish.
+- [x] Stagingga 32/32 migrationni qo'llash, `bright-api` v1ni deploy qilish va health/Auth settings/security-advisor smoke-testlarini o'tkazish.
+- [x] Staging Auth redirect allow-listini Netlify preview wildcard/local Vite URLlariga cheklash; email confirmation, 8-digit/1-minute OTP va TOTPni explicit pin qilish.
+- [x] Netlify `production` envlarini production contextga, staging envlarini `deploy-preview`/`branch-deploy`/`dev` contextlariga o'tkazish; optional URL envlarini olib tashlash va CLI read-backni 4/4 o'tkazish. Personal reja sabab faqat browser-public `VITE_*` qiymatlar `All` scope'da.
+- [ ] Stagingda ephemeral synthetic Auth/tenant fixture bilan authenticated Edge acceptance o'tkazish va fixtureni tozalash.
+- [x] Vercel external Git integrationini uzish; project/deployment historyni saqlash, CLI yaratgan OIDC `.env.local` va `.vercel` metadata’sini darhol o'chirish.
+- [ ] GitHub CI, Netlify production va deploy-previewda Auth/Realtime/health/CSP/noindex smoke-testlarini o'tkazish.
 
 ## P1 — Phase 2 AI Hujjatchini tugallash
 

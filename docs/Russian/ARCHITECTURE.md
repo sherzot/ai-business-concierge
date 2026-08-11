@@ -1,7 +1,7 @@
 # ARCHITECTURE.md — AI Business Concierge
 
 > Архитектура проекта, паттерны проектирования и правила unit-тестирования
-> Версия: 1.1 | Обновлено: 2026-08-07
+> Версия: 1.2 | Обновлено: 2026-08-11
 >
 > Текущий runtime-статус находится в [STATUS.md](STATUS.md). Папки `hr-candidate` — modular scaffold с TODO/stub logic, а не production-ready эталон.
 
@@ -26,6 +26,14 @@
 ```
 
 **Правило:** Каждый слой может импортировать только себя или нижестоящий слой. Нижний слой не знает о верхнем.
+
+### 1.1 Граница delivery и environments
+
+- Активный hosting path — только `GitHub -> Netlify`; Vercel не используется как runtime, preview или deployment platform.
+- Контекст Netlify `production` подключается только к production-проекту Supabase.
+- Контексты `deploy-preview`, `branch-deploy` и `dev` подключаются к отдельному staging-проекту Supabase; production project ref, keys, secrets и реальные данные запрещены.
+- В Supabase Free нет Branching, поэтому staging — отдельный project. Схема синхронизируется только versioned migrations, а тестовые данные создаются synthetic seed.
+- Build guard `validate:deploy-env` fail-closed останавливает сборку при несовпадении context/project. CSP генерируется во время build из выбранного project ref.
 
 ---
 

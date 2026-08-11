@@ -282,7 +282,7 @@ supabase secrets set SENTRY_DSN=https://...@o123.ingest.sentry.io/789 --project-
 2. Repo: `sherzot/ai-business-concierge`
 3. Build settings:
    - Base directory: `frontend`
-   - Build command: `npm run build`
+   - Build command: `npm run validate:deploy-env && npm run build`
    - Publish directory: `frontend/dist`
 4. **Site settings → Environment variables** ga `VITE_*` qiymatlarni qo'shing
 5. **Domain settings → Add custom domain**: `app.your-domain.uz`
@@ -297,6 +297,8 @@ supabase secrets set SENTRY_DSN=https://...@o123.ingest.sentry.io/789 --project-
 ### 9.3 Branch previews
 
 Har PR uchun Netlify avtomatik preview chiqaradi (`https://deploy-preview-<n>--<site>.netlify.app`).
+
+Preview/branch/dev contextlari faqat alohida staging Supabase projectiga ulanadi. Production project-ref yoki publishable keyni `All` contextga bermang; `validate:deploy-env` noto'g'ri context/project juftligini build vaqtida bloklaydi. Stagingga real production ma'lumotini ko'chirmang.
 
 ---
 

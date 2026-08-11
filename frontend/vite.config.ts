@@ -4,19 +4,26 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-function netlifyPreviewHeaders(): Plugin {
+function netlifySecurityHeaders(): Plugin {
   return {
-    name: 'netlify-preview-security-headers',
+    name: 'netlify-security-headers',
     generateBundle() {
       const context = process.env.CONTEXT
-      if (context !== 'deploy-preview' && context !== 'branch-deploy') return
+      const projectId = process.env.VITE_SUPABASE_PROJECT_ID
+      if (!projectId || !/^[a-z0-9]{20}$/.test(projectId)) {
+        throw new Error('VITE_SUPABASE_PROJECT_ID must be a valid Supabase project reference.')
+      }
+
+      const previewHeaders = context === 'deploy-preview' || context === 'branch-deploy'
+        ? '  X-Robots-Tag: noindex, nofollow, noarchive\n  Cache-Control: no-store\n'
+        : ''
 
       this.emitFile({
         type: 'asset',
         fileName: '_headers',
         source: `/*
-  X-Robots-Tag: noindex, nofollow, noarchive
-  Cache-Control: no-store
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://${projectId}.supabase.co wss://${projectId}.supabase.co; font-src 'self' data:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
+${previewHeaders}
 `,
       })
     },
@@ -60,7 +67,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
       },
     }),
-    netlifyPreviewHeaders(),
+    netlifySecurityHeaders(),
   ],
   resolve: {
     alias: {

@@ -4,6 +4,20 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-11 — Netlify/Supabase environment isolation方針とfail-closed guardを準備
+
+- Auditでrepository内にVercel config/dependencyがない一方、external Vercel projectにはGit integrationが残ることを確認。Netlifyの`production`、`deploy-preview`、`branch-deploy`、`dev`のfrontend Supabase valuesは全て同じproduction projectを参照し、PR previewがproduction Auth/API/Realtime/data boundaryへ接続可能だった。Supabase organizationはFreeでBranchingなし。Productionはhealthyで別staging projectはなかった。Credentialをdocs/logsへ記録していない。
+- Delivery boundaryを確定: active hosting pathはGitHub -> Netlifyのみで、Vercelはactive runtime/preview/deployment platformではない。Netlify `production`はapproved production Supabase refのみ許可し、`deploy-preview`/`branch-deploy`/`dev`は別non-production refを使用する。Supabase FreeのBranching代替として別staging project、versioned migrations、synthetic-only test dataを使う。
+- `validate-deploy-environment.mjs`はNetlify context、20文字project ref、modern publishable-key format、optional Supabase URL、`bright-api` endpoint不一致をvalues非表示でfail-closed検査する。Node regression testsを10件追加。Netlifyはbuild前にguardを実行。Viteは選択project refからCSPを生成し、preview `noindex/no-store`を維持。CIとsecurity gateにもcontractを追加。
+- Verification: deployment guard `10/10` PASS、Vitest `23/23` files・`108/108` tests PASS、TypeScript PASS、synthetic 20文字non-production refでproduction build `3700` modules PASS、security gateは`10` build/Netlify filesを検査しPASS。最初のrunでNode test/Vitest glob collisionとCI fixtureの文字数不足を検出し、修正後に全gate green。Remote GitHub CI/Netlify deployは未実行。
+- Supabase cost `$0/month`をuserへ提示し、別の2段階confirmation後に`AI Business Concierge Staging` (`piqsyfwrjtormrlenjix`)を`ap-southeast-1`で作成。`ACTIVE_HEALTHY`、32/32 tracked migrations、`bright-api` v1 ACTIVE、real health `200`。Security advisor error `0`、known `vector` warning `1`、server-only RLS/no-policy info `11`。Auth settings `200`、email autoconfirm false。
+- Netlify connectorはdelete/upsert successを返したがinventoryは`[]`。Authenticated Netlify CLIでenv不在を確認。Granular builds-only scopeはPersonalで利用不可のため、browser-public project ref/publishable keyのみ`All` scopeへstrict contextsで設定。Authoritative read-back 4/4: production -> production、deploy-preview/branch-deploy/dev -> staging。Optional URL envなし。Raw keyはlogしていない。
+- Staging Auth redirectsをproduction Netlify URL、Netlify preview wildcard、local Vite URLsへ制限。最初の`config push`でCLI local defaultsがemail confirmation/TOTPを無効化しOTPを6-digit/1-secondへ弱化したことを検出。Explicit pinでemail confirmation ON、TOTP ON、8-digit/1-minute OTPを2回目pushで即時復元。Productionは未変更。
+- Vercel CLI OAuth後、existing projectをlinkしexplicit confirmationでGit integrationを切断。Read-backは`gitRepositoryConnected=false`。Project/deployment historyは保持。CLIが作成したOIDC `.env.local`と`.vercel` metadataをvalue未読のまま即時削除し、local `.netlify`/`.vercel` pathを`.gitignore`へ追加。
+- Remaining work: stagingでephemeral synthetic Auth/tenant fixtureを使うauthenticated Edge acceptanceとcleanup。Branch/PR経由のGitHub CIとNetlify production/preview smoke tests。Vercel project/history削除は別destructive confirmation後のみ。
+
+Files: `.gitignore`, `.github/workflows/ci.yml`, `netlify.toml`, `supabase/config.toml`, `frontend/package.json`, `frontend/vite.config.ts`, `frontend/scripts/validate-deploy-environment.mjs`, `frontend/scripts/validate-deploy-environment.node.mjs`, `frontend/scripts/security-check.mjs`, 4-language `ARCHITECTURE/CONNECTIONS/DEPLOY_SETUP/STATUS/PLAN/DEVLOG`.
+
 ## 2026-08-11 — GHSA exception removalのmain pushとremote CI closeout完了
 
 - Verified audit gateと同期済み4-language docsを`1fb6c0c` (`chore: remove obsolete GHSA audit exception [skip netlify]`)として`main`へdirect commit/push。Local `main`と`origin/main`は同commitで一致し、既存の3 untracked user filesはstage/commitしていない。

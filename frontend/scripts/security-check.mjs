@@ -22,6 +22,7 @@ function assert(condition, message) {
 
 const netlifyConfig = await readFile(join(repoDir, "netlify.toml"), "utf8");
 const indexHtml = await readFile(join(distDir, "index.html"), "utf8");
+const generatedHeaders = await readFile(join(distDir, "_headers"), "utf8");
 const docDetailSource = await readFile(
   join(frontendDir, "src/features/docs/components/DocDetail.tsx"),
   "utf8",
@@ -46,18 +47,43 @@ assert(
   "Netlify smart secret scanning yoqilmagan.",
 );
 assert(
-  netlifyConfig.includes("script-src 'self';"),
+  netlifyConfig.includes(
+    'command = "npm run validate:deploy-env && npm run build"',
+  ),
+  "Netlify build deployment environment guard'ini ishlatmayapti.",
+);
+assert(
+  !netlifyConfig.includes("Content-Security-Policy"),
+  "Static Netlify CSP dynamic Supabase CSP bilan to'qnashmasligi kerak.",
+);
+assert(
+  generatedHeaders.includes("script-src 'self';"),
   "CSP script-src faqat same-origin bo'lishi kerak.",
 );
 assert(
-  !netlifyConfig.includes("script-src 'self' 'unsafe-inline'"),
+  !generatedHeaders.includes("script-src 'self' 'unsafe-inline'"),
   "CSP inline scriptlarga ruxsat bermasligi kerak.",
 );
 assert(
-  netlifyConfig.includes("object-src 'none'") &&
-    netlifyConfig.includes("frame-ancestors 'none'"),
+  generatedHeaders.includes("object-src 'none'") &&
+    generatedHeaders.includes("frame-ancestors 'none'"),
   "CSP object/frame himoyasi to'liq emas.",
 );
+assert(
+  generatedHeaders.includes(
+    `connect-src 'self' https://${process.env.VITE_SUPABASE_PROJECT_ID}.supabase.co ` +
+      `wss://${process.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`,
+  ),
+  "CSP tanlangan Supabase project bilan mos emas.",
+);
+
+if (["deploy-preview", "branch-deploy"].includes(process.env.CONTEXT)) {
+  assert(
+    generatedHeaders.includes("X-Robots-Tag: noindex, nofollow, noarchive") &&
+      generatedHeaders.includes("Cache-Control: no-store"),
+    "Netlify preview noindex/no-store bilan himoyalanmagan.",
+  );
+}
 assert(
   netlifyConfig.includes("Cache-Control = \"public, max-age=31536000, immutable\""),
   "Hashlangan assetlar uchun immutable cache sozlanmagan.",

@@ -16,6 +16,7 @@
 > 2026-08-11: The user opened an authenticated Leader production session; the Company Dashboard Business Status panel was fully checked in dark mode through computed contrast and visual screenshot review. Text is visible with no overlap, overflow, or browser errors; acceptance is complete.
 > 2026-08-11: The raw npm production audit returned zero vulnerabilities; the temporary GHSA-qwww metadata exception was removed and the exception-free production audit gate passed.
 > 2026-08-11: The GHSA exception removal was pushed directly to `main` as `1fb6c0c`; GitHub CI run `31466592524` completed green across every security-gate step.
+> 2026-08-11: Netlify + Supabase was fixed as the only active delivery platform and the Vercel Git integration was disconnected. The `$0/month` staging Supabase project was created after two-step user confirmation; 32/32 migrations, `bright-api` v1, Auth hardening, and Netlify context isolation are green 4/4.
 
 ## Current phase
 
@@ -30,18 +31,23 @@
 
 | Check | Status |
 |---|---|
-| Git | `main` and `origin/main` aligned at `1fb6c0c`; GHSA exception removal pushed directly |
+| Git | `main` and `origin/main` aligned at `a6f6e49`; Netlify/Supabase isolation changes are local and uncommitted |
 | Runtime | Node.js `22.18.0`; `.nvmrc` and package engine pin `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; verified with a fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
 | Health | `200` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 32/32 migrations, `bright-api` v1 ACTIVE, health `200` |
+| Staging Auth | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false |
 | Type-check | Passed |
 | Unit tests | 23/23 files, 108/108 tests |
-| Production build/security check | Passed |
+| Deployment environment guard | 10/10 Node tests; production accepts only the approved project ref and deploy-preview/branch-deploy/dev reject it |
+| Production build/security check | Build passed with a synthetic non-production ref; CSP was generated from that ref; security checked 10 build/Netlify files |
 | Production dependency audit | Raw audit: 0 total vulnerabilities; scoped gate: 0 high/critical with no exceptions |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue system; landing, public/auth, product core, and admin shell redesign completed locally |
 | Visual browser acceptance | Landing Why Us 6/6 inverse text is green. Authenticated Company Dashboard dark mode: Business Status background `rgb(17,19,24)`; title/percentage contrast `16.73:1`, muted text `7.5:1`, success signal `10.66:1`; 12/12 text nodes inside the panel, overlap/overflow/console errors `0` |
-| Preview CI | PR #6 Netlify preview deploy `6a7ab3ed99861d0008a32837` ready; Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready |
+| Delivery platform | Netlify only. The repository has no Vercel config/dependency; the external Vercel project remains, with `gitRepositoryConnected=false` verified |
+| Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs are absent; on Personal only browser-public `VITE_*` values use `All` scope |
+| Staging security advisor | Errors `0`; known `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
 | Remote GitHub Actions | GHSA closeout run `31466592524`, commit `1fb6c0c`: success (57s); type-check, 108 tests, exception-free production audit, build, and security steps green |
 | Production frontend | Latest docs-only Netlify deploy `6a7ab804ea3f550008240f11` ready, build `6a7ab804ea3f550008240f0f`, published at 2026-08-11T05:50:30.225Z; 32s, plugin success, 0 secret matches across 87,160 files. No-fallback app rollout artifact: `6a7ab5474835d660f21249cd` |
 | Frontend Supabase key contract | Code and production accept only the modern publishable key; bundle has 1 modern key, 0 JWT-like keys, no legacy env name, and the format guard; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env deleted |
@@ -65,7 +71,8 @@
 
 ## Immediate order
 
-1. Decide production/preview environment, secret, and data separation.
-2. Continue Document Assistant PDF/DOCX/Storage work.
+1. Run authenticated Edge acceptance with an ephemeral synthetic Auth/tenant fixture in staging, then clean it up.
+2. Finish GitHub CI and Netlify production/preview smoke tests through a branch/PR.
+3. Continue Document Assistant PDF/DOCX/Storage work.
 
 Detailed tasks: [PLAN.md](PLAN.md). Canonical source: [Uzbek STATUS](../STATUS.md).

@@ -223,7 +223,7 @@ supabase secrets set SENTRY_DSN=https://...@o123.ingest.sentry.io/789 --project-
 2. Repo: `sherzot/ai-business-concierge`
 3. Build settings:
    - Base directory: `frontend`
-   - Build command: `npm run build`
+   - Build command: `npm run validate:deploy-env && npm run build`
    - Publish directory: `frontend/dist`
 4. Add `VITE_*` values to **Site settings → Environment variables**
 
@@ -237,6 +237,8 @@ In `frontend/public/_redirects`:
 ### 9.3 Branch Previews
 
 Netlify automatically creates a preview for each PR.
+
+Preview/branch/dev contexts connect only to a separate staging Supabase project. Never assign the production project ref or publishable key to `All` contexts; `validate:deploy-env` blocks an invalid context/project pair during the build. Never copy real production data into staging.
 
 ---
 

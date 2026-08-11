@@ -1,6 +1,6 @@
 # AI Business Concierge — active plan
 
-> Version 5.4 · Updated 2026-08-11
+> Version 5.5 · Updated 2026-08-11
 > Only active and next work belongs here. The previous master plan is archived at [../archive/English/PLAN_LEGACY_2026-07-24.md](../archive/English/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — safe session start
@@ -19,7 +19,7 @@
 - [x] Align remaining legacy modules through semantic compatibility while preserving light/dark, reduced motion, and focus-visible behavior.
 - [x] Pass TypeScript, 101/101 tests, production build, security gate, and dependency audit.
 - [x] Run browser acceptance for desktop/mobile landing, login, forgot-password, and contact routes; no overlay, browser errors, or horizontal overflow found.
-- [x] Commit/push the finding-free redesign as `83bc7e0`, open PR #2, verify GitHub CI/Vercel/Netlify preview, and merge PR #2 into `main` as `65abe2f`.
+- [x] Commit/push the finding-free redesign as `83bc7e0`, open PR #2, verify GitHub CI and the Netlify preview, and merge PR #2 into `main` as `65abe2f`.
 
 ## P1 — finish the Supabase/Netlify security handoff
 
@@ -35,7 +35,15 @@
 - [x] Run active/blocked/terminated, super-admin cross-tenant/admin, and role-`403` Edge integration tests with local non-production Auth fixtures/tokens: 8/8 passed, with no production users/data.
 - [x] Repair and run a fresh local migration stack: after the core baseline and historical PL/pgSQL replay fix, 32/32 migrations and pgTAP 21/21 passed.
 - [x] Upgrade Supabase CLI from `v2.101.0` to `v2.112.0` and rerun fresh/full-stack regression: 32/32 migrations, pgTAP 21/21, Edge 8/8, Storage/Auth/Studio `200`.
-- [ ] Decide production/preview environment and secret separation.
+- [x] Decide delivery architecture: Netlify + Supabase only; production uses production Supabase, while preview/branch/dev use a separate staging project; remove Vercel from the active architecture.
+- [x] Add the fail-closed `validate:deploy-env` guard, 10 Node tests, dynamic Supabase CSP, and CI/security-gate wiring.
+- [x] Show the `$0/month` staging cost for `sherzot's Org` and create the project in `ap-southeast-1` after two-step user confirmation.
+- [x] Apply 32/32 migrations to staging, deploy `bright-api` v1, and pass health/Auth-settings/security-advisor smoke tests.
+- [x] Restrict staging Auth redirects to the Netlify preview wildcard/local Vite URLs; explicitly pin email confirmation, 8-digit/1-minute OTP, and TOTP.
+- [x] Map Netlify production env to production and staging env to deploy-preview/branch-deploy/dev, remove optional URL envs, and pass authoritative CLI read-back for 4/4 contexts. On Personal, only browser-public `VITE_*` values use `All` scope.
+- [ ] Run authenticated Edge acceptance with an ephemeral synthetic Auth/tenant fixture in staging and clean it up.
+- [x] Disconnect the external Vercel Git integration while preserving project/deployment history; immediately remove the CLI-created OIDC `.env.local` and `.vercel` metadata.
+- [ ] Run GitHub CI plus Netlify production/deploy-preview Auth, Realtime, health, CSP, and noindex smoke tests.
 
 ## P1 — complete Phase 2 AI Document Assistant
 

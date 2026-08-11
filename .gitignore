@@ -9,3 +9,7 @@ dist
 .turbo
 coverage
 supabase/.temp
+
+# Local hosting CLI metadata
+.netlify
+.vercel

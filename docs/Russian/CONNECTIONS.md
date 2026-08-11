@@ -211,7 +211,7 @@ supabase secrets set SENTRY_DSN=https://...@o123.ingest.sentry.io/789 --project-
 1. https://app.netlify.com → New site from Git
 2. Build settings:
    - Base directory: `frontend`
-   - Build command: `npm run build`
+   - Build command: `npm run validate:deploy-env && npm run build`
    - Publish directory: `frontend/dist`
 
 ### 9.2 Redirect (SPA fallback)
@@ -220,6 +220,10 @@ supabase secrets set SENTRY_DSN=https://...@o123.ingest.sentry.io/789 --project-
 ```
 /*    /index.html   200
 ```
+
+### 9.3 Branch previews
+
+Netlify автоматически создаёт preview для каждого PR. Контексты preview/branch/dev подключаются только к отдельному staging-проекту Supabase. Не назначайте production project ref или publishable key контексту `All`; `validate:deploy-env` блокирует неправильную пару context/project во время build. Реальные production data в staging не копируются.
 
 ---
 
