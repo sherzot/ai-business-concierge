@@ -51,6 +51,7 @@ export type GeneratedBinary = {
 export type StoredDocumentBinary = Omit<GeneratedBinary, "bytes"> & {
   storageBucket: typeof GENERATED_DOCUMENTS_BUCKET;
   storagePath: string;
+  storageVersion: string;
   fileSize: number;
 };
 
@@ -78,9 +79,10 @@ export function documentStoragePath(args: {
   tenantId: string;
   userId: string;
   documentId: string;
+  storageVersion: string;
   format: DocumentFormat;
 }) {
-  return `${args.tenantId}/${args.userId}/documents/${args.documentId}/document.${args.format}`;
+  return `${args.tenantId}/${args.userId}/documents/${args.documentId}/document-${args.storageVersion}.${args.format}`;
 }
 
 export function safeDownloadName(title: string, format: DocumentFormat) {
@@ -419,17 +421,17 @@ export async function generateAndStoreDocumentBinary(
     tenantId: string;
     userId: string;
     documentId: string;
-    upsert?: boolean;
   },
 ): Promise<StoredDocumentBinary> {
   const generated = await generateDocumentBinary(args);
-  const storagePath = documentStoragePath(args);
+  const storageVersion = crypto.randomUUID();
+  const storagePath = documentStoragePath({ ...args, storageVersion });
   const { error } = await args.supabase.storage
     .from(GENERATED_DOCUMENTS_BUCKET)
     .upload(storagePath, generated.bytes, {
       contentType: generated.mimeType,
       cacheControl: "0",
-      upsert: Boolean(args.upsert),
+      upsert: false,
     });
 
   if (error) {
@@ -442,6 +444,7 @@ export async function generateAndStoreDocumentBinary(
   return {
     storageBucket: GENERATED_DOCUMENTS_BUCKET,
     storagePath,
+    storageVersion,
     mimeType: generated.mimeType,
     fileSize: generated.bytes.length,
     sha256: generated.sha256,

@@ -1,6 +1,7 @@
 import {
   documentMimeType,
   documentStoragePath,
+  generateAndStoreDocumentBinary,
   generateDocumentBinary,
   safeDownloadName,
   sha256Hex,
@@ -22,12 +23,13 @@ Deno.test("private document path tenant/user/resource contractini saqlaydi", () 
     tenantId: "tenant-a",
     userId: "11111111-1111-4111-8111-111111111111",
     documentId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    storageVersion: "22222222-2222-4222-8222-222222222222",
     format: "pdf",
   });
 
   assert(
     path ===
-      "tenant-a/11111111-1111-4111-8111-111111111111/documents/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/document.pdf",
+      "tenant-a/11111111-1111-4111-8111-111111111111/documents/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/document-22222222-2222-4222-8222-222222222222.pdf",
     `unexpected path: ${path}`,
   );
 });
@@ -91,5 +93,55 @@ Deno.test({
       "PDF checksum noto'g'ri",
     );
     await writePreview("ai-hujjatchi-four-languages.pdf", generated.bytes);
+  },
+});
+
+Deno.test({
+  name: "bir xil format re-export faol objectni overwrite qilmaydi",
+  ignore: !fontPath,
+  fn: async () => {
+    const uploads: Array<{ path: string; upsert: boolean }> = [];
+    const supabase = {
+      storage: {
+        from: () => ({
+          upload: (
+            path: string,
+            _bytes: Uint8Array,
+            options: { upsert: boolean },
+          ) => {
+            uploads.push({ path, upsert: options.upsert });
+            return Promise.resolve({ error: null });
+          },
+        }),
+      },
+    };
+    const input = {
+      tenantId: "tenant-a",
+      userId: "11111111-1111-4111-8111-111111111111",
+      documentId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      title: "Shartnoma",
+      content: "O'zbekcha\nРусский\nEnglish\n日本語",
+      locale: "ja" as const,
+      format: "pdf" as const,
+      supabase,
+      documentFontBytes: await Deno.readFile(fontPath!),
+    };
+
+    const first = await generateAndStoreDocumentBinary(input);
+    const second = await generateAndStoreDocumentBinary(input);
+
+    assert(
+      first.storagePath !== second.storagePath,
+      "object path versionlanmadi",
+    );
+    assert(
+      first.storageVersion !== second.storageVersion,
+      "storage version takrorlandi",
+    );
+    assert(uploads.length === 2, "ikkita upload kutilgan");
+    assert(
+      uploads.every((upload) => !upload.upsert),
+      "upload overwrite qilmasligi kerak",
+    );
   },
 });

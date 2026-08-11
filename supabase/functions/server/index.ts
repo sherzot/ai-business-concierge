@@ -3889,6 +3889,7 @@ const registerRoutes = (prefix: string) => {
         format,
         storage_bucket: storedBinary.storageBucket,
         storage_path: storedBinary.storagePath,
+        storage_version: storedBinary.storageVersion,
         mime_type: storedBinary.mimeType,
         file_size: storedBinary.fileSize,
         sha256: storedBinary.sha256,
@@ -4169,7 +4170,6 @@ const registerRoutes = (prefix: string) => {
         content: document.content ?? "",
         locale,
         format,
-        upsert: true,
       });
     } catch (error) {
       console.error("Document export generation error", error);
@@ -4195,6 +4195,7 @@ const registerRoutes = (prefix: string) => {
       format,
       storage_bucket: storedBinary.storageBucket,
       storage_path: storedBinary.storagePath,
+      storage_version: storedBinary.storageVersion,
       mime_type: storedBinary.mimeType,
       file_size: storedBinary.fileSize,
       sha256: storedBinary.sha256,
@@ -4418,16 +4419,6 @@ const registerRoutes = (prefix: string) => {
     const storagePaths = (generatedFiles ?? [])
       .map((file) => file.storage_path)
       .filter((path): path is string => Boolean(path));
-    if (storagePaths.length) {
-      const { error: storageError } = await supabase.storage
-        .from(GENERATED_DOCUMENTS_BUCKET)
-        .remove(storagePaths);
-      if (storageError) {
-        console.error("Docs delete Storage error", storageError);
-        return failure(c, 503, "STORAGE_ERROR", "Hujjat faylini o'chirib bo'lmadi.");
-      }
-    }
-
     const { data, error } = await supabase
       .from("documents")
       .delete()
@@ -4441,6 +4432,20 @@ const registerRoutes = (prefix: string) => {
         console.error("Docs delete error", error);
       }
       return failure(c, 404, "NOT_FOUND", "Document topilmadi.");
+    }
+
+    // The document row owns the lifecycle. Delete it first so a database
+    // failure cannot leave visible metadata pointing at a missing binary.
+    if (storagePaths.length) {
+      const { error: storageError } = await supabase.storage
+        .from(GENERATED_DOCUMENTS_BUCKET)
+        .remove(storagePaths);
+      if (storageError) {
+        // The document is already gone and direct bucket access is denied.
+        // Keep the API idempotent; the remaining object is an inaccessible
+        // cleanup orphan rather than a broken user-visible document.
+        console.error("Docs delete Storage cleanup error", storageError);
+      }
     }
 
     await writeAuditLog(ctx as TenantContext, {

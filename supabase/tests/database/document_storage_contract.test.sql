@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(12);
+select plan(13);
 
 select is(
   (select public from storage.buckets where id = 'generated-documents'),
@@ -55,6 +55,17 @@ select ok(
       and data_type = 'text'
   ),
   'doc_generated has sha256 metadata'
+);
+
+select ok(
+  exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'doc_generated'
+      and column_name = 'storage_version'
+      and data_type = 'uuid'
+  ),
+  'doc_generated has immutable storage version metadata'
 );
 
 select ok(

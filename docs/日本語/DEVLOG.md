@@ -4,6 +4,15 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-11 — PR #11 Codex transactional Storage findingsを修正
+
+- PR #10の`adab3fe`を再確認しgreenのため`55d1468`として`main`へsquash-merge。PR #11を`main`へretargetし、squash-history conflictは同PRの2 commitsだけをreplayして解消。Head `50a46c2`でCI run `31500547178`は53秒でPASS、Netlify preview `6a7b2e774d8b4a00084583b0` ready。`/`と`/dashboard/docs`は`200`、staging-only CSPと`noindex`を確認。
+- Codex review `4907243544`は`50a46c2`で2件のP2を検出。Same-format re-exportがDB metadata commit前にactive objectをoverwriteし、deleteがDB rowより先にbinaryを削除していた。Exportは`upsert:false`でimmutable UUID-versioned path `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>`を作成し、metadata成功後だけ旧objectをcleanupする。Deleteはtenant-scoped document rowを先に削除し、その後binary cleanupを行う。
+- Follow-up migration `20260811142919_version_document_storage_objects.sql`で`storage_version`とexact versioned-path constraintを追加し、legacy unversioned rowsのread compatibilityを維持。Stagingは34/34 migrations、`bright-api` v6 ACTIVE、health `200`。Schema/constraint/private bucketsはgreen、synthetic fixture residue 0。Advisorsは既存linter debtのみで新規document Storage findingなし。
+- Verification: Deno binary/service `5/5`、focused service `deno check`、integration `node --check`、`git diff --check` PASS。Full `bright-api` checkは既存の22 logging/Hono/risk/usage typing errorsのみ。Remote staging Auth acceptanceはfixture作成前に既知Cloudflare IP-level `403`でblocked、final residue 0のため新authenticated remote pathはBLOCKED。Remaining: PR #11へfix push、CI/Netlify/Codex再実行、merge後にproduction Supabase/Netlify rolloutと可能な最大範囲のsmoke-test。
+
+Files/state: PR #10 merge `55d1468`、PR #11、`supabase/functions/server/{index.ts,services/document-binary.ts}`、`supabase/functions/server/services/document-binary.test.ts`、`supabase/migrations/20260811142919_version_document_storage_objects.sql`、`supabase/tests/{database/document_storage_contract.test.sql,integration/document_binary_storage.test.mjs}`、同期済み4-language STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/DEVLOG。
+
 ## 2026-08-11 — AI文書作成の実PDF/DOCXとprivate Storageをstagingで完了
 
 - 以前は15 templates、4言語、dynamic form、editable draftsがあったが、「PDF」はbrowser print、downloadは`.txt`で、private Storage、binary metadata、signed URL、tenant/user path contractがなかった。作業はdraft PR #10上の`agent/ai-document-binary-storage` stacked branch。既存3 untracked user filesは保持しstageしていない。

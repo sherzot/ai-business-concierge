@@ -34,7 +34,7 @@
 | R-018 | AI cost tracking | Partial | Log wiring mavjud; usage API, tenant dashboard va plan enforcement |
 | R-019 | Vector Search (RAG) | Partial | Embedding/match fundamenti bor; explicit docs tool, citation va cache |
 | R-020 | Admin Dashboard | Partial | Billing/MRR/churn va advanced AI agent monitoring |
-| R-021 | AI Hujjatchi binary output | Staging verified / production pending | Real PDF/DOCX, embedded Noto Sans JP, private Storage, canonical tenant/user path, restrictive RLS va 60 soniyali signed URL stagingda green; production rollout qolgan |
+| R-021 | AI Hujjatchi binary output | Staging verified / production pending | Real PDF/DOCX, embedded Noto Sans JP, private Storage, immutable UUID-versioned tenant/user path, metadata-commitdan keyingi replacement cleanup, DB-first delete, restrictive RLS va 60 soniyali signed URL stagingda green; production rollout qolgan |
 | R-003 | Billing/To'lovlar | Planned | Click/Payme, subscription lifecycle va idempotency |
 | R-004 | Audit log ko'rinishi | Done | Retention va filterlarni keyin kengaytirish |
 | R-005 | Export/Import | Planned | Reports/Tasks CSV/Excel va bulk import |

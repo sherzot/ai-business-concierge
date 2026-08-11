@@ -38,7 +38,7 @@
 ### 1.2 Private binary boundary AI Документолога
 
 - PDF/DOCX генерируются только внутри `bright-api`; browser не создаёт binary и не выполняет direct Supabase Storage CRUD.
-- Binary хранятся в private bucket `generated-documents` по canonical path `<tenant>/<user>/documents/<document-id>/document.<pdf|docx>`. Restrictive Storage policy блокирует direct access ролей `anon`/`authenticated` к этому bucket и private `document-assets`.
+- Binary хранятся в private bucket `generated-documents` по immutable path `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>`. Каждый re-export создаёт новую UUID version и удаляет прежний object только после metadata commit; legacy unversioned paths остаются читаемыми для rollout compatibility. Restrictive Storage policy блокирует direct access ролей `anon`/`authenticated` к этому bucket и private `document-assets`.
 - `bright-api` проверяет active tenant membership до использования service role. Download выдаётся через 60-second signed URL; export регенерирует current editable content, delete удаляет private object до DB row.
 - Pinned Noto Sans JP OTF проверяется SHA-256, покрывает 4 языка, полностью embedded в PDF, как obfuscated `.odttf` в DOCX и cached в private `document-assets`.
 

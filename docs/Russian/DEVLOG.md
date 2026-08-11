@@ -4,6 +4,15 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Исправлены transactional Storage findings Codex в PR #11
+
+- PR #10 повторно подтверждён green на `adab3fe` и squash-merged в `main` как `55d1468`. PR #11 retargeted на `main`; конфликт squash-history устранён replay только двух его commits. Для head `50a46c2` CI run `31500547178` прошёл за 53 секунды, Netlify preview `6a7b2e774d8b4a00084583b0` ready; `/` и `/dashboard/docs` дали `200`, staging-only CSP и `noindex` подтверждены.
+- Codex review `4907243544` для `50a46c2` нашёл два P2: same-format re-export перезаписывал active object до DB metadata commit, а delete удалял binary до строки БД. Export теперь создаёт immutable UUID-versioned path `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>` с `upsert:false` и удаляет прежний object только после успешного metadata write. Delete сначала удаляет tenant-scoped document row, затем выполняет binary cleanup.
+- Follow-up migration `20260811142919_version_document_storage_objects.sql` добавляет `storage_version` и exact versioned-path constraint, сохраняя чтение legacy unversioned rows. Staging: 34/34 migrations, `bright-api` v6 ACTIVE, health `200`; schema/constraint/private buckets подтверждены, synthetic fixture residue 0. Advisors показали только ранее известный linter debt без новых document Storage findings.
+- Verification: Deno binary/service `5/5`, focused service `deno check`, integration `node --check` и `git diff --check` PASS. Full `bright-api` check всё ещё содержит те же 22 pre-existing logging/Hono/risk/usage typing errors. Remote staging Auth acceptance заблокирован до создания fixture известным Cloudflare IP-level `403`; final residue 0, поэтому новый authenticated remote path остаётся BLOCKED. Далее: push fix в PR #11, повторные CI/Netlify/Codex, merge, затем production Supabase/Netlify rollout и максимально доступный smoke-test.
+
+Files/state: PR #10 merge `55d1468`, PR #11, `supabase/functions/server/{index.ts,services/document-binary.ts}`, `supabase/functions/server/services/document-binary.test.ts`, `supabase/migrations/20260811142919_version_document_storage_objects.sql`, `supabase/tests/{database/document_storage_contract.test.sql,integration/document_binary_storage.test.mjs}`, синхронизированные 4-language STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/DEVLOG.
+
 ## 2026-08-11 — Real PDF/DOCX AI Документолога и private Storage завершены в staging
 
 - Ранее были 15 templates, 4 языка, dynamic form и editable drafts, но “PDF” открывал browser print, download создавал `.txt`; отсутствовали private Storage, binary metadata, signed URL и tenant/user path contract. Работа находится в `agent/ai-document-binary-storage`, stacked на draft PR #10. Три существующих untracked user files сохранены и не staged.

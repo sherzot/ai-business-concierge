@@ -4,6 +4,15 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — PR #11 Codex transactional Storage findings fixed
+
+- PR #10 was re-verified green at `adab3fe` and squash-merged to `main` as `55d1468`. PR #11 was retargeted to `main`; the squash-history conflict was removed by replaying only its two commits. On head `50a46c2`, CI run `31500547178` passed in 53 seconds and Netlify preview `6a7b2e774d8b4a00084583b0` was ready. `/` and `/dashboard/docs` returned `200` with staging-only CSP and `noindex`.
+- Codex review `4907243544` on `50a46c2` found two P2 partial-failure bugs: same-format re-export overwrote the active object before the DB metadata commit, and delete removed the binary before the database row. Exports now create immutable UUID-versioned paths `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>` with `upsert:false`, then remove the old object only after metadata succeeds. Delete now removes the tenant-scoped document row first and performs binary cleanup afterward.
+- Follow-up migration `20260811142919_version_document_storage_objects.sql` adds `storage_version` and the exact versioned-path constraint while retaining read compatibility for legacy unversioned rows. Staging is at 34/34 migrations, `bright-api` v6 ACTIVE, health `200`; schema/constraint/private-bucket read-back is green and synthetic fixture residue is zero. Advisors reported only pre-existing linter debt and no new document Storage finding.
+- Verification: Deno binary/service tests `5/5`, focused service `deno check`, integration `node --check`, and `git diff --check` passed. The full `bright-api` check still reports the same 22 pre-existing logging/Hono/risk/usage typing errors. Remote staging Auth acceptance was blocked before fixture creation by the known Cloudflare IP-level `403`; final residue is zero, so the new authenticated remote path remains BLOCKED. Remaining: push the fix to PR #11, rerun CI/Netlify/Codex, merge, then production Supabase/Netlify rollout and the strongest available smoke test.
+
+Files/state: PR #10 merge `55d1468`, PR #11, `supabase/functions/server/{index.ts,services/document-binary.ts}`, `supabase/functions/server/services/document-binary.test.ts`, `supabase/migrations/20260811142919_version_document_storage_objects.sql`, `supabase/tests/{database/document_storage_contract.test.sql,integration/document_binary_storage.test.mjs}`, synchronized four-language STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/DEVLOG.
+
 ## 2026-08-11 — Real AI Document Assistant PDF/DOCX and private Storage completed in staging
 
 - Previously, 15 templates, four languages, the dynamic form, and editable drafts existed, but “PDF” used the browser print dialog and download produced `.txt`; there was no private Storage, binary metadata, signed URL, or tenant/user path contract. Work is on `agent/ai-document-binary-storage`, stacked on draft PR #10. The three existing untracked user files were preserved and not staged.

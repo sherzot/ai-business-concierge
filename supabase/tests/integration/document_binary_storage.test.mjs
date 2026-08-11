@@ -204,9 +204,11 @@ try {
 
   const firstMetadata = await generatedMetadata(documentId);
   assert.equal(firstMetadata.storage_bucket, "generated-documents");
-  assert.equal(
+  assert.match(
     firstMetadata.storage_path,
-    `${tenantA}/${userA.id}/documents/${documentId}/document.docx`,
+    new RegExp(
+      `^${tenantA}/${userA.id}/documents/${documentId}/document-[0-9a-f-]{36}\\.docx$`,
+    ),
   );
 
   const directDownload = await fetch(
@@ -253,15 +255,67 @@ try {
   console.log(`ok - edited PDF regenerated/downloaded: ${pdfBytes.length} bytes`);
 
   const secondMetadata = await generatedMetadata(documentId);
-  assert.equal(
+  assert.match(
     secondMetadata.storage_path,
-    `${tenantA}/${userA.id}/documents/${documentId}/document.pdf`,
+    new RegExp(
+      `^${tenantA}/${userA.id}/documents/${documentId}/document-[0-9a-f-]{36}\\.pdf$`,
+    ),
   );
+
+  const exportedAgain = await edgeRequest(
+    tokenA,
+    tenantA,
+    `/docs/${documentId}/export`,
+    {
+      method: "POST",
+      body: JSON.stringify({ format: "pdf", locale: "uz" }),
+    },
+  );
+  assert.equal(
+    exportedAgain.response.status,
+    200,
+    JSON.stringify(exportedAgain.body),
+  );
+  const thirdMetadata = await generatedMetadata(documentId);
+  assert.notEqual(
+    thirdMetadata.storage_path,
+    secondMetadata.storage_path,
+    "same-format re-export immutable yangi object yaratishi kerak",
+  );
+  assert.equal(thirdMetadata.storage_version, thirdMetadata.storage_path.match(
+    /document-([0-9a-f-]{36})\.pdf$/,
+  )?.[1]);
+
+  const removedPreviousExport = await fetch(exported.body.data.download_url);
+  assert.ok(
+    removedPreviousExport.status === 400 || removedPreviousExport.status === 404,
+    `old re-export object kutilmaganda ${removedPreviousExport.status}`,
+  );
+  console.log("ok - same-format re-export preserved metadata commit ordering");
 
   const deleted = await edgeRequest(tokenA, tenantA, `/docs/${documentId}`, {
     method: "DELETE",
   });
   assert.equal(deleted.response.status, 200, JSON.stringify(deleted.body));
+
+  const removedDeletedExport = await fetch(exportedAgain.body.data.download_url);
+  assert.ok(
+    removedDeletedExport.status === 400 || removedDeletedExport.status === 404,
+    `deleted document object kutilmaganda ${removedDeletedExport.status}`,
+  );
+
+  const [documentRows, generatedRows] = await Promise.all([
+    request(`${apiUrl}/rest/v1/documents?id=eq.${encodeURIComponent(documentId)}&select=id`, {
+      headers: serviceHeaders,
+    }),
+    request(`${apiUrl}/rest/v1/doc_generated?document_id=eq.${encodeURIComponent(documentId)}&select=id`, {
+      headers: serviceHeaders,
+    }),
+  ]);
+  assert.equal(documentRows.response.status, 200, JSON.stringify(documentRows.body));
+  assert.equal(generatedRows.response.status, 200, JSON.stringify(generatedRows.body));
+  assert.deepEqual(documentRows.body, []);
+  assert.deepEqual(generatedRows.body, []);
   documentId = null;
   console.log("ok - document row and private object deleted");
 } finally {
