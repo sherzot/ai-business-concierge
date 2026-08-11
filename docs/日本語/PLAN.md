@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 5.1 · 更新 2026-08-11
+> Version 5.2 · 更新 2026-08-11
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -28,7 +28,6 @@
 - [x] Production publishable keyを確認し、temporary rollout fallbackを保持してconfig、env type/example、CIを移行。
 - [x] Publishable-key commit `35d4b91`をpushし、GitHub CI run `31192041119` greenとNetlify production deploy readyを確認。Bundleがlegacy fallbackを使うことを特定。
 - [x] Netlify production publishable envを設定しredeploy、Auth `200`/Realtime `OPEN` smoke tests成功後、legacy frontend envを削除。
-- [ ] Local no-fallback sourceと4-language docsをcommit/push/PR。Green CI後にfinal Netlify deployとbundle/Auth/Realtimeを再確認。
 - [x] Direct browser SupabaseをAuth/Realtimeだけに限定し`from/rpc/storage/functions` regression gateを追加。
 - [x] Public RLS/grants/views/functionsをinventory: 32/32 tablesでRLS、8/8 viewsが`security_invoker`、6/6 `SECURITY DEFINER` functionsはbrowser EXECUTE不可。
 - [x] Risk scannerのserver-only boundaryを強化しbrowser CRUD grants/policiesを削除、production migration適用。

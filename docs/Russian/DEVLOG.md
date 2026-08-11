@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — PR #6 merge, Codex P1 closeout и final no-fallback deploy завершены
+
+- No-fallback code и синхронизированные four-language docs pushed как commit `85cb241` в `agent/remove-legacy-supabase-anon-fallback`. Draft PR #6 переведён ready; GitHub `frontend-security-gate` run `31461980468` прошёл за 48s, Netlify preview `6a7ab3ed99861d0008a32837` ready, Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready. PR #6 squash-merged в `main` как `2b71a4990e6cdba5c822379821c27816b6854185`.
+- Post-merge Codex review сообщил один unresolved P1 thread: canonical PLAN/STATUS/DEVLOG продолжал указывать commit как next action после его создания и не записывал identifier. Finding корректен; этот append-only entry и синхронизированный STATUS/PLAN closeout записывают commit/PR/CI/deploy IDs и удаляют completed item из active plan. Reply/resolve не выполнялись, так как user не запросил этот GitHub write.
+- Clean tracked snapshot merge commit вручную deployed в production. Первая sandboxed попытка завершилась npm-registry DNS `ENOTFOUND`; та же команда успешно прошла с approved network access. Netlify deploy `6a7ab5474835d660f21249cd`, build `6a7ab5464835d660f21249cb`, ready, published `2026-08-11T05:39:38.297Z`, 82s, plugin success; normal/enhanced secret matches 0 в 87,160 files.
+- Production browser acceptance: 2 scripts, modern publishable key 1, JWT-like legacy keys 0, имя `VITE_SUPABASE_ANON_KEY` отсутствует, format guard `sb_publishable_...` есть; Auth settings HTTP `200`, Realtime WebSocket `OPEN`. Login отобразил содержимое, console errors/Vite overlay/horizontal overflow 0.
+- Next active work: authenticated production dark-mode visual recheck Company Dashboard Business Status panel; re-review GHSA-qwww metadata exception до 2026-08-21; затем AI Документолог PDF/DOCX/Storage.
+
+Files/state: PR #6, `frontend/src/app/config.ts`, `frontend/src/app/__tests__/config.test.ts`, `frontend/src/env.d.ts`, синхронизированные four-language STATUS/PLAN/DEVLOG/FIRST_PUSH, Netlify production env/deploy.
+
 ## 2026-08-11 — Production handoff Supabase publishable key выполнен; source publish подготовлен
 
 - Ранее frontend предпочитал publishable key, но modern env отсутствовал в Netlify и production использовал legacy anon fallback. Наличие active modern `sb_publishable_...` key в production подтверждено без вывода значения; `VITE_SUPABASE_PUBLISHABLE_KEY` настроен как public build env для всех scopes/context Personal plan.

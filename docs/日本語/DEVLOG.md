@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-11 — PR #6 merge、Codex P1 closeout、final no-fallback deploy完了
+
+- No-fallback codeと同期済み4-language docsをcommit `85cb241`として`agent/remove-legacy-supabase-anon-fallback`へpush。Draft PR #6をreadyに変更し、GitHub `frontend-security-gate` run `31461980468`は48sでsuccess、Netlify preview `6a7ab3ed99861d0008a32837` ready、Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready。PR #6を`2b71a4990e6cdba5c822379821c27816b6854185`として`main`へsquash-merge。
+- Post-merge Codex reviewでunresolved P1 thread 1件: canonical PLAN/STATUS/DEVLOGがcommit作成後もcommitをnext actionとして残しidentifierを記録していなかった。Findingは有効。このappend-only entryと同期STATUS/PLAN closeoutでcommit/PR/CI/deploy IDsを記録し、completed itemをactive planから削除。UserがGitHub writeを依頼していないためreply/resolveは未実施。
+- Merge commitのclean tracked snapshotをmanual production deploy。最初のsandboxed attemptはnpm-registry DNS `ENOTFOUND`、approved network accessで同じcommandを再実行し成功。Netlify deploy `6a7ab5474835d660f21249cd`、build `6a7ab5464835d660f21249cb`、ready、published `2026-08-11T05:39:38.297Z`、82s、plugin success。87,160 filesでnormal/enhanced secret match 0。
+- Production browser acceptance: 2 scripts、modern publishable key 1、JWT-like legacy key 0、`VITE_SUPABASE_ANON_KEY` nameなし、`sb_publishable_...` format guardあり。Auth settings HTTP `200`、Realtime WebSocket `OPEN`。Login content表示、console error/Vite overlay/horizontal overflow 0。
+- Next active work: Company Dashboard Business Status panelのauthenticated production dark-mode visual recheck、2026-08-21までのGHSA-qwww metadata exception再確認、その後AI文書作成PDF/DOCX/Storage。
+
+Files/state: PR #6、`frontend/src/app/config.ts`、`frontend/src/app/__tests__/config.test.ts`、`frontend/src/env.d.ts`、同期済み4-language STATUS/PLAN/DEVLOG/FIRST_PUSH、Netlify production env/deploy。
+
 ## 2026-08-11 — Supabase publishable-key production handoff完了、source publish準備済み
 
 - Previously frontendはpublishable keyを優先していたがNetlifyにmodern envがなく、productionはlegacy anon fallbackを使用。Productionのactive modern `sb_publishable_...` keyをvalue非表示で確認し、`VITE_SUPABASE_PUBLISHABLE_KEY`をPersonal planの全scope/context向けpublic build envとして設定。

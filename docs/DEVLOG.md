@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-11 — PR #6 merge, Codex P1 closeout va final no-fallback deploy yakunlandi
+
+- No-fallback kod va 4-tilli hujjatlar `85cb241` commitida `agent/remove-legacy-supabase-anon-fallback`ga push qilindi. Draft PR #6 ready-for-reviewga o'tkazildi; GitHub `frontend-security-gate` run `31461980468` 48 soniyada `success`, Netlify preview `6a7ab3ed99861d0008a32837` ready, Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready bo'ldi. PR #6 `2b71a4990e6cdba5c822379821c27816b6854185` bilan `main`ga squash-merge qilindi.
+- Merge'dan keyin kelgan Codex reviewda bitta unresolved P1 thread topildi: canonical PLAN/STATUS/DEVLOG commit yaratilganidan keyin ham commitni keyingi amal deb ko'rsatgan va IDni yozmagan. Finding to'g'ri; ushbu append-only entry va 4-tilli STATUS/PLAN closeout commit/PR/CI/deploy IDlarini yozib, tugallangan itemni faol rejadan olib tashlaydi. User reply/resolve so'ramagani uchun GitHub threadga yozilmadi va u resolve qilinmadi.
+- Merge commitning clean tracked snapshotidan manual production deploy qilindi. Birinchi sandboxed urinish npm registry DNS `ENOTFOUND` bilan tugadi; ayni command network approval bilan qayta ishlatilib muvaffaqiyatli yakunlandi. Netlify deploy `6a7ab5474835d660f21249cd`, build `6a7ab5464835d660f21249cb`, `ready`, published `2026-08-11T05:39:38.297Z`, 82s, plugin `success`; 87,160 scanned faylda normal/enhanced secret match `0`.
+- Production browser acceptance: 2 script, modern publishable key 1, JWT-like legacy key 0, `VITE_SUPABASE_ANON_KEY` nomi yo'q, `sb_publishable_...` format guard mavjud; Auth settings HTTP `200`, Realtime WebSocket `OPEN`. Login mazmunli render bo'ldi, console error/Vite overlay/horizontal overflow `0`.
+- Keyingi faol ish: Company Dashboard “Biznes holati” panelining authenticated production dark-mode vizual rechecki; 2026-08-21gacha GHSA-qwww metadata exceptionini qayta ko'rish; undan keyin AI Hujjatchi PDF/DOCX/Storage.
+
+Fayllar/state: PR #6, `frontend/src/app/config.ts`, `frontend/src/app/__tests__/config.test.ts`, `frontend/src/env.d.ts`, 4-tilli STATUS/PLAN/DEVLOG/FIRST_PUSH, Netlify production env/deploy.
+
 ## 2026-08-11 — Supabase publishable-key production handoffi bajarildi, source publish tayyorlandi
 
 - Oldingi holatda frontend yangi publishable keyni birinchi tanlasa-da, Netlify'da modern env yo'q va production bundle legacy anon fallbackni ishlatar edi. Supabase production projectida faol modern `sb_publishable_...` key mavjudligi qiymatini loglamasdan tekshirildi; Netlify'da `VITE_SUPABASE_PUBLISHABLE_KEY` public build env sifatida barcha Personal-plan scope/contextlariga o'rnatildi.

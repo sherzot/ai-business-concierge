@@ -12,7 +12,8 @@
 > 2026-08-08: Visual consolidation davom etdi: decorative emoji/purple/pink legacy UI semantic palette’ga yig‘ildi, landing title scale kichraytirildi; targeted checks green.
 > 2026-08-10: PR #3 `79be466` bilan `main`ga merge qilindi; Codex review hotfixi `aee6692` ham `main`ga push qilindi. Frontend Netlify production deploy `6a79d69c9aa5a6bcf326e83c`da ready, `bright-api` v75 ACTIVE; authenticated ikki-rolli smoke-test qolgan.
 > 2026-08-10: User Rahbar Kompaniya profili va Super Admin dashboardining authenticated production oqimlarini muvaffaqiyatli tekshirganini tasdiqladi. Landing Why Us kontrast fixi PR #4, Company Dashboard fixi PR #5 orqali `main`ga merge qilindi va Netlify production deploy `6a79e664a453161423131204`da chiqarildi; authenticated dashboard vizual recheck qolgan.
-> 2026-08-11: Netlify production modern `sb_publishable_...` keyga o'tdi, Auth `200` va Realtime `OPEN` smoke-testlari o'tdi, legacy frontend env o'chirildi. Source fallback removal lokal `agent/remove-legacy-supabase-anon-fallback` branchida tayyor; GitHub CLI auth keyring orqali tasdiqlandi, push/PR/final deploy keyingi amal.
+> 2026-08-11: Netlify production modern `sb_publishable_...` keyga o'tdi, Auth `200` va Realtime `OPEN` smoke-testlari o'tdi, legacy frontend env o'chirildi. Source fallback removal `agent/remove-legacy-supabase-anon-fallback` branchida tayyorlandi va GitHub CLI auth keyring orqali tasdiqlandi.
+> 2026-08-11: No-fallback source PR #6 orqali `2b71a49` bilan `main`ga merge qilindi; GitHub CI green va final Netlify deploy `6a7ab5474835d660f21249cd` ready. Production bundle/Auth/Realtime recheck to'liq o'tdi; publishable-key handoff yakunlandi.
 
 ## Hozir qayerdamiz
 
@@ -27,7 +28,7 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | `main` `208473d`; no-fallback source lokal `agent/remove-legacy-supabase-anon-fallback` branchida, GitHub CLI auth tasdiqlangan |
+| Git | PR #6 `2b71a49` bilan `main`ga squash-merge qilingan; source commit `85cb241` |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -39,10 +40,10 @@
 | Production dependency audit | Scoped gate o'tdi: unexcepted high/critical 0; GHSA-qwww metadata exceptioni 2026-08-21 gacha |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue tokenlari; landing, public/auth, product core va admin shell redesign lokal yakunlangan |
 | Visual browser acceptance | Landing Why Us 6/6 sabab dark/light mode'da inverse text bilan ko'rindi: title `rgb(244,243,239)`, fon `rgb(17,19,24)`, overflow `0`, console/overlay error yo'q; dashboard inverse markup regressiya testi bilan yopildi |
-| Preview CI | PR #5 code preview Netlify deploy `6a79e27ae3c42e00088ffd45` ready; latest docs-only deploy `6a79e3b03648850008d64852` canceled; Vercel deployment `Cg6Bt5HG1JJrGvwzDYaJqokQQU2q` ready |
-| Remote GitHub Actions | PR #5 run `31399751738`, commit `04cd48f`: `success`; oldingi code-only run `31399285836` ham `success` |
-| Production frontend | Netlify deploy `6a7a9c1ec552d009a42c6f97` `ready`, build `6a7a9c1ec552d009a42c6f95`, 2026-08-11T03:51:28.742Z da published; deploy time 33s, plugin success, secret matches 0/87,160 scanned files |
-| Frontend Supabase key contract | Production bundle modern publishable keyni ishlatadi; legacy project JWT 0, Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan. Kod fallbacki lokal branchda olib tashlangan, final deploy pending |
+| Preview CI | PR #6 Netlify preview deploy `6a7ab3ed99861d0008a32837` ready; Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready |
+| Remote GitHub Actions | PR #6 `frontend-security-gate` run `31461980468`, commit `85cb241`: `success` (48s) |
+| Production frontend | Netlify deploy `6a7ab5474835d660f21249cd` `ready`, build `6a7ab5464835d660f21249cb`, 2026-08-11T05:39:38.297Z da published; deploy time 82s, plugin success, secret matches 0/87,160 scanned files |
+| Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |
 | DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; real Auth tokenli Edge `8/8`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |
 | Migration history | Local/remote 32/32 teng; production `db push --dry-run`: up to date |
 | Local Supabase services | Storage `v1.68.1`, Auth `v2.195.0`; barcha enabled containerlar healthy; Storage/Auth/Studio HTTP `200`; `imgproxy` transformations o'chiq bo'lgani uchun stopped |
@@ -75,9 +76,9 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. No-fallback branchni commit/push/PR qilish, CI va final Netlify deployni tekshirish.
-2. Company Dashboard “Biznes holati” panelini productionda authenticated dark-mode bilan vizual qayta tekshirish.
-3. 2026-08-21gacha GHSA-qwww metadata exceptionini qayta ko'rish; keyin AI Hujjatchi PDF/DOCX/Storage ishlariga o'tish.
+1. Company Dashboard “Biznes holati” panelini productionda authenticated dark-mode bilan vizual qayta tekshirish.
+2. 2026-08-21gacha GHSA-qwww metadata exceptionini qayta ko'rish.
+3. AI Hujjatchi PDF/DOCX/Storage ishlariga o'tish.
 
 Batafsil tartib: [PLAN.md](PLAN.md).
 

@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — PR #6 merge, Codex P1 closeout, and final no-fallback deploy completed
+
+- No-fallback code and synchronized four-language docs were pushed as commit `85cb241` on `agent/remove-legacy-supabase-anon-fallback`. Draft PR #6 was marked ready; GitHub `frontend-security-gate` run `31461980468` passed in 48s, Netlify preview `6a7ab3ed99861d0008a32837` was ready, and Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` was ready. PR #6 was squash-merged into `main` as `2b71a4990e6cdba5c822379821c27816b6854185`.
+- A post-merge Codex review reported one unresolved P1 thread: canonical PLAN/STATUS/DEVLOG still listed commit as a next step after the commit existed and omitted its identifier. The finding is valid; this append-only entry and synchronized STATUS/PLAN closeout record commit/PR/CI/deploy IDs and remove the completed item from the active plan. No reply or resolution was written because the user did not request that GitHub write.
+- A clean tracked snapshot of the merge commit was manually deployed to production. The first sandboxed attempt failed with npm-registry DNS `ENOTFOUND`; the same command succeeded with approved network access. Netlify deploy `6a7ab5474835d660f21249cd`, build `6a7ab5464835d660f21249cb`, ready, published `2026-08-11T05:39:38.297Z`, 82s, plugin success; 0 normal/enhanced secret matches across 87,160 files.
+- Production browser acceptance: 2 scripts, 1 modern publishable key, 0 JWT-like legacy keys, no `VITE_SUPABASE_ANON_KEY` name, and the `sb_publishable_...` format guard present; Auth settings HTTP `200`, Realtime WebSocket `OPEN`. Login rendered meaningful content with zero console errors, Vite overlay, or horizontal overflow.
+- Next active work: authenticated production dark-mode visual recheck of the Company Dashboard Business Status panel; re-review the GHSA-qwww metadata exception by 2026-08-21; then AI Document Assistant PDF/DOCX/Storage.
+
+Files/state: PR #6, `frontend/src/app/config.ts`, `frontend/src/app/__tests__/config.test.ts`, `frontend/src/env.d.ts`, synchronized four-language STATUS/PLAN/DEVLOG/FIRST_PUSH, Netlify production env/deploy.
+
 ## 2026-08-11 — Supabase publishable-key production handoff completed; source publish prepared
 
 - Previously the frontend preferred the publishable key but Netlify had no modern env and production used the legacy anon fallback. An active modern `sb_publishable_...` production key was verified without logging its value, then `VITE_SUPABASE_PUBLISHABLE_KEY` was configured as a public build variable across the Personal-plan scopes/context.

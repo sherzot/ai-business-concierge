@@ -11,7 +11,8 @@
 > 2026-08-08: Portfolio-inspired frontend redesign прошёл browser acceptance, commits `83bc7e0`/`509bc2d` отправлены, PR #2 открыт, CI green.
 > 2026-08-10: PR #3 merged в `main` как `79be466`; Codex review hotfix `aee6692` также pushed в `main`. Netlify production deploy `6a79d69c9aa5a6bcf326e83c` ready, `bright-api` v75 ACTIVE; остаются authenticated smoke-tests двух ролей.
 > 2026-08-10: User подтвердил успешные authenticated production checks Leader Company Profile и Super Admin dashboard. Landing Why Us fix из PR #4 и Company Dashboard fix из PR #5 merged в `main` и shipped в Netlify production deploy `6a79e664a453161423131204`; остаётся authenticated dashboard visual recheck.
-> 2026-08-11: Netlify production переведён на modern `sb_publishable_...` key, smoke tests Auth `200` и Realtime `OPEN` прошли, legacy frontend env удалён. Source fallback removal готов в local `agent/remove-legacy-supabase-anon-fallback`; GitHub CLI auth подтверждён через keyring, далее push/PR/final deploy.
+> 2026-08-11: Netlify production переведён на modern `sb_publishable_...` key, smoke tests Auth `200` и Realtime `OPEN` прошли, legacy frontend env удалён. Source fallback removal подготовлен в `agent/remove-legacy-supabase-anon-fallback`, GitHub CLI auth подтверждён через keyring.
+> 2026-08-11: No-fallback source merged в `main` через PR #6 как `2b71a49`; GitHub CI green и final Netlify deploy `6a7ab5474835d660f21249cd` ready. Production bundle/Auth/Realtime rechecks прошли; publishable-key handoff завершён.
 
 ## Текущая фаза
 
@@ -26,7 +27,7 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | `main` на `208473d`; no-fallback source в local `agent/remove-legacy-supabase-anon-fallback`, GitHub CLI auth подтверждён |
+| Git | PR #6 squash-merged в `main` как `2b71a49`; source commit `85cb241` |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -37,10 +38,10 @@
 | Production dependency audit | Scoped gate: 0 unexcepted high/critical; GHSA-qwww metadata exception до 2026-08-21 |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue; landing, public/auth, product core и admin shell redesign завершён локально |
 | Visual browser acceptance | Все 6/6 причин Why Us отображаются inverse text в dark/light modes: title `rgb(244,243,239)`, background `rgb(17,19,24)`, overflow `0`, console/overlay errors нет; dashboard inverse markup закрыт regression test |
-| Preview CI | PR #5 code preview Netlify deploy `6a79e27ae3c42e00088ffd45` ready; latest docs-only deploy `6a79e3b03648850008d64852` canceled; Vercel deployment `Cg6Bt5HG1JJrGvwzDYaJqokQQU2q` ready |
-| Remote GitHub Actions | PR #5 run `31399751738`, commit `04cd48f`: success; previous code-only run `31399285836` также success |
-| Production frontend | Netlify deploy `6a7a9c1ec552d009a42c6f97` ready, build `6a7a9c1ec552d009a42c6f95`, published 2026-08-11T03:51:28.742Z; deploy 33s, plugin success, 0 secret matches в 87,160 files |
-| Frontend Supabase key contract | Production bundle использует modern publishable key; project legacy JWT 0, Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён. Code fallback удалён локально; final deploy pending |
+| Preview CI | PR #6 Netlify preview deploy `6a7ab3ed99861d0008a32837` ready; Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready |
+| Remote GitHub Actions | PR #6 `frontend-security-gate` run `31461980468`, commit `85cb241`: success (48s) |
+| Production frontend | Netlify deploy `6a7ab5474835d660f21249cd` ready, build `6a7ab5464835d660f21249cb`, published 2026-08-11T05:39:38.297Z; deploy 82s, plugin success, 0 secret matches в 87,160 files |
+| Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; real Auth-token Edge tests 8/8; Realtime tables SELECT-only и требуют active membership/tenant |
 | Migration history | Local/remote 32/32 совпадают; production `db push --dry-run`: up to date |
 | Local Supabase services | Storage `v1.68.1`, Auth `v2.195.0`; все enabled containers healthy; Storage/Auth/Studio HTTP `200`; `imgproxy` stopped, так как transformations выключены |
@@ -61,8 +62,8 @@
 
 ## Ближайший порядок
 
-1. Commit/push/PR no-fallback branch, затем проверить CI и final Netlify deploy.
-2. Визуально перепроверить Company Dashboard Business Status panel в authenticated production dark mode.
-3. До 2026-08-21 пересмотреть GHSA-qwww, затем продолжить PDF/DOCX/Storage Документолога.
+1. Визуально перепроверить Company Dashboard Business Status panel в authenticated production dark mode.
+2. До 2026-08-21 пересмотреть GHSA-qwww.
+3. Продолжить PDF/DOCX/Storage Документолога.
 
 Подробности: [PLAN.md](PLAN.md). Основной источник: [узбекский STATUS](../STATUS.md).

@@ -1,6 +1,6 @@
 # AI Business Concierge — активный план
 
-> Версия 5.1 · Обновлено 2026-08-11
+> Версия 5.2 · Обновлено 2026-08-11
 > Здесь только активные и следующие задачи. Старый master plan: [../archive/Russian/PLAN_LEGACY_2026-07-24.md](../archive/Russian/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — безопасное начало сессии
@@ -28,7 +28,6 @@
 - [x] Подтвердить production publishable key; перевести config, env type/example и CI, сохранив temporary rollout fallback.
 - [x] Отправить publishable-key commit `35d4b91`, подтвердить green GitHub CI run `31192041119` и ready Netlify production deploy; определить, что bundle использует legacy fallback.
 - [x] Установить Netlify production publishable env, redeploy, пройти Auth `200`/Realtime `OPEN` smoke tests и удалить legacy frontend env.
-- [ ] Commit/push/PR local no-fallback source и four-language docs, затем проверить green CI, final Netlify deploy и повторно bundle/Auth/Realtime.
 - [x] Ограничить direct browser Supabase только Auth/Realtime и добавить `from/rpc/storage/functions` regression gate.
 - [x] Инвентаризировать public RLS/grants/views/functions: RLS на 32/32 tables, `security_invoker` на 8/8 views, browser EXECUTE закрыт для 6/6 `SECURITY DEFINER` functions.
 - [x] Усилить server-only границу risk scanner: удалить browser CRUD grants/policies и применить production migration.
