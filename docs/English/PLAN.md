@@ -1,6 +1,6 @@
 # AI Business Concierge — active plan
 
-> Version 5.2 · Updated 2026-08-11
+> Version 5.3 · Updated 2026-08-11
 > Only active and next work belongs here. The previous master plan is archived at [../archive/English/PLAN_LEGACY_2026-07-24.md](../archive/English/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — safe session start
@@ -20,7 +20,6 @@
 - [x] Pass TypeScript, 101/101 tests, production build, security gate, and dependency audit.
 - [x] Run browser acceptance for desktop/mobile landing, login, forgot-password, and contact routes; no overlay, browser errors, or horizontal overflow found.
 - [x] Commit/push the finding-free redesign as `83bc7e0`, open PR #2, verify GitHub CI/Vercel/Netlify preview, and merge PR #2 into `main` as `65abe2f`.
-- [ ] Visually recheck the Company Dashboard Business Status panel in authenticated production dark mode.
 
 ## P1 — finish the Supabase/Netlify security handoff
 

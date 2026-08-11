@@ -14,6 +14,7 @@
 > 2026-08-10: User Rahbar Kompaniya profili va Super Admin dashboardining authenticated production oqimlarini muvaffaqiyatli tekshirganini tasdiqladi. Landing Why Us kontrast fixi PR #4, Company Dashboard fixi PR #5 orqali `main`ga merge qilindi va Netlify production deploy `6a79e664a453161423131204`da chiqarildi; authenticated dashboard vizual recheck qolgan.
 > 2026-08-11: Netlify production modern `sb_publishable_...` keyga o'tdi, Auth `200` va Realtime `OPEN` smoke-testlari o'tdi, legacy frontend env o'chirildi. Source fallback removal `agent/remove-legacy-supabase-anon-fallback` branchida tayyorlandi va GitHub CLI auth keyring orqali tasdiqlandi.
 > 2026-08-11: No-fallback source PR #6 orqali `2b71a49` bilan `main`ga merge qilindi; GitHub CI green va final Netlify deploy `6a7ab5474835d660f21249cd` ready. Production bundle/Auth/Realtime recheck to'liq o'tdi; publishable-key handoff yakunlandi.
+> 2026-08-11: User productionda Rahbar sifatida authenticated session ochdi; Company Dashboard “Biznes holati” paneli dark mode'da computed contrast va vizual screenshot bilan to'liq tekshirildi. Matn ko'rinadi, overlap/overflow/browser error yo'q; acceptance yakunlandi.
 
 ## Hozir qayerdamiz
 
@@ -39,7 +40,7 @@
 | Security check | 9 ta build/Netlify fayli muvaffaqiyatli |
 | Production dependency audit | Scoped gate o'tdi: unexcepted high/critical 0; GHSA-qwww metadata exceptioni 2026-08-21 gacha |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue tokenlari; landing, public/auth, product core va admin shell redesign lokal yakunlangan |
-| Visual browser acceptance | Landing Why Us 6/6 sabab dark/light mode'da inverse text bilan ko'rindi: title `rgb(244,243,239)`, fon `rgb(17,19,24)`, overflow `0`, console/overlay error yo'q; dashboard inverse markup regressiya testi bilan yopildi |
+| Visual browser acceptance | Landing Why Us 6/6 inverse text bilan green. Authenticated Company Dashboard dark mode'da “Biznes holati” fon `rgb(17,19,24)`; title/foiz kontrasti `16.73:1`, muted text `7.5:1`, success signal `10.66:1`; 12/12 text node panel ichida, overlap/overflow/console error `0` |
 | Preview CI | PR #6 Netlify preview deploy `6a7ab3ed99861d0008a32837` ready; Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready |
 | Remote GitHub Actions | Main closeout run `31462960098`, commit `f9152c6`: `success` (58s); PR #6 run `31461980468`, commit `85cb241`: `success` (48s) |
 | Production frontend | Eng so'nggi docs-only Netlify deploy `6a7ab804ea3f550008240f11` `ready`, build `6a7ab804ea3f550008240f0f`, 2026-08-11T05:50:30.225Z da published; 32s, plugin success, secret matches 0/87,160. No-fallback app rollout artifacti `6a7ab5474835d660f21249cd` |
@@ -56,7 +57,7 @@
 | Core web modullar | **Done** | Reports, Inbox, Tasks, HR, Docs, Integrations, Settings |
 | Realtime | **Done** | Inbox, Tasks va Notifications subscriptionlari |
 | Task assignment notifications | **Done** | Biriktirish, read va acknowledge oqimi |
-| Admin platforma | **Partial** | Dashboard, companies, contacts, users, audit, KB, risk, health va AI stats mavjud; tenant profile/AI-stats authenticated smoke user tomonidan tasdiqlangan, dashboard dark-contrast productionda va user vizual recheck qolgan |
+| Admin platforma | **Partial** | Dashboard, companies, contacts, users, audit, KB, risk, health va AI stats mavjud; tenant profile/AI-stats authenticated smoke va Company Dashboard dark-contrast vizual acceptance user sessionida tasdiqlangan |
 | Telegram bot | **Partial / operational block** | Bot funksiyalari mavjud; `TELEGRAM_WEBHOOK_SECRET` productionda qayta tekshirilishi kerak |
 | Resend email inbox | **Partial** | Webhook va mapping kodi mavjud; real receiving/delivery smoke-test tasdiqlanmagan |
 | AI Concierge / RAG | **Partial** | Claude router, OpenAI embedding va RAG fundamenti bor; explicit document search/citation va to'liq smoke-test qarzi bor |
@@ -76,8 +77,8 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. Company Dashboard “Biznes holati” panelini productionda authenticated dark-mode bilan vizual qayta tekshirish.
-2. 2026-08-21gacha GHSA-qwww metadata exceptionini qayta ko'rish.
+1. 2026-08-21gacha GHSA-qwww metadata exceptionini qayta ko'rish.
+2. Production va preview environment/secret/data ajratish qarorini qabul qilish.
 3. AI Hujjatchi PDF/DOCX/Storage ishlariga o'tish.
 
 Batafsil tartib: [PLAN.md](PLAN.md).

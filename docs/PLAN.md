@@ -1,6 +1,6 @@
 # AI Business Concierge — faol reja
 
-> Version: 5.2
+> Version: 5.3
 > Yangilandi: 2026-08-11
 > Bu faylda faqat faol va navbatdagi ishlar turadi. 2026-07-24 gacha bo'lgan katta tarixiy reja [archive/PLAN_LEGACY_2026-07-24.md](archive/PLAN_LEGACY_2026-07-24.md)ga ko'chirilgan.
 
@@ -28,7 +28,6 @@
 - [x] TypeScript, 101/101 test, production build, security gate va dependency auditni o'tkazish.
 - [x] Browser-enabled muhitda desktop/mobile landing, login, forgot-password va contact route'larni vizual acceptance qilish; overlay, browser error va horizontal overflow topilmadi.
 - [x] Topilmasiz redesignni `83bc7e0` bilan commit/push qilish, PR #2 ochish, GitHub CI/Vercel/Netlify previewni tekshirish va PR #2ni `65abe2f` bilan `main`ga merge qilish.
-- [ ] Company Dashboard “Biznes holati” panelini productionda authenticated dark-mode bilan vizual qayta tekshirish.
 
 ## P1 — Supabase/Netlify security handoffini yakunlash
 

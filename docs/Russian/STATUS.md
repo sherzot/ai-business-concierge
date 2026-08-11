@@ -13,6 +13,7 @@
 > 2026-08-10: User подтвердил успешные authenticated production checks Leader Company Profile и Super Admin dashboard. Landing Why Us fix из PR #4 и Company Dashboard fix из PR #5 merged в `main` и shipped в Netlify production deploy `6a79e664a453161423131204`; остаётся authenticated dashboard visual recheck.
 > 2026-08-11: Netlify production переведён на modern `sb_publishable_...` key, smoke tests Auth `200` и Realtime `OPEN` прошли, legacy frontend env удалён. Source fallback removal подготовлен в `agent/remove-legacy-supabase-anon-fallback`, GitHub CLI auth подтверждён через keyring.
 > 2026-08-11: No-fallback source merged в `main` через PR #6 как `2b71a49`; GitHub CI green и final Netlify deploy `6a7ab5474835d660f21249cd` ready. Production bundle/Auth/Realtime rechecks прошли; publishable-key handoff завершён.
+> 2026-08-11: User открыл authenticated production session Leader; Company Dashboard Business Status panel полностью проверен в dark mode через computed contrast и visual screenshot. Текст виден, overlap/overflow/browser errors нет; acceptance завершён.
 
 ## Текущая фаза
 
@@ -37,7 +38,7 @@
 | Production build/security check | Успешно |
 | Production dependency audit | Scoped gate: 0 unexcepted high/critical; GHSA-qwww metadata exception до 2026-08-21 |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue; landing, public/auth, product core и admin shell redesign завершён локально |
-| Visual browser acceptance | Все 6/6 причин Why Us отображаются inverse text в dark/light modes: title `rgb(244,243,239)`, background `rgb(17,19,24)`, overflow `0`, console/overlay errors нет; dashboard inverse markup закрыт regression test |
+| Visual browser acceptance | Landing Why Us 6/6 inverse text green. Authenticated Company Dashboard dark mode: Business Status background `rgb(17,19,24)`; title/percentage contrast `16.73:1`, muted text `7.5:1`, success signal `10.66:1`; 12/12 text nodes внутри panel, overlap/overflow/console errors `0` |
 | Preview CI | PR #6 Netlify preview deploy `6a7ab3ed99861d0008a32837` ready; Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready |
 | Remote GitHub Actions | Main closeout run `31462960098`, commit `f9152c6`: success (58s); PR #6 run `31461980468`, commit `85cb241`: success (48s) |
 | Production frontend | Latest docs-only Netlify deploy `6a7ab804ea3f550008240f11` ready, build `6a7ab804ea3f550008240f0f`, published 2026-08-11T05:50:30.225Z; 32s, plugin success, 0 secret matches в 87,160 files. No-fallback app rollout artifact: `6a7ab5474835d660f21249cd` |
@@ -52,7 +53,7 @@
 |---|---|---|
 | Auth, multi-tenant, RBAC и основные web-модули | Done | Основной фундамент работает |
 | Realtime и task notifications | Done | Inbox, Tasks, Notifications, acknowledge |
-| Admin platform | Partial | Основное управление/monitoring есть; user подтвердил tenant-profile/AI-stats authenticated smoke tests, dashboard dark contrast в production, остаётся user visual recheck |
+| Admin platform | Partial | Основное управление/monitoring есть; tenant-profile/AI-stats authenticated smoke tests и Company Dashboard dark-contrast visual acceptance подтверждены в user session |
 | Telegram | Partial / operational block | Проверить `TELEGRAM_WEBHOOK_SECRET` и webhook |
 | Resend inbox | Partial | Код есть; receiving/delivery E2E не подтверждён |
 | AI Concierge/RAG и cost tracking | Partial | Основа есть; citation UX, plan enforcement и smoke-test остаются |
@@ -62,8 +63,8 @@
 
 ## Ближайший порядок
 
-1. Визуально перепроверить Company Dashboard Business Status panel в authenticated production dark mode.
-2. До 2026-08-21 пересмотреть GHSA-qwww.
+1. До 2026-08-21 пересмотреть GHSA-qwww.
+2. Решить разделение production/preview environment, secrets и data.
 3. Продолжить PDF/DOCX/Storage Документолога.
 
 Подробности: [PLAN.md](PLAN.md). Основной источник: [узбекский STATUS](../STATUS.md).

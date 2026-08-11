@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-11 — Company Dashboard authenticated dark-mode visual acceptance yakunlandi
+
+- Oldingi holatda “Biznes holati” inverse markup unit test va landingdagi shared token browser acceptance bilan himoyalangan, ammo agentda production credential bo'lmagani uchun authenticated Company Dashboard vizual recheck ochiq qolgan edi. User ko'rinadigan agent browser oynasida Rahbar akkaunti bilan login qildi; credential qiymatlari agentga berilmadi va loglanmadi.
+- Production `/app` authenticated Rahbar dashboardini ochdi; HTML class va computed `color-scheme` `dark`, theme toggle esa “Yorug' rejim”ni ko'rsatdi. “Biznes holati” section fon rangi `rgb(17,19,24)`, title/foiz matni `rgb(244,243,239)` va `16.73:1`, 6/6 muted matn `65%` inverse foreground va `7.5:1`, yashil success signal `rgb(74,222,128)` va `10.66:1` kontrast bilan render bo'ldi. SVG background track `20%` inverse rangda dekorativ; yashil arc va raqam/status matni holatni mustaqil beradi.
+- 12/12 to'g'ridan-to'g'ri text node section chegarasida, out-of-bounds `0`, overlap `0`; section viewport ichida, sahifa horizontal overflow `0`, browser console error `0`. Targeted viewport screenshot vizual ko'rib chiqildi: barcha title, update, status, bo'lim label va foizlar o'qiladi.
+- Tekshiruvdan keyin test browser sessionidan UI orqali logout qilindi va `/login` redirect tasdiqlandi. Private dashboard ma'lumoti tushgan screenshotlar commit qilinmadi va lokal tempdan o'chirildi. Kod o'zgarmadi; completed dashboard visual item faol PLAN'dan olib tashlandi.
+- Keyingi faol ish: 2026-08-21gacha GHSA-qwww metadata exceptionini qayta ko'rish, production/preview environment ajratish qarori, so'ng AI Hujjatchi PDF/DOCX/Storage.
+
+Fayllar/state: 4-tilli STATUS/PLAN/DEVLOG; production authenticated browser runtime. Application code o'zgarmadi.
+
 ## 2026-08-11 — Main closeout CI va docs-only production holati tasdiqlandi
 
 - Codex P1 findingi va final rollout dalillari `f9152c6` docs-only commitida bevosita `main`ga push qilindi. Main GitHub CI run `31462960098` 58 soniyada `success`; type-check, 108/108 unit test, production dependency audit, build va bundle/hosting security steps green.

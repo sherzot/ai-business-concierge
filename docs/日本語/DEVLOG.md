@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-11 — Company Dashboard authenticated dark-mode visual acceptance完了
+
+- Previously Business Status inverse markupはunit testとlandingのshared-token browser acceptanceで保護していたが、agentにproduction credentialがなくauthenticated Company Dashboard visual recheckはopenだった。Userがvisible agent-browser windowでLeader accountへlogin。Credential valuesはagentへ渡されずlogにも記録していない。
+- Production `/app`でauthenticated Leader dashboardを表示。HTML classとcomputed `color-scheme`は`dark`、theme toggleはLight modeを表示。Business Status section backgroundは`rgb(17,19,24)`、title/percentage textは`rgb(244,243,239)`で`16.73:1`、6 muted itemsすべて65% inverse foregroundで`7.5:1`、green success signalは`rgb(74,222,128)`で`10.66:1`。SVG background trackは20% inverseのdecorative elementで、green arcとnumeric/status textが独立してstateを伝える。
+- 12 direct text nodesすべてsection内: out-of-bounds 0、overlap 0。Sectionはviewport内、page horizontal overflow 0、browser console error 0。Targeted screenshot reviewでtitle、update、status、department labels、percentagesの可読性を確認。
+- Verification後、test browser sessionをUIからlogoutし`/login` redirectを確認。Private dashboard dataを含むscreenshotsはcommitせずlocal tempから削除。Application code変更なし。Completed dashboard visual itemをactive PLANから削除。
+- Next active work: 2026-08-21までにGHSA-qwww metadata exceptionを再確認、production/preview environment separationを決定、その後AI文書作成PDF/DOCX/Storage。
+
+Files/state: 同期済み4-language STATUS/PLAN/DEVLOG、authenticated production browser runtime。Application code unchanged。
+
 ## 2026-08-11 — Main closeout CIとdocs-only production stateを確認
 
 - Codex P1 closeoutとfinal rollout evidenceをdocs-only commit `f9152c6`として`main`へdirect push。Main GitHub CI run `31462960098`は58sでsuccess。Type-check、108/108 unit tests、production dependency audit、build、bundle/hosting security stepsはgreen。

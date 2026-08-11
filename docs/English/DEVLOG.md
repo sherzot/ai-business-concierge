@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Company Dashboard authenticated dark-mode visual acceptance completed
+
+- Previously the Business Status inverse markup was protected by a unit test and shared-token browser acceptance on the landing page, but the authenticated Company Dashboard visual recheck remained open because the agent had no production credential. The user signed into a visible agent-browser window with a Leader account; credential values were never given to or logged by the agent.
+- Production `/app` opened the authenticated Leader dashboard; the HTML class and computed `color-scheme` were `dark`, and the theme toggle offered Light mode. The Business Status section background was `rgb(17,19,24)`; title/percentage text was `rgb(244,243,239)` at `16.73:1`; all 6 muted items used 65% inverse foreground at `7.5:1`; the green success signal was `rgb(74,222,128)` at `10.66:1`. The SVG background track is decorative at 20% inverse; the green arc and numeric/status text independently convey state.
+- All 12 direct text nodes stayed inside the section: out-of-bounds 0, overlaps 0. The section fit the viewport, page horizontal overflow was 0, and browser console errors were 0. Targeted screenshot review confirmed every title, update, status, department label, and percentage is readable.
+- After verification, the test browser session was signed out through the UI and the `/login` redirect was confirmed. Screenshots containing private dashboard data were not committed and were deleted from local temp storage. No application code changed; the completed dashboard visual item was removed from the active PLAN.
+- Next active work: re-review the GHSA-qwww metadata exception by 2026-08-21, decide production/preview environment separation, then AI Document Assistant PDF/DOCX/Storage.
+
+Files/state: synchronized four-language STATUS/PLAN/DEVLOG; authenticated production browser runtime. Application code unchanged.
+
 ## 2026-08-11 — Main closeout CI and docs-only production state verified
 
 - The Codex P1 closeout and final rollout evidence were pushed directly to `main` in docs-only commit `f9152c6`. Main GitHub CI run `31462960098` passed in 58s; type-check, 108/108 unit tests, production dependency audit, build, and bundle/hosting security steps were green.

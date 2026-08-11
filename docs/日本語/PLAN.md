@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 5.2 · 更新 2026-08-11
+> Version 5.3 · 更新 2026-08-11
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -20,7 +20,6 @@
 - [x] TypeScript、101/101 tests、production build、security gate、dependency audit成功。
 - [x] Browser-enabled environmentでdesktop/mobile landing、login、forgot-password、contact routesをbrowser acceptance。Overlay、browser errors、horizontal overflowなし。
 - [x] Findingsなしのredesignを`83bc7e0`でcommit/push、PR #2を作成しGitHub CI/Vercel/Netlify previewを確認、`65abe2f`として`main`へmerge。
-- [ ] Company Dashboard Business Status panelをauthenticated production dark modeでvisual recheck。
 
 ## P1 — Supabase/Netlify security handoff完了
 

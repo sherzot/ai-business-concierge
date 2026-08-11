@@ -13,6 +13,7 @@
 > 2026-08-10: The user confirmed successful authenticated production checks for Leader Company Profile and the Super Admin dashboard. The landing Why Us fix from PR #4 and Company Dashboard fix from PR #5 are merged into `main` and shipped in Netlify production deploy `6a79e664a453161423131204`; an authenticated dashboard visual recheck remains.
 > 2026-08-11: Netlify production moved to the modern `sb_publishable_...` key, Auth `200` and Realtime `OPEN` smoke tests passed, and the legacy frontend env was deleted. Source fallback removal was prepared on `agent/remove-legacy-supabase-anon-fallback`, and GitHub CLI auth was verified through the keyring.
 > 2026-08-11: The no-fallback source was merged to `main` through PR #6 as `2b71a49`; GitHub CI is green and final Netlify deploy `6a7ab5474835d660f21249cd` is ready. Production bundle/Auth/Realtime rechecks passed; the publishable-key handoff is complete.
+> 2026-08-11: The user opened an authenticated Leader production session; the Company Dashboard Business Status panel was fully checked in dark mode through computed contrast and visual screenshot review. Text is visible with no overlap, overflow, or browser errors; acceptance is complete.
 
 ## Current phase
 
@@ -37,7 +38,7 @@
 | Production build/security check | Passed |
 | Production dependency audit | Scoped gate passed: 0 unexcepted high/critical; GHSA-qwww metadata exception expires 2026-08-21 |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue system; landing, public/auth, product core, and admin shell redesign completed locally |
-| Visual browser acceptance | All 6/6 Why Us reasons render with inverse text in dark/light modes: title `rgb(244,243,239)`, background `rgb(17,19,24)`, overflow `0`, no console/overlay errors; dashboard inverse markup is covered by a regression test |
+| Visual browser acceptance | Landing Why Us 6/6 inverse text is green. Authenticated Company Dashboard dark mode: Business Status background `rgb(17,19,24)`; title/percentage contrast `16.73:1`, muted text `7.5:1`, success signal `10.66:1`; 12/12 text nodes inside the panel, overlap/overflow/console errors `0` |
 | Preview CI | PR #6 Netlify preview deploy `6a7ab3ed99861d0008a32837` ready; Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready |
 | Remote GitHub Actions | Main closeout run `31462960098`, commit `f9152c6`: success (58s); PR #6 run `31461980468`, commit `85cb241`: success (48s) |
 | Production frontend | Latest docs-only Netlify deploy `6a7ab804ea3f550008240f11` ready, build `6a7ab804ea3f550008240f0f`, published at 2026-08-11T05:50:30.225Z; 32s, plugin success, 0 secret matches across 87,160 files. No-fallback app rollout artifact: `6a7ab5474835d660f21249cd` |
@@ -52,7 +53,7 @@
 |---|---|---|
 | Auth, multi-tenant, RBAC and core web modules | Done | Main product foundation works |
 | Realtime and task notifications | Done | Inbox, Tasks, Notifications, acknowledgement |
-| Admin platform | Partial | Core management/monitoring exists; the user confirmed tenant-profile/AI-stats authenticated smoke tests, dashboard dark contrast is in production, and a user visual recheck remains |
+| Admin platform | Partial | Core management/monitoring exists; tenant-profile/AI-stats authenticated smoke tests and Company Dashboard dark-contrast visual acceptance were confirmed in a user session |
 | Telegram | Partial / operational block | Verify `TELEGRAM_WEBHOOK_SECRET` and webhook |
 | Resend inbox | Partial | Code exists; receiving/delivery E2E is unverified |
 | AI Concierge/RAG and cost tracking | Partial | Foundation exists; citation UX, plan enforcement and full smoke tests remain |
@@ -62,8 +63,8 @@
 
 ## Immediate order
 
-1. Visually recheck the Company Dashboard Business Status panel in authenticated production dark mode.
-2. Re-review GHSA-qwww by 2026-08-21.
+1. Re-review GHSA-qwww by 2026-08-21.
+2. Decide production/preview environment, secret, and data separation.
 3. Continue Document Assistant PDF/DOCX/Storage work.
 
 Detailed tasks: [PLAN.md](PLAN.md). Canonical source: [Uzbek STATUS](../STATUS.md).

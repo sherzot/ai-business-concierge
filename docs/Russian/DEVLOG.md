@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Authenticated dark-mode visual acceptance Company Dashboard завершён
+
+- Ранее inverse markup Business Status был защищён unit test и browser acceptance shared token на landing, но authenticated Company Dashboard visual recheck оставался open из-за отсутствия production credential у агента. User вошёл как Leader в visible agent-browser window; credential values не передавались агенту и не логировались.
+- Production `/app` открыл authenticated Leader dashboard; HTML class и computed `color-scheme` были `dark`, theme toggle предлагал Light mode. Business Status section background `rgb(17,19,24)`; title/percentage text `rgb(244,243,239)` с `16.73:1`; все 6 muted items — 65% inverse foreground с `7.5:1`; green success signal `rgb(74,222,128)` с `10.66:1`. SVG background track декоративный при 20% inverse; green arc и numeric/status text независимо передают состояние.
+- Все 12 direct text nodes остались внутри section: out-of-bounds 0, overlaps 0. Section помещается в viewport, horizontal overflow страницы 0, browser console errors 0. Targeted screenshot review подтвердил читаемость title, update, status, department labels и percentages.
+- После проверки test browser session завершён через UI, redirect на `/login` подтверждён. Screenshots с private dashboard data не committed и удалены из local temp storage. Application code не менялся; completed dashboard visual item удалён из active PLAN.
+- Next active work: re-review metadata exception GHSA-qwww до 2026-08-21, решить production/preview environment separation, затем AI Документолог PDF/DOCX/Storage.
+
+Files/state: синхронизированные four-language STATUS/PLAN/DEVLOG; authenticated production browser runtime. Application code unchanged.
+
 ## 2026-08-11 — Main closeout CI и docs-only production state подтверждены
 
 - Codex P1 closeout и final rollout evidence pushed напрямую в `main` в docs-only commit `f9152c6`. Main GitHub CI run `31462960098` прошёл за 58s; type-check, 108/108 unit tests, production dependency audit, build и bundle/hosting security steps green.
