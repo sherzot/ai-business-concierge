@@ -35,7 +35,7 @@
 
 | Check | 状態 |
 |---|---|
-| Git | `main`と`origin/main`は`c00362a`で一致。PR #9 merged、tracked tree clean |
+| Git | `main`と`origin/main`は同期済み。Latest application merge `c00362a`、final docs-only closeoutはmain、tracked tree clean |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Supabase Edge Function `bright-api` v75、`ACTIVE`、`verify_jwt=false` |

@@ -9,6 +9,7 @@
 - Follow-up `57d4dbc` push в PR #9; GitHub CI run `31481174852` success. Netlify preview `6a7af589fd49aa00082aa968` ready, build `6a7af589fd49aa00082aa966`, 29s, plugin success, secret matches 0/87,166; staging-only CSP/bundle и noindex/no-store green.
 - PR #9 squash-merged как `c00362a`. Main CI run `31481586911` success. Netlify production deploy `6a7af6d8233dfa000954ac24` ready, build `6a7af6d8233dfa000954ac22`, 32s, plugin success, secret matches 0/87,166. Production page/Auth/health HTTP `200`, Realtime `OPEN`; CSP/bundle содержат только production ref без staging ref.
 - Codex re-review нового commit ожидался более пяти минут, но GitHub сохранил только старый review `c7a489a`; reply/resolve не выполнялся, поскольку user отдельно этого не просил. Finding закрыт 14/14 regressions, mismatch-FAIL/aligned-PASS integration acceptance, remote CI и preview. Три существующих untracked user files не committed.
+- Final 4-language closeout push в main как `a648f73`; `[skip netlify]` не создал новый deployment, latest production остаётся `6a7af6d8233dfa000954ac24`. Git handoff в STATUS теперь фиксирует sync main/origin и latest application merge без self-referential HEAD hash.
 - Remaining active work: staging ephemeral synthetic Auth/tenant authenticated Edge acceptance и cleanup, затем AI Документолог PDF/DOCX/Storage.
 
 Files/state: PR #9, merge `c00362a`, CI `31481174852`/`31481586911`, Netlify preview `6a7af589fd49aa00082aa968`, production `6a7af6d8233dfa000954ac24`, синхронизированные 4-language STATUS/PLAN/DEVLOG.

@@ -36,7 +36,7 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | `main` va `origin/main` `c00362a`da teng; PR #9 merged, tracked tree clean |
+| Git | `main` va `origin/main` sinxron; latest application merge `c00362a`, final docs-only closeout main'da, tracked tree clean |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |

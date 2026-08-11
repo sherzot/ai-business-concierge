@@ -35,7 +35,7 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | `main` и `origin/main` совпадают на `c00362a`; PR #9 merged, tracked tree clean |
+| Git | `main` и `origin/main` синхронизированы; latest application merge `c00362a`, final docs-only closeout в main, tracked tree clean |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |

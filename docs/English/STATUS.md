@@ -35,7 +35,7 @@
 
 | Check | Status |
 |---|---|
-| Git | `main` and `origin/main` align at `c00362a`; PR #9 is merged and the tracked tree is clean |
+| Git | `main` and `origin/main` are synchronized; latest application merge `c00362a`, final docs-only closeout on main, tracked tree clean |
 | Runtime | Node.js `22.18.0`; `.nvmrc` and package engine pin `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; verified with a fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
