@@ -18,6 +18,7 @@
 > 2026-08-11: GHSA exception removal напрямую push в `main` как `1fb6c0c`; GitHub CI run `31466592524` завершён green со всеми security-gate steps.
 > 2026-08-11: Единственной активной delivery platform выбраны Netlify + Supabase; Vercel Git integration отключён. Staging Supabase project `$0/month` создан после двухэтапного user confirmation; 32/32 migrations, `bright-api` v1, Auth hardening и Netlify context isolation green 4/4.
 > 2026-08-11: Isolation PR #7 merged в `main` как `3fb1592`; PR и main CI green. Netlify preview/production smoke tests подтвердили соответствующие staging/production refs, Auth/health `200`, Realtime `OPEN`, CSP и preview noindex/no-store; Vercel не создал новый deployment.
+> 2026-08-11: P2 finding Vite `.env`/build-time CSP из Codex review PR #7 исправлен локально; с 2 regressions environment tests 12/12, TypeScript, 108 tests, `.env`-only build и security gate green. Остаётся hotfix branch/PR closeout.
 
 ## Текущая фаза
 
@@ -32,7 +33,7 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | `main` и `origin/main` совпадают на `3fb1592`; Netlify/Supabase isolation merged через PR #7 |
+| Git | `agent/fix-vite-env-file-security-headers` создан от main closeout `b4c7c3c`; Codex P2 hotfix локальный и uncommitted |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -41,7 +42,7 @@
 | Staging Auth | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false |
 | Type-check | Успешно |
 | Unit tests | 23/23 файлов, 108/108 тестов |
-| Deployment environment guard | 10/10 Node tests; production принимает только approved project ref, а deploy-preview/branch-deploy/dev его отклоняют |
+| Deployment environment guard | 12/12 Node tests: 10 isolation-contract checks + 2 Vite `.env` fallback/runtime-precedence regressions |
 | Production build/security check | Build прошёл с synthetic non-production ref; CSP создан из этого ref; проверено 10 build/Netlify файлов |
 | Production dependency audit | Raw audit: всего 0 vulnerabilities; scoped gate без исключений: high/critical 0 |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue; landing, public/auth, product core и admin shell redesign завершён локально |

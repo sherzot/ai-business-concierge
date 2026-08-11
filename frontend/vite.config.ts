@@ -3,13 +3,12 @@ import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { resolveViteEnvironmentValue } from './scripts/vite-environment.mjs'
 
-function netlifySecurityHeaders(): Plugin {
+function netlifySecurityHeaders(projectId: string | undefined, context: string | undefined): Plugin {
   return {
     name: 'netlify-security-headers',
     generateBundle() {
-      const context = process.env.CONTEXT
-      const projectId = process.env.VITE_SUPABASE_PROJECT_ID
       if (!projectId || !/^[a-z0-9]{20}$/.test(projectId)) {
         throw new Error('VITE_SUPABASE_PROJECT_ID must be a valid Supabase project reference.')
       }
@@ -30,52 +29,59 @@ ${previewHeaders}
   }
 }
 
-export default defineConfig({
-  plugins: [
-    // The React and Tailwind plugins are both required for Make, even if
-    // Tailwind is not being actively used – do not remove them
-    react(),
-    tailwindcss(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico'],
-      manifest: {
-        name: 'AI Business Concierge',
-        short_name: 'AI Concierge',
-        description: 'Kundalik biznes boshqaruv AI yordamchisi',
-        theme_color: '#4f46e5',
-        background_color: '#0f172a',
-        display: 'standalone',
-        orientation: 'portrait',
-        scope: '/',
-        start_url: '/app',
-        icons: [
-          {
-            src: '/icon.svg',
-            sizes: 'any',
-            type: 'image/svg+xml',
-            purpose: 'any maskable',
-          },
-          {
-            src: '/favicon.ico',
-            sizes: '64x64 32x32 24x24 16x16',
-            type: 'image/x-icon',
-          },
-        ],
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
-      },
-    }),
-    netlifySecurityHeaders(),
-  ],
-  resolve: {
-    alias: {
-      // Alias @ to the src directory
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
+export default defineConfig(({ mode }) => {
+  const projectId = resolveViteEnvironmentValue('VITE_SUPABASE_PROJECT_ID', {
+    mode,
+    envDir: __dirname,
+  })
 
-  // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
-  assetsInclude: ['**/*.svg', '**/*.csv'],
+  return {
+    plugins: [
+      // The React and Tailwind plugins are both required for Make, even if
+      // Tailwind is not being actively used – do not remove them
+      react(),
+      tailwindcss(),
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.ico'],
+        manifest: {
+          name: 'AI Business Concierge',
+          short_name: 'AI Concierge',
+          description: 'Kundalik biznes boshqaruv AI yordamchisi',
+          theme_color: '#4f46e5',
+          background_color: '#0f172a',
+          display: 'standalone',
+          orientation: 'portrait',
+          scope: '/',
+          start_url: '/app',
+          icons: [
+            {
+              src: '/icon.svg',
+              sizes: 'any',
+              type: 'image/svg+xml',
+              purpose: 'any maskable',
+            },
+            {
+              src: '/favicon.ico',
+              sizes: '64x64 32x32 24x24 16x16',
+              type: 'image/x-icon',
+            },
+          ],
+        },
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
+        },
+      }),
+      netlifySecurityHeaders(projectId, process.env.CONTEXT),
+    ],
+    resolve: {
+      alias: {
+        // Alias @ to the src directory
+        '@': path.resolve(__dirname, './src'),
+      },
+    },
+
+    // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
+    assetsInclude: ['**/*.svg', '**/*.csv'],
+  }
 })

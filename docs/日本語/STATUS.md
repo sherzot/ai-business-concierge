@@ -18,6 +18,7 @@
 > 2026-08-11: GHSA exception removalを`1fb6c0c`として`main`へdirect push。GitHub CI run `31466592524`は全security-gate steps greenで完了。
 > 2026-08-11: 有効なdelivery platformをNetlify + Supabaseのみに確定し、Vercel Git integrationを切断。`$0/month` staging Supabase projectを2段階user確認後に作成し、32/32 migrations、`bright-api` v1、Auth hardening、Netlify context isolationは4/4 green。
 > 2026-08-11: Isolation PR #7を`3fb1592`として`main`へmerge。PR/main CIはgreen。Netlify preview/production smoke testsで適切なstaging/production ref、Auth/health `200`、Realtime `OPEN`、CSP、preview noindex/no-storeを確認し、Vercel新規deploymentは0。
+> 2026-08-11: PR #7 Codex reviewのVite `.env`/build-time CSP P2 findingをlocal修正。2 regressions追加でenvironment tests 12/12、TypeScript、108 tests、`.env`-only build、security gateがgreen。Hotfix branch/PR closeoutが残る。
 
 ## 現在のPhase
 
@@ -32,7 +33,7 @@
 
 | Check | 状態 |
 |---|---|
-| Git | `main`と`origin/main`は`3fb1592`で一致。Netlify/Supabase isolationはPR #7でmerge済み |
+| Git | `agent/fix-vite-env-file-security-headers`をmain closeout `b4c7c3c`から作成。Codex P2 hotfixはlocal・未commit |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Supabase Edge Function `bright-api` v75、`ACTIVE`、`verify_jwt=false` |
@@ -41,7 +42,7 @@
 | Staging Auth | Netlify preview wildcard + local Vite redirect allow-list。Email confirmation ON、8-digit/1-minute OTP、TOTP ON。Auth settings HTTP `200`、autoconfirm false |
 | Type-check | 成功 |
 | Unit tests | 23/23 files、108/108 tests |
-| Deployment environment guard | Node tests 10/10。productionはapproved project refのみ許可し、deploy-preview/branch-deploy/devはそれを拒否 |
+| Deployment environment guard | Node tests 12/12: isolation contract 10件 + Vite `.env` fallback/runtime-precedence regressions 2件 |
 | Production build/security check | Synthetic non-production refでbuild pass。CSPはそのrefから生成、10 build/Netlify filesを検査 |
 | Production dependency audit | Raw audit: vulnerability合計0件; scoped gateはexceptionなしでhigh/critical 0件 |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue。Landing、public/auth、product core、admin shell redesignをlocal完了 |

@@ -41,6 +41,7 @@
 - [x] Stagingへ32/32 migrationsを適用し、`bright-api` v1をdeploy、health/Auth-settings/security-advisor smoke testsをpass。
 - [x] Staging Auth redirectsをNetlify preview wildcard/local Vite URLsへ制限し、email confirmation、8-digit/1-minute OTP、TOTPをexplicit pin。
 - [x] Netlify productionとdeploy-preview/branch-deploy/dev envを分離し、optional URL envを削除、authoritative CLI read-back 4/4 contextsをpass。Personalではbrowser-public `VITE_*`のみ`All` scopeを使用。
+- [ ] PR #7 Codex P2 `.env`/CSP hotfixをcommit/pushし、PR CI・Netlify preview、merge・production smoke-testでclose。
 - [ ] Stagingでephemeral synthetic Auth/tenant fixtureを使ったauthenticated Edge acceptanceを実行しfixtureを削除。
 - [x] External Vercel Git integrationを切断しproject/deployment historyを保持。CLIが作成したOIDC `.env.local`と`.vercel` metadataを直ちに削除。
 

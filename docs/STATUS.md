@@ -19,6 +19,7 @@
 > 2026-08-11: GHSA exception removal `1fb6c0c` bilan bevosita `main`ga push qilindi; GitHub CI run `31466592524` barcha security-gate bosqichlari bilan green yakunlandi.
 > 2026-08-11: Faol delivery platformasi Netlify + Supabase deb qat'iy belgilandi; Vercel Git integrationi uzildi. `$0/oy` staging Supabase project ikki bosqichli user tasdig'i bilan yaratildi; 32/32 migration, `bright-api` v1, Auth hardening va Netlify context isolation 4/4 green.
 > 2026-08-11: Isolation PR #7 `3fb1592` bilan `main`ga merge qilindi; PR/main CI green. Netlify preview va production smoke-testlarida tegishli staging/production ref, Auth/health `200`, Realtime `OPEN`, CSP hamda preview noindex/no-store tasdiqlandi; Vercel yangi deploy yaratmagan.
+> 2026-08-11: PR #7 Codex reviewidagi Vite `.env`/build-time CSP P2 topilmasi lokal tuzatildi; 2 ta regression bilan environment tests 12/12, TypeScript, 108 test, `.env`-only build va security gate green. Hotfix branch/PR closeouti qolgan.
 
 ## Hozir qayerdamiz
 
@@ -33,7 +34,7 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | `main` va `origin/main` `3fb1592`da teng; Netlify/Supabase isolation PR #7 orqali merge qilingan |
+| Git | `agent/fix-vite-env-file-security-headers` `b4c7c3c` main closeout commitidan ochilgan; Codex P2 hotfix lokal, commit qilinmagan |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -42,7 +43,7 @@
 | Staging Auth | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false |
 | Type-check | Muvaffaqiyatli |
 | Unit test | 23/23 fayl, 108/108 test |
-| Deploy environment guard | Node test 10/10; production faqat approved project-ref, deploy-preview/branch-deploy/dev esa production refni rad etadi |
+| Deploy environment guard | Node test 12/12: 10 isolation contracti + 2 Vite `.env` fallback/runtime-precedence regressiyasi |
 | Production build | Synthetic non-production project-ref bilan muvaffaqiyatli; CSP tanlangan refdan yaratildi |
 | Security check | 10 ta build/Netlify fayli muvaffaqiyatli |
 | Production dependency audit | Raw audit: jami 0 vulnerability; scoped gate exception'siz high/critical 0 |

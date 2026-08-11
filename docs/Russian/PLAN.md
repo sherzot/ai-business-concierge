@@ -41,6 +41,7 @@
 - [x] Применить 32/32 migrations в staging, deploy `bright-api` v1 и пройти health/Auth-settings/security-advisor smoke tests.
 - [x] Ограничить staging Auth redirects Netlify preview wildcard/local Vite URLs; явно pin email confirmation, 8-digit/1-minute OTP и TOTP.
 - [x] Разделить Netlify production и deploy-preview/branch-deploy/dev env, удалить optional URL envs и пройти authoritative CLI read-back 4/4 contexts. На Personal только browser-public `VITE_*` используют `All` scope.
+- [ ] Commit/push Codex P2 `.env`/CSP hotfix из PR #7, пройти PR CI и Netlify preview, затем закрыть через merge и production smoke-test.
 - [ ] Выполнить authenticated Edge acceptance с ephemeral synthetic Auth/tenant fixture в staging и очистить fixture.
 - [x] Отключить external Vercel Git integration, сохранив project/deployment history; сразу удалить созданные CLI OIDC `.env.local` и `.vercel` metadata.
 
