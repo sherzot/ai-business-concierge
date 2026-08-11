@@ -1,6 +1,6 @@
 # AI Business Concierge — requirements
 
-> Yangilandi: 2026-08-07
+> Yangilandi: 2026-08-11
 > Holat qiymatlari: **Done** — ishlaydigan implementatsiya bor; **Partial** — bir qismi yoki operatsion verifikatsiya qolgan; **Skeleton** — scaffold bor, business logic ishlamaydi; **Planned** — boshlanmagan.
 
 ## Hozirgi platforma capabilitylari
@@ -14,7 +14,7 @@
 | Tasks | Done | Board/list CRUD, Realtime, assignment notification va acknowledge |
 | HR employee management | Done | Employee profile/invite/status oqimlari |
 | Docs library | Done | List, search, CRUD va 15 ta 4 tilli template |
-| AI Hujjatchi | Partial | Qoralama generatsiya bor; PDF/DOCX va Storage yo'q |
+| AI Hujjatchi | Staging verified / production pending | Qoralama va real PDF/DOCX, embedded font, private Storage va signed URL stagingda green; production rollout qolgan |
 | Integrations | Partial | Telegram/Email fundamenti bor; ayrim production smoke-testlar qolgan |
 | AI Concierge | Partial | Router, safety, cost log va RAG fundamenti bor; to'liq semantic/citation UX qarzi mavjud |
 | Admin platforma | Partial | Asosiy boshqaruv/monitoring sahifalari bor; advanced agent va billing qismlari yo'q |
@@ -34,7 +34,7 @@
 | R-018 | AI cost tracking | Partial | Log wiring mavjud; usage API, tenant dashboard va plan enforcement |
 | R-019 | Vector Search (RAG) | Partial | Embedding/match fundamenti bor; explicit docs tool, citation va cache |
 | R-020 | Admin Dashboard | Partial | Billing/MRR/churn va advanced AI agent monitoring |
-| R-021 | AI Hujjatchi binary output | Partial | PDF/DOCX, font embedding, private Storage va signed URL |
+| R-021 | AI Hujjatchi binary output | Staging verified / production pending | Real PDF/DOCX, embedded Noto Sans JP, private Storage, canonical tenant/user path, restrictive RLS va 60 soniyali signed URL stagingda green; production rollout qolgan |
 | R-003 | Billing/To'lovlar | Planned | Click/Payme, subscription lifecycle va idempotency |
 | R-004 | Audit log ko'rinishi | Done | Retention va filterlarni keyin kengaytirish |
 | R-005 | Export/Import | Planned | Reports/Tasks CSV/Excel va bulk import |

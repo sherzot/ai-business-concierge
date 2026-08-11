@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as apiClientModule from "../../../shared/lib/apiClient";
-import { generateDoc, getDocTemplates } from "../api/docsApi";
+import { exportDoc, generateDoc, getDocTemplates } from "../api/docsApi";
 
 vi.mock("../../../shared/lib/apiClient");
 const mockApiRequest = vi.mocked(apiClientModule.apiRequest);
@@ -60,7 +60,13 @@ describe("generateDoc", () => {
       format: "docx",
       requested_locale: "uz",
       applied_locale: "uz",
-      file_ready: false,
+      file_ready: true,
+      file_name: "Mehnat shartnomasi.docx",
+      file_size: 1234,
+      mime_type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      sha256: "a".repeat(64),
+      download_url: "https://example.test/signed",
+      download_expires_in: 60,
       remaining: 1,
     });
 
@@ -86,5 +92,30 @@ describe("generateDoc", () => {
     expect(body.fields_data.employee).toBe("Ali Valiyev");
     expect(body.format).toBe("docx");
     expect(body.templateId).toBeUndefined();
+  });
+});
+
+describe("exportDoc", () => {
+  it("real binary export uchun format va localeni tenant APIga yuboradi", async () => {
+    mockApiRequest.mockResolvedValue({
+      document_id: "doc-1",
+      generated_id: "generated-1",
+      format: "pdf",
+      file_ready: true,
+      file_name: "Shartnoma.pdf",
+      file_size: 2048,
+      mime_type: "application/pdf",
+      sha256: "b".repeat(64),
+      download_url: "https://example.test/signed",
+      download_expires_in: 60,
+    });
+
+    await exportDoc("tenant-1", "doc-1", "pdf", "ja");
+
+    expect(mockApiRequest).toHaveBeenCalledWith("/docs/doc-1/export", {
+      tenantId: "tenant-1",
+      method: "POST",
+      body: JSON.stringify({ format: "pdf", locale: "ja" }),
+    });
   });
 });

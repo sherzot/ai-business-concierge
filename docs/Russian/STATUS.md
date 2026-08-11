@@ -23,6 +23,7 @@
 > 2026-08-11: PR #9 merged как `c00362a` в main/production; PR/main CI green. Preview/production CSP/bundle isolation, Auth/health и production Realtime smoke tests прошли.
 > 2026-08-11: Staging переведён на modern Edge key overrides, legacy anon/service-role keys отключены. Real synthetic authenticated Edge acceptance прошёл 8/8 с обязательным cleanup двух tenants/пяти Auth users и final fixture count 0/0.
 > 2026-08-11: Acceptance changes push как `cc31fe7` в draft PR #10; GitHub CI run `31485875838` и Netlify deploy-preview `6a7b047d3150bc00088fc18d` green.
+> 2026-08-11: Real PDF/DOCX AI Документолога, embedded Noto Sans JP и private Storage contract завершены в staging; pgTAP 12/12 и binary/frontend gates green, `bright-api` v5 ACTIVE. Production намеренно не изменён.
 
 ## Текущая фаза
 
@@ -37,15 +38,15 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | Latest application merge `main`/`origin/main` — `c00362a`; staging acceptance commit `cc31fe7` находится в draft PR #10, tracked branch clean |
+| Git | `agent/ai-document-binary-storage` stacked поверх draft PR #10; PR #10 OPEN/DRAFT/MERGEABLE, latest CI/Netlify checks green; binary changes ещё не push/PR |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 32/32 migrations, `bright-api` v2, health `200` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 33/33 migrations, `bright-api` v5 ACTIVE, health `200` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge использует modern overrides `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY`; legacy anon/service-role API keys disabled |
 | Type-check | Успешно |
-| Unit tests | 23/23 файлов, 108/108 тестов |
+| Unit tests | Frontend 23/23 файлов, 109/109 тестов; Deno document binary 4/4 |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks + 2 Vite `.env` fallback/runtime-precedence + 2 bundled-endpoint extraction regressions |
 | Production build/security check | Build прошёл с synthetic non-production ref; CSP создан из этого ref; проверено 10 build/Netlify файлов |
 | Production dependency audit | Raw audit: всего 0 vulnerabilities; scoped gate без исключений: high/critical 0 |
@@ -59,7 +60,8 @@
 | Production frontend | Deploy `6a7af6d8233dfa000954ac24` ready, build `6a7af6d8233dfa000954ac22`, 32s, plugin success, 0 secret matches в 87,166 files; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup двух tenants/пяти Auth users и final fixture 0/0; Realtime tables SELECT-only и требуют active membership/tenant |
-| Migration history | Local/remote 32/32 совпадают; production `db push --dry-run`: up to date |
+| Document binary/Storage acceptance | Real 4-language PDF `3,961,665` bytes и DOCX с embedded font `3,894,424` bytes; внутри DOCX `.odttf` `4,533,028` bytes; staging Storage/RLS pgTAP 12/12; предыдущий remote generate/export/cross-tenant/direct-deny/delete E2E green |
+| Migration history | Local и staging 33/33; production намеренно остаётся на прежних 32 migrations, document buckets `0`, новых колонок `doc_generated` `0`; preflight: 2 legacy rows, rows с `storage_path`/incompatibility `0`, до merge/rollout approval |
 | Local Supabase services | Последний full-stack snapshot: Storage `v1.68.1`, Auth `v2.195.0`, enabled containers healthy, Storage/Auth/Studio HTTP `200`. На closeout 2026-08-11 stack был stopped; remote staging acceptance от него не зависел |
 
 ## Состояние возможностей
@@ -72,12 +74,14 @@
 | Telegram | Partial / operational block | Проверить `TELEGRAM_WEBHOOK_SECRET` и webhook |
 | Resend inbox | Partial | Код есть; receiving/delivery E2E не подтверждён |
 | AI Concierge/RAG и cost tracking | Partial | Основа есть; citation UX, plan enforcement и smoke-test остаются |
-| AI Документолог | Partial — active | 15 templates/4 языка/draft pipeline есть; PDF/DOCX и Storage нет |
+| AI Документолог | Staging-ready / production pending | 15 templates, 4 языка, real PDF/DOCX, embedded Noto Sans JP, private Storage, 60-second signed URL и tenant-scoped export/delete готовы |
 | HR Candidate Analysis | Skeleton | Scaffold есть; production endpoint возвращает `501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme и AI Sales Bot | Planned | Phase 3 |
 
 ## Ближайший порядок
 
-1. Продолжить PDF/DOCX binary generation и private Supabase Storage для AI Документолога.
+1. Review/merge draft PR #10, затем push stacked branch AI Документолога и пройти PR/CI/preview review.
+2. После merge approval выполнить production migration/`bright-api` rollout и authenticated PDF/DOCX/Storage smoke-test.
+3. Затем подключить AI questions/polishing через LLM Router.
 
 Подробности: [PLAN.md](PLAN.md). Основной источник: [узбекский STATUS](../STATUS.md).

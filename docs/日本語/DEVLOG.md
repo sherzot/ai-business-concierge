@@ -4,6 +4,18 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-11 — AI文書作成の実PDF/DOCXとprivate Storageをstagingで完了
+
+- 以前は15 templates、4言語、dynamic form、editable draftsがあったが、「PDF」はbrowser print、downloadは`.txt`で、private Storage、binary metadata、signed URL、tenant/user path contractがなかった。作業はdraft PR #10上の`agent/ai-document-binary-storage` stacked branch。既存3 untracked user filesは保持しstageしていない。
+- Pinned `pdf-lib@1.17.1`、`@pdf-lib/fontkit@1.1.1`、`docx@9.7.1`で実生成を追加。Pinned Noto Sans JP assetをexact SHA-256検証してprivate cacheし、PDFへfull embed、DOCXへ`word/fonts/font1.odttf`としてembed。Visual reviewでPDF subsettingのbroken CFF glyph mapを発見し、full-font embeddingで4言語を修正。
+- Private `generated-documents`/`document-assets` buckets、10/5 MiB limits、MIME allow-lists、`doc_generated` binary metadata/checksum/FK/unique/canonical-path constraints、`anon`/`authenticated`向けrestrictive direct-access deny policyを追加。Pathは`<tenant>/<user>/documents/<document-id>/document.<pdf|docx>`、downloadは60秒signed URL。Generate/export/edit-stale/deleteはtenant-scopedでcompensation cleanupとaudit logsあり。
+- Frontend print/`.txt` pseudo-exportを実PDF/DOCX downloadへ置換し、list/detail file status、4 locales copy、OpenAPI generate/export contractを更新。
+- Migration `20260811131308`をstaging `piqsyfwrjtormrlenjix`へapplyし、`bright-api` v5 ACTIVE、health `ok`。Storage/RLS pgTAP 12/12 PASS。以前のv3 remote E2Eは実DOCX/PDF download、direct authenticated Storage deny `400`、cross-tenant export `404`、edit/regenerate、delete cleanupをPASS。Embedded-font v4/v5 acceptance再実行はfixture作成前にSupabase Auth AdminのIP-level Cloudflare `403`でblock。Final residueはacceptance users/tenants/documents/templates/generated rows/objectsが0、verified private font cacheが1。Productionは意図的に未変更でnew buckets `0`、new columns `0`。Preflightは2 legacy generated rowsの`storage_path`がいずれもnullと確認。
+- Verification: Deno binary 4/4、DOCX ZIP integrity green、embedded `.odttf` `4,533,028` bytes、final DOCX `3,894,424` bytes、PDF `3,961,665` bytes、Quick Look visual green。Frontend Vitest 23/23 files・109/109 tests、TypeScript、3700-module production build、raw audit total 0、production high/critical 0、focused docs API 5/5、new service `deno check`、integration `node --check`、`git diff --check` PASS。Full `bright-api` Deno checkの22件logging/Hono/risk/usage type debtはpre-existing。Docker stoppedのためlocal Supabaseは未実行。
+- Remaining: draft PR #10 review/merge、stacked PR push/open、CI/Netlify/Codex、次にproduction migration/Edge rolloutとauthenticated smoke。次product sliceはLLM Router questions/polishing。
+
+Files: `supabase/migrations/20260811131308_ai_document_binary_storage.sql`、`supabase/functions/bright-api/deno.json`、`supabase/functions/server/{index.ts,openapi.ts}`、`supabase/functions/server/services/document-binary{,.test}.ts`、`supabase/tests/{database/document_storage_contract.test.sql,integration/document_binary_storage.test.mjs}`、`frontend/src/features/docs/**`、`frontend/src/app/i18n.ts`、同期済み4-language STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/DEVLOG。
+
 ## 2026-08-11 — Staging authenticated Edge acceptanceとlegacy-key cleanup完了
 
 - 以前はstaging migrationsと`bright-api` healthはgreenだったが、Supabase CLI `v2.112.0`のAPI-key timestamp parserによりremote Auth/tenant acceptanceがblockされていた。Integration scriptはlocal stack専用でcleanup responsesをassertしていなかった。

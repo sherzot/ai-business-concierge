@@ -23,6 +23,7 @@
 > 2026-08-11: PR #9を`c00362a`としてmain/productionへmerge。PR/main CI green。Preview/production CSP/bundle isolation、Auth/health、production Realtime smoke tests成功。
 > 2026-08-11: Stagingをmodern Edge key overridesへ移行しlegacy anon/service-role keysをdisable。Real synthetic authenticated Edge acceptanceは8/8成功し、2 tenants/5 Auth usersのmandatory cleanupとfinal fixture count 0/0を確認。
 > 2026-08-11: Acceptance changesを`cc31fe7`としてdraft PR #10へpush。GitHub CI run `31485875838`とNetlify deploy-preview `6a7b047d3150bc00088fc18d`はgreen。
+> 2026-08-11: AI文書作成の実PDF/DOCX、embedded Noto Sans JP、private Storage contractをstagingで完了。pgTAP 12/12とbinary/frontend gatesはgreen、`bright-api` v5 ACTIVE。Productionは意図的に未変更。
 
 ## 現在のPhase
 
@@ -37,15 +38,15 @@
 
 | Check | 状態 |
 |---|---|
-| Git | `main`/`origin/main` latest application mergeは`c00362a`。Staging acceptance commit `cc31fe7`はdraft PR #10、tracked branch clean |
+| Git | `agent/ai-document-binary-storage`はdraft PR #10上のstacked branch。PR #10はOPEN/DRAFT/MERGEABLEでlatest CI/Netlify checks green。Binary changesはまだpush/PR前 |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Supabase Edge Function `bright-api` v75、`ACTIVE`、`verify_jwt=false` |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。32/32 migrations、`bright-api` v2、health `200` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。33/33 migrations、`bright-api` v5 ACTIVE、health `200` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list。Email confirmation ON、8-digit/1-minute OTP、TOTP ON。Auth settings HTTP `200`、autoconfirm false。Edgeはmodern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overridesを使用しlegacy anon/service-role API keysはdisabled |
 | Type-check | 成功 |
-| Unit tests | 23/23 files、108/108 tests |
+| Unit tests | Frontend 23/23 files、109/109 tests。Deno document binary 4/4 |
 | Deployment environment guard | Node tests 14/14: isolation contract 10件 + Vite `.env` fallback/runtime-precedence 2件 + bundled-endpoint extraction regressions 2件 |
 | Production build/security check | Synthetic non-production refでbuild pass。CSPはそのrefから生成、10 build/Netlify filesを検査 |
 | Production dependency audit | Raw audit: vulnerability合計0件; scoped gateはexceptionなしでhigh/critical 0件 |
@@ -59,7 +60,8 @@
 | Production frontend | Deploy `6a7af6d8233dfa000954ac24` ready、build `6a7af6d8233dfa000954ac22`、32s、plugin success、87,166 filesでsecret match 0。Production-only CSP/bundle、page/Auth/health `200`、Realtime `OPEN` |
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |
 | DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、local real Auth-token Edge tests 8/8。Staging modern-key remote Edge 8/8、2 tenants/5 Auth users cleanup、final fixture 0/0。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |
-| Migration history | Local/remote 32/32整合、production `db push --dry-run`: up to date |
+| Document binary/Storage acceptance | 実4-language PDF `3,961,665` bytes、embedded-font DOCX `3,894,424` bytes、DOCX内`.odttf` `4,533,028` bytes。Staging Storage/RLS pgTAP 12/12、以前のremote generate/export/cross-tenant/direct-deny/delete E2E green |
+| Migration history | Local/staging 33/33。Productionは意図的に従来32 migrationsのまま、document buckets `0`、新`doc_generated` columns `0`。Preflightはlegacy rows 2、`storage_path`/incompatible rows `0`。Merge/rollout approval待ち |
 | Local Supabase services | Last full-stack snapshot: Storage `v1.68.1`、Auth `v2.195.0`、enabled containers healthy、Storage/Auth/Studio HTTP `200`。2026-08-11 closeout時はstack stoppedで、remote staging acceptanceは非依存 |
 
 ## Capability状態
@@ -72,12 +74,14 @@
 | Telegram | Partial / operational block | `TELEGRAM_WEBHOOK_SECRET`とwebhook確認が必要 |
 | Resend inbox | Partial | Codeあり、receiving/delivery E2E未確認 |
 | AI Concierge/RAGとcost tracking | Partial | 基盤あり、citation UX、plan enforcement、smoke-testが残る |
-| AI文書作成 | Partial — active | 15 templates/4言語/draft pipelineあり、PDF/DOCXとStorageなし |
+| AI文書作成 | Staging-ready / production pending | 15 templates、4言語、実PDF/DOCX、embedded Noto Sans JP、private Storage、60秒signed URL、tenant-scoped export/deleteを実装済み |
 | HR Candidate Analysis | Skeleton | Scaffoldあり、production endpointは`501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme と AI Sales Bot | Planned | Phase 3 |
 
 ## 直近の順序
 
-1. AI文書作成のPDF/DOCX binary generationとprivate Supabase Storageを継続。
+1. Draft PR #10をreview/merge後、stacked AI文書作成branchをpushしPR/CI/preview reviewを通す。
+2. Merge approval後にproduction migrationと`bright-api`をrolloutし、authenticated PDF/DOCX/Storage smoke-testを実施。
+3. 次にLLM Router経由のAI questions/polishingを接続。
 
 詳細: [PLAN.md](PLAN.md)。Canonical: [Uzbek STATUS](../STATUS.md)。

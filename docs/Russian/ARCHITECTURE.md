@@ -35,6 +35,13 @@
 - В Supabase Free нет Branching, поэтому staging — отдельный project. Схема синхронизируется только versioned migrations, а тестовые данные создаются synthetic seed.
 - Build guard `validate:deploy-env` fail-closed останавливает сборку при несовпадении context/project. CSP генерируется во время build из выбранного project ref.
 
+### 1.2 Private binary boundary AI Документолога
+
+- PDF/DOCX генерируются только внутри `bright-api`; browser не создаёт binary и не выполняет direct Supabase Storage CRUD.
+- Binary хранятся в private bucket `generated-documents` по canonical path `<tenant>/<user>/documents/<document-id>/document.<pdf|docx>`. Restrictive Storage policy блокирует direct access ролей `anon`/`authenticated` к этому bucket и private `document-assets`.
+- `bright-api` проверяет active tenant membership до использования service role. Download выдаётся через 60-second signed URL; export регенерирует current editable content, delete удаляет private object до DB row.
+- Pinned Noto Sans JP OTF проверяется SHA-256, покрывает 4 языка, полностью embedded в PDF, как obfuscated `.odttf` в DOCX и cached в private `document-assets`.
+
 ---
 
 ## 2. АРХИТЕКТУРА ФРОНТЕНДА

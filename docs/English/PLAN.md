@@ -1,6 +1,6 @@
 # AI Business Concierge — active plan
 
-> Version 5.8 · Updated 2026-08-11
+> Version 5.9 · Updated 2026-08-11
 > Only active and next work belongs here. The previous master plan is archived at [../archive/English/PLAN_LEGACY_2026-07-24.md](../archive/English/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — safe session start
@@ -45,10 +45,9 @@
 
 ## P1 — complete Phase 2 AI Document Assistant
 
+- [ ] Review/merge draft PR #10; push stacked `agent/ai-document-binary-storage` and pass PR, GitHub CI, Netlify preview, and Codex review.
+- [ ] After approved merges, roll out `20260811131308_ai_document_binary_storage.sql` and `bright-api` to production; smoke-test authenticated real PDF/DOCX signed download, cross-tenant deny, direct Storage deny, and delete cleanup.
 - [ ] Add LLM-guided questions and polishing.
-- [ ] Generate real PDF/DOCX with Noto Sans support.
-- [ ] Add private Storage, tenant/user paths, RLS, file validation and signed URLs.
-- [ ] Add tests and four-language/theme regression smoke tests.
 - [ ] After the web flow is stable, add Telegram step-by-step generation and file delivery.
 
 ## P2 — operational integrations

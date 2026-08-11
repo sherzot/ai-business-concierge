@@ -35,6 +35,13 @@
 - Supabase Free rejasida Branching yo'qligi sabab staging alohida project bo'ladi. Schema faqat versionlangan migrationlar orqali sinxronlanadi, test ma'lumotlari esa synthetic seed bilan yaratiladi.
 - `validate:deploy-env` build guardi context/project mos kelmasa fail-closed to'xtaydi. CSP tanlangan project-ref asosida build vaqtida yaratiladi.
 
+### 1.2 AI Hujjatchi private binary chegarasi
+
+- PDF va DOCX faqat `bright-api` ichida yaratiladi; browser binary yaratmaydi va Supabase Storage bilan direct CRUD qilmaydi.
+- Binarylar private `generated-documents` bucketida `<tenant>/<user>/documents/<document-id>/document.<pdf|docx>` canonical yo'lida saqlanadi. `anon` va `authenticated` rollari uchun restrictive Storage policy bu bucket hamda private `document-assets` bucketini to'g'ridan-to'g'ri yopadi.
+- `bright-api` service role ishlatishdan oldin active tenant membershipni tekshiradi. Yuklab olish faqat 60 soniyali signed URL bilan beriladi; export joriy editable contentdan qayta generatsiya qiladi, delete esa DB qatoridan oldin private obyektni o'chiradi.
+- To'rt til uchun pinned va SHA-256 bilan tasdiqlangan `Noto Sans JP` OTF ishlatiladi. Font PDFga to'liq, DOCXga obfuscated `.odttf` sifatida embed qilinadi va private `document-assets` bucketida cache qilinadi.
+
 ---
 
 ## 2. FRONTEND ARXITEKTURASI

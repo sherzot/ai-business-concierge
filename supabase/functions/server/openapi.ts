@@ -250,7 +250,11 @@ export const OPENAPI_SPEC = {
           {
             name: "locale",
             in: "query",
-            schema: { type: "string", enum: ["uz", "ru"], default: "uz" },
+            schema: {
+              type: "string",
+              enum: ["uz", "ru", "en", "ja"],
+              default: "uz",
+            },
           },
           {
             name: "category",
@@ -279,9 +283,9 @@ export const OPENAPI_SPEC = {
     "/docs/generate": {
       post: {
         tags: ["Documents"],
-        summary: "Generate and save an editable document draft",
+        summary: "Generate an editable document and private PDF/DOCX file",
         description:
-          "Renders a seeded template with validated fields and stores it in documents/doc_generated. Binary PDF/DOCX export is a later Phase 2 slice.",
+          "Renders a seeded template, creates a real PDF or DOCX binary, stores it in private Supabase Storage, and returns a 60-second signed download URL.",
         requestBody: {
           required: true,
           content: {
@@ -320,7 +324,7 @@ export const OPENAPI_SPEC = {
         },
         responses: {
           "200": {
-            description: "Generated draft and IDs",
+            description: "Generated document, file metadata, and signed URL",
           },
           "422": {
             description: "Missing template fields or invalid input",
@@ -333,6 +337,47 @@ export const OPENAPI_SPEC = {
           "429": {
             description: "Plan document generation limit reached",
           },
+        },
+      },
+    },
+    "/docs/{id}/export": {
+      post: {
+        tags: ["Documents"],
+        summary: "Regenerate and download a document as PDF or DOCX",
+        description:
+          "Validates tenant access, regenerates the current editable content, stores it in private Storage, and returns a 60-second signed URL.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["format", "locale"],
+                properties: {
+                  format: { type: "string", enum: ["pdf", "docx"] },
+                  locale: {
+                    type: "string",
+                    enum: ["uz", "ru", "en", "ja"],
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "File metadata and signed download URL",
+          },
+          "404": { description: "Document not found in the active tenant" },
+          "503": { description: "Binary generation, Storage, or signing error" },
         },
       },
     },

@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 5.8 · 更新 2026-08-11
+> Version 5.9 · 更新 2026-08-11
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -45,10 +45,9 @@
 
 ## P1 — Phase 2 AI文書作成を完了
 
+- [ ] Draft PR #10をreview/mergeし、stacked `agent/ai-document-binary-storage`をpushしてPR、GitHub CI、Netlify preview、Codex reviewを通す。
+- [ ] Approved merge後、`20260811131308_ai_document_binary_storage.sql`と`bright-api`をproductionへrolloutし、authenticated実PDF/DOCX signed download、cross-tenant deny、direct Storage deny、delete cleanupをsmoke-testする。
 - [ ] LLM質問/polishingを追加。
-- [ ] Noto Sans対応の実PDF/DOCXを生成。
-- [ ] Private Storage、tenant/user path、RLS、file validation、signed URLを追加。
-- [ ] Testsと4-language/theme smoke-testを追加。
 - [ ] Web flow安定後、Telegram wizardとfile送信を追加。
 
 ## P2 — Operational integrations

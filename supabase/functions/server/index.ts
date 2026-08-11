@@ -22,6 +22,13 @@ import {
   type DocumentLocale,
   type DocumentTemplateRow,
 } from "./services/document-generator.ts";
+import {
+  DocumentBinaryError,
+  GENERATED_DOCUMENTS_BUCKET,
+  SIGNED_DOWNLOAD_TTL_SECONDS,
+  generateAndStoreDocumentBinary,
+  safeDownloadName,
+} from "./services/document-binary.ts";
 
 const app = new Hono();
 const BASE_PATH = "/make-server-6c2837d6";
@@ -3719,6 +3726,11 @@ const registerRoutes = (prefix: string) => {
   app.post(`${prefix}/docs/generate`, async (c) => {
     const ctx = await requireTenant(c);
     if (!(ctx as any).tenantId) return ctx;
+    const tenantId = (ctx as TenantContext).tenantId;
+    const userId = (ctx as TenantContext).userId;
+    if (!userId) {
+      return failure(c, 401, "UNAUTHORIZED", "Foydalanuvchi topilmadi.");
+    }
 
     const body = await c.req.json().catch(() => ({}));
     const templateId =
@@ -3778,8 +3790,8 @@ const registerRoutes = (prefix: string) => {
 
     const usageGate = await guardUsage({
       supabase,
-      tenantId: (ctx as any).tenantId,
-      userId: (ctx as any).userId ?? null,
+      tenantId,
+      userId,
       resource: "docs_generated",
     });
     if (!usageGate.ok) return c.json(usageGate.body, 429);
@@ -3811,12 +3823,13 @@ const registerRoutes = (prefix: string) => {
       requested_locale: locale,
       applied_locale: rendered.appliedLocale,
       format,
+      binary_current: true,
     };
 
     const { data: document, error: documentError } = await supabase
       .from("documents")
       .insert({
-        tenant_id: (ctx as any).tenantId,
+        tenant_id: tenantId,
         title: generatedTitle,
         content: rendered.content,
         metadata,
@@ -3831,28 +3844,68 @@ const registerRoutes = (prefix: string) => {
       });
     }
 
+    let storedBinary: Awaited<
+      ReturnType<typeof generateAndStoreDocumentBinary>
+    >;
+    try {
+      storedBinary = await generateAndStoreDocumentBinary({
+        supabase,
+        tenantId,
+        userId,
+        documentId: document.id,
+        title: generatedTitle,
+        content: rendered.content,
+        locale: rendered.appliedLocale,
+        format,
+      });
+    } catch (error) {
+      console.error("Document binary generation error", error);
+      await supabase
+        .from("documents")
+        .delete()
+        .eq("id", document.id)
+        .eq("tenant_id", tenantId);
+      const code = error instanceof DocumentBinaryError
+        ? error.code
+        : "GENERATION_FAILED";
+      return failure(
+        c,
+        503,
+        code,
+        "PDF/DOCX faylini yaratib bo'lmadi. Qayta urinib ko'ring.",
+      );
+    }
+
     const { data: generated, error: generatedError } = await supabase
       .from("doc_generated")
       .insert({
-        tenant_id: (ctx as any).tenantId,
-        user_id: (ctx as any).userId ?? null,
+        tenant_id: tenantId,
+        user_id: userId,
+        document_id: document.id,
         template_id: template.id,
         title: generatedTitle,
         locale: rendered.appliedLocale,
         fields_data: rendered.fieldsData,
         format,
-        storage_path: null,
+        storage_bucket: storedBinary.storageBucket,
+        storage_path: storedBinary.storagePath,
+        mime_type: storedBinary.mimeType,
+        file_size: storedBinary.fileSize,
+        sha256: storedBinary.sha256,
       })
       .select("id")
       .single();
 
     if (generatedError || !generated) {
       console.error("doc_generated insert error", generatedError);
+      await supabase.storage
+        .from(storedBinary.storageBucket)
+        .remove([storedBinary.storagePath]);
       await supabase
         .from("documents")
         .delete()
         .eq("id", document.id)
-        .eq("tenant_id", (ctx as any).tenantId);
+        .eq("tenant_id", tenantId);
       return failure(c, 500, "DB_ERROR", "Generatsiya tarixini saqlab bo'lmadi.", {
         details: generatedError?.message,
       });
@@ -3861,18 +3914,46 @@ const registerRoutes = (prefix: string) => {
     const chunks = rendered.content
       .split("\n\n")
       .map((content, index) => ({
-        tenant_id: (ctx as any).tenantId,
+        tenant_id: tenantId,
         document_id: document.id,
         section: `p${index + 1}`,
         content: content.trim(),
       }))
       .filter((chunk) => chunk.content.length > 0);
-    if (chunks.length) await supabase.from("doc_chunks").insert(chunks);
+    if (chunks.length) {
+      const { error: chunkError } = await supabase.from("doc_chunks").insert(chunks);
+      if (chunkError) console.error("Generated document chunks insert error", chunkError);
+    }
+
+    const { data: signed, error: signedError } = await supabase.storage
+      .from(storedBinary.storageBucket)
+      .createSignedUrl(
+        storedBinary.storagePath,
+        SIGNED_DOWNLOAD_TTL_SECONDS,
+        { download: safeDownloadName(generatedTitle, format) },
+      );
+    if (signedError || !signed?.signedUrl) {
+      console.error("Generated document signed URL error", signedError);
+      await supabase.storage
+        .from(storedBinary.storageBucket)
+        .remove([storedBinary.storagePath]);
+      await supabase
+        .from("documents")
+        .delete()
+        .eq("id", document.id)
+        .eq("tenant_id", tenantId);
+      return failure(
+        c,
+        503,
+        "SIGNED_URL_ERROR",
+        "Yuklab olish havolasi yaratilmadi. Qayta urinib ko'ring.",
+      );
+    }
 
     await recordUsage(
       supabase,
-      (ctx as any).tenantId,
-      (ctx as any).userId ?? null,
+      tenantId,
+      userId,
       { docs_generated: 1 },
     );
     await writeAuditLog(ctx as TenantContext, {
@@ -3896,7 +3977,13 @@ const registerRoutes = (prefix: string) => {
       format,
       requested_locale: locale,
       applied_locale: rendered.appliedLocale,
-      file_ready: false,
+      file_ready: true,
+      file_name: safeDownloadName(generatedTitle, format),
+      file_size: storedBinary.fileSize,
+      mime_type: storedBinary.mimeType,
+      sha256: storedBinary.sha256,
+      download_url: signed.signedUrl,
+      download_expires_in: SIGNED_DOWNLOAD_TTL_SECONDS,
       remaining: usageGate.remaining === Number.POSITIVE_INFINITY
         ? null
         : Math.max(0, usageGate.remaining - 1),
@@ -3927,14 +4014,43 @@ const registerRoutes = (prefix: string) => {
       });
     }
 
-    const docs = (data ?? []).map((doc: any) => ({
-      id: doc.id,
-      title: doc.title,
-      owner: doc.metadata?.owner ?? "Legal",
-      status: doc.metadata?.status ?? "draft",
-      updated_at: doc.created_at,
-      content: doc.content,
-    }));
+    const documentIds = (data ?? []).map((doc: any) => doc.id);
+    const generatedByDocument = new Map<string, any>();
+    if (documentIds.length) {
+      const { data: generatedFiles, error: generatedFilesError } = await supabase
+        .from("doc_generated")
+        .select(
+          "document_id, format, storage_path, mime_type, file_size, sha256, updated_at",
+        )
+        .eq("tenant_id", ctx.tenantId)
+        .in("document_id", documentIds);
+      if (generatedFilesError) {
+        console.error("Docs file metadata error", generatedFilesError);
+        return failure(c, 500, "DB_ERROR", "Fayl metadata yuklanmadi.");
+      }
+      for (const file of generatedFiles ?? []) {
+        if (file.document_id) generatedByDocument.set(file.document_id, file);
+      }
+    }
+
+    const docs = (data ?? []).map((doc: any) => {
+      const file = generatedByDocument.get(doc.id);
+      return {
+        id: doc.id,
+        title: doc.title,
+        owner: doc.metadata?.owner ?? "Legal",
+        status: doc.metadata?.status ?? "draft",
+        updated_at: file?.updated_at ?? doc.created_at,
+        content: doc.content,
+        file_ready: Boolean(
+          file?.storage_path && doc.metadata?.binary_current !== false
+        ),
+        file_format: file?.format ?? null,
+        file_size: file?.file_size ?? null,
+        mime_type: file?.mime_type ?? null,
+        sha256: file?.sha256 ?? null,
+      };
+    });
 
     return success(c, docs);
   });
@@ -3958,7 +4074,223 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 404, "NOT_FOUND", "Document topilmadi.");
     }
 
-    return success(c, data);
+    const { data: generatedFile, error: generatedFileError } = await supabase
+      .from("doc_generated")
+      .select("format, storage_path, mime_type, file_size, sha256, updated_at")
+      .eq("tenant_id", ctx.tenantId)
+      .eq("document_id", id)
+      .maybeSingle();
+    if (generatedFileError) {
+      console.error("Docs detail file metadata error", generatedFileError);
+      return failure(c, 500, "DB_ERROR", "Fayl metadata yuklanmadi.");
+    }
+
+    return success(c, {
+      ...data,
+      file_ready: Boolean(
+        generatedFile?.storage_path && data.metadata?.binary_current !== false
+      ),
+      file_format: generatedFile?.format ?? null,
+      file_size: generatedFile?.file_size ?? null,
+      mime_type: generatedFile?.mime_type ?? null,
+      sha256: generatedFile?.sha256 ?? null,
+    });
+  });
+
+  app.post(`${prefix}/docs/:id/export`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+    const tenantId = (ctx as TenantContext).tenantId;
+    const userId = (ctx as TenantContext).userId;
+    if (!userId) {
+      return failure(c, 401, "UNAUTHORIZED", "Foydalanuvchi topilmadi.");
+    }
+
+    const id = c.req.param("id");
+    const body = await c.req.json().catch(() => ({}));
+    if (body?.format && !["pdf", "docx"].includes(body.format)) {
+      return failure(c, 422, "VALIDATION_ERROR", "Format pdf yoki docx bo'lishi kerak.");
+    }
+    if (body?.locale && !isDocumentLocale(body.locale)) {
+      return failure(c, 422, "VALIDATION_ERROR", "Til uz, ru, en yoki ja bo'lishi kerak.");
+    }
+
+    const [{ data: document, error: documentError }, generatedResult] =
+      await Promise.all([
+        supabase
+          .from("documents")
+          .select("id, title, content, metadata")
+          .eq("tenant_id", tenantId)
+          .eq("id", id)
+          .maybeSingle(),
+        supabase
+          .from("doc_generated")
+          .select("*")
+          .eq("tenant_id", tenantId)
+          .eq("document_id", id)
+          .maybeSingle(),
+      ]);
+
+    if (documentError || !document) {
+      if (documentError) console.error("Document export fetch error", documentError);
+      return failure(c, 404, "NOT_FOUND", "Document topilmadi.");
+    }
+    if (generatedResult.error) {
+      console.error("Document export metadata fetch error", generatedResult.error);
+      return failure(c, 500, "DB_ERROR", "Fayl metadata yuklanmadi.");
+    }
+
+    const previous = generatedResult.data;
+    const format: DocumentFormat = body?.format === "pdf"
+      ? "pdf"
+      : body?.format === "docx"
+        ? "docx"
+        : previous?.format === "pdf"
+          ? "pdf"
+          : "docx";
+    const locale: DocumentLocale = isDocumentLocale(body?.locale)
+      ? body.locale
+      : isDocumentLocale(previous?.locale)
+        ? previous.locale
+        : isDocumentLocale(document.metadata?.applied_locale)
+          ? document.metadata.applied_locale
+          : "uz";
+
+    let storedBinary: Awaited<
+      ReturnType<typeof generateAndStoreDocumentBinary>
+    >;
+    try {
+      storedBinary = await generateAndStoreDocumentBinary({
+        supabase,
+        tenantId,
+        userId,
+        documentId: id,
+        title: document.title,
+        content: document.content ?? "",
+        locale,
+        format,
+        upsert: true,
+      });
+    } catch (error) {
+      console.error("Document export generation error", error);
+      const code = error instanceof DocumentBinaryError
+        ? error.code
+        : "GENERATION_FAILED";
+      return failure(
+        c,
+        503,
+        code,
+        "PDF/DOCX faylini yaratib bo'lmadi. Qayta urinib ko'ring.",
+      );
+    }
+
+    const generatedPayload = {
+      tenant_id: tenantId,
+      user_id: userId,
+      document_id: id,
+      template_id: previous?.template_id ?? null,
+      title: document.title,
+      locale,
+      fields_data: previous?.fields_data ?? {},
+      format,
+      storage_bucket: storedBinary.storageBucket,
+      storage_path: storedBinary.storagePath,
+      mime_type: storedBinary.mimeType,
+      file_size: storedBinary.fileSize,
+      sha256: storedBinary.sha256,
+      updated_at: new Date().toISOString(),
+    };
+
+    const generatedWrite = previous?.id
+      ? await supabase
+        .from("doc_generated")
+        .update(generatedPayload)
+        .eq("id", previous.id)
+        .eq("tenant_id", tenantId)
+        .select("id")
+        .single()
+      : await supabase
+        .from("doc_generated")
+        .insert(generatedPayload)
+        .select("id")
+        .single();
+
+    if (generatedWrite.error || !generatedWrite.data) {
+      console.error("Document export metadata write error", generatedWrite.error);
+      if (previous?.storage_path !== storedBinary.storagePath) {
+        const { error: cleanupError } = await supabase.storage
+          .from(storedBinary.storageBucket)
+          .remove([storedBinary.storagePath]);
+        if (cleanupError) {
+          console.error("Failed document export cleanup error", cleanupError);
+        }
+      }
+      return failure(c, 500, "DB_ERROR", "Fayl metadata saqlanmadi.");
+    }
+
+    if (
+      previous?.storage_path &&
+      previous.storage_path !== storedBinary.storagePath
+    ) {
+      const { error: oldFileError } = await supabase.storage
+        .from(GENERATED_DOCUMENTS_BUCKET)
+        .remove([previous.storage_path]);
+      if (oldFileError) console.error("Old document export cleanup error", oldFileError);
+    }
+
+    const nextMetadata = {
+      ...(document.metadata ?? {}),
+      binary_current: true,
+      format,
+    };
+    const { error: metadataError } = await supabase
+      .from("documents")
+      .update({ metadata: nextMetadata })
+      .eq("tenant_id", tenantId)
+      .eq("id", id);
+    if (metadataError) {
+      console.error("Document export metadata sync error", metadataError);
+      return failure(c, 500, "DB_ERROR", "Hujjat metadata yangilanmadi.");
+    }
+
+    const fileName = safeDownloadName(document.title, format);
+    const { data: signed, error: signedError } = await supabase.storage
+      .from(storedBinary.storageBucket)
+      .createSignedUrl(
+        storedBinary.storagePath,
+        SIGNED_DOWNLOAD_TTL_SECONDS,
+        { download: fileName },
+      );
+    if (signedError || !signed?.signedUrl) {
+      console.error("Document export signed URL error", signedError);
+      return failure(c, 503, "SIGNED_URL_ERROR", "Yuklab olish havolasi yaratilmadi.");
+    }
+
+    await writeAuditLog(ctx as TenantContext, {
+      event_type: "doc_export",
+      entity_type: "document",
+      entity_id: id,
+      trace_id: getTraceId(c),
+      payload: {
+        document_id: id,
+        generated_id: generatedWrite.data.id,
+        format,
+        file_size: storedBinary.fileSize,
+      },
+    });
+
+    return success(c, {
+      document_id: id,
+      generated_id: generatedWrite.data.id,
+      format,
+      file_ready: true,
+      file_name: fileName,
+      file_size: storedBinary.fileSize,
+      mime_type: storedBinary.mimeType,
+      sha256: storedBinary.sha256,
+      download_url: signed.signedUrl,
+      download_expires_in: SIGNED_DOWNLOAD_TTL_SECONDS,
+    });
   });
 
   app.patch(`${prefix}/docs/:id`, async (c) => {
@@ -3994,7 +4326,11 @@ const registerRoutes = (prefix: string) => {
 
     const nextTitle = title ?? existing.title;
     const nextContent = content ?? existing.content;
-    const nextMetadata = metadata ?? existing.metadata ?? {};
+    const nextMetadata = {
+      ...(existing.metadata ?? {}),
+      ...(metadata ?? {}),
+      ...((title || content) ? { binary_current: false } : {}),
+    };
 
     const { data: updated, error: updateError } = await supabase
       .from("documents")
@@ -4057,6 +4393,41 @@ const registerRoutes = (prefix: string) => {
     if (!(ctx as any).tenantId) return ctx;
 
     const id = c.req.param("id");
+    const { data: existing, error: existingError } = await supabase
+      .from("documents")
+      .select("id")
+      .eq("tenant_id", ctx.tenantId)
+      .eq("id", id)
+      .maybeSingle();
+    if (existingError || !existing) {
+      if (existingError) console.error("Docs delete fetch error", existingError);
+      return failure(c, 404, "NOT_FOUND", "Document topilmadi.");
+    }
+
+    const { data: generatedFiles, error: generatedFilesError } = await supabase
+      .from("doc_generated")
+      .select("storage_path")
+      .eq("tenant_id", ctx.tenantId)
+      .eq("document_id", id)
+      .not("storage_path", "is", null);
+    if (generatedFilesError) {
+      console.error("Docs delete file metadata error", generatedFilesError);
+      return failure(c, 500, "DB_ERROR", "Fayl metadata yuklanmadi.");
+    }
+
+    const storagePaths = (generatedFiles ?? [])
+      .map((file) => file.storage_path)
+      .filter((path): path is string => Boolean(path));
+    if (storagePaths.length) {
+      const { error: storageError } = await supabase.storage
+        .from(GENERATED_DOCUMENTS_BUCKET)
+        .remove(storagePaths);
+      if (storageError) {
+        console.error("Docs delete Storage error", storageError);
+        return failure(c, 503, "STORAGE_ERROR", "Hujjat faylini o'chirib bo'lmadi.");
+      }
+    }
+
     const { data, error } = await supabase
       .from("documents")
       .delete()

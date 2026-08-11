@@ -10,6 +10,9 @@ export type DocItem = {
   updatedAt: string;
   status: DocStatus;
   content?: string;
+  fileReady?: boolean;
+  fileFormat?: "pdf" | "docx" | null;
+  fileSize?: number | null;
 };
 
 export function DocList({
@@ -45,6 +48,11 @@ export function DocList({
             <div>
               <h4 className="text-sm font-semibold text-slate-800">{doc.title}</h4>
               <p className="text-xs text-slate-500 mt-1">{translate("docs.owner")}: {doc.owner}</p>
+              {doc.fileReady && doc.fileFormat && (
+                <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                  {doc.fileFormat}
+                </p>
+              )}
             </div>
             <DocStatusBadge status={doc.status} />
           </div>

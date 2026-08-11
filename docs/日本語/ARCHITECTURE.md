@@ -35,6 +35,13 @@
 - Supabase FreeにはBranchingがないため、stagingは別projectとする。Schemaはversioned migrationのみで同期し、test dataはsynthetic seedで作成する。
 - `validate:deploy-env` build guardはcontext/project不一致時にfail-closedで停止する。CSPは選択したproject refからbuild時に生成する。
 
+### 1.2 AI文書作成private binary境界
+
+- PDF/DOCXは`bright-api`内だけで生成する。Browserはbinaryを生成せず、Supabase Storageへdirect CRUDしない。
+- Binaryはprivate `generated-documents` bucketの`<tenant>/<user>/documents/<document-id>/document.<pdf|docx>` canonical pathへ保存する。Restrictive Storage policyが`anon`/`authenticated`による同bucketとprivate `document-assets`へのdirect accessを遮断する。
+- `bright-api`はservice role使用前にactive tenant membershipを確認する。Downloadは60秒signed URLのみ。Exportはcurrent editable contentから再生成し、deleteはDB rowより先にprivate objectを削除する。
+- Pinned Noto Sans JP OTFをSHA-256検証し4言語をcoverする。PDFへfull embed、DOCXへobfuscated `.odttf`としてembedし、private `document-assets`へcacheする。
+
 ---
 
 ## 2. フロントエンドアーキテクチャ

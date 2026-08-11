@@ -35,6 +35,13 @@
 - Supabase Free has no Branching, so staging is a separate project. Schema is synchronized only through versioned migrations and test data comes from synthetic seeds.
 - The `validate:deploy-env` build guard fails closed on context/project mismatch. CSP is generated at build time from the selected project ref.
 
+### 1.2 AI Document Assistant private binary boundary
+
+- PDF and DOCX are generated only inside `bright-api`; the browser neither generates binaries nor performs direct Supabase Storage CRUD.
+- Binaries live in the private `generated-documents` bucket at `<tenant>/<user>/documents/<document-id>/document.<pdf|docx>`. A restrictive Storage policy blocks `anon` and `authenticated` direct access to this bucket and private `document-assets`.
+- `bright-api` validates active tenant membership before using the service role. Downloads use 60-second signed URLs; export regenerates current editable content, and delete removes the private object before the database row.
+- A pinned SHA-256-verified `Noto Sans JP` OTF covers all four languages. It is fully embedded in PDF, embedded as obfuscated `.odttf` in DOCX, and cached in private `document-assets`.
+
 ---
 
 ## 2. FRONTEND ARCHITECTURE

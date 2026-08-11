@@ -24,6 +24,7 @@
 > 2026-08-11: PR #9 `c00362a` bilan main/productionga merge qilindi; PR/main CI green. Preview va production CSP/bundle isolation, Auth/health va production Realtime smoke-testlari o'tdi.
 > 2026-08-11: Staging modern Edge key override'lariga o'tdi, legacy anon/service-role keylari disable qilindi; real synthetic authenticated Edge acceptance 8/8 va majburiy cleanup 2 tenant/5 Auth user bilan o'tdi, yakuniy fixture soni 0/0.
 > 2026-08-11: Acceptance o'zgarishlari `cc31fe7` bilan draft PR #10ga push qilindi; GitHub CI run `31485875838` va Netlify deploy-preview `6a7b047d3150bc00088fc18d` green.
+> 2026-08-11: AI Hujjatchi real PDF/DOCX, embedded Noto Sans JP va private Storage kontrakti stagingda yakunlandi; 12/12 pgTAP va binary/unit/frontend gate'lar green, `bright-api` v5 ACTIVE. Production ataylab o'zgartirilmadi.
 
 ## Hozir qayerdamiz
 
@@ -38,15 +39,15 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | `main`/`origin/main` latest application merge `c00362a`; staging acceptance commit `cc31fe7` draft PR #10da, tracked branch clean |
+| Git | `agent/ai-document-binary-storage` draft PR #10 ustiga stack qilingan; PR #10 OPEN/DRAFT/MERGEABLE va latest CI/Netlify checklari green; binary o'zgarishlari hali push/PR qilinmagan |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
 | Health smoke-test | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 32/32 migration, `bright-api` v2, health `200` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 33/33 migration, `bright-api` v5 ACTIVE, health `200` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` modern key override'larida; legacy anon/service-role API keylari disabled |
 | Type-check | Muvaffaqiyatli |
-| Unit test | 23/23 fayl, 108/108 test |
+| Unit test | Frontend 23/23 fayl, 109/109 test; document binary Deno 4/4 |
 | Deploy environment guard | Node test 14/14: 10 isolation contracti + 2 Vite `.env` fallback/runtime-precedence + 2 bundled endpoint extraction regressiyasi |
 | Production build | Synthetic non-production project-ref bilan muvaffaqiyatli; CSP tanlangan refdan yaratildi |
 | Security check | 10 ta build/Netlify fayli muvaffaqiyatli |
@@ -61,7 +62,8 @@
 | Production frontend | Deploy `6a7af6d8233dfa000954ac24` ready, build `6a7af6d8233dfa000954ac22`, 32s, plugin success, secret match 0/87,166; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |
 | DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; local real Auth tokenli Edge `8/8`; staging modern-key remote Edge `8/8`, cleanup 2 tenant/5 Auth user va yakuniy fixture `0/0`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |
-| Migration history | Local/remote 32/32 teng; production `db push --dry-run`: up to date |
+| Document binary/Storage acceptance | Real to'rt tilli PDF `3,961,665` bayt va embedded-font DOCX `3,894,424` bayt; DOCX ichida `4,533,028` bayt `.odttf`; staging Storage/RLS pgTAP 12/12; oldingi remote generate/export/cross-tenant/direct-deny/delete E2E green |
+| Migration history | Local va staging 33/33; production ataylab oldingi 32 migrationda, document bucketlari `0` va yangi `doc_generated` ustunlari `0`; preflightda 2 legacy row, `storage_path`li/incompatible row `0` — merge/rollout tasdig'ini kutmoqda |
 | Local Supabase services | Oxirgi full-stack snapshot: Storage `v1.68.1`, Auth `v2.195.0`, enabled containerlar healthy va Storage/Auth/Studio HTTP `200`. 2026-08-11 closeoutida stack ishlamayotgan edi; remote staging acceptance bunga bog'lanmadi |
 
 ## Mahsulot va integratsiyalar holati
@@ -77,7 +79,7 @@
 | Resend email inbox | **Partial** | Webhook va mapping kodi mavjud; real receiving/delivery smoke-test tasdiqlanmagan |
 | AI Concierge / RAG | **Partial** | Claude router, OpenAI embedding va RAG fundamenti bor; explicit document search/citation va to'liq smoke-test qarzi bor |
 | AI usage/cost tracking | **Partial** | Log wiring va DB tracking bor; tenant billing dashboard/plan enforcement yo'q |
-| AI Hujjatchi | **Partial — faol** | 15 shablon, 4 til, dinamik forma va qoralama pipeline mavjud; PDF/DOCX va Storage yo'q |
+| AI Hujjatchi | **Staging-ready / production pending** | 15 shablon, 4 til, real PDF/DOCX, embedded Noto Sans JP, private Storage, 60 soniyali signed URL va tenant-scoped export/delete mavjud |
 | HR Candidate Analysis | **Skeleton** | Backend/frontend scaffold bor; production endpoint `501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme | **Planned** | Phase 3 |
 | AI Sotuvchi | **Planned** | Phase 3 |
@@ -85,14 +87,17 @@
 ## Qabul qilingan arxitektura chegarasi
 
 - Netlify: faqat React/Vite statik frontend va browser-delivery security.
-- Supabase: Auth, PostgreSQL, Edge Function API, Realtime, kelajakdagi private Storage, RLS va authorization.
+- Supabase: Auth, PostgreSQL, Edge Function API, Realtime, private Storage, RLS va authorization.
 - Browser Supabase bilan faqat Auth va Realtime uchun bevosita ishlaydi.
 - Barcha business/admin/AI/Telegram/email operatsiyalari `apiClient -> bright-api` orqali o'tadi.
+- AI Hujjatchi binarylari faqat private `generated-documents` bucketida `<tenant>/<user>/documents/<document-id>/document.<pdf|docx>` yo'lida saqlanadi; browser direct Storage CRUD qila olmaydi va faqat `bright-api` bergan 60 soniyali signed URLdan foydalanadi.
 - Server secretlari hech qachon `VITE_*`, browser bundle, Git yoki public logga chiqmaydi.
 
 ## Eng yaqin bajariladigan ishlar
 
-1. AI Hujjatchi PDF/DOCX binary generation va private Supabase Storage ishlariga o'tish.
+1. Draft PR #10ni review/merge qilish, so'ng stacked AI Hujjatchi branchini push/PR/CI/previewdan o'tkazish.
+2. Merge tasdig'idan keyin production migration va `bright-api` rolloutini bajarib authenticated PDF/DOCX/Storage smoke-test o'tkazish.
+3. Keyin AI savol-javob/polishing oqimini LLM Router orqali ulash.
 
 Batafsil tartib: [PLAN.md](PLAN.md).
 
