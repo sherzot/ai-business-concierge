@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 5.4 · 更新 2026-08-11
+> Version 5.5 · 更新 2026-08-11
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -19,7 +19,7 @@
 - [x] Light/dark、reduced motion、focus-visibleを維持しlegacy modulesをsemantic compatibilityで統一。
 - [x] TypeScript、101/101 tests、production build、security gate、dependency audit成功。
 - [x] Browser-enabled environmentでdesktop/mobile landing、login、forgot-password、contact routesをbrowser acceptance。Overlay、browser errors、horizontal overflowなし。
-- [x] Findingsなしのredesignを`83bc7e0`でcommit/push、PR #2を作成しGitHub CI/Vercel/Netlify previewを確認、`65abe2f`として`main`へmerge。
+- [x] Findingsなしのredesignを`83bc7e0`でcommit/push、PR #2を作成しGitHub CIとNetlify previewを確認、`65abe2f`として`main`へmerge。
 
 ## P1 — Supabase/Netlify security handoff完了
 
@@ -35,7 +35,15 @@
 - [x] Local non-production Auth fixtures/tokensでactive/blocked/terminated、super-admin cross-tenant/admin、role-`403` Edge integration testsを実行: 8/8 pass、production users/dataなし。
 - [x] Fresh local migration stackを修復・実行: core baselineとhistorical PL/pgSQL replay fix後、32/32 migrationsとpgTAP 21/21 pass。
 - [x] Supabase CLIを`v2.101.0`から`v2.112.0`へupgradeしfresh/full-stack regressionを再実行: 32/32 migrations、pgTAP 21/21、Edge 8/8、Storage/Auth/Studio `200`。
-- [ ] Production/preview envとsecret分離を決定。
+- [x] Delivery architectureを決定: Netlify + Supabaseのみ。Productionはproduction Supabase、preview/branch/devは別staging projectを使用し、Vercelをactive architectureから除外。
+- [x] Fail-closed `validate:deploy-env` guard、10 Node tests、dynamic Supabase CSP、CI/security gate wiringを追加。
+- [x] `sherzot's Org`のstaging cost `$0/month`を提示し、2段階user確認後に`ap-southeast-1`でproject作成。
+- [x] Stagingへ32/32 migrationsを適用し、`bright-api` v1をdeploy、health/Auth-settings/security-advisor smoke testsをpass。
+- [x] Staging Auth redirectsをNetlify preview wildcard/local Vite URLsへ制限し、email confirmation、8-digit/1-minute OTP、TOTPをexplicit pin。
+- [x] Netlify productionとdeploy-preview/branch-deploy/dev envを分離し、optional URL envを削除、authoritative CLI read-back 4/4 contextsをpass。Personalではbrowser-public `VITE_*`のみ`All` scopeを使用。
+- [ ] Stagingでephemeral synthetic Auth/tenant fixtureを使ったauthenticated Edge acceptanceを実行しfixtureを削除。
+- [x] External Vercel Git integrationを切断しproject/deployment historyを保持。CLIが作成したOIDC `.env.local`と`.vercel` metadataを直ちに削除。
+- [ ] GitHub CIとNetlify production/deploy-previewのAuth、Realtime、health、CSP、noindex smoke testsを実行。
 
 ## P1 — Phase 2 AI文書作成を完了
 

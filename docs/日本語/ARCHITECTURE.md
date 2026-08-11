@@ -1,7 +1,7 @@
 # ARCHITECTURE.md — AI Business Concierge
 
 > プロジェクトアーキテクチャ、設計パターン、ユニットテストルール
-> バージョン: 1.1 | 更新: 2026-08-07
+> バージョン: 1.2 | 更新: 2026-08-11
 >
 > Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate` foldersはTODO/stub logicを含むmodular scaffoldであり、production-ready referenceではない。
 
@@ -26,6 +26,14 @@
 ```
 
 **ルール:** 各レイヤーは自分自身または下位レイヤーのみインポートできます。下位レイヤーは上位レイヤーを知らない。
+
+### 1.1 Deliveryとenvironmentの境界
+
+- 有効なhosting pathは`GitHub -> Netlify`のみ。Vercelはruntime、preview、deployment platformとして使用しない。
+- Netlifyの`production` contextはproduction Supabase projectのみに接続する。
+- `deploy-preview`、`branch-deploy`、`dev` contextは別のstaging Supabase projectへ接続し、production project ref、key、secret、実データを使用しない。
+- Supabase FreeにはBranchingがないため、stagingは別projectとする。Schemaはversioned migrationのみで同期し、test dataはsynthetic seedで作成する。
+- `validate:deploy-env` build guardはcontext/project不一致時にfail-closedで停止する。CSPは選択したproject refからbuild時に生成する。
 
 ---
 

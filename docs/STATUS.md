@@ -17,6 +17,7 @@
 > 2026-08-11: User productionda Rahbar sifatida authenticated session ochdi; Company Dashboard “Biznes holati” paneli dark mode'da computed contrast va vizual screenshot bilan to'liq tekshirildi. Matn ko'rinadi, overlap/overflow/browser error yo'q; acceptance yakunlandi.
 > 2026-08-11: Raw npm production audit 0 ta vulnerability qaytardi; GHSA-qwww vaqtinchalik metadata exceptioni olib tashlandi va exception'siz production audit gate green tasdiqlandi.
 > 2026-08-11: GHSA exception removal `1fb6c0c` bilan bevosita `main`ga push qilindi; GitHub CI run `31466592524` barcha security-gate bosqichlari bilan green yakunlandi.
+> 2026-08-11: Faol delivery platformasi Netlify + Supabase deb qat'iy belgilandi; Vercel Git integrationi uzildi. `$0/oy` staging Supabase project ikki bosqichli user tasdig'i bilan yaratildi; 32/32 migration, `bright-api` v1, Auth hardening va Netlify context isolation 4/4 green.
 
 ## Hozir qayerdamiz
 
@@ -31,19 +32,24 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | `main` va `origin/main` `1fb6c0c`da teng; GHSA exception removal bevosita push qilingan |
+| Git | `main` va `origin/main` `a6f6e49`da teng; Netlify/Supabase isolation o'zgarishlari lokal, hali commit qilinmagan |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
 | Health smoke-test | `200` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 32/32 migration, `bright-api` v1 ACTIVE, health `200` |
+| Staging Auth | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false |
 | Type-check | Muvaffaqiyatli |
 | Unit test | 23/23 fayl, 108/108 test |
-| Production build | Muvaffaqiyatli |
-| Security check | 9 ta build/Netlify fayli muvaffaqiyatli |
+| Deploy environment guard | Node test 10/10; production faqat approved project-ref, deploy-preview/branch-deploy/dev esa production refni rad etadi |
+| Production build | Synthetic non-production project-ref bilan muvaffaqiyatli; CSP tanlangan refdan yaratildi |
+| Security check | 10 ta build/Netlify fayli muvaffaqiyatli |
 | Production dependency audit | Raw audit: jami 0 vulnerability; scoped gate exception'siz high/critical 0 |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue tokenlari; landing, public/auth, product core va admin shell redesign lokal yakunlangan |
 | Visual browser acceptance | Landing Why Us 6/6 inverse text bilan green. Authenticated Company Dashboard dark mode'da “Biznes holati” fon `rgb(17,19,24)`; title/foiz kontrasti `16.73:1`, muted text `7.5:1`, success signal `10.66:1`; 12/12 text node panel ichida, overlap/overflow/console error `0` |
-| Preview CI | PR #6 Netlify preview deploy `6a7ab3ed99861d0008a32837` ready; Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready |
+| Delivery platform | Faol platforma faqat Netlify. Repo ichida Vercel config/dependency yo'q; external Vercel project saqlangan, `gitRepositoryConnected=false` tasdiqlandi |
+| Environment isolation | Netlify CLI authoritative read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envlari yo'q; Personal rejada faqat browser-public `VITE_*` qiymatlar `All` scope'da |
+| Staging security advisor | Error `0`; ma'lum `vector` public-schema warningi `1`; server-only RLS/no-policy info `11` |
 | Remote GitHub Actions | GHSA closeout run `31466592524`, commit `1fb6c0c`: `success` (57s); type-check, 108 test, exception'siz production audit, build va security steps green |
 | Production frontend | Eng so'nggi docs-only Netlify deploy `6a7ab804ea3f550008240f11` `ready`, build `6a7ab804ea3f550008240f0f`, 2026-08-11T05:50:30.225Z da published; 32s, plugin success, secret matches 0/87,160. No-fallback app rollout artifacti `6a7ab5474835d660f21249cd` |
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |
@@ -79,8 +85,9 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. Production va preview environment/secret/data ajratish qarorini qabul qilish.
-2. AI Hujjatchi PDF/DOCX/Storage ishlariga o'tish.
+1. Stagingda ephemeral synthetic Auth/tenant fixture bilan authenticated Edge acceptance o'tkazish va fixtureni tozalash.
+2. Branch/PR orqali GitHub CI va Netlify production/preview smoke-testini yakunlash.
+3. AI Hujjatchi PDF/DOCX/Storage ishlariga o'tish.
 
 Batafsil tartib: [PLAN.md](PLAN.md).
 

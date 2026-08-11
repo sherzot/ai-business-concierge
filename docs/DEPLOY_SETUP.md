@@ -141,21 +141,32 @@ supabase functions deploy bright-api
 3. Repo: `sherzot/ai-business-concierge`
 4. **Build settings** (avtomatik `netlify.toml` dan olinadi):
    - Base directory: `frontend`
-   - Build command: `npm run build`
+   - Build command: `npm run validate:deploy-env && npm run build`
    - Publish directory: `dist`
 
 ### 5.3 Environment variables
 
 **Site settings** → **Environment variables** → **Add a variable** → **Add single variable**
 
-| Key | Value | Scopes |
-|-----|-------|--------|
-| `VITE_SUPABASE_PROJECT_ID` | `ufhepwdkjqptjvxrmpjn` | All |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase `sb_publishable_...` key (Settings → API Keys) | Builds |
+| Netlify context | `VITE_SUPABASE_PROJECT_ID` | `VITE_SUPABASE_PUBLISHABLE_KEY` | Scope |
+|---|---|---|---|
+| `production` | production ref `ufhepwdkjqptjvxrmpjn` | production `sb_publishable_...` | All (Personal plan) |
+| `deploy-preview` | alohida staging project ref | staging `sb_publishable_...` | All (Personal plan) |
+| `branch-deploy` | alohida staging project ref | staging `sb_publishable_...` | All (Personal plan) |
+| `dev` | alohida staging project ref | staging `sb_publishable_...` | All (Personal plan) |
 
-**Eslatma:** `VITE_` prefixi qiymatni browser bundle'ga chiqaradi. Bu yerga faqat publishable key yoziladi; `sb_secret_...` va `service_role` qat'iyan taqiqlanadi.
+**Eslatma:** `VITE_` prefixi qiymatni browser bundle'ga chiqaradi. Bu yerga faqat publishable key yoziladi; `sb_secret_...` va `service_role` qat'iyan taqiqlanadi. Netlify Personal rejasi granular build-only scope bermaydi, shuning uchun faqat browser-public project-ref/publishable key `All` scope'da saqlanadi; xavfsizlik context separation orqali ta'minlanadi.
 
-### 5.4 Deploy
+`VITE_SUPABASE_URL` va `VITE_API_BASE_URL` majburiy emas: ilova ularni project-refdan hosil qiladi. Agar ular Netlify'da saqlansa, har context uchun ayni projectga mos bo'lishi shart. Production qiymatlarini `All` contextga bermang. Build guard production/non-production aralashuvini bloklaydi.
+
+### 5.4 Staging Supabase talablari
+
+- Supabase Free Branching bermaydi; previewlar uchun productiondan alohida staging project yaratiladi.
+- Barcha migrationlar stagingga tartib bilan qo'llanadi va `bright-api` alohida deploy qilinadi.
+- Staging Edge Function secretlari productiondan alohida bo'ladi. Real production ma'lumoti ko'chirilmaydi; faqat synthetic test fixture/seed ishlatiladi.
+- Netlify contextlari staging Auth redirect URLlari va CORS/CSP bilan smoke-test qilinmaguncha preview handoff yakunlangan hisoblanmaydi.
+
+### 5.5 Deploy
 
 - **Deploy** tugmasi yoki `main` branch ga push qilganda avtomatik deploy bo'ladi
 - Deploy tugagach, Netlify sizga URL beradi (masalan: `https://random-name-123.netlify.app`)

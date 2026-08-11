@@ -1,7 +1,7 @@
 # ARCHITECTURE.md — AI Business Concierge
 
 > Project architecture, design patterns, and unit testing rules
-> Version: 1.1 | Updated: 2026-08-07
+> Version: 1.2 | Updated: 2026-08-11
 >
 > Current runtime status is in [STATUS.md](STATUS.md). The `hr-candidate` folders are a modular scaffold with TODO/stub logic, not a production-ready reference implementation.
 
@@ -26,6 +26,14 @@
 ```
 
 **Rule:** Each layer can only import itself or a lower layer. A lower layer does not know about higher layers.
+
+### 1.1 Delivery and environment boundary
+
+- The active hosting path is `GitHub -> Netlify` only; Vercel is not a runtime, preview, or deployment platform.
+- Netlify `production` connects only to the production Supabase project.
+- Netlify `deploy-preview`, `branch-deploy`, and `dev` connect to a separate staging Supabase project; they must never use production project refs, keys, secrets, or real data.
+- Supabase Free has no Branching, so staging is a separate project. Schema is synchronized only through versioned migrations and test data comes from synthetic seeds.
+- The `validate:deploy-env` build guard fails closed on context/project mismatch. CSP is generated at build time from the selected project ref.
 
 ---
 

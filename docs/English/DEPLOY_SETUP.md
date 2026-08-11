@@ -112,19 +112,30 @@ Create the accounts shown in [DEMO_USERS.md](DEMO_USERS.md) and add them to `use
 3. Repo: `sherzot/ai-business-concierge`
 4. **Build settings:**
    - Base directory: `frontend`
-   - Build command: `npm run build`
+   - Build command: `npm run validate:deploy-env && npm run build`
    - Publish directory: `dist`
 
 ### 5.3 Environment Variables
 
-| Key | Value |
-|-----|-------|
-| `VITE_SUPABASE_PROJECT_ID` | `ufhepwdkjqptjvxrmpjn` |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase `sb_publishable_...` key, build scope only |
+| Netlify context | `VITE_SUPABASE_PROJECT_ID` | `VITE_SUPABASE_PUBLISHABLE_KEY` | Scope |
+|---|---|---|---|
+| `production` | production ref `ufhepwdkjqptjvxrmpjn` | production `sb_publishable_...` | All (Personal plan) |
+| `deploy-preview` | separate staging project ref | staging `sb_publishable_...` | All (Personal plan) |
+| `branch-deploy` | separate staging project ref | staging `sb_publishable_...` | All (Personal plan) |
+| `dev` | separate staging project ref | staging `sb_publishable_...` | All (Personal plan) |
 
-Only publishable keys may use the `VITE_` prefix. Never place `sb_secret_...` or `service_role` in the frontend environment.
+Only publishable keys may use the `VITE_` prefix. Never place `sb_secret_...` or `service_role` in the frontend environment. Netlify Personal has no granular build-only scope, so only the browser-public project ref/publishable key use `All` scope; context separation provides isolation.
 
-### 5.4 Deploy
+`VITE_SUPABASE_URL` and `VITE_API_BASE_URL` are optional and are derived from the project ref. If retained in Netlify, they must match the selected project in each context. Never assign production values to `All` contexts. The build guard blocks production/non-production mixing.
+
+### 5.4 Staging Supabase requirements
+
+- Supabase Free has no Branching; previews use a separate staging project.
+- Apply every migration in order and deploy `bright-api` separately to staging.
+- Staging Edge Function secrets are separate from production. Never copy real production data; use synthetic test fixtures/seeds only.
+- Preview handoff is incomplete until staging Auth redirects and CORS/CSP have passed smoke tests in the Netlify contexts.
+
+### 5.5 Deploy
 
 - Clicking **Deploy** or pushing to the `main` branch triggers an automatic deploy
 

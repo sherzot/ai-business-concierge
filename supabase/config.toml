@@ -1,6 +1,23 @@
 # Supabase Edge Functions sozlamalari
 # JWT tekshiruv kodimizda (supabase.auth.getUser) amalga oshiriladi — gateway da o'chirish
 
+[auth]
+site_url = "https://ai-business-concierge1.netlify.app"
+additional_redirect_urls = [
+  "https://**--ai-business-concierge1.netlify.app/**",
+  "http://localhost:5173/**",
+  "http://127.0.0.1:5173/**",
+]
+
+[auth.email]
+enable_confirmations = true
+max_frequency = "1m"
+otp_length = 8
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
 [functions.server]
 verify_jwt = false
 

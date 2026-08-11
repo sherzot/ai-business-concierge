@@ -1,7 +1,7 @@
 # ARCHITECTURE.md — AI Business Concierge
 
 > Loyiha arxitekturasi, design patternlar va unit testing qoidalari
-> Version: 1.1 | Yangilandi: 2026-08-07
+> Version: 1.2 | Yangilandi: 2026-08-11
 >
 > Bu hujjat joriy arxitektura chegaralari va target refactoring yo'nalishini birga ko'rsatadi. Runtime holati uchun [STATUS.md](STATUS.md) ustun. `hr-candidate` papkalari scaffold bo'lib, production-ready etalon emas.
 
@@ -26,6 +26,14 @@
 ```
 
 **Qoida:** Har qatlam faqat o'zi yoki pastroq qatlamni import qila oladi. Pastroq qatlam yuqorini bilmaydi.
+
+### 1.1 Delivery va environment chegarasi
+
+- Faol hosting zanjiri faqat `GitHub -> Netlify`; Vercel runtime, preview yoki deploy platformasi emas.
+- Netlify `production` konteksti faqat production Supabase projectiga ulanadi.
+- Netlify `deploy-preview`, `branch-deploy` va `dev` kontekstlari alohida staging Supabase projectiga ulanadi; production project-ref, key, secret yoki real ma'lumot ishlatilmaydi.
+- Supabase Free rejasida Branching yo'qligi sabab staging alohida project bo'ladi. Schema faqat versionlangan migrationlar orqali sinxronlanadi, test ma'lumotlari esa synthetic seed bilan yaratiladi.
+- `validate:deploy-env` build guardi context/project mos kelmasa fail-closed to'xtaydi. CSP tanlangan project-ref asosida build vaqtida yaratiladi.
 
 ---
 
