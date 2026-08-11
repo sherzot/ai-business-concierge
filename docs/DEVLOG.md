@@ -4,6 +4,15 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-12 — Generate publish tartibi va PDF wrapping qotirildi
+
+- `661401a` CI run `31544880764` 40 soniyada PASS, Netlify `6a7ba9f3a8c5ab0009f8474f` canceled/PASS. Codex review `4911510535` binary xatosidan keyingi document cleanup muvaffaqiyatsiz bo'lsa file-less duplicate qolishi va uzun newline'siz PDF paragraf O(n²) o'lchanishini 2 ta P2 sifatida topdi.
+- Generate endi UUID document IDni oldindan yaratadi, binaryni immutable private pathga tayyorlaydi va faqat shundan keyin `documents` qatorini publish qiladi. Binary/font/upload xatosida DB qatori hali yo'q; document insert xatosida esa faqat yetim object cleanup qilinadi.
+- PDF wrapper har bir glyph kengligini bir marta o'lchab O(n) ishlaydi; 20,000 belgili regressiya testi exact 20,000 measurementni tasdiqlaydi. Delete storage snapshoti unique `doc_generated` rowga soddalashtirilib oldingi race threadi outdated qilindi. Staging `bright-api` v10 ACTIVE, health `200`; Deno 7/7, focused/syntax/diff green, full API faqat avvalgi 22 typing qarzida.
+- Qolgan ish: commit/push, yangi CI/Netlify/Codex greenidan keyin PR #11 merge va production rollout. Uch untracked user fayli tegilmagan.
+
+Fayllar: `supabase/functions/server/{index.ts,services/document-binary.ts,services/document-binary.test.ts}` va 4-tilli DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE.
+
 ## 2026-08-12 — PR #11 URL lease va delete/export race yopildi
 
 - `0532a74` uchun CI run `31543616548` 50 soniyada PASS, Netlify `6a7ba58c7a91150008320965` canceled/PASS bo'ldi. Codex review `4911406530` URL TTL lease signingdan oldin boshlanishi va delete in-flight export bilan serializatsiya qilinmaganini 2 ta P2 sifatida topdi.

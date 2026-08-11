@@ -4,6 +4,15 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-12 — Усилены generate publication order и PDF wrapping
+
+- `661401a` CI run `31544880764` прошёл за 40 секунд, Netlify `6a7ba9f3a8c5ab0009f8474f` canceled/PASS. Codex review `4911510535` нашёл два P2: failed cleanup после binary error мог оставить file-less duplicate document, а длинный PDF paragraph без newline измерялся O(n²).
+- Generate заранее назначает UUID document ID, готовит binary в immutable private path и только затем публикует `documents` row. Binary/font/upload failure происходит до DB row; document insert failure удаляет только orphan object.
+- PDF wrapping измеряет каждый glyph один раз, O(n); regression на 20,000 символов подтверждает exact 20,000 measurements. Delete snapshot читает unique `doc_generated` row, старый race thread становится outdated. Staging `bright-api` v10 ACTIVE, health `200`; Deno 7/7 и focused/syntax/diff green, full API содержит только известные 22 typing errors.
+- Remaining: commit/push, новые CI/Netlify/Codex, merge PR #11 и production rollout. Три user-owned untracked files не изменены.
+
+Files: `supabase/functions/server/{index.ts,services/document-binary.ts,services/document-binary.test.ts}` и синхронные 4-language DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE.
+
 ## 2026-08-12 — Закрыты URL-lease и delete/export races PR #11
 
 - Для `0532a74` CI run `31543616548` прошёл за 50 секунд, Netlify `6a7ba58c7a91150008320965` canceled/PASS. Codex review `4911406530` нашёл два P2: URL lease начинался до signing, delete не был serialized с in-flight export.

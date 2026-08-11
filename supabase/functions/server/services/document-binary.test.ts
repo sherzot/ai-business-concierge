@@ -8,6 +8,7 @@ import {
   isDocumentDownloadLeaseActive,
   safeDownloadName,
   sha256Hex,
+  wrapText,
 } from "./document-binary.ts";
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -64,6 +65,28 @@ Deno.test("document export lease signed URL muddatidan keyin tugaydi", () => {
     documentExportProvisionalLeaseExpiresAt(now) ===
       "2026-08-12T00:05:00.000Z",
     "provisional lease signing tugaguncha exportni bloklashi kerak",
+  );
+});
+
+Deno.test("PDF wrapping uzun paragrafni chiziqli o'lchaydi", () => {
+  let measurements = 0;
+  const content = "a".repeat(20_000);
+  const lines = wrapText(
+    content,
+    {
+      widthOfTextAtSize: (value: string) => {
+        measurements += 1;
+        return value.length;
+      },
+    },
+    10,
+    100,
+  );
+
+  assert(lines.length === 200, `unexpected line count: ${lines.length}`);
+  assert(
+    measurements === content.length,
+    `wrapping ${measurements} measurements ishlatdi`,
   );
 });
 

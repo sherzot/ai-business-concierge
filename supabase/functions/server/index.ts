@@ -3829,9 +3829,38 @@ const registerRoutes = (prefix: string) => {
       binary_current: true,
     };
 
+    const documentId = crypto.randomUUID();
+    let storedBinary: Awaited<
+      ReturnType<typeof generateAndStoreDocumentBinary>
+    >;
+    try {
+      storedBinary = await generateAndStoreDocumentBinary({
+        supabase,
+        tenantId,
+        userId,
+        documentId,
+        title: generatedTitle,
+        content: rendered.content,
+        locale: rendered.appliedLocale,
+        format,
+      });
+    } catch (error) {
+      console.error("Document binary generation error", error);
+      const code = error instanceof DocumentBinaryError
+        ? error.code
+        : "GENERATION_FAILED";
+      return failure(
+        c,
+        503,
+        code,
+        "PDF/DOCX faylini yaratib bo'lmadi. Qayta urinib ko'ring.",
+      );
+    }
+
     const { data: document, error: documentError } = await supabase
       .from("documents")
       .insert({
+        id: documentId,
         tenant_id: tenantId,
         title: generatedTitle,
         content: rendered.content,
@@ -3842,41 +3871,15 @@ const registerRoutes = (prefix: string) => {
 
     if (documentError || !document) {
       console.error("Generated document insert error", documentError);
+      const { error: cleanupError } = await supabase.storage
+        .from(storedBinary.storageBucket)
+        .remove([storedBinary.storagePath]);
+      if (cleanupError) {
+        console.error("Generated document insert cleanup error", cleanupError);
+      }
       return failure(c, 500, "DB_ERROR", "Hujjatni saqlab bo'lmadi.", {
         details: documentError?.message,
       });
-    }
-
-    let storedBinary: Awaited<
-      ReturnType<typeof generateAndStoreDocumentBinary>
-    >;
-    try {
-      storedBinary = await generateAndStoreDocumentBinary({
-        supabase,
-        tenantId,
-        userId,
-        documentId: document.id,
-        title: generatedTitle,
-        content: rendered.content,
-        locale: rendered.appliedLocale,
-        format,
-      });
-    } catch (error) {
-      console.error("Document binary generation error", error);
-      await supabase
-        .from("documents")
-        .delete()
-        .eq("id", document.id)
-        .eq("tenant_id", tenantId);
-      const code = error instanceof DocumentBinaryError
-        ? error.code
-        : "GENERATION_FAILED";
-      return failure(
-        c,
-        503,
-        code,
-        "PDF/DOCX faylini yaratib bo'lmadi. Qayta urinib ko'ring.",
-      );
     }
 
     const { data: generated, error: generatedError } = await supabase
@@ -4585,20 +4588,20 @@ const registerRoutes = (prefix: string) => {
       return failure(c, 404, "NOT_FOUND", "Document topilmadi.");
     }
 
-    const { data: generatedFiles, error: generatedFilesError } = await supabase
+    const { data: generatedFile, error: generatedFileError } = await supabase
       .from("doc_generated")
       .select("storage_path")
       .eq("tenant_id", ctx.tenantId)
       .eq("document_id", id)
-      .not("storage_path", "is", null);
-    if (generatedFilesError) {
-      console.error("Docs delete file metadata error", generatedFilesError);
+      .maybeSingle();
+    if (generatedFileError) {
+      console.error("Docs delete file metadata error", generatedFileError);
       return failure(c, 500, "DB_ERROR", "Fayl metadata yuklanmadi.");
     }
 
-    const storagePaths = [...new Set([
-      ...(generatedFiles ?? []).map((file) => file.storage_path),
-    ].filter((path): path is string => Boolean(path)))];
+    const storagePaths = generatedFile?.storage_path
+      ? [generatedFile.storage_path]
+      : [];
     const { data, error } = await supabase
       .from("documents")
       .delete()

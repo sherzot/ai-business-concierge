@@ -27,6 +27,7 @@
 > 2026-08-12: CI PR #11 green на `7837778`; P2 Codex re-review по signed-URL compensation и concurrent export исправлены DB-first cleanup, compare-and-swap и 120-second retained-version grace. Staging 35/35 migrations, `bright-api` v7, health `200`.
 > 2026-08-12: P2 Codex после green `35fa078` заменили retained cleanup на 65-second export lease и `documents.row_version` CAS. Staging 36/36 migrations, `bright-api` v8, health `200`.
 > 2026-08-12: P2 Codex для `0532a74` закрыты post-signing final lease pin и delete/export row-version CAS. Staging `bright-api` v9 ACTIVE, health `200`.
+> 2026-08-12: P2 Codex для `661401a` закрыты binary-before-DB publish и O(n) PDF wrapping. Staging `bright-api` v10 ACTIVE, health `200`, Deno 7/7.
 
 ## Текущая фаза
 
@@ -41,15 +42,15 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | PR #10 merged как `55d1468`. PR #11 head `0532a74` CI green; URL-lease/delete-race Codex fixes green local/staging и ожидают commit/push |
+| Git | PR #10 merged как `55d1468`. PR #11 head `661401a` CI green; generate/PDF Codex fixes green local/staging и ожидают commit/push |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 36/36 migrations, `bright-api` v9 ACTIVE, health `200`, unauth docs `401` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 36/36 migrations, `bright-api` v10 ACTIVE, health `200`, unauth docs `401` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge использует modern overrides `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY`; legacy anon/service-role API keys disabled |
 | Type-check | Успешно |
-| Unit tests | Frontend 23/23 файлов, 109/109 тестов; Deno document binary/lifecycle 6/6 |
+| Unit tests | Frontend 23/23 файлов, 109/109 тестов; Deno document binary/lifecycle 7/7 |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks + 2 Vite `.env` fallback/runtime-precedence + 2 bundled-endpoint extraction regressions |
 | Production build/security check | Build прошёл с synthetic non-production ref; CSP создан из этого ref; проверено 10 build/Netlify файлов |
 | Production dependency audit | Raw audit: всего 0 vulnerabilities; scoped gate без исключений: high/critical 0 |
@@ -58,12 +59,12 @@
 | Delivery platform | Только Netlify. В repository нет Vercel config/dependency; внешний Vercel project сохранён, `gitRepositoryConnected=false` подтверждён |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs отсутствуют; на Personal только browser-public `VITE_*` используют `All` scope |
 | Staging security advisor | Errors `0`; известный `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | PR #11 run `31542246103`, commit `35fa078`: success за 55s; новый run ожидается после третьего follow-up push |
+| Remote GitHub Actions | PR #11 run `31544880764`, commit `661401a`: success за 40s; новый run ожидается после generate/PDF follow-up push |
 | Netlify preview | Frontend artifact `6a7b2e774d8b4a00084583b0` ready; backend-only incremental deploy `6a7b9cd2d9412e000833a5c8` canceled/PASS |
 | Production frontend | Deploy `6a7af6d8233dfa000954ac24` ready, build `6a7af6d8233dfa000954ac22`, 32s, plugin success, 0 secret matches в 87,166 files; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup двух tenants/пяти Auth users и final fixture 0/0; Realtime tables SELECT-only и требуют active membership/tenant |
-| Document binary/Storage acceptance | Real PDF/DOCX, immutable paths, active-download lease, export/document CAS и DB-first cleanup Deno 6/6. Staging schema read-back и последний pgTAP `ok 15`, active lease residue 0; remote Auth acceptance BLOCKED Cloudflare IP `403` |
+| Document binary/Storage acceptance | Real PDF/DOCX, immutable paths, binary-before-DB publish, O(n) PDF wrap, active-download lease, export/edit/delete CAS и DB-first cleanup Deno 7/7. Staging schema read-back и последний pgTAP `ok 15`; remote Auth acceptance BLOCKED Cloudflare IP `403` |
 | Migration history | Local/staging 36/36; production остаётся на 32 migrations, document buckets/new `doc_generated` columns `0`; preflight: 2 legacy rows и `storage_path`/incompatible rows `0`, до merge PR #11 |
 | Local Supabase services | Последний full-stack snapshot: Storage `v1.68.1`, Auth `v2.195.0`, enabled containers healthy, Storage/Auth/Studio HTTP `200`. На closeout 2026-08-11 stack был stopped; remote staging acceptance от него не зависел |
 

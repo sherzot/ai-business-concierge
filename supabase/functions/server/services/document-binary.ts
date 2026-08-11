@@ -221,9 +221,9 @@ async function resolveDocumentFont(input: BinaryInput) {
     : await loadDocumentFont(input.supabase);
 }
 
-function wrapText(
+export function wrapText(
   text: string,
-  font: PDFFont,
+  font: Pick<PDFFont, "widthOfTextAtSize">,
   fontSize: number,
   maxWidth: number,
 ) {
@@ -235,16 +235,16 @@ function wrapText(
     }
 
     let line = "";
+    let lineWidth = 0;
     for (const character of Array.from(paragraph)) {
-      const candidate = `${line}${character}`;
-      if (
-        line &&
-        font.widthOfTextAtSize(candidate, fontSize) > maxWidth
-      ) {
+      const characterWidth = font.widthOfTextAtSize(character, fontSize);
+      if (line && lineWidth + characterWidth > maxWidth) {
         lines.push(line.trimEnd());
         line = character.trimStart();
+        lineWidth = line ? characterWidth : 0;
       } else {
-        line = candidate;
+        line += character;
+        lineWidth += characterWidth;
       }
     }
     if (line) lines.push(line.trimEnd());

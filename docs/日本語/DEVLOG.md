@@ -4,6 +4,15 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-12 — Generate publication orderとPDF wrappingをhardening
+
+- `661401a`のCI run `31544880764`は40秒でPASS、Netlify `6a7ba9f3a8c5ab0009f8474f`はcanceled/PASS。Codex review `4911510535`は2件P2を検出。Binary error後のfailed cleanupでfile-less duplicate documentが残り得て、newlineなし長文PDF paragraphはO(n²)測定だった。
+- GenerateはUUID document IDを事前割当し、immutable private pathへbinaryを準備してから`documents` rowをpublishする。Binary/font/upload failure時はDB row未作成、document insert failureはorphan objectのみcleanup。
+- PDF wrappingは各glyphを1回測定するO(n)。20,000文字regressionでexact 20,000 measurementsを確認。Delete snapshotはunique `doc_generated` rowを読む形へ整理し旧race threadをoutdated化。Staging `bright-api` v10 ACTIVE、health `200`。Deno 7/7、focused/syntax/diff green、full APIは既知22 typing errorsのみ。
+- Remaining: commit/push、新CI/Netlify/Codex、PR #11 merge、production rollout。既存3 user-owned untracked filesは未変更。
+
+Files: `supabase/functions/server/{index.ts,services/document-binary.ts,services/document-binary.test.ts}`と同期4-language DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE。
+
 ## 2026-08-12 — PR #11のURL leaseとdelete/export raceをclose
 
 - `0532a74`のCI run `31543616548`は50秒でPASS、Netlify `6a7ba58c7a91150008320965`はcanceled/PASS。Codex review `4911406530`はURL leaseがsigning前に開始する点とdeleteがin-flight exportとserializeされない点を2件P2として検出。
