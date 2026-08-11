@@ -26,9 +26,9 @@ import {
   DocumentBinaryError,
   GENERATED_DOCUMENTS_BUCKET,
   SIGNED_DOWNLOAD_TTL_SECONDS,
+  documentDownloadLeaseExpiresAt,
   generateAndStoreDocumentBinary,
-  parseRetainedDocumentStoragePaths,
-  retainSupersededDocumentStoragePath,
+  isDocumentDownloadLeaseActive,
   safeDownloadName,
 } from "./services/document-binary.ts";
 
@@ -3892,7 +3892,7 @@ const registerRoutes = (prefix: string) => {
         storage_bucket: storedBinary.storageBucket,
         storage_path: storedBinary.storagePath,
         storage_version: storedBinary.storageVersion,
-        retained_storage_paths: [],
+        download_expires_at: documentDownloadLeaseExpiresAt(),
         mime_type: storedBinary.mimeType,
         file_size: storedBinary.fileSize,
         sha256: storedBinary.sha256,
@@ -4141,7 +4141,7 @@ const registerRoutes = (prefix: string) => {
       await Promise.all([
         supabase
           .from("documents")
-          .select("id, title, content, metadata")
+          .select("id, title, content, metadata, row_version")
           .eq("tenant_id", tenantId)
           .eq("id", id)
           .maybeSingle(),
@@ -4163,6 +4163,15 @@ const registerRoutes = (prefix: string) => {
     }
 
     const previous = generatedResult.data;
+    if (isDocumentDownloadLeaseActive(previous?.download_expires_at)) {
+      return failure(
+        c,
+        409,
+        "EXPORT_DOWNLOAD_ACTIVE",
+        "Oldingi yuklab olish havolasi hali faol. Bir daqiqadan keyin qayta urinib ko'ring.",
+        { retry_after: previous.download_expires_at },
+      );
+    }
     const format: DocumentFormat = body?.format === "pdf"
       ? "pdf"
       : body?.format === "docx"
@@ -4217,13 +4226,7 @@ const registerRoutes = (prefix: string) => {
       storage_bucket: storedBinary.storageBucket,
       storage_path: storedBinary.storagePath,
       storage_version: storedBinary.storageVersion,
-      retained_storage_paths: retainSupersededDocumentStoragePath({
-        retained: parseRetainedDocumentStoragePaths(
-          previous?.retained_storage_paths,
-          tenantId,
-        ),
-        previousPath: previous?.storage_path,
-      }),
+      download_expires_at: documentDownloadLeaseExpiresAt(),
       mime_type: storedBinary.mimeType,
       file_size: storedBinary.fileSize,
       sha256: storedBinary.sha256,
@@ -4269,21 +4272,54 @@ const registerRoutes = (prefix: string) => {
       }
       return failure(c, 500, "DB_ERROR", "Fayl metadata saqlanmadi.");
     }
+    const generatedId = generatedWrite.data.id;
 
-    const nextMetadata = {
-      ...(document.metadata ?? {}),
-      binary_current: true,
-      format,
+    const rollbackGeneratedWrite = async () => {
+      const rollback = previous?.id
+        ? await supabase
+          .from("doc_generated")
+          .update({
+            user_id: previous.user_id,
+            template_id: previous.template_id,
+            title: previous.title,
+            locale: previous.locale,
+            fields_data: previous.fields_data,
+            format: previous.format,
+            storage_bucket: previous.storage_bucket,
+            storage_path: previous.storage_path,
+            storage_version: previous.storage_version,
+            download_expires_at: previous.download_expires_at,
+            mime_type: previous.mime_type,
+            file_size: previous.file_size,
+            sha256: previous.sha256,
+            updated_at: previous.updated_at,
+          })
+          .eq("id", previous.id)
+          .eq("tenant_id", tenantId)
+          .eq("storage_path", storedBinary.storagePath)
+          .select("id")
+          .maybeSingle()
+        : await supabase
+          .from("doc_generated")
+          .delete()
+          .eq("id", generatedId)
+          .eq("tenant_id", tenantId)
+          .eq("storage_path", storedBinary.storagePath)
+          .select("id")
+          .maybeSingle();
+
+      if (rollback.error || !rollback.data) {
+        console.error("Document export metadata rollback error", rollback.error);
+        return false;
+      }
+      const { error: cleanupError } = await supabase.storage
+        .from(storedBinary.storageBucket)
+        .remove([storedBinary.storagePath]);
+      if (cleanupError) {
+        console.error("Document export binary rollback error", cleanupError);
+      }
+      return true;
     };
-    const { error: metadataError } = await supabase
-      .from("documents")
-      .update({ metadata: nextMetadata })
-      .eq("tenant_id", tenantId)
-      .eq("id", id);
-    if (metadataError) {
-      console.error("Document export metadata sync error", metadataError);
-      return failure(c, 500, "DB_ERROR", "Hujjat metadata yangilanmadi.");
-    }
 
     const fileName = safeDownloadName(document.title, format);
     const { data: signed, error: signedError } = await supabase.storage
@@ -4295,34 +4331,52 @@ const registerRoutes = (prefix: string) => {
       );
     if (signedError || !signed?.signedUrl) {
       console.error("Document export signed URL error", signedError);
+      await rollbackGeneratedWrite();
       return failure(c, 503, "SIGNED_URL_ERROR", "Yuklab olish havolasi yaratilmadi.");
     }
 
-    const retainedPaths = generatedPayload.retained_storage_paths;
-    const expiredPaths = retainedPaths.filter(
-      (entry) => Date.parse(entry.delete_after) <= Date.now(),
-    );
-    if (expiredPaths.length) {
-      const { error: expiredCleanupError } = await supabase.storage
+    const nextMetadata = {
+      ...(document.metadata ?? {}),
+      binary_current: true,
+      format,
+    };
+    const { data: metadataWrite, error: metadataError } = await supabase
+      .from("documents")
+      .update({
+        metadata: nextMetadata,
+        row_version: Number(document.row_version) + 1,
+      })
+      .eq("tenant_id", tenantId)
+      .eq("id", id)
+      .eq("row_version", document.row_version)
+      .select("id")
+      .maybeSingle();
+    if (metadataError || !metadataWrite) {
+      console.error("Document export metadata sync error", metadataError);
+      await rollbackGeneratedWrite();
+      if (!metadataError) {
+        return failure(
+          c,
+          409,
+          "DOCUMENT_CONFLICT",
+          "Hujjat export vaqtida o'zgardi. Qayta urinib ko'ring.",
+        );
+      }
+      return failure(c, 500, "DB_ERROR", "Hujjat metadata yangilanmadi.");
+    }
+
+    // A new export is serialized until the previous signed URL's guarded
+    // lease has elapsed. The superseded object can therefore be removed now
+    // without invalidating an issued download URL.
+    if (
+      previous?.storage_path &&
+      previous.storage_path !== storedBinary.storagePath
+    ) {
+      const { error: previousCleanupError } = await supabase.storage
         .from(GENERATED_DOCUMENTS_BUCKET)
-        .remove(expiredPaths.map((entry) => entry.path));
-      if (expiredCleanupError) {
-        console.error("Expired document export cleanup error", expiredCleanupError);
-      } else {
-        const expired = new Set(expiredPaths.map((entry) => entry.path));
-        const { error: retentionWriteError } = await supabase
-          .from("doc_generated")
-          .update({
-            retained_storage_paths: retainedPaths.filter(
-              (entry) => !expired.has(entry.path),
-            ),
-          })
-          .eq("id", generatedWrite.data.id)
-          .eq("tenant_id", tenantId)
-          .eq("storage_path", storedBinary.storagePath);
-        if (retentionWriteError) {
-          console.error("Expired document retention metadata error", retentionWriteError);
-        }
+        .remove([previous.storage_path]);
+      if (previousCleanupError) {
+        console.error("Superseded document export cleanup error", previousCleanupError);
       }
     }
 
@@ -4333,7 +4387,7 @@ const registerRoutes = (prefix: string) => {
       trace_id: getTraceId(c),
       payload: {
         document_id: id,
-        generated_id: generatedWrite.data.id,
+        generated_id: generatedId,
         format,
         file_size: storedBinary.fileSize,
       },
@@ -4341,7 +4395,7 @@ const registerRoutes = (prefix: string) => {
 
     return success(c, {
       document_id: id,
-      generated_id: generatedWrite.data.id,
+      generated_id: generatedId,
       format,
       file_ready: true,
       file_name: fileName,
@@ -4398,15 +4452,25 @@ const registerRoutes = (prefix: string) => {
         title: nextTitle,
         content: nextContent,
         metadata: nextMetadata,
+        row_version: Number(existing.row_version) + 1,
       })
       .eq("tenant_id", ctx.tenantId)
       .eq("id", id)
+      .eq("row_version", existing.row_version)
       .select("*")
-      .single();
+      .maybeSingle();
 
     if (updateError || !updated) {
       if (updateError) {
         console.error("Docs update error", updateError);
+      }
+      if (!updateError) {
+        return failure(
+          c,
+          409,
+          "DOCUMENT_CONFLICT",
+          "Hujjat ayni paytda o'zgartirildi. Yangilab, qayta urinib ko'ring.",
+        );
       }
       return failure(c, 500, "DB_ERROR", "Document yangilashda xatolik.", {
         details: updateError?.message,
@@ -4466,7 +4530,7 @@ const registerRoutes = (prefix: string) => {
 
     const { data: generatedFiles, error: generatedFilesError } = await supabase
       .from("doc_generated")
-      .select("storage_path, retained_storage_paths")
+      .select("storage_path")
       .eq("tenant_id", ctx.tenantId)
       .eq("document_id", id)
       .not("storage_path", "is", null);
@@ -4477,12 +4541,6 @@ const registerRoutes = (prefix: string) => {
 
     const storagePaths = [...new Set([
       ...(generatedFiles ?? []).map((file) => file.storage_path),
-      ...(generatedFiles ?? []).flatMap((file) =>
-        parseRetainedDocumentStoragePaths(
-          file.retained_storage_paths,
-          ctx.tenantId,
-        ).map((entry) => entry.path)
-      ),
     ].filter((path): path is string => Boolean(path)))];
     const { data, error } = await supabase
       .from("documents")

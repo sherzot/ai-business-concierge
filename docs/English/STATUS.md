@@ -25,6 +25,7 @@
 > 2026-08-11: Acceptance changes were pushed as `cc31fe7` in draft PR #10; GitHub CI run `31485875838` and Netlify deploy-preview `6a7b047d3150bc00088fc18d` are green.
 > 2026-08-11: Real AI Document Assistant PDF/DOCX, embedded Noto Sans JP, and the private Storage contract are complete in staging; 12/12 pgTAP and binary/frontend gates are green, and `bright-api` v5 is ACTIVE. Production was intentionally left unchanged.
 > 2026-08-12: PR #11 CI is green at `7837778`; Codex re-review P2s for signed-URL compensation and concurrent export were fixed with DB-first cleanup, compare-and-swap, and a 120-second retained-version grace. Staging is at 35/35 migrations, `bright-api` v7, health `200`.
+> 2026-08-12: Codex P2s after green `35fa078` replaced retained cleanup with a 65-second export lease and `documents.row_version` CAS. Staging is at 36/36 migrations, `bright-api` v8, health `200`.
 
 ## Current phase
 
@@ -39,15 +40,15 @@
 
 | Check | Status |
 |---|---|
-| Git | PR #10 merged as `55d1468`. PR #11 head `7837778` is MERGEABLE with green CI; second Codex re-review fixes are local and await commit/push |
+| Git | PR #10 merged as `55d1468`. PR #11 head `35fa078` has green CI; third Codex review fixes are green locally/staging and await commit/push |
 | Runtime | Node.js `22.18.0`; `.nvmrc` and package engine pin `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; verified with a fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 35/35 migrations, `bright-api` v7 ACTIVE, health `200` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 36/36 migrations, `bright-api` v8 ACTIVE, health `200`, unauthenticated docs `401` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge uses modern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overrides; legacy anon/service-role API keys are disabled |
 | Type-check | Passed |
-| Unit tests | Frontend 23/23 files, 109/109 tests; Deno document binary/lifecycle 7/7 |
+| Unit tests | Frontend 23/23 files, 109/109 tests; Deno document binary/lifecycle 6/6 |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks, 2 Vite `.env` fallback/runtime-precedence regressions, and 2 bundled-endpoint extraction regressions |
 | Production build/security check | Build passed with a synthetic non-production ref; CSP was generated from that ref; security checked 10 build/Netlify files |
 | Production dependency audit | Raw audit: 0 total vulnerabilities; scoped gate: 0 high/critical with no exceptions |
@@ -56,13 +57,13 @@
 | Delivery platform | Netlify only. The repository has no Vercel config/dependency; the external Vercel project remains, with `gitRepositoryConnected=false` verified |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs are absent; on Personal only browser-public `VITE_*` values use `All` scope |
 | Staging security advisor | Errors `0`; known `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | PR #11 run `31540938092`, commit `7837778`: success in 52s; a new run is pending after the second follow-up push |
+| Remote GitHub Actions | PR #11 run `31542246103`, commit `35fa078`: success in 55s; a new run is pending after the third follow-up push |
 | Netlify preview | Frontend artifact `6a7b2e774d8b4a00084583b0` ready; backend-only `7837778` incremental deploy `6a7b9cd2d9412e000833a5c8` canceled/PASS |
 | Production frontend | Deploy `6a7af6d8233dfa000954ac24` ready, build `6a7af6d8233dfa000954ac22`, 32s, plugin success, 0 secret matches across 87,166 files; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
 | Frontend Supabase key contract | Code and production accept only the modern publishable key; bundle has 1 modern key, 0 JWT-like keys, no legacy env name, and the format guard; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env deleted |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup of two tenants/five Auth users, final fixture 0/0; Realtime tables are SELECT-only and require active membership/tenant |
-| Document binary/Storage acceptance | Real PDF/DOCX baseline is green; immutable/CAS/120s retained-version lifecycle passes 7/7 Deno tests. Staging JSONB/constraint/private-bucket read-back and pgTAP `ok 14`, fixture residue 0; remote Auth acceptance is BLOCKED by Cloudflare IP `403` |
-| Migration history | Local and staging 35/35; production intentionally remains at 32 migrations with 0 document buckets/new `doc_generated` columns; preflight found 2 legacy rows and 0 rows with `storage_path`/incompatibility, pending PR #11 merge |
+| Document binary/Storage acceptance | Real PDF/DOCX, immutable paths, active-download lease, export/document CAS, and DB-first cleanup pass 6/6 Deno tests. Staging schema read-back and last pgTAP `ok 15`, active lease residue 0; remote Auth acceptance is BLOCKED by Cloudflare IP `403` |
+| Migration history | Local and staging 36/36; production intentionally remains at 32 migrations with 0 document buckets/new `doc_generated` columns; preflight found 2 legacy rows and 0 rows with `storage_path`/incompatibility, pending PR #11 merge |
 | Local Supabase services | Last full-stack snapshot: Storage `v1.68.1`, Auth `v2.195.0`, enabled containers healthy, Storage/Auth/Studio HTTP `200`. The stack was stopped at the 2026-08-11 closeout; remote staging acceptance did not depend on it |
 
 ## Capability status
@@ -81,7 +82,7 @@
 
 ## Immediate order
 
-1. Push the Codex transactional follow-up to PR #11, pass GitHub CI/Netlify preview/Codex re-review, and merge the PR.
+1. Push the active-download lease/document row-version follow-up to PR #11, pass GitHub CI/Netlify preview/Codex re-review, and merge the PR.
 2. After merge, roll out production migrations and `bright-api`/Netlify, then run the strongest authenticated PDF/DOCX/Storage smoke test the environment permits.
 3. Next, connect the AI question/polishing flow through the LLM Router.
 

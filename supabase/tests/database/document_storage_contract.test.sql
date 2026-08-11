@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(14);
+select plan(15);
 
 select is(
   (select public from storage.buckets where id = 'generated-documents'),
@@ -73,11 +73,22 @@ select ok(
     select 1 from information_schema.columns
     where table_schema = 'public'
       and table_name = 'doc_generated'
-      and column_name = 'retained_storage_paths'
-      and data_type = 'jsonb'
+      and column_name = 'download_expires_at'
+      and data_type = 'timestamp with time zone'
+  ),
+  'doc_generated tracks the active signed-URL serialization deadline'
+);
+
+select ok(
+  exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'documents'
+      and column_name = 'row_version'
+      and data_type = 'bigint'
       and is_nullable = 'NO'
   ),
-  'doc_generated tracks retained signed-URL versions'
+  'documents expose an optimistic concurrency revision'
 );
 
 select ok(

@@ -19,8 +19,8 @@ import type { DocumentFormat, DocumentLocale } from "./document-generator.ts";
 export const GENERATED_DOCUMENTS_BUCKET = "generated-documents";
 export const DOCUMENT_ASSETS_BUCKET = "document-assets";
 export const SIGNED_DOWNLOAD_TTL_SECONDS = 60;
-export const SUPERSEDED_DOCUMENT_RETENTION_SECONDS =
-  SIGNED_DOWNLOAD_TTL_SECONDS + 60;
+export const DOCUMENT_EXPORT_SERIALIZATION_SECONDS =
+  SIGNED_DOWNLOAD_TTL_SECONDS + 5;
 export const MAX_GENERATED_FILE_BYTES = 10 * 1024 * 1024;
 
 const DOCUMENT_FONT_NAME = "Noto Sans JP";
@@ -55,11 +55,6 @@ export type StoredDocumentBinary = Omit<GeneratedBinary, "bytes"> & {
   storagePath: string;
   storageVersion: string;
   fileSize: number;
-};
-
-export type RetainedDocumentStoragePath = {
-  path: string;
-  delete_after: string;
 };
 
 export class DocumentBinaryError extends Error {
@@ -102,50 +97,19 @@ export function safeDownloadName(title: string, format: DocumentFormat) {
   return `${normalized || "document"}.${format}`;
 }
 
-export function parseRetainedDocumentStoragePaths(
-  value: unknown,
-  tenantId: string,
-): RetainedDocumentStoragePath[] {
-  if (!Array.isArray(value)) return [];
-  const tenantPrefix = `${tenantId}/`;
-  const unique = new Map<string, RetainedDocumentStoragePath>();
-  for (const entry of value) {
-    if (
-      !entry ||
-      typeof entry !== "object" ||
-      !("path" in entry) ||
-      !("delete_after" in entry) ||
-      typeof entry.path !== "string" ||
-      !entry.path.startsWith(tenantPrefix) ||
-      typeof entry.delete_after !== "string" ||
-      !Number.isFinite(Date.parse(entry.delete_after))
-    ) {
-      continue;
-    }
-    unique.set(entry.path, {
-      path: entry.path,
-      delete_after: entry.delete_after,
-    });
-  }
-  return [...unique.values()];
+export function documentDownloadLeaseExpiresAt(now = new Date()) {
+  return new Date(
+    now.getTime() + DOCUMENT_EXPORT_SERIALIZATION_SECONDS * 1000,
+  ).toISOString();
 }
 
-export function retainSupersededDocumentStoragePath(args: {
-  retained: RetainedDocumentStoragePath[];
-  previousPath?: string | null;
-  now?: Date;
-}) {
-  const retained = new Map(args.retained.map((entry) => [entry.path, entry]));
-  if (args.previousPath) {
-    const now = args.now ?? new Date();
-    retained.set(args.previousPath, {
-      path: args.previousPath,
-      delete_after: new Date(
-        now.getTime() + SUPERSEDED_DOCUMENT_RETENTION_SECONDS * 1000,
-      ).toISOString(),
-    });
-  }
-  return [...retained.values()];
+export function isDocumentDownloadLeaseActive(
+  value: unknown,
+  now = new Date(),
+) {
+  return typeof value === "string" &&
+    Number.isFinite(Date.parse(value)) &&
+    Date.parse(value) > now.getTime();
 }
 
 export async function sha256Hex(bytes: Uint8Array) {

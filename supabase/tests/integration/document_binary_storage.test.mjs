@@ -119,6 +119,18 @@ async function generatedMetadata(id) {
   return result.body[0];
 }
 
+async function expireDownloadLease(id) {
+  const result = await request(
+    `${apiUrl}/rest/v1/doc_generated?document_id=eq.${encodeURIComponent(id)}`,
+    {
+      method: "PATCH",
+      headers: serviceHeaders,
+      body: JSON.stringify({ download_expires_at: "2000-01-01T00:00:00.000Z" }),
+    },
+  );
+  assert.ok(result.response.ok, JSON.stringify(result.body));
+}
+
 async function removeStoragePath(path) {
   if (!path) return;
   await fetch(`${apiUrl}/storage/v1/object/generated-documents`, {
@@ -242,6 +254,23 @@ try {
   });
   assert.equal(updated.response.status, 200, JSON.stringify(updated.body));
 
+  const activeInitialDownload = await edgeRequest(
+    tokenA,
+    tenantA,
+    `/docs/${documentId}/export`,
+    {
+      method: "POST",
+      body: JSON.stringify({ format: "pdf", locale: "uz" }),
+    },
+  );
+  assert.equal(
+    activeInitialDownload.response.status,
+    409,
+    JSON.stringify(activeInitialDownload.body),
+  );
+  assert.equal(activeInitialDownload.body.error.code, "EXPORT_DOWNLOAD_ACTIVE");
+  await expireDownloadLease(documentId);
+
   const exported = await edgeRequest(tokenA, tenantA, `/docs/${documentId}/export`, {
     method: "POST",
     body: JSON.stringify({ format: "pdf", locale: "uz" }),
@@ -262,6 +291,24 @@ try {
     ),
   );
 
+  const overlappingExport = await edgeRequest(
+    tokenA,
+    tenantA,
+    `/docs/${documentId}/export`,
+    {
+      method: "POST",
+      body: JSON.stringify({ format: "pdf", locale: "uz" }),
+    },
+  );
+  assert.equal(
+    overlappingExport.response.status,
+    409,
+    JSON.stringify(overlappingExport.body),
+  );
+  assert.equal(overlappingExport.body.error.code, "EXPORT_DOWNLOAD_ACTIVE");
+  console.log("ok - active signed URL serializes parallel re-export");
+
+  await expireDownloadLease(documentId);
   const exportedAgain = await edgeRequest(
     tokenA,
     tenantA,
@@ -286,16 +333,6 @@ try {
     /document-([0-9a-f-]{36})\.pdf$/,
   )?.[1]);
 
-  const retainedPreviousExport = await fetch(exported.body.data.download_url);
-  assert.equal(retainedPreviousExport.status, 200);
-  assert.equal(
-    new TextDecoder().decode(
-      new Uint8Array(await retainedPreviousExport.arrayBuffer()).slice(0, 5),
-    ),
-    "%PDF-",
-  );
-  console.log("ok - same-format re-export retained previous signed URL");
-
   const deleted = await edgeRequest(tokenA, tenantA, `/docs/${documentId}`, {
     method: "DELETE",
   });
@@ -305,11 +342,6 @@ try {
   assert.ok(
     removedDeletedExport.status === 400 || removedDeletedExport.status === 404,
     `deleted document object kutilmaganda ${removedDeletedExport.status}`,
-  );
-  const removedRetainedExport = await fetch(exported.body.data.download_url);
-  assert.ok(
-    removedRetainedExport.status === 400 || removedRetainedExport.status === 404,
-    `retained document object kutilmaganda ${removedRetainedExport.status}`,
   );
 
   const [documentRows, generatedRows] = await Promise.all([

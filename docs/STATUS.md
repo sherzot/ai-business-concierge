@@ -26,6 +26,7 @@
 > 2026-08-11: Acceptance o'zgarishlari `cc31fe7` bilan draft PR #10ga push qilindi; GitHub CI run `31485875838` va Netlify deploy-preview `6a7b047d3150bc00088fc18d` green.
 > 2026-08-11: AI Hujjatchi real PDF/DOCX, embedded Noto Sans JP va private Storage kontrakti stagingda yakunlandi; 12/12 pgTAP va binary/unit/frontend gate'lar green, `bright-api` v5 ACTIVE. Production ataylab o'zgartirilmadi.
 > 2026-08-12: PR #11 `7837778` uchun CI green; Codex re-review topgan signed-URL compensation va parallel export P2lari DB-first cleanup, compare-and-swap hamda 120 soniyalik retained-version grace bilan tuzatildi. Staging 35/35 migration, `bright-api` v7 va health `200`.
+> 2026-08-12: `35fa078` CI greenidan keyingi Codex P2lari retained modelni 65 soniyalik export lease va `documents.row_version` CAS bilan almashtirish orqali yopildi. Staging 36/36 migration, `bright-api` v8, health `200`.
 
 ## Hozir qayerdamiz
 
@@ -40,15 +41,15 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | PR #10 `55d1468` bilan merged. PR #11 head `7837778` MERGEABLE va CI green; ikkinchi Codex re-review fixlari lokal, commit/push navbatda |
+| Git | PR #10 `55d1468` bilan merged. PR #11 head `35fa078` uchun CI green; uchinchi Codex review P2 fixlari lokal/stagingda green, commit/push navbatda |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
 | Health smoke-test | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 35/35 migration, `bright-api` v7 ACTIVE, health `200` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 36/36 migration, `bright-api` v8 ACTIVE, health `200`, authsiz docs `401` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` modern key override'larida; legacy anon/service-role API keylari disabled |
 | Type-check | Muvaffaqiyatli |
-| Unit test | Frontend 23/23 fayl, 109/109 test; document binary/lifecycle Deno 7/7 |
+| Unit test | Frontend 23/23 fayl, 109/109 test; document binary/lifecycle Deno 6/6 |
 | Deploy environment guard | Node test 14/14: 10 isolation contracti + 2 Vite `.env` fallback/runtime-precedence + 2 bundled endpoint extraction regressiyasi |
 | Production build | Synthetic non-production project-ref bilan muvaffaqiyatli; CSP tanlangan refdan yaratildi |
 | Security check | 10 ta build/Netlify fayli muvaffaqiyatli |
@@ -58,13 +59,13 @@
 | Delivery platform | Faol platforma faqat Netlify. Repo ichida Vercel config/dependency yo'q; external Vercel project saqlangan, `gitRepositoryConnected=false` tasdiqlandi |
 | Environment isolation | Netlify CLI authoritative read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envlari yo'q; Personal rejada faqat browser-public `VITE_*` qiymatlar `All` scope'da |
 | Staging security advisor | Error `0`; ma'lum `vector` public-schema warningi `1`; server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | PR #11 run `31540938092`, commit `7837778`: `success` 52s; ikkinchi follow-up pushidan keyin yangi run kutiladi |
+| Remote GitHub Actions | PR #11 run `31542246103`, commit `35fa078`: `success` 55s; uchinchi follow-up pushidan keyin yangi run kutiladi |
 | Netlify preview | Frontend artifact `6a7b2e774d8b4a00084583b0` ready; backend-only `7837778` incremental deployi `6a7b9cd2d9412e000833a5c8` canceled/PASS |
 | Production frontend | Deploy `6a7af6d8233dfa000954ac24` ready, build `6a7af6d8233dfa000954ac22`, 32s, plugin success, secret match 0/87,166; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |
 | DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; local real Auth tokenli Edge `8/8`; staging modern-key remote Edge `8/8`, cleanup 2 tenant/5 Auth user va yakuniy fixture `0/0`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |
-| Document binary/Storage acceptance | Real PDF/DOCX baseline green; immutable/CAS/120s retained-version lifecycle Deno 7/7. Staging JSONB/constraint/private bucket read-back va pgTAP `ok 14`, fixture residue 0; remote Auth acceptance Cloudflare IP `403` sabab BLOCKED |
-| Migration history | Local va staging 35/35; production ataylab oldingi 32 migrationda, document bucketlari `0` va yangi `doc_generated` ustunlari `0`; preflightda 2 legacy row, `storage_path`li/incompatible row `0` — PR #11 merge'ini kutmoqda |
+| Document binary/Storage acceptance | Real PDF/DOCX, immutable paths, active-download lease, export/document CAS va DB-first cleanup Deno 6/6. Staging schema read-back va pgTAP oxirgi `ok 15`, faol lease residue 0; remote Auth acceptance Cloudflare IP `403` sabab BLOCKED |
+| Migration history | Local va staging 36/36; production ataylab oldingi 32 migrationda, document bucketlari `0` va yangi `doc_generated` ustunlari `0`; preflightda 2 legacy row, `storage_path`li/incompatible row `0` — PR #11 merge'ini kutmoqda |
 | Local Supabase services | Oxirgi full-stack snapshot: Storage `v1.68.1`, Auth `v2.195.0`, enabled containerlar healthy va Storage/Auth/Studio HTTP `200`. 2026-08-11 closeoutida stack ishlamayotgan edi; remote staging acceptance bunga bog'lanmadi |
 
 ## Mahsulot va integratsiyalar holati
@@ -96,7 +97,7 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. Codex transactional follow-upini PR #11ga push qilib GitHub CI/Netlify preview/Codex re-reviewni green qilish va PRni merge qilish.
+1. Active-download lease va document row-version follow-upini PR #11ga push qilib GitHub CI/Netlify preview/Codex re-reviewni green qilish va PRni merge qilish.
 2. Merge'dan keyin production migration va `bright-api`/Netlify rolloutini bajarib mavjud muhit imkon bergan authenticated PDF/DOCX/Storage smoke-testni o'tkazish.
 3. Keyin AI savol-javob/polishing oqimini LLM Router orqali ulash.
 

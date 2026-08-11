@@ -4,6 +4,15 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-12 — PR #11 uchinchi Codex concurrency topilmalari serializatsiya bilan yopildi
+
+- `35fa078` uchun GitHub CI run `31542246103` 55 soniyada PASS bo'ldi; backend/docs-only Netlify preview `6a7ba1042a94de0008d79759` canceled/PASS. Codex review `4911297037` aynan shu commitda 2 ta P2 topdi: 120 soniyalik retained object cleanupi kelajak requestga bog'langan va parallel document edit exportning eski metadata/binarysini current qilib qo'yishi mumkin edi.
+- Retained-path modeli productionga chiqishidan oldin almashtirildi. `doc_generated.download_expires_at` 60 soniyali signed URL ustiga 5 soniya safety lease beradi; faol lease vaqtida re-export `409 EXPORT_DOWNLOAD_ACTIVE`, lease tugagach immutable old object yangi metadata/document commitidan keyin darhol o'chadi. `documents.row_version` edit va export metadata publishini optimistic compare-and-swap bilan serializatsiya qiladi; stale export upload/metadata rollback qilinib `409 DOCUMENT_CONFLICT` qaytaradi.
+- Follow-up migration `20260811223321_serialize_document_exports.sql` stagingga qo'llandi: staging 36/36 migration, `bright-api` v8 ACTIVE, health `200`, authsiz docs `401`; `download_expires_at`/`row_version` read-back green, eski retained ustun olib tashlangan, faol lease residue `0`, pgTAP oxirgi assertion `ok 15`. Deno binary/lifecycle `6/6`, focused check, integration syntax va diff check PASS; full API checkda faqat avvalgi 22 typing qarzi qolgan.
+- Qolgan ish: ushbu follow-upni PR #11ga push qilish, yangi CI/Netlify/Codex re-reviewni green qilish, merge va production Supabase/Netlify rollout. Remote authenticated fixture Cloudflare Auth Admin IP `403` sabab BLOCKED; mavjud uch untracked user fayliga tegilmadi.
+
+Fayllar/state: `supabase/functions/server/{index.ts,services/document-binary.ts}`, unit/database/integration testlar, `supabase/migrations/20260811223321_serialize_document_exports.sql`, sinxron 4-tilli DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE.
+
 ## 2026-08-12 — PR #11 Codex re-review concurrency va compensation topilmalari yopildi
 
 - `7837778` follow-up pushidan keyin GitHub CI run `31540938092` 52 soniyada PASS bo'ldi. Frontend o'zgarmagani uchun Netlify incremental preview `6a7b9cd2d9412e000833a5c8`ni cancel qilib statusni PASS berdi; avvalgi ayni frontend artifact previewi `6a7b2e774d8b4a00084583b0` ready qolgan. Codex re-review `4911171318` aynan `7837778`da yana ikki P2 topdi: initial generate signed-URL failure compensationi Storage-first edi va parallel export oldingi 60 soniyalik signed URL objectini darhol o'chirishi mumkin edi.

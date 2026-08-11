@@ -45,8 +45,8 @@
 
 ## P1 — complete Phase 2 AI Document Assistant
 
-- [ ] Push the second PR #11 Codex re-review follow-up—DB-first signed-URL compensation, export CAS, and 120s retained-version lifecycle; pass fresh GitHub CI, Netlify preview, and Codex re-review, then merge.
-- [ ] After merge, roll out `20260811131308_ai_document_binary_storage.sql`, `20260811142919_version_document_storage_objects.sql`, `20260811221503_retain_document_storage_versions.sql`, and `bright-api` to production; verify Netlify production and the strongest available authenticated PDF/DOCX signed-download, cross-tenant deny, direct Storage deny, and delete-cleanup smoke test.
+- [ ] Push the third PR #11 Codex follow-up—active-download lease, immutable export CAS, and `documents.row_version` conflict rollback; pass fresh GitHub CI, Netlify preview, and Codex re-review, then merge.
+- [ ] After merge, roll out the four document migrations (`20260811131308`, `20260811142919`, `20260811221503`, `20260811223321`) and `bright-api` to production; verify Netlify production and the strongest available authenticated PDF/DOCX signed-download, cross-tenant deny, direct Storage deny, and delete-cleanup smoke test.
 - [ ] Add LLM-guided questions and polishing.
 - [ ] After the web flow is stable, add Telegram step-by-step generation and file delivery.
 

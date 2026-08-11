@@ -4,6 +4,15 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-12 — Third PR #11 Codex concurrency findings closed with serialization
+
+- For `35fa078`, CI run `31542246103` passed in 55 seconds and backend/docs-only Netlify preview `6a7ba1042a94de0008d79759` was canceled/PASS. Codex review `4911297037` found two P2s on that commit: retained cleanup depended on a future request, and a parallel document edit could let export republish stale metadata/binary as current.
+- The retained-path model was replaced before production. `doc_generated.download_expires_at` provides the 60-second signed URL plus a five-second safety lease; re-export returns `409 EXPORT_DOWNLOAD_ACTIVE` while active, then removes the superseded immutable object after the new metadata/document commit. `documents.row_version` serializes edit and export publication with optimistic compare-and-swap; stale export upload/metadata is rolled back with `409 DOCUMENT_CONFLICT`.
+- Migration `20260811223321_serialize_document_exports.sql` is applied to staging: 36/36 migrations, `bright-api` v8 ACTIVE, health `200`, unauthenticated docs `401`; column/removal read-back is green, active-lease residue is zero, and the last pgTAP assertion is `ok 15`. Deno binary/lifecycle tests pass 6/6, focused check, integration syntax and diff check pass; the full API check retains only the known 22 typing errors.
+- Remaining: push this follow-up, pass fresh CI/Netlify/Codex, merge, and deploy production Supabase/Netlify. Remote authenticated fixtures remain BLOCKED by Cloudflare Auth Admin IP `403`; the three user-owned untracked files remain untouched.
+
+Files/state: `supabase/functions/server/{index.ts,services/document-binary.ts}`, unit/database/integration tests, `supabase/migrations/20260811223321_serialize_document_exports.sql`, synchronized four-language DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE.
+
 ## 2026-08-12 — PR #11 Codex re-review concurrency and compensation findings closed
 
 - After follow-up `7837778`, CI run `31540938092` passed in 52 seconds. Netlify canceled incremental preview `6a7b9cd2d9412e000833a5c8` with a passing status because the frontend was unchanged; the same frontend artifact remains ready at `6a7b2e774d8b4a00084583b0`. Codex re-review `4911171318` on `7837778` found two more P2 issues: initial signed-URL compensation was Storage-first, and concurrent export could immediately delete an object still covered by a 60-second signed URL.

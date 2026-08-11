@@ -4,6 +4,15 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-12 — PR #11の3rd Codex concurrency findingsをserializationでclose
+
+- `35fa078`のCI run `31542246103`は55秒でPASS、backend/docs-only Netlify preview `6a7ba1042a94de0008d79759`はcanceled/PASS。Codex review `4911297037`は2件P2を検出。Retained cleanupが将来request依存で、parallel document editがstale metadata/binaryをcurrentにできた。
+- Production前にretained-path modelを置換。`doc_generated.download_expires_at`は60秒signed URLと5秒safety leaseを保持し、active中のre-exportは`409 EXPORT_DOWNLOAD_ACTIVE`、期限後は新metadata/document commit後に旧immutable objectを即時削除。`documents.row_version`でedit/export publishをoptimistic compare-and-swapし、stale exportはupload/metadata rollback後`409 DOCUMENT_CONFLICT`。
+- Migration `20260811223321_serialize_document_exports.sql`をstagingへ適用。36/36 migrations、`bright-api` v8 ACTIVE、health `200`、unauth docs `401`。Schema read-back green、active lease residue 0、pgTAP最終assertion `ok 15`。Deno binary/lifecycle 6/6、focused check、integration syntax、diff check PASS。Full API checkは既知22 typing errorsのみ。
+- Remaining: follow-up push、新CI/Netlify/Codex、merge、production Supabase/Netlify rollout。Remote authenticated fixtureはCloudflare Auth Admin IP `403`でBLOCKED。既存3 user-owned untracked filesは未変更。
+
+Files/state: `supabase/functions/server/{index.ts,services/document-binary.ts}`、unit/database/integration tests、`supabase/migrations/20260811223321_serialize_document_exports.sql`、同期4-language DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE。
+
 ## 2026-08-12 — PR #11 Codex re-reviewのconcurrency/compensation findingsをclose
 
 - Follow-up `7837778`後、CI run `31540938092`は52秒でPASS。Frontend変更なしのためNetlifyはincremental preview `6a7b9cd2d9412e000833a5c8`をcancelしpassing status、同一frontend artifact `6a7b2e774d8b4a00084583b0`はready。Codex re-review `4911171318`は`7837778`でさらに2件P2を検出。Initial signed-URL compensationがStorage-firstで、concurrent exportが有効な60秒signed URLのobjectを即時削除できた。

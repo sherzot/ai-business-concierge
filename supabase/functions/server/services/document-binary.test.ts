@@ -1,10 +1,10 @@
 import {
+  documentDownloadLeaseExpiresAt,
   documentMimeType,
   documentStoragePath,
   generateAndStoreDocumentBinary,
   generateDocumentBinary,
-  parseRetainedDocumentStoragePaths,
-  retainSupersededDocumentStoragePath,
+  isDocumentDownloadLeaseActive,
   safeDownloadName,
   sha256Hex,
 } from "./document-binary.ts";
@@ -41,40 +41,23 @@ Deno.test("download nomi xavfli path belgilarini olib tashlaydi", () => {
   assert(name === "Shartnoma - 契約書- 2026.docx", `unexpected name: ${name}`);
 });
 
-Deno.test("retained Storage metadata faqat o'z tenant yo'llarini qabul qiladi", () => {
-  const retained = parseRetainedDocumentStoragePaths([
-    {
-      path: "tenant-a/user/documents/document-a/document-version.pdf",
-      delete_after: "2026-08-12T00:00:00.000Z",
-    },
-    {
-      path: "tenant-b/user/documents/document-b/document-version.pdf",
-      delete_after: "2026-08-12T00:00:00.000Z",
-    },
-    { path: "tenant-a/invalid.pdf", delete_after: "invalid" },
-  ], "tenant-a");
-
+Deno.test("document export lease signed URL muddatidan keyin tugaydi", () => {
+  const now = new Date("2026-08-12T00:00:00.000Z");
+  const expiresAt = documentDownloadLeaseExpiresAt(now);
   assert(
-    retained.length === 1,
-    `unexpected retained count: ${retained.length}`,
+    expiresAt === "2026-08-12T00:01:05.000Z",
+    `unexpected export lease deadline: ${expiresAt}`,
   );
   assert(
-    retained[0].path.startsWith("tenant-a/"),
-    "cross-tenant path retained",
+    isDocumentDownloadLeaseActive(expiresAt, now),
+    "yangi export lease faol bo'lishi kerak",
   );
-});
-
-Deno.test("superseded binary signed URL TTLdan keyingacha saqlanadi", () => {
-  const retained = retainSupersededDocumentStoragePath({
-    retained: [],
-    previousPath: "tenant-a/user/documents/document-a/document-version.pdf",
-    now: new Date("2026-08-12T00:00:00.000Z"),
-  });
-
-  assert(retained.length === 1, "superseded path saqlanmadi");
   assert(
-    retained[0].delete_after === "2026-08-12T00:02:00.000Z",
-    `unexpected retention deadline: ${retained[0].delete_after}`,
+    !isDocumentDownloadLeaseActive(
+      expiresAt,
+      new Date("2026-08-12T00:01:05.000Z"),
+    ),
+    "deadline yetganda export lease tugashi kerak",
   );
 });
 

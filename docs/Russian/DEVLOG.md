@@ -4,6 +4,15 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-12 — Третьи concurrency findings Codex в PR #11 закрыты serialization
+
+- Для `35fa078` CI run `31542246103` прошёл за 55 секунд, backend/docs-only Netlify preview `6a7ba1042a94de0008d79759` canceled/PASS. Codex review `4911297037` нашёл два P2: retained cleanup зависел от будущего request, а parallel document edit мог сделать stale metadata/binary current.
+- Retained-path model заменён до production. `doc_generated.download_expires_at` задаёт 60-second signed URL плюс 5-second safety lease; активный re-export возвращает `409 EXPORT_DOWNLOAD_ACTIVE`, после lease прежний immutable object удаляется после commit новой metadata/document. `documents.row_version` сериализует edit и export publish optimistic compare-and-swap; stale export rollback удаляет upload/metadata и возвращает `409 DOCUMENT_CONFLICT`.
+- Migration `20260811223321_serialize_document_exports.sql` применена в staging: 36/36 migrations, `bright-api` v8 ACTIVE, health `200`, unauth docs `401`; schema read-back green, active lease residue 0, последний pgTAP assertion `ok 15`. Deno binary/lifecycle 6/6, focused check, integration syntax и diff check PASS; full API check содержит только известные 22 typing errors.
+- Remaining: push follow-up, новые CI/Netlify/Codex, merge и production Supabase/Netlify rollout. Remote authenticated fixture BLOCKED Cloudflare Auth Admin IP `403`; три user-owned untracked files не изменены.
+
+Files/state: `supabase/functions/server/{index.ts,services/document-binary.ts}`, unit/database/integration tests, `supabase/migrations/20260811223321_serialize_document_exports.sql`, синхронные 4-language DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE.
+
 ## 2026-08-12 — Закрыты concurrency/compensation findings Codex re-review PR #11
 
 - После follow-up `7837778` CI run `31540938092` прошёл за 52 секунды. Netlify canceled incremental preview `6a7b9cd2d9412e000833a5c8` с passing status, потому что frontend не менялся; тот же frontend artifact остаётся ready в `6a7b2e774d8b4a00084583b0`. Codex re-review `4911171318` для `7837778` нашёл ещё два P2: initial signed-URL compensation был Storage-first, а concurrent export мог сразу удалить object с ещё действующим 60-second signed URL.

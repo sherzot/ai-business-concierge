@@ -38,8 +38,8 @@
 ### 1.2 AI文書作成private binary境界
 
 - PDF/DOCXは`bright-api`内だけで生成する。Browserはbinaryを生成せず、Supabase Storageへdirect CRUDしない。
-- Binaryはprivate `generated-documents`のimmutable `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>` pathへ保存する。Export metadata replacementは`storage_path` compare-and-swapでserialize。Superseded pathsはURL TTL 60s + safety window 60sをJSONB retention metadataで保持し、新URL署名後だけcleanupする。Document deleteはDB-first後にactive/retained pathsを削除し、legacy unversioned pathsはread可能。Restrictive policyが`anon`/`authenticated` direct accessを遮断する。
-- `bright-api`はservice role使用前にactive tenant membershipを確認する。Downloadは60秒signed URLのみ。Exportはcurrent editable contentから再生成し、deleteはDB rowより先にprivate objectを削除する。
+- Binaryはprivate `generated-documents`のimmutable `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>` pathへ保存する。`storage_path` CASがparallel commitをserializeし、65秒`download_expires_at` leaseがactiveな60秒signed URL中の置換を防ぐ。Expiry後、旧objectは新metadata/document commit後に削除。`documents.row_version` CASがparallel editとexport publicationをserializeする。Legacy unversioned pathsはread可能で、restrictive policyがdirect `anon`/`authenticated` accessを遮断する。
+- `bright-api`はservice role使用前にactive tenant membershipを確認する。Downloadは60秒signed URLのみ。Exportはcurrent editable contentから再生成し、delete/compensationはDB-first後にprivate objectをcleanupする。
 - Pinned Noto Sans JP OTFをSHA-256検証し4言語をcoverする。PDFへfull embed、DOCXへobfuscated `.odttf`としてembedし、private `document-assets`へcacheする。
 
 ---

@@ -25,6 +25,7 @@
 > 2026-08-11: Acceptance changesを`cc31fe7`としてdraft PR #10へpush。GitHub CI run `31485875838`とNetlify deploy-preview `6a7b047d3150bc00088fc18d`はgreen。
 > 2026-08-11: AI文書作成の実PDF/DOCX、embedded Noto Sans JP、private Storage contractをstagingで完了。pgTAP 12/12とbinary/frontend gatesはgreen、`bright-api` v5 ACTIVE。Productionは意図的に未変更。
 > 2026-08-12: PR #11 CIは`7837778`でgreen。Codex re-reviewのsigned-URL compensation/concurrent export P2をDB-first cleanup、compare-and-swap、120秒retained-version graceで修正。Stagingは35/35 migrations、`bright-api` v7、health `200`。
+> 2026-08-12: Green `35fa078`後のCodex P2によりretained cleanupを65秒export leaseと`documents.row_version` CASへ置換。Stagingは36/36 migrations、`bright-api` v8、health `200`。
 
 ## 現在のPhase
 
@@ -39,15 +40,15 @@
 
 | Check | 状態 |
 |---|---|
-| Git | PR #10は`55d1468`としてmerged。PR #11 head `7837778`はMERGEABLE、CI green。2nd Codex re-review fixesはlocalでcommit/push待ち |
+| Git | PR #10は`55d1468`としてmerged。PR #11 head `35fa078`はCI green。3rd Codex review fixesはlocal/staging greenでcommit/push待ち |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Supabase Edge Function `bright-api` v75、`ACTIVE`、`verify_jwt=false` |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。35/35 migrations、`bright-api` v7 ACTIVE、health `200` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。36/36 migrations、`bright-api` v8 ACTIVE、health `200`、unauth docs `401` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list。Email confirmation ON、8-digit/1-minute OTP、TOTP ON。Auth settings HTTP `200`、autoconfirm false。Edgeはmodern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overridesを使用しlegacy anon/service-role API keysはdisabled |
 | Type-check | 成功 |
-| Unit tests | Frontend 23/23 files、109/109 tests。Deno document binary/lifecycle 7/7 |
+| Unit tests | Frontend 23/23 files、109/109 tests。Deno document binary/lifecycle 6/6 |
 | Deployment environment guard | Node tests 14/14: isolation contract 10件 + Vite `.env` fallback/runtime-precedence 2件 + bundled-endpoint extraction regressions 2件 |
 | Production build/security check | Synthetic non-production refでbuild pass。CSPはそのrefから生成、10 build/Netlify filesを検査 |
 | Production dependency audit | Raw audit: vulnerability合計0件; scoped gateはexceptionなしでhigh/critical 0件 |
@@ -56,13 +57,13 @@
 | Delivery platform | Netlifyのみ。RepositoryにVercel config/dependencyなし。External Vercel projectは保持し、`gitRepositoryConnected=false`を確認 |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase、`deploy-preview`/`branch-deploy`/`dev` -> staging。Optional URL envなし。Personalではbrowser-public `VITE_*`のみ`All` scopeを使用 |
 | Staging security advisor | Error `0`、既知`vector` public-schema warning `1`、server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | PR #11 run `31540938092`、commit `7837778`: 52sでsuccess。2nd follow-up push後のnew run待ち |
+| Remote GitHub Actions | PR #11 run `31542246103`、commit `35fa078`: 55sでsuccess。3rd follow-up push後のnew run待ち |
 | Netlify preview | Frontend artifact `6a7b2e774d8b4a00084583b0` ready。Backend-only incremental deploy `6a7b9cd2d9412e000833a5c8`はcanceled/PASS |
 | Production frontend | Deploy `6a7af6d8233dfa000954ac24` ready、build `6a7af6d8233dfa000954ac22`、32s、plugin success、87,166 filesでsecret match 0。Production-only CSP/bundle、page/Auth/health `200`、Realtime `OPEN` |
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |
 | DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、local real Auth-token Edge tests 8/8。Staging modern-key remote Edge 8/8、2 tenants/5 Auth users cleanup、final fixture 0/0。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |
-| Document binary/Storage acceptance | 実PDF/DOCX baseline green。Immutable/CAS/120s retained-version lifecycleはDeno 7/7。Staging JSONB/constraint/private bucketsとpgTAP `ok 14`、fixture residue 0。Remote Auth acceptanceはCloudflare IP `403`でBLOCKED |
-| Migration history | Local/staging 35/35。Productionは32 migrations、document buckets/new `doc_generated` columns `0`のまま。Preflightはlegacy rows 2、`storage_path`/incompatible rows `0`。PR #11 merge待ち |
+| Document binary/Storage acceptance | 実PDF/DOCX、immutable paths、active-download lease、export/document CAS、DB-first cleanupはDeno 6/6。Staging schema read-backとpgTAP最終`ok 15`、active lease residue 0。Remote Auth acceptanceはCloudflare IP `403`でBLOCKED |
+| Migration history | Local/staging 36/36。Productionは32 migrations、document buckets/new `doc_generated` columns `0`のまま。Preflightはlegacy rows 2、`storage_path`/incompatible rows `0`。PR #11 merge待ち |
 | Local Supabase services | Last full-stack snapshot: Storage `v1.68.1`、Auth `v2.195.0`、enabled containers healthy、Storage/Auth/Studio HTTP `200`。2026-08-11 closeout時はstack stoppedで、remote staging acceptanceは非依存 |
 
 ## Capability状態
@@ -81,7 +82,7 @@
 
 ## 直近の順序
 
-1. Codex transactional follow-upをPR #11へpushし、GitHub CI/Netlify preview/Codex re-reviewを通してmergeする。
+1. Active-download lease/document row-version follow-upをPR #11へpushし、GitHub CI/Netlify preview/Codex re-reviewを通してmergeする。
 2. Merge後にproduction migrationsと`bright-api`/Netlifyをrolloutし、環境が許す最大範囲のauthenticated PDF/DOCX/Storage smoke-testを行う。
 3. 次にLLM Router経由のAI questions/polishingを接続。
 
