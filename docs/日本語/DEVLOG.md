@@ -4,6 +4,14 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-11 — PR #8 Codexのmode・STATUS follow-upを修正
+
+- PR #8を`e2b3e78`としてmergeしproduction rollout後、Codexから2件の正しいfinding: non-default `vite build --mode ...` valueはstandalone `security:check`へ自動伝播せず、canonical STATUSはhotfixをまだuncommittedと記載していた。
+- Security gateはenv/modeを再推測しない。Generated `_headers` CSPから一致するHTTPS/WSS 20-character Supabase refを1つ抽出し、同refがbuild bundleに存在することを検査するため、全Vite modeでgenerated artifacts同士を比較できる。STATUSからtransient “uncommitted”を削除し、PR #8 merge stateへ更新。
+- Node 22.18 verification: shell `VITE_*` unset + custom `.env.codex-mode-regression`でnon-default-mode build 3700 modules PASS。`MODE` unset standalone security gate 10 files PASS。Environment tests 12/12、TypeScript PASS、Vitest 23/23 files・108/108 tests PASS。最初のgate runでminificationがfull URLをcontiguousに保持しないことを検出し、exact 20-character ref比較へ修正して再green。一時env fileは削除。Remaining work: follow-up branch/PR CI、preview、merge、production smoke-test。
+
+Files: `frontend/scripts/security-check.mjs`、同期済み4-language STATUS/PLAN/DEVLOG。
+
 ## 2026-08-11 — PR #7 Codex reviewのVite `.env` CSP findingを修正
 
 - PR #7 post-merge Codex reviewで1件のP2 issueを確認。Vite applicationは`.env` valuesを`import.meta.env`へloadする一方、build-time CSP pluginとstandalone security gateは`process.env`のみを読んでいた。そのためdocumented local `frontend/.env` workflowではapplication configがvalidでもbuildが誤ってfailし得た。Netlify production/previewはshell environment variablesを提供するため影響なし。

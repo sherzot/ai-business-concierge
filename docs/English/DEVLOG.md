@@ -4,6 +4,14 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Fixed the PR #8 Codex mode and STATUS follow-ups
+
+- After PR #8 merged as `e2b3e78` and shipped to production, Codex reported two valid findings: a non-default `vite build --mode ...` value is not propagated automatically to standalone `security:check`, and canonical STATUS still described the hotfix as uncommitted.
+- The security gate no longer guesses env/mode again. It extracts one matching HTTPS/WSS 20-character Supabase ref from generated `_headers` CSP and verifies that the same ref exists in the build bundle, comparing generated artifacts for every Vite mode. STATUS no longer uses the transient “uncommitted” statement and now records the PR #8 merge state.
+- Node 22.18 verification: custom `.env.codex-mode-regression` with shell `VITE_*` unset drove a 3700-module non-default-mode build PASS; standalone security gate with `MODE` unset checked 10 files and PASS; environment tests 12/12, TypeScript PASS, Vitest 23/23 files and 108/108 tests PASS. The first gate run showed that minification did not preserve the full URL contiguously; comparison was corrected to the exact 20-character ref and rerun green. The temporary env file was deleted. Remaining work: follow-up branch/PR CI, preview, merge, and production smoke test.
+
+Files: `frontend/scripts/security-check.mjs`, synchronized four-language STATUS/PLAN/DEVLOG.
+
 ## 2026-08-11 — Fixed the Vite `.env` CSP finding from the PR #7 Codex review
 
 - The post-merge Codex review on PR #7 identified one P2 issue: Vite loaded application `.env` values into `import.meta.env`, while the build-time CSP plugin and standalone security gate read only `process.env`. The documented local `frontend/.env` workflow could therefore fail the build even with valid application config. Netlify production/preview were unaffected because they provide shell environment variables.

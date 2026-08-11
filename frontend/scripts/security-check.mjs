@@ -1,15 +1,9 @@
 import { readdir, readFile } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 
-import { resolveViteEnvironmentValue } from "./vite-environment.mjs";
-
 const frontendDir = resolve(import.meta.dirname, "..");
 const repoDir = resolve(frontendDir, "..");
 const distDir = join(frontendDir, "dist");
-const projectId = resolveViteEnvironmentValue("VITE_SUPABASE_PROJECT_ID", {
-  mode: process.env.MODE ?? "production",
-  envDir: frontendDir,
-});
 
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -29,6 +23,9 @@ function assert(condition, message) {
 const netlifyConfig = await readFile(join(repoDir, "netlify.toml"), "utf8");
 const indexHtml = await readFile(join(distDir, "index.html"), "utf8");
 const generatedHeaders = await readFile(join(distDir, "_headers"), "utf8");
+const generatedProjectId = generatedHeaders.match(
+  /connect-src 'self' https:\/\/([a-z0-9]{20})\.supabase\.co wss:\/\/\1\.supabase\.co/,
+)?.[1];
 const docDetailSource = await readFile(
   join(frontendDir, "src/features/docs/components/DocDetail.tsx"),
   "utf8",
@@ -76,11 +73,12 @@ assert(
   "CSP object/frame himoyasi to'liq emas.",
 );
 assert(
-  generatedHeaders.includes(
-    `connect-src 'self' https://${projectId}.supabase.co ` +
-      `wss://${projectId}.supabase.co`,
-  ),
-  "CSP tanlangan Supabase project bilan mos emas.",
+  generatedProjectId,
+  "Generated CSP bitta mos HTTPS/WSS Supabase project-ref ishlatishi kerak.",
+);
+assert(
+  bundleText.includes(generatedProjectId),
+  "Generated CSP Supabase project-refi build bundle bilan mos emas.",
 );
 
 if (["deploy-preview", "branch-deploy"].includes(process.env.CONTEXT)) {

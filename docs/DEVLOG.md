@@ -4,6 +4,14 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-11 — PR #8 Codex mode va STATUS follow-uplari tuzatildi
+
+- PR #8 `e2b3e78` bilan merge va productionga chiqqach Codex review ikki to'g'ri topilma berdi: non-default `vite build --mode ...` qiymati standalone `security:check`ga avtomatik o'tmas edi; canonical STATUS esa hotfixni hali uncommitted deb ko'rsatgan.
+- Security gate env/mode'ni qayta taxmin qilmaydi: generated `_headers` ichidagi CSPdan yagona bir xil HTTPS/WSS 20 belgili Supabase refni oladi va ayni ref build bundle ichida mavjudligini tekshiradi. Bu har qanday Vite mode'da generated artifactlarni o'zaro solishtiradi. STATUS transient “uncommitted” iborasidan tozalandi va PR #8 merge holatiga yangilandi.
+- Node 22.18 verifikatsiyasi: custom `.env.codex-mode-regression` va unset shell `VITE_*` bilan non-default mode build 3700 modul PASS; `MODE` unset standalone security gate 10 fayl PASS; environment tests 12/12, TypeScript PASS, Vitest 23/23 fayl va 108/108 test PASS. Dastlab bundle minification to'liq URLni contiguous saqlamagani aniqlandi; gate exact 20 belgili refni solishtirishga tuzatilib qayta green bo'ldi. Temporary env fayli o'chirildi. Qolgan ish: follow-up branch/PR CI, preview, merge va production smoke-test.
+
+Fayllar: `frontend/scripts/security-check.mjs`, 4-tilli STATUS/PLAN/DEVLOG.
+
 ## 2026-08-11 — PR #7 Codex reviewidagi Vite `.env` CSP topilmasi tuzatildi
 
 - PR #7 merge'dan keyingi Codex review bitta P2 topilmani ko'rsatdi: Vite application `.env` qiymatlarini `import.meta.env`ga yuklasa ham, build-time CSP plugin va standalone security gate faqat `process.env`ni o'qirdi. Shu sabab hujjatdagi `frontend/.env` lokal workflowida application config valid bo'lsa ham build noto'g'ri yiqilishi mumkin edi; Netlify production/preview shell env ishlatgani uchun deployed runtime ta'sirlanmagan.

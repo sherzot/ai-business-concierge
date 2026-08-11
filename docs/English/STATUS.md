@@ -18,7 +18,7 @@
 > 2026-08-11: The GHSA exception removal was pushed directly to `main` as `1fb6c0c`; GitHub CI run `31466592524` completed green across every security-gate step.
 > 2026-08-11: Netlify + Supabase was fixed as the only active delivery platform and the Vercel Git integration was disconnected. The `$0/month` staging Supabase project was created after two-step user confirmation; 32/32 migrations, `bright-api` v1, Auth hardening, and Netlify context isolation are green 4/4.
 > 2026-08-11: Isolation PR #7 merged into `main` as `3fb1592`; PR and main CI are green. Netlify preview and production smoke tests confirmed the appropriate staging/production ref, Auth/health `200`, Realtime `OPEN`, CSP, and preview noindex/no-store; Vercel created no new deployment.
-> 2026-08-11: The Vite `.env`/build-time CSP P2 finding from the PR #7 Codex review was fixed locally; with two regressions, environment tests are 12/12 and TypeScript, 108 tests, `.env`-only build, and the security gate are green. Hotfix branch/PR closeout remains.
+> 2026-08-11: The PR #7 Codex `.env`/CSP hotfix shipped through PR #8 as `e2b3e78` to main/production; CI `31479695709`/`31479985070` and preview/production smoke tests are green. PR #8 Codex mode/STATUS follow-ups are active on `agent/fix-security-check-build-mode`.
 
 ## Current phase
 
@@ -33,7 +33,7 @@
 
 | Check | Status |
 |---|---|
-| Git | `agent/fix-vite-env-file-security-headers` branches from main closeout `b4c7c3c`; the Codex P2 hotfix is local and uncommitted |
+| Git | `main` and `origin/main` align at `e2b3e78`; PR #8 is merged and the Codex mode/STATUS follow-up is active on `agent/fix-security-check-build-mode` |
 | Runtime | Node.js `22.18.0`; `.nvmrc` and package engine pin `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; verified with a fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -50,9 +50,9 @@
 | Delivery platform | Netlify only. The repository has no Vercel config/dependency; the external Vercel project remains, with `gitRepositoryConnected=false` verified |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs are absent; on Personal only browser-public `VITE_*` values use `All` scope |
 | Staging security advisor | Errors `0`; known `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | PR run `31478289472` and main run `31478554989`, commit `3fb1592`: success; deploy guard, type-check, 108 tests, production audit, build, and security steps green |
-| Netlify preview | PR #7 deploy `6a7aec950715d300093248d8` ready; staging-only CSP/bundle, noindex/no-store, page/Auth/health `200`, Realtime `OPEN`, 0 secret matches across 87,162 files |
-| Production frontend | Deploy `6a7aed68abe8a70008108596` ready, build `6a7aed68abe8a70008108594`, 43s, plugin success, 0 secret matches across 87,162 files; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
+| Remote GitHub Actions | PR #8 run `31479695709` and main run `31479985070`, commit `e2b3e78`: success; 12 env tests, type-check, 108 tests, audit, build, and security steps green |
+| Netlify preview | PR #8 deploy `6a7af0f72a34e60009692db9` ready; staging-only CSP/bundle, noindex/no-store, page/Auth/health `200`, 0 secret matches across 87,164 files |
+| Production frontend | Deploy `6a7af1de285a110008fa6d31` ready, build `6a7af1de285a110008fa6d2f`, 41s, plugin success, 0 secret matches across 87,164 files; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
 | Frontend Supabase key contract | Code and production accept only the modern publishable key; bundle has 1 modern key, 0 JWT-like keys, no legacy env name, and the format guard; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env deleted |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; real Auth-token Edge tests 8/8; Realtime tables are SELECT-only and require active membership/tenant |
 | Migration history | Local/remote 32/32 aligned; production `db push --dry-run`: up to date |

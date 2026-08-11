@@ -4,6 +4,14 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Исправлены Codex follow-ups PR #8 по mode и STATUS
+
+- После merge PR #8 как `e2b3e78` и production rollout Codex дал две корректные находки: non-default значение `vite build --mode ...` автоматически не передаётся standalone `security:check`, а canonical STATUS всё ещё называл hotfix uncommitted.
+- Security gate больше не угадывает env/mode повторно: из CSP generated `_headers` извлекается один совпадающий HTTPS/WSS 20-character Supabase ref и проверяется наличие того же ref в build bundle. Так generated artifacts сравниваются для любого Vite mode. Из STATUS удалено transient “uncommitted”, состояние обновлено до merge PR #8.
+- Node 22.18 verification: custom `.env.codex-mode-regression` с unset shell `VITE_*` дал non-default-mode build 3700 modules PASS; standalone security gate с unset `MODE` проверил 10 files и PASS; environment tests 12/12, TypeScript PASS, Vitest 23/23 files и 108/108 tests PASS. Первый gate run показал, что minification не сохраняет полный URL contiguous; comparison исправлен на exact 20-character ref и повторно green. Temporary env file удалён. Remaining work: follow-up branch/PR CI, preview, merge и production smoke-test.
+
+Files: `frontend/scripts/security-check.mjs`, синхронизированные 4-language STATUS/PLAN/DEVLOG.
+
 ## 2026-08-11 — Исправлена Vite `.env` CSP находка Codex review PR #7
 
 - Post-merge Codex review PR #7 обнаружил один P2 issue: Vite загружал application `.env` values в `import.meta.env`, но build-time CSP plugin и standalone security gate читали только `process.env`. Поэтому documented local workflow `frontend/.env` мог ошибочно останавливать build при valid application config. Netlify production/preview не были затронуты, поскольку передают shell environment variables.

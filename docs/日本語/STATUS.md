@@ -18,7 +18,7 @@
 > 2026-08-11: GHSA exception removalを`1fb6c0c`として`main`へdirect push。GitHub CI run `31466592524`は全security-gate steps greenで完了。
 > 2026-08-11: 有効なdelivery platformをNetlify + Supabaseのみに確定し、Vercel Git integrationを切断。`$0/month` staging Supabase projectを2段階user確認後に作成し、32/32 migrations、`bright-api` v1、Auth hardening、Netlify context isolationは4/4 green。
 > 2026-08-11: Isolation PR #7を`3fb1592`として`main`へmerge。PR/main CIはgreen。Netlify preview/production smoke testsで適切なstaging/production ref、Auth/health `200`、Realtime `OPEN`、CSP、preview noindex/no-storeを確認し、Vercel新規deploymentは0。
-> 2026-08-11: PR #7 Codex reviewのVite `.env`/build-time CSP P2 findingをlocal修正。2 regressions追加でenvironment tests 12/12、TypeScript、108 tests、`.env`-only build、security gateがgreen。Hotfix branch/PR closeoutが残る。
+> 2026-08-11: PR #7 Codex `.env`/CSP hotfixをPR #8経由で`e2b3e78`としてmain/productionへship。CI `31479695709`/`31479985070`とpreview/production smokeはgreen。PR #8 Codex mode/STATUS follow-upは`agent/fix-security-check-build-mode`でactive。
 
 ## 現在のPhase
 
@@ -33,7 +33,7 @@
 
 | Check | 状態 |
 |---|---|
-| Git | `agent/fix-vite-env-file-security-headers`をmain closeout `b4c7c3c`から作成。Codex P2 hotfixはlocal・未commit |
+| Git | `main`と`origin/main`は`e2b3e78`で一致。PR #8 merged、Codex mode/STATUS follow-upは`agent/fix-security-check-build-mode`でactive |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Supabase Edge Function `bright-api` v75、`ACTIVE`、`verify_jwt=false` |
@@ -50,9 +50,9 @@
 | Delivery platform | Netlifyのみ。RepositoryにVercel config/dependencyなし。External Vercel projectは保持し、`gitRepositoryConnected=false`を確認 |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase、`deploy-preview`/`branch-deploy`/`dev` -> staging。Optional URL envなし。Personalではbrowser-public `VITE_*`のみ`All` scopeを使用 |
 | Staging security advisor | Error `0`、既知`vector` public-schema warning `1`、server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | PR run `31478289472`とmain run `31478554989`、commit `3fb1592`: success。Deploy guard、type-check、108 tests、production audit、build、security steps green |
-| Netlify preview | PR #7 deploy `6a7aec950715d300093248d8` ready。Staging-only CSP/bundle、noindex/no-store、page/Auth/health `200`、Realtime `OPEN`、87,162 filesでsecret match 0 |
-| Production frontend | Deploy `6a7aed68abe8a70008108596` ready、build `6a7aed68abe8a70008108594`、43s、plugin success、87,162 filesでsecret match 0。Production-only CSP/bundle、page/Auth/health `200`、Realtime `OPEN` |
+| Remote GitHub Actions | PR #8 run `31479695709`とmain run `31479985070`、commit `e2b3e78`: success。12 env tests、type-check、108 tests、audit、build、security steps green |
+| Netlify preview | PR #8 deploy `6a7af0f72a34e60009692db9` ready。Staging-only CSP/bundle、noindex/no-store、page/Auth/health `200`、87,164 filesでsecret match 0 |
+| Production frontend | Deploy `6a7af1de285a110008fa6d31` ready、build `6a7af1de285a110008fa6d2f`、41s、plugin success、87,164 filesでsecret match 0。Production-only CSP/bundle、page/Auth/health `200`、Realtime `OPEN` |
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |
 | DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、real Auth-token Edge tests 8/8。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |
 | Migration history | Local/remote 32/32整合、production `db push --dry-run`: up to date |
