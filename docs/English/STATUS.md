@@ -17,6 +17,7 @@
 > 2026-08-11: The raw npm production audit returned zero vulnerabilities; the temporary GHSA-qwww metadata exception was removed and the exception-free production audit gate passed.
 > 2026-08-11: The GHSA exception removal was pushed directly to `main` as `1fb6c0c`; GitHub CI run `31466592524` completed green across every security-gate step.
 > 2026-08-11: Netlify + Supabase was fixed as the only active delivery platform and the Vercel Git integration was disconnected. The `$0/month` staging Supabase project was created after two-step user confirmation; 32/32 migrations, `bright-api` v1, Auth hardening, and Netlify context isolation are green 4/4.
+> 2026-08-11: Isolation PR #7 merged into `main` as `3fb1592`; PR and main CI are green. Netlify preview and production smoke tests confirmed the appropriate staging/production ref, Auth/health `200`, Realtime `OPEN`, CSP, and preview noindex/no-store; Vercel created no new deployment.
 
 ## Current phase
 
@@ -31,7 +32,7 @@
 
 | Check | Status |
 |---|---|
-| Git | `main` and `origin/main` aligned at `a6f6e49`; Netlify/Supabase isolation changes are local and uncommitted |
+| Git | `main` and `origin/main` aligned at `3fb1592`; Netlify/Supabase isolation merged through PR #7 |
 | Runtime | Node.js `22.18.0`; `.nvmrc` and package engine pin `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; verified with a fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -48,8 +49,9 @@
 | Delivery platform | Netlify only. The repository has no Vercel config/dependency; the external Vercel project remains, with `gitRepositoryConnected=false` verified |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs are absent; on Personal only browser-public `VITE_*` values use `All` scope |
 | Staging security advisor | Errors `0`; known `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | GHSA closeout run `31466592524`, commit `1fb6c0c`: success (57s); type-check, 108 tests, exception-free production audit, build, and security steps green |
-| Production frontend | Latest docs-only Netlify deploy `6a7ab804ea3f550008240f11` ready, build `6a7ab804ea3f550008240f0f`, published at 2026-08-11T05:50:30.225Z; 32s, plugin success, 0 secret matches across 87,160 files. No-fallback app rollout artifact: `6a7ab5474835d660f21249cd` |
+| Remote GitHub Actions | PR run `31478289472` and main run `31478554989`, commit `3fb1592`: success; deploy guard, type-check, 108 tests, production audit, build, and security steps green |
+| Netlify preview | PR #7 deploy `6a7aec950715d300093248d8` ready; staging-only CSP/bundle, noindex/no-store, page/Auth/health `200`, Realtime `OPEN`, 0 secret matches across 87,162 files |
+| Production frontend | Deploy `6a7aed68abe8a70008108596` ready, build `6a7aed68abe8a70008108594`, 43s, plugin success, 0 secret matches across 87,162 files; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
 | Frontend Supabase key contract | Code and production accept only the modern publishable key; bundle has 1 modern key, 0 JWT-like keys, no legacy env name, and the format guard; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env deleted |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; real Auth-token Edge tests 8/8; Realtime tables are SELECT-only and require active membership/tenant |
 | Migration history | Local/remote 32/32 aligned; production `db push --dry-run`: up to date |
@@ -72,7 +74,6 @@
 ## Immediate order
 
 1. Run authenticated Edge acceptance with an ephemeral synthetic Auth/tenant fixture in staging, then clean it up.
-2. Finish GitHub CI and Netlify production/preview smoke tests through a branch/PR.
-3. Continue Document Assistant PDF/DOCX/Storage work.
+2. Continue Document Assistant PDF/DOCX/Storage work.
 
 Detailed tasks: [PLAN.md](PLAN.md). Canonical source: [Uzbek STATUS](../STATUS.md).

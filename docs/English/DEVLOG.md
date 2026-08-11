@@ -4,6 +4,15 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Shipped Netlify/Supabase isolation to production through PR #7
+
+- Committed and pushed the isolation work as `4a29773` on `agent/netlify-supabase-environment-isolation` and opened PR #7. GitHub Actions PR run `31478289472` succeeded. Netlify deploy-preview `6a7aec950715d300093248d8` was ready with build `6a7aec950715d300093248d6`, plugin success, and zero normal/enhanced secret matches across 87,162 scanned files.
+- Preview smoke test: page/Auth/health HTTP `200`, Realtime `OPEN`; CSP and JavaScript bundle contained the staging ref and not the production ref; `noindex/no-store` headers were correct. PR #7 was squash-merged into `main` as `3fb1592`.
+- Main CI run `31478554989` succeeded. Netlify production deploy `6a7aed68abe8a70008108596` was ready with build `6a7aed68abe8a70008108594`, 43 seconds, plugin success, and zero secret matches across 87,162 files. Production page/Auth/health returned HTTP `200`, Realtime was `OPEN`, and CSP/bundle contained only the production ref with no staging ref. Vercel created zero deployments during the merge window, confirming that the disconnected Git integration did not restart.
+- Remaining work: Supabase CLI v2.112 cannot parse the `projects api-keys` metadata timestamp, so ephemeral synthetic Auth/tenant authenticated Edge acceptance and cleanup in staging remain a separate active item. The three existing untracked user files were not committed.
+
+Files/state: PR #7, commit `3fb1592`, GitHub CI `31478289472`/`31478554989`, Netlify preview `6a7aec950715d300093248d8`, production `6a7aed68abe8a70008108596`, synchronized four-language STATUS/PLAN/DEVLOG.
+
 ## 2026-08-11 — Netlify/Supabase environment isolation decision and fail-closed guard prepared
 
 - The audit confirmed that the repository has no Vercel config/dependency, while an external Vercel project still has a Git integration. Netlify frontend Supabase values for `production`, `deploy-preview`, `branch-deploy`, and `dev` all pointed to the same production project, so a PR preview could reach the production Auth/API/Realtime/data boundary. The Supabase organization is on Free with no Branching; production was healthy and no separate staging project existed. No credential was written to documentation or logs.

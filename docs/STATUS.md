@@ -18,6 +18,7 @@
 > 2026-08-11: Raw npm production audit 0 ta vulnerability qaytardi; GHSA-qwww vaqtinchalik metadata exceptioni olib tashlandi va exception'siz production audit gate green tasdiqlandi.
 > 2026-08-11: GHSA exception removal `1fb6c0c` bilan bevosita `main`ga push qilindi; GitHub CI run `31466592524` barcha security-gate bosqichlari bilan green yakunlandi.
 > 2026-08-11: Faol delivery platformasi Netlify + Supabase deb qat'iy belgilandi; Vercel Git integrationi uzildi. `$0/oy` staging Supabase project ikki bosqichli user tasdig'i bilan yaratildi; 32/32 migration, `bright-api` v1, Auth hardening va Netlify context isolation 4/4 green.
+> 2026-08-11: Isolation PR #7 `3fb1592` bilan `main`ga merge qilindi; PR/main CI green. Netlify preview va production smoke-testlarida tegishli staging/production ref, Auth/health `200`, Realtime `OPEN`, CSP hamda preview noindex/no-store tasdiqlandi; Vercel yangi deploy yaratmagan.
 
 ## Hozir qayerdamiz
 
@@ -32,7 +33,7 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | `main` va `origin/main` `a6f6e49`da teng; Netlify/Supabase isolation o'zgarishlari lokal, hali commit qilinmagan |
+| Git | `main` va `origin/main` `3fb1592`da teng; Netlify/Supabase isolation PR #7 orqali merge qilingan |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -50,8 +51,9 @@
 | Delivery platform | Faol platforma faqat Netlify. Repo ichida Vercel config/dependency yo'q; external Vercel project saqlangan, `gitRepositoryConnected=false` tasdiqlandi |
 | Environment isolation | Netlify CLI authoritative read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envlari yo'q; Personal rejada faqat browser-public `VITE_*` qiymatlar `All` scope'da |
 | Staging security advisor | Error `0`; ma'lum `vector` public-schema warningi `1`; server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | GHSA closeout run `31466592524`, commit `1fb6c0c`: `success` (57s); type-check, 108 test, exception'siz production audit, build va security steps green |
-| Production frontend | Eng so'nggi docs-only Netlify deploy `6a7ab804ea3f550008240f11` `ready`, build `6a7ab804ea3f550008240f0f`, 2026-08-11T05:50:30.225Z da published; 32s, plugin success, secret matches 0/87,160. No-fallback app rollout artifacti `6a7ab5474835d660f21249cd` |
+| Remote GitHub Actions | PR run `31478289472` va main run `31478554989`, commit `3fb1592`: `success`; deploy guard, type-check, 108 test, production audit, build va security steps green |
+| Netlify preview | PR #7 deploy `6a7aec950715d300093248d8` ready; staging-only CSP/bundle, noindex/no-store, page/Auth/health `200`, Realtime `OPEN`, secret match 0/87,162 |
+| Production frontend | Deploy `6a7aed68abe8a70008108596` ready, build `6a7aed68abe8a70008108594`, 43s, plugin success, secret match 0/87,162; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |
 | DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; real Auth tokenli Edge `8/8`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |
 | Migration history | Local/remote 32/32 teng; production `db push --dry-run`: up to date |
@@ -86,8 +88,7 @@
 ## Eng yaqin bajariladigan ishlar
 
 1. Stagingda ephemeral synthetic Auth/tenant fixture bilan authenticated Edge acceptance o'tkazish va fixtureni tozalash.
-2. Branch/PR orqali GitHub CI va Netlify production/preview smoke-testini yakunlash.
-3. AI Hujjatchi PDF/DOCX/Storage ishlariga o'tish.
+2. AI Hujjatchi PDF/DOCX/Storage ishlariga o'tish.
 
 Batafsil tartib: [PLAN.md](PLAN.md).
 

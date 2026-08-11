@@ -4,6 +4,15 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Netlify/Supabase isolation выпущена в production через PR #7
+
+- Isolation changes committed/pushed как `4a29773` в branch `agent/netlify-supabase-environment-isolation`, открыт PR #7. GitHub Actions PR run `31478289472` завершён со статусом `success`; Netlify deploy-preview `6a7aec950715d300093248d8` ready, build `6a7aec950715d300093248d6`, plugin success, normal/enhanced secret matches `0` в 87,162 scanned files.
+- Preview smoke-test: page/Auth/health HTTP `200`, Realtime `OPEN`; CSP и JavaScript bundle содержат staging ref и не содержат production ref; headers `noindex/no-store` корректны. PR #7 squash-merged в `main` как `3fb1592`.
+- Main CI run `31478554989` success. Netlify production deploy `6a7aed68abe8a70008108596` ready, build `6a7aed68abe8a70008108594`, 43s, plugin success, secret matches `0` в 87,162 files. Production page/Auth/health HTTP `200`, Realtime `OPEN`; CSP/bundle содержат только production ref без staging ref. В период merge Vercel создал `0` новых deployments, то есть отключённая Git integration не возобновилась.
+- Remaining work: Supabase CLI v2.112 не может parse metadata timestamp команды `projects api-keys`, поэтому staging ephemeral synthetic Auth/tenant authenticated Edge acceptance и cleanup остаются отдельным active item. Три существующих untracked user files не committed.
+
+Files/state: PR #7, commit `3fb1592`, GitHub CI `31478289472`/`31478554989`, Netlify preview `6a7aec950715d300093248d8`, production `6a7aed68abe8a70008108596`, синхронизированные 4-language STATUS/PLAN/DEVLOG.
+
 ## 2026-08-11 — Подготовлены решение Netlify/Supabase environment isolation и fail-closed guard
 
 - Audit подтвердил отсутствие Vercel config/dependency в repository, но внешний Vercel project всё ещё имеет Git integration. Frontend Supabase values Netlify для `production`, `deploy-preview`, `branch-deploy` и `dev` указывали на один production project, поэтому PR preview мог обращаться к production Auth/API/Realtime/data boundary. Supabase organization работает на Free без Branching; production был healthy, отдельного staging project не было. Credentials не записывались в docs/logs.

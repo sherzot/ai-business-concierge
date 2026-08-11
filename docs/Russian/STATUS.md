@@ -17,6 +17,7 @@
 > 2026-08-11: Raw npm production audit вернул 0 vulnerabilities; временное metadata exception GHSA-qwww удалено, а production audit gate без исключений успешно пройден.
 > 2026-08-11: GHSA exception removal напрямую push в `main` как `1fb6c0c`; GitHub CI run `31466592524` завершён green со всеми security-gate steps.
 > 2026-08-11: Единственной активной delivery platform выбраны Netlify + Supabase; Vercel Git integration отключён. Staging Supabase project `$0/month` создан после двухэтапного user confirmation; 32/32 migrations, `bright-api` v1, Auth hardening и Netlify context isolation green 4/4.
+> 2026-08-11: Isolation PR #7 merged в `main` как `3fb1592`; PR и main CI green. Netlify preview/production smoke tests подтвердили соответствующие staging/production refs, Auth/health `200`, Realtime `OPEN`, CSP и preview noindex/no-store; Vercel не создал новый deployment.
 
 ## Текущая фаза
 
@@ -31,7 +32,7 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | `main` и `origin/main` совпадают на `a6f6e49`; изменения Netlify/Supabase isolation локальные и ещё не закоммичены |
+| Git | `main` и `origin/main` совпадают на `3fb1592`; Netlify/Supabase isolation merged через PR #7 |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -48,8 +49,9 @@
 | Delivery platform | Только Netlify. В repository нет Vercel config/dependency; внешний Vercel project сохранён, `gitRepositoryConnected=false` подтверждён |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs отсутствуют; на Personal только browser-public `VITE_*` используют `All` scope |
 | Staging security advisor | Errors `0`; известный `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | GHSA closeout run `31466592524`, commit `1fb6c0c`: success (57s); type-check, 108 tests, production audit без exception, build и security steps green |
-| Production frontend | Latest docs-only Netlify deploy `6a7ab804ea3f550008240f11` ready, build `6a7ab804ea3f550008240f0f`, published 2026-08-11T05:50:30.225Z; 32s, plugin success, 0 secret matches в 87,160 files. No-fallback app rollout artifact: `6a7ab5474835d660f21249cd` |
+| Remote GitHub Actions | PR run `31478289472` и main run `31478554989`, commit `3fb1592`: success; deploy guard, type-check, 108 tests, production audit, build и security steps green |
+| Netlify preview | PR #7 deploy `6a7aec950715d300093248d8` ready; staging-only CSP/bundle, noindex/no-store, page/Auth/health `200`, Realtime `OPEN`, 0 secret matches в 87,162 files |
+| Production frontend | Deploy `6a7aed68abe8a70008108596` ready, build `6a7aed68abe8a70008108594`, 43s, plugin success, 0 secret matches в 87,162 files; production-only CSP/bundle, page/Auth/health `200`, Realtime `OPEN` |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; real Auth-token Edge tests 8/8; Realtime tables SELECT-only и требуют active membership/tenant |
 | Migration history | Local/remote 32/32 совпадают; production `db push --dry-run`: up to date |
@@ -72,7 +74,6 @@
 ## Ближайший порядок
 
 1. Выполнить authenticated Edge acceptance с ephemeral synthetic Auth/tenant fixture в staging и очистить fixture.
-2. Завершить GitHub CI и Netlify production/preview smoke tests через branch/PR.
-3. Продолжить PDF/DOCX/Storage Документолога.
+2. Продолжить PDF/DOCX/Storage Документолога.
 
 Подробности: [PLAN.md](PLAN.md). Основной источник: [узбекский STATUS](../STATUS.md).

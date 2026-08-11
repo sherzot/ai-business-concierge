@@ -1,6 +1,6 @@
 # AI Business Concierge — активный план
 
-> Версия 5.5 · Обновлено 2026-08-11
+> Версия 5.6 · Обновлено 2026-08-11
 > Здесь только активные и следующие задачи. Старый master plan: [../archive/Russian/PLAN_LEGACY_2026-07-24.md](../archive/Russian/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — безопасное начало сессии
@@ -43,7 +43,6 @@
 - [x] Разделить Netlify production и deploy-preview/branch-deploy/dev env, удалить optional URL envs и пройти authoritative CLI read-back 4/4 contexts. На Personal только browser-public `VITE_*` используют `All` scope.
 - [ ] Выполнить authenticated Edge acceptance с ephemeral synthetic Auth/tenant fixture в staging и очистить fixture.
 - [x] Отключить external Vercel Git integration, сохранив project/deployment history; сразу удалить созданные CLI OIDC `.env.local` и `.vercel` metadata.
-- [ ] Выполнить GitHub CI и Netlify production/deploy-preview smoke tests Auth, Realtime, health, CSP и noindex.
 
 ## P1 — завершить Phase 2 AI Документолог
 

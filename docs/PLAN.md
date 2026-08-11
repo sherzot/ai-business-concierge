@@ -1,6 +1,6 @@
 # AI Business Concierge — faol reja
 
-> Version: 5.5
+> Version: 5.6
 > Yangilandi: 2026-08-11
 > Bu faylda faqat faol va navbatdagi ishlar turadi. 2026-07-24 gacha bo'lgan katta tarixiy reja [archive/PLAN_LEGACY_2026-07-24.md](archive/PLAN_LEGACY_2026-07-24.md)ga ko'chirilgan.
 
@@ -51,7 +51,6 @@
 - [x] Netlify `production` envlarini production contextga, staging envlarini `deploy-preview`/`branch-deploy`/`dev` contextlariga o'tkazish; optional URL envlarini olib tashlash va CLI read-backni 4/4 o'tkazish. Personal reja sabab faqat browser-public `VITE_*` qiymatlar `All` scope'da.
 - [ ] Stagingda ephemeral synthetic Auth/tenant fixture bilan authenticated Edge acceptance o'tkazish va fixtureni tozalash.
 - [x] Vercel external Git integrationini uzish; project/deployment historyni saqlash, CLI yaratgan OIDC `.env.local` va `.vercel` metadata’sini darhol o'chirish.
-- [ ] GitHub CI, Netlify production va deploy-previewda Auth/Realtime/health/CSP/noindex smoke-testlarini o'tkazish.
 
 ## P1 — Phase 2 AI Hujjatchini tugallash
 

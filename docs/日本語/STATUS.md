@@ -17,6 +17,7 @@
 > 2026-08-11: Raw npm production auditはvulnerability 0件。Temporary GHSA-qwww metadata exceptionを削除し、exceptionなしのproduction audit gate成功を確認。
 > 2026-08-11: GHSA exception removalを`1fb6c0c`として`main`へdirect push。GitHub CI run `31466592524`は全security-gate steps greenで完了。
 > 2026-08-11: 有効なdelivery platformをNetlify + Supabaseのみに確定し、Vercel Git integrationを切断。`$0/month` staging Supabase projectを2段階user確認後に作成し、32/32 migrations、`bright-api` v1、Auth hardening、Netlify context isolationは4/4 green。
+> 2026-08-11: Isolation PR #7を`3fb1592`として`main`へmerge。PR/main CIはgreen。Netlify preview/production smoke testsで適切なstaging/production ref、Auth/health `200`、Realtime `OPEN`、CSP、preview noindex/no-storeを確認し、Vercel新規deploymentは0。
 
 ## 現在のPhase
 
@@ -31,7 +32,7 @@
 
 | Check | 状態 |
 |---|---|
-| Git | `main`と`origin/main`は`a6f6e49`で一致。Netlify/Supabase isolation変更はlocalで未commit |
+| Git | `main`と`origin/main`は`3fb1592`で一致。Netlify/Supabase isolationはPR #7でmerge済み |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Supabase Edge Function `bright-api` v75、`ACTIVE`、`verify_jwt=false` |
@@ -48,8 +49,9 @@
 | Delivery platform | Netlifyのみ。RepositoryにVercel config/dependencyなし。External Vercel projectは保持し、`gitRepositoryConnected=false`を確認 |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase、`deploy-preview`/`branch-deploy`/`dev` -> staging。Optional URL envなし。Personalではbrowser-public `VITE_*`のみ`All` scopeを使用 |
 | Staging security advisor | Error `0`、既知`vector` public-schema warning `1`、server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | GHSA closeout run `31466592524`、commit `1fb6c0c`: success (57s)。Type-check、108 tests、exceptionなしproduction audit、build、security steps green |
-| Production frontend | Latest docs-only Netlify deploy `6a7ab804ea3f550008240f11` ready、build `6a7ab804ea3f550008240f0f`、2026-08-11T05:50:30.225Zにpublished。32s、plugin success、87,160 filesでsecret match 0。No-fallback app rollout artifact: `6a7ab5474835d660f21249cd` |
+| Remote GitHub Actions | PR run `31478289472`とmain run `31478554989`、commit `3fb1592`: success。Deploy guard、type-check、108 tests、production audit、build、security steps green |
+| Netlify preview | PR #7 deploy `6a7aec950715d300093248d8` ready。Staging-only CSP/bundle、noindex/no-store、page/Auth/health `200`、Realtime `OPEN`、87,162 filesでsecret match 0 |
+| Production frontend | Deploy `6a7aed68abe8a70008108596` ready、build `6a7aed68abe8a70008108594`、43s、plugin success、87,162 filesでsecret match 0。Production-only CSP/bundle、page/Auth/health `200`、Realtime `OPEN` |
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |
 | DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、real Auth-token Edge tests 8/8。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |
 | Migration history | Local/remote 32/32整合、production `db push --dry-run`: up to date |
@@ -72,7 +74,6 @@
 ## 直近の順序
 
 1. Stagingでephemeral synthetic Auth/tenant fixtureを使ったauthenticated Edge acceptanceを実行しfixtureを削除。
-2. Branch/PR経由でGitHub CIとNetlify production/preview smoke testsを完了。
-3. Document Assistant PDF/DOCX/Storageを継続。
+2. Document Assistant PDF/DOCX/Storageを継続。
 
 詳細: [PLAN.md](PLAN.md)。Canonical: [Uzbek STATUS](../STATUS.md)。

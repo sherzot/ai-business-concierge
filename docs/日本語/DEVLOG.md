@@ -4,6 +4,15 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-11 — PR #7でNetlify/Supabase isolationをproductionへリリース
+
+- Isolation変更を`agent/netlify-supabase-environment-isolation`へ`4a29773`としてcommit/pushし、PR #7を作成。GitHub Actions PR run `31478289472`は`success`。Netlify deploy-preview `6a7aec950715d300093248d8`はready、build `6a7aec950715d300093248d6`、plugin success、87,162 scanned filesでnormal/enhanced secret match `0`。
+- Preview smoke-test: page/Auth/health HTTP `200`、Realtime `OPEN`。CSPとJavaScript bundleはstaging refを含みproduction refを含まない。`noindex/no-store` headersも正しい。PR #7をsquash-mergeし、`3fb1592`として`main`へ反映。
+- Main CI run `31478554989`はsuccess。Netlify production deploy `6a7aed68abe8a70008108596`はready、build `6a7aed68abe8a70008108594`、43s、plugin success、87,162 filesでsecret match `0`。Production page/Auth/health HTTP `200`、Realtime `OPEN`。CSP/bundleはproduction refのみを含みstaging refなし。Merge期間中のVercel新規deploymentは`0`で、切断済みGit integrationが再起動していないことを確認。
+- Remaining work: Supabase CLI v2.112が`projects api-keys` metadata timestampをparseできないため、stagingのephemeral synthetic Auth/tenant authenticated Edge acceptanceとcleanupは別active itemとして残る。既存の3 untracked user filesはcommitしていない。
+
+Files/state: PR #7、commit `3fb1592`、GitHub CI `31478289472`/`31478554989`、Netlify preview `6a7aec950715d300093248d8`、production `6a7aed68abe8a70008108596`、同期済み4-language STATUS/PLAN/DEVLOG。
+
 ## 2026-08-11 — Netlify/Supabase environment isolation方針とfail-closed guardを準備
 
 - Auditでrepository内にVercel config/dependencyがない一方、external Vercel projectにはGit integrationが残ることを確認。Netlifyの`production`、`deploy-preview`、`branch-deploy`、`dev`のfrontend Supabase valuesは全て同じproduction projectを参照し、PR previewがproduction Auth/API/Realtime/data boundaryへ接続可能だった。Supabase organizationはFreeでBranchingなし。Productionはhealthyで別staging projectはなかった。Credentialをdocs/logsへ記録していない。

@@ -4,6 +4,15 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-11 — Netlify/Supabase isolation PR #7 orqali productionga chiqarildi
+
+- Isolation o'zgarishlari `4a29773` bilan `agent/netlify-supabase-environment-isolation` branchiga commit/push qilindi va PR #7 ochildi. GitHub Actions PR run `31478289472` `success`; Netlify deploy-preview `6a7aec950715d300093248d8` `ready`, build `6a7aec950715d300093248d6`, plugin `success`, 87,162 scanned faylda normal/enhanced secret match `0`.
+- Preview smoke-test: sahifa/Auth/health HTTP `200`, Realtime `OPEN`; CSP va JavaScript bundle staging refni o'z ichiga oldi, production refni olmadi; `noindex/no-store` headerlari to'g'ri. PR #7 squash-merge qilinib `3fb1592` bilan `main`ga tushdi.
+- Main CI run `31478554989` `success`. Netlify production deploy `6a7aed68abe8a70008108596` `ready`, build `6a7aed68abe8a70008108594`, 43s, plugin `success`, 87,162 scanned faylda secret match `0`. Production sahifa/Auth/health HTTP `200`, Realtime `OPEN`; CSP/bundle faqat production refni o'z ichiga oldi, staging ref yo'q. Merge oralig'ida Vercel yangi deploymentlari `0`, ya'ni uzilgan Git integration qayta ishga tushmagan.
+- Qolgan ish: Supabase CLI v2.112 `projects api-keys` metadata timestampini parse qila olmagani sabab stagingdagi ephemeral synthetic Auth/tenant authenticated Edge acceptance va cleanup alohida faol item bo'lib qoladi. Uchta mavjud untracked user fayli commit qilinmadi.
+
+Fayllar/state: PR #7, commit `3fb1592`, GitHub CI `31478289472`/`31478554989`, Netlify preview `6a7aec950715d300093248d8`, production `6a7aed68abe8a70008108596`, 4-tilli STATUS/PLAN/DEVLOG.
+
 ## 2026-08-11 — Netlify/Supabase environment isolation qarori va fail-closed guard tayyorlandi
 
 - Oldingi holat auditida faol repo ichida Vercel config/dependency yo'qligi, ammo tashqi Vercel project Git integrationi mavjudligi tasdiqlandi. Netlify `production`, `deploy-preview`, `branch-deploy` va `dev` contextlarining frontend Supabase qiymatlari bir xil production projectga qaragan; demak PR preview production Auth/API/Realtime/data chegarasiga ulanishi mumkin edi. Supabase organization Free rejada va Branching mavjud emas; production project healthy, alohida staging project yo'q edi. Hech qanday credential hujjat/logga yozilmadi.
