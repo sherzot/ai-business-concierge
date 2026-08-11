@@ -4,6 +4,22 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-11 — PR #9 Codex bundled endpoint drift topilmasi yopildi
+
+- PR #9ni merge'dan oldin kutish natijasida Codex yana bitta P2 drift holatini topdi: CSP ref bundle ichida biror joyda mavjud bo'lishi yetarli, optional `VITE_SUPABASE_URL`/`VITE_API_BASE_URL` esa boshqa Supabase project endpointiga qarashi mumkin edi.
+- `security-artifacts.mjs` bundled HTTPS/WSS Supabase endpointlaridan barcha 20 belgili project-ref'larni, shu jumladan escaped URL stringlarni chiqaradi. Security gate generated CSP refning bundle ichida mavjudligini va topilgan har bir runtime endpoint ref aynan shu CSP refga tengligini tekshiradi. Ikki regression test qo'shilib deploy/security environment testlari 14/14ga yetdi.
+- Node 22.18 acceptance: mismatched synthetic API project bilan non-default-mode build 3700 modul PASS, security gate kutilganidek FAIL; ayni fixture CSP projectga moslangach build 3700 modul va 10-faylli security gate PASS. TypeScript PASS, Vitest baseline 23/23 fayl va 108/108 test PASS. Temporary env fixture o'chirildi. Qolgan ish: PR #9 branchiga follow-up commit push, CI/preview qayta green, Codex re-review va merge/production smoke.
+
+Fayllar: `frontend/scripts/security-artifacts.mjs`, `frontend/scripts/security-artifacts.node.mjs`, `frontend/scripts/security-check.mjs`, `frontend/package.json`, 4-tilli STATUS/DEVLOG.
+
+## 2026-08-11 — PR #8 Codex mode va STATUS follow-uplari tuzatildi
+
+- PR #8 `e2b3e78` bilan merge va productionga chiqqach Codex review ikki to'g'ri topilma berdi: non-default `vite build --mode ...` qiymati standalone `security:check`ga avtomatik o'tmas edi; canonical STATUS esa hotfixni hali uncommitted deb ko'rsatgan.
+- Security gate env/mode'ni qayta taxmin qilmaydi: generated `_headers` ichidagi CSPdan yagona bir xil HTTPS/WSS 20 belgili Supabase refni oladi va ayni ref build bundle ichida mavjudligini tekshiradi. Bu har qanday Vite mode'da generated artifactlarni o'zaro solishtiradi. STATUS transient “uncommitted” iborasidan tozalandi va PR #8 merge holatiga yangilandi.
+- Node 22.18 verifikatsiyasi: custom `.env.codex-mode-regression` va unset shell `VITE_*` bilan non-default mode build 3700 modul PASS; `MODE` unset standalone security gate 10 fayl PASS; environment tests 12/12, TypeScript PASS, Vitest 23/23 fayl va 108/108 test PASS. Dastlab bundle minification to'liq URLni contiguous saqlamagani aniqlandi; gate exact 20 belgili refni solishtirishga tuzatilib qayta green bo'ldi. Temporary env fayli o'chirildi. Qolgan ish: follow-up branch/PR CI, preview, merge va production smoke-test.
+
+Fayllar: `frontend/scripts/security-check.mjs`, 4-tilli STATUS/PLAN/DEVLOG.
+
 ## 2026-08-11 — PR #7 Codex reviewidagi Vite `.env` CSP topilmasi tuzatildi
 
 - PR #7 merge'dan keyingi Codex review bitta P2 topilmani ko'rsatdi: Vite application `.env` qiymatlarini `import.meta.env`ga yuklasa ham, build-time CSP plugin va standalone security gate faqat `process.env`ni o'qirdi. Shu sabab hujjatdagi `frontend/.env` lokal workflowida application config valid bo'lsa ham build noto'g'ri yiqilishi mumkin edi; Netlify production/preview shell env ishlatgani uchun deployed runtime ta'sirlanmagan.

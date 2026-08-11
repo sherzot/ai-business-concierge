@@ -1,15 +1,11 @@
 import { readdir, readFile } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 
-import { resolveViteEnvironmentValue } from "./vite-environment.mjs";
+import { extractSupabaseEndpointProjectIds } from "./security-artifacts.mjs";
 
 const frontendDir = resolve(import.meta.dirname, "..");
 const repoDir = resolve(frontendDir, "..");
 const distDir = join(frontendDir, "dist");
-const projectId = resolveViteEnvironmentValue("VITE_SUPABASE_PROJECT_ID", {
-  mode: process.env.MODE ?? "production",
-  envDir: frontendDir,
-});
 
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -29,6 +25,9 @@ function assert(condition, message) {
 const netlifyConfig = await readFile(join(repoDir, "netlify.toml"), "utf8");
 const indexHtml = await readFile(join(distDir, "index.html"), "utf8");
 const generatedHeaders = await readFile(join(distDir, "_headers"), "utf8");
+const generatedProjectId = generatedHeaders.match(
+  /connect-src 'self' https:\/\/([a-z0-9]{20})\.supabase\.co wss:\/\/\1\.supabase\.co/,
+)?.[1];
 const docDetailSource = await readFile(
   join(frontendDir, "src/features/docs/components/DocDetail.tsx"),
   "utf8",
@@ -47,6 +46,7 @@ const textFiles = distFiles.filter((file) =>
 const bundleText = (
   await Promise.all(textFiles.map((file) => readFile(file, "utf8")))
 ).join("\n");
+const bundledEndpointProjectIds = extractSupabaseEndpointProjectIds(bundleText);
 
 assert(
   netlifyConfig.includes("SECRETS_SCAN_SMART_DETECTION_ENABLED = \"true\""),
@@ -76,11 +76,18 @@ assert(
   "CSP object/frame himoyasi to'liq emas.",
 );
 assert(
-  generatedHeaders.includes(
-    `connect-src 'self' https://${projectId}.supabase.co ` +
-      `wss://${projectId}.supabase.co`,
+  generatedProjectId,
+  "Generated CSP bitta mos HTTPS/WSS Supabase project-ref ishlatishi kerak.",
+);
+assert(
+  bundleText.includes(generatedProjectId),
+  "Generated CSP Supabase project-refi build bundle bilan mos emas.",
+);
+assert(
+  [...bundledEndpointProjectIds].every(
+    (projectId) => projectId === generatedProjectId,
   ),
-  "CSP tanlangan Supabase project bilan mos emas.",
+  "Build bundle ichidagi Supabase endpointlar generated CSP project-refi bilan mos emas.",
 );
 
 if (["deploy-preview", "branch-deploy"].includes(process.env.CONTEXT)) {
