@@ -4,6 +4,64 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-12 — Generate publication orderとPDF wrappingをhardening
+
+- `661401a`のCI run `31544880764`は40秒でPASS、Netlify `6a7ba9f3a8c5ab0009f8474f`はcanceled/PASS。Codex review `4911510535`は2件P2を検出。Binary error後のfailed cleanupでfile-less duplicate documentが残り得て、newlineなし長文PDF paragraphはO(n²)測定だった。
+- GenerateはUUID document IDを事前割当し、immutable private pathへbinaryを準備してから`documents` rowをpublishする。Binary/font/upload failure時はDB row未作成、document insert failureはorphan objectのみcleanup。
+- PDF wrappingは各glyphを1回測定するO(n)。20,000文字regressionでexact 20,000 measurementsを確認。Delete snapshotはunique `doc_generated` rowを読む形へ整理し旧race threadをoutdated化。Staging `bright-api` v10 ACTIVE、health `200`。Deno 7/7、focused/syntax/diff green、full APIは既知22 typing errorsのみ。
+- Remaining: commit/push、新CI/Netlify/Codex、PR #11 merge、production rollout。既存3 user-owned untracked filesは未変更。
+
+Files: `supabase/functions/server/{index.ts,services/document-binary.ts,services/document-binary.test.ts}`と同期4-language DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE。
+
+## 2026-08-12 — PR #11のURL leaseとdelete/export raceをclose
+
+- `0532a74`のCI run `31543616548`は50秒でPASS、Netlify `6a7ba58c7a91150008320965`はcanceled/PASS。Codex review `4911406530`はURL leaseがsigning前に開始する点とdeleteがin-flight exportとserializeされない点を2件P2として検出。
+- Binary metadata publish時に5分provisional leaseを取得し、URL signing成功時点からfinal 65秒leaseへpin。Final lease write失敗はDB metadata/objectをcompensationしURLを返さない。
+- Deleteは`documents.row_version` CASを使用。Export publishが勝てばdeleteは`409 DOCUMENT_CONFLICT`、deleteが勝てばstale exportはdocument不在を検出し新immutable uploadをcleanup。Staging `bright-api` v9 ACTIVE、health `200`。Deno 6/6、focused/syntax/diff green、full APIは既知22 typing errorsのみ。
+- Remaining: commit/push、新CI/Netlify/Codex、PR #11 merge、production rollout。既存3 user-owned untracked filesは未変更。
+
+Files: `supabase/functions/server/{index.ts,services/document-binary.ts,services/document-binary.test.ts}`と同期4-language DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE。
+
+## 2026-08-12 — PR #11の3rd Codex concurrency findingsをserializationでclose
+
+- `35fa078`のCI run `31542246103`は55秒でPASS、backend/docs-only Netlify preview `6a7ba1042a94de0008d79759`はcanceled/PASS。Codex review `4911297037`は2件P2を検出。Retained cleanupが将来request依存で、parallel document editがstale metadata/binaryをcurrentにできた。
+- Production前にretained-path modelを置換。`doc_generated.download_expires_at`は60秒signed URLと5秒safety leaseを保持し、active中のre-exportは`409 EXPORT_DOWNLOAD_ACTIVE`、期限後は新metadata/document commit後に旧immutable objectを即時削除。`documents.row_version`でedit/export publishをoptimistic compare-and-swapし、stale exportはupload/metadata rollback後`409 DOCUMENT_CONFLICT`。
+- Migration `20260811223321_serialize_document_exports.sql`をstagingへ適用。36/36 migrations、`bright-api` v8 ACTIVE、health `200`、unauth docs `401`。Schema read-back green、active lease residue 0、pgTAP最終assertion `ok 15`。Deno binary/lifecycle 6/6、focused check、integration syntax、diff check PASS。Full API checkは既知22 typing errorsのみ。
+- Remaining: follow-up push、新CI/Netlify/Codex、merge、production Supabase/Netlify rollout。Remote authenticated fixtureはCloudflare Auth Admin IP `403`でBLOCKED。既存3 user-owned untracked filesは未変更。
+
+Files/state: `supabase/functions/server/{index.ts,services/document-binary.ts}`、unit/database/integration tests、`supabase/migrations/20260811223321_serialize_document_exports.sql`、同期4-language DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE。
+
+## 2026-08-12 — PR #11 Codex re-reviewのconcurrency/compensation findingsをclose
+
+- Follow-up `7837778`後、CI run `31540938092`は52秒でPASS。Frontend変更なしのためNetlifyはincremental preview `6a7b9cd2d9412e000833a5c8`をcancelしpassing status、同一frontend artifact `6a7b2e774d8b4a00084583b0`はready。Codex re-review `4911171318`は`7837778`でさらに2件P2を検出。Initial signed-URL compensationがStorage-firstで、concurrent exportが有効な60秒signed URLのobjectを即時削除できた。
+- Generate signed-URL compensationはtenant-scoped document deleteを確認してからbinary cleanupする。Export replacementは`storage_path` compare-and-swapでmetadata commitsをserializeし、stale parallel requestは新uploadをcleanupして`409 EXPORT_CONFLICT`を返す。
+- Superseded binariesは`retained_storage_paths`へ`path/delete_after`として記録し120秒保持する。内訳はURL TTL 60秒とsafety window 60秒。Expired objectは新URL署名後だけcleanupし、cleanup metadataもcompare-and-swap。Document deleteはDB-first後にactiveと全retained pathsを削除。Migration `20260811221503_retain_document_storage_versions.sql`でJSONB-array contractを追加。
+- Stagingは35/35 migrations、`bright-api` v7 ACTIVE、health `200`。Retained column/constraint green、pgTAP最終assertion `ok 14`、retained/acceptance residue 0。Security advisorはpre-existing debtのみで新document Storage findingなし。Deno binary/lifecycle `7/7`、focused service check、integration syntax、diff check PASS。Full API checkは同じ22 pre-existing typing errors。Remote authenticated fixtureはCloudflare Auth Admin IP `403`でBLOCKEDのまま。
+- Remaining: 2nd follow-upをcommit/pushし、新CI/Netlify/Codex後にmerge、production migrations/Edge/Netlify rollout。既存3 untracked user filesは未変更。
+
+Files/state: `supabase/functions/server/{index.ts,services/document-binary.ts}`、`supabase/functions/server/services/document-binary.test.ts`、`supabase/migrations/20260811221503_retain_document_storage_versions.sql`、`supabase/tests/{database/document_storage_contract.test.sql,integration/document_binary_storage.test.mjs}`、同期済み4-language STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/DEVLOG。
+
+## 2026-08-11 — PR #11 Codex transactional Storage findingsを修正
+
+- PR #10の`adab3fe`を再確認しgreenのため`55d1468`として`main`へsquash-merge。PR #11を`main`へretargetし、squash-history conflictは同PRの2 commitsだけをreplayして解消。Head `50a46c2`でCI run `31500547178`は53秒でPASS、Netlify preview `6a7b2e774d8b4a00084583b0` ready。`/`と`/dashboard/docs`は`200`、staging-only CSPと`noindex`を確認。
+- Codex review `4907243544`は`50a46c2`で2件のP2を検出。Same-format re-exportがDB metadata commit前にactive objectをoverwriteし、deleteがDB rowより先にbinaryを削除していた。Exportは`upsert:false`でimmutable UUID-versioned path `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>`を作成し、metadata成功後だけ旧objectをcleanupする。Deleteはtenant-scoped document rowを先に削除し、その後binary cleanupを行う。
+- Follow-up migration `20260811142919_version_document_storage_objects.sql`で`storage_version`とexact versioned-path constraintを追加し、legacy unversioned rowsのread compatibilityを維持。Stagingは34/34 migrations、`bright-api` v6 ACTIVE、health `200`。Schema/constraint/private bucketsはgreen、synthetic fixture residue 0。Advisorsは既存linter debtのみで新規document Storage findingなし。
+- Verification: Deno binary/service `5/5`、focused service `deno check`、integration `node --check`、`git diff --check` PASS。Full `bright-api` checkは既存の22 logging/Hono/risk/usage typing errorsのみ。Remote staging Auth acceptanceはfixture作成前に既知Cloudflare IP-level `403`でblocked、final residue 0のため新authenticated remote pathはBLOCKED。Remaining: PR #11へfix push、CI/Netlify/Codex再実行、merge後にproduction Supabase/Netlify rolloutと可能な最大範囲のsmoke-test。
+
+Files/state: PR #10 merge `55d1468`、PR #11、`supabase/functions/server/{index.ts,services/document-binary.ts}`、`supabase/functions/server/services/document-binary.test.ts`、`supabase/migrations/20260811142919_version_document_storage_objects.sql`、`supabase/tests/{database/document_storage_contract.test.sql,integration/document_binary_storage.test.mjs}`、同期済み4-language STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/DEVLOG。
+
+## 2026-08-11 — AI文書作成の実PDF/DOCXとprivate Storageをstagingで完了
+
+- 以前は15 templates、4言語、dynamic form、editable draftsがあったが、「PDF」はbrowser print、downloadは`.txt`で、private Storage、binary metadata、signed URL、tenant/user path contractがなかった。作業はdraft PR #10上の`agent/ai-document-binary-storage` stacked branch。既存3 untracked user filesは保持しstageしていない。
+- Pinned `pdf-lib@1.17.1`、`@pdf-lib/fontkit@1.1.1`、`docx@9.7.1`で実生成を追加。Pinned Noto Sans JP assetをexact SHA-256検証してprivate cacheし、PDFへfull embed、DOCXへ`word/fonts/font1.odttf`としてembed。Visual reviewでPDF subsettingのbroken CFF glyph mapを発見し、full-font embeddingで4言語を修正。
+- Private `generated-documents`/`document-assets` buckets、10/5 MiB limits、MIME allow-lists、`doc_generated` binary metadata/checksum/FK/unique/canonical-path constraints、`anon`/`authenticated`向けrestrictive direct-access deny policyを追加。Pathは`<tenant>/<user>/documents/<document-id>/document.<pdf|docx>`、downloadは60秒signed URL。Generate/export/edit-stale/deleteはtenant-scopedでcompensation cleanupとaudit logsあり。
+- Frontend print/`.txt` pseudo-exportを実PDF/DOCX downloadへ置換し、list/detail file status、4 locales copy、OpenAPI generate/export contractを更新。
+- Migration `20260811131308`をstaging `piqsyfwrjtormrlenjix`へapplyし、`bright-api` v5 ACTIVE、health `ok`。Storage/RLS pgTAP 12/12 PASS。以前のv3 remote E2Eは実DOCX/PDF download、direct authenticated Storage deny `400`、cross-tenant export `404`、edit/regenerate、delete cleanupをPASS。Embedded-font v4/v5 acceptance再実行はfixture作成前にSupabase Auth AdminのIP-level Cloudflare `403`でblock。Final residueはacceptance users/tenants/documents/templates/generated rows/objectsが0、verified private font cacheが1。Productionは意図的に未変更でnew buckets `0`、new columns `0`。Preflightは2 legacy generated rowsの`storage_path`がいずれもnullと確認。
+- Verification: Deno binary 4/4、DOCX ZIP integrity green、embedded `.odttf` `4,533,028` bytes、final DOCX `3,894,424` bytes、PDF `3,961,665` bytes、Quick Look visual green。Frontend Vitest 23/23 files・109/109 tests、TypeScript、3700-module production build、raw audit total 0、production high/critical 0、focused docs API 5/5、new service `deno check`、integration `node --check`、`git diff --check` PASS。Full `bright-api` Deno checkの22件logging/Hono/risk/usage type debtはpre-existing。Docker stoppedのためlocal Supabaseは未実行。
+- Application/docsを`d8bec96`として`agent/ai-document-binary-storage`へcommit/pushし、draft PR #11をPR #10 head branch上にOPEN/DRAFT/MERGEABLEで作成。CI workflowはbase `main`のPRだけで動くため#11 checksはまだなく、failureではない。Remaining: PR #10 review/merge、#11を`main`へretarget、CI/Netlify/Codex、次にproduction migration/Edge rolloutとauthenticated smoke。次product sliceはLLM Router questions/polishing。
+
+Files: `supabase/migrations/20260811131308_ai_document_binary_storage.sql`、`supabase/functions/bright-api/deno.json`、`supabase/functions/server/{index.ts,openapi.ts}`、`supabase/functions/server/services/document-binary{,.test}.ts`、`supabase/tests/{database/document_storage_contract.test.sql,integration/document_binary_storage.test.mjs}`、`frontend/src/features/docs/**`、`frontend/src/app/i18n.ts`、同期済み4-language STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/DEVLOG。
+
 ## 2026-08-11 — Staging authenticated Edge acceptanceとlegacy-key cleanup完了
 
 - 以前はstaging migrationsと`bright-api` healthはgreenだったが、Supabase CLI `v2.112.0`のAPI-key timestamp parserによりremote Auth/tenant acceptanceがblockされていた。Integration scriptはlocal stack専用でcleanup responsesをassertしていなかった。

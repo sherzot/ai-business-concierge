@@ -1,6 +1,6 @@
 # AI Business Concierge — faol reja
 
-> Version: 5.8
+> Version: 5.9
 > Yangilandi: 2026-08-11
 > Bu faylda faqat faol va navbatdagi ishlar turadi. 2026-07-24 gacha bo'lgan katta tarixiy reja [archive/PLAN_LEGACY_2026-07-24.md](archive/PLAN_LEGACY_2026-07-24.md)ga ko'chirilgan.
 
@@ -53,12 +53,9 @@
 
 ## P1 — Phase 2 AI Hujjatchini tugallash
 
+- [ ] PR #11 generate/PDF follow-upini — binary-before-DB publish, O(n) glyph wrapping va delete/export CAS — push qilish; yangi GitHub CI, Netlify preview va Codex re-reviewni green qilib PRni merge qilish.
+- [ ] Merge'dan keyin to'rtta document migration (`20260811131308`, `20260811142919`, `20260811221503`, `20260811223321`) va `bright-api`ni productionga chiqarish; Netlify production deploy hamda mavjud muhit imkon bergan authenticated PDF/DOCX signed-download, cross-tenant deny, direct Storage deny va delete cleanup smoke-testini o'tkazish.
 - [ ] AI savol-javob/polishing oqimini LLM Router orqali ulash.
-- [ ] Haqiqiy PDF va DOCX binary generatsiyasini yozish.
-- [ ] O'zbek/rus matni uchun Noto Sans font embeddingni tekshirish.
-- [ ] Private Supabase Storage bucket va `<tenant>/<user>/<resource>/<file>` path kontraktini yaratish.
-- [ ] Upload/download/delete RLS, MIME/extension/size/name validation va signed URL oqimini yozish.
-- [ ] Unit/integration testlar va 4 til/light-dark regressiya smoke-testini o'tkazish.
 - [ ] Web oqimi barqarorlashgach Telegram step-by-step hujjat yaratish va document yuborishni ulash.
 
 ## P2 — operatsion integratsiyalar

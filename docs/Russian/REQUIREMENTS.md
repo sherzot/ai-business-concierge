@@ -2,7 +2,7 @@
 
 Данный документ определяет требования к проекту и направления развития. Обращайтесь к этому документу при добавлении новых функций.
 
-> Обновлено 2026-08-07. Текущий snapshot: [STATUS.md](STATUS.md). Статусы: Done, Partial, Skeleton, Planned.
+> Обновлено 2026-08-11. Текущий snapshot: [STATUS.md](STATUS.md). Статусы: Done, Partial, Skeleton, Planned.
 
 ---
 
@@ -46,7 +46,7 @@
 | R-018 | AI cost tracking | Partial; logging есть, tenant dashboard/enforcement остаётся | Backend |
 | R-019 | Vector Search (RAG) | Partial; vector/embedding основа есть, explicit tool/citations остаются | Docs |
 | R-020 | Admin Dashboard | Partial; core pages есть, billing/advanced agents остаются | Admin |
-| R-021 | AI Документовед binary output | Partial; templates/drafts есть, PDF/DOCX/Storage остаются | Docs |
+| R-021 | AI Документовед binary output | Staging verified / production pending; real PDF/DOCX, embedded Noto Sans JP, O(n) PDF wrap, binary-before-DB publish, private immutable Storage, provisional/final download lease, export/edit/delete CAS, DB-first compensation/delete, restrictive RLS и 60s signed URL green | Docs |
 | R-003 | Биллинг/Платежи | Подписка, планы, история платежей | Новый |
 | R-004 | Просмотр журнала аудита | Admin audit log страница и backend endpoint ✅ | Settings |
 | R-005 | Экспорт/Импорт | Excel, CSV экспорт; массовый импорт | Reports, Tasks |

@@ -4,6 +4,64 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-12 — Усилены generate publication order и PDF wrapping
+
+- `661401a` CI run `31544880764` прошёл за 40 секунд, Netlify `6a7ba9f3a8c5ab0009f8474f` canceled/PASS. Codex review `4911510535` нашёл два P2: failed cleanup после binary error мог оставить file-less duplicate document, а длинный PDF paragraph без newline измерялся O(n²).
+- Generate заранее назначает UUID document ID, готовит binary в immutable private path и только затем публикует `documents` row. Binary/font/upload failure происходит до DB row; document insert failure удаляет только orphan object.
+- PDF wrapping измеряет каждый glyph один раз, O(n); regression на 20,000 символов подтверждает exact 20,000 measurements. Delete snapshot читает unique `doc_generated` row, старый race thread становится outdated. Staging `bright-api` v10 ACTIVE, health `200`; Deno 7/7 и focused/syntax/diff green, full API содержит только известные 22 typing errors.
+- Remaining: commit/push, новые CI/Netlify/Codex, merge PR #11 и production rollout. Три user-owned untracked files не изменены.
+
+Files: `supabase/functions/server/{index.ts,services/document-binary.ts,services/document-binary.test.ts}` и синхронные 4-language DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE.
+
+## 2026-08-12 — Закрыты URL-lease и delete/export races PR #11
+
+- Для `0532a74` CI run `31543616548` прошёл за 50 секунд, Netlify `6a7ba58c7a91150008320965` canceled/PASS. Codex review `4911406530` нашёл два P2: URL lease начинался до signing, delete не был serialized с in-flight export.
+- Binary metadata publish сначала получает 5-minute provisional lease, затем после успешного URL signing pin final 65-second lease. Ошибка final lease write выполняет compensation DB metadata/object и не возвращает URL.
+- Delete использует `documents.row_version` CAS: если export publish выиграл, delete возвращает `409 DOCUMENT_CONFLICT`; если delete выиграл, stale export обнаруживает отсутствующий document и удаляет новый immutable upload. Staging `bright-api` v9 ACTIVE, health `200`; Deno 6/6 и focused/syntax/diff green, full API содержит только известные 22 typing errors.
+- Remaining: commit/push, новые CI/Netlify/Codex, merge PR #11 и production rollout. Три user-owned untracked files не изменены.
+
+Files: `supabase/functions/server/{index.ts,services/document-binary.ts,services/document-binary.test.ts}` и синхронные 4-language DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE.
+
+## 2026-08-12 — Третьи concurrency findings Codex в PR #11 закрыты serialization
+
+- Для `35fa078` CI run `31542246103` прошёл за 55 секунд, backend/docs-only Netlify preview `6a7ba1042a94de0008d79759` canceled/PASS. Codex review `4911297037` нашёл два P2: retained cleanup зависел от будущего request, а parallel document edit мог сделать stale metadata/binary current.
+- Retained-path model заменён до production. `doc_generated.download_expires_at` задаёт 60-second signed URL плюс 5-second safety lease; активный re-export возвращает `409 EXPORT_DOWNLOAD_ACTIVE`, после lease прежний immutable object удаляется после commit новой metadata/document. `documents.row_version` сериализует edit и export publish optimistic compare-and-swap; stale export rollback удаляет upload/metadata и возвращает `409 DOCUMENT_CONFLICT`.
+- Migration `20260811223321_serialize_document_exports.sql` применена в staging: 36/36 migrations, `bright-api` v8 ACTIVE, health `200`, unauth docs `401`; schema read-back green, active lease residue 0, последний pgTAP assertion `ok 15`. Deno binary/lifecycle 6/6, focused check, integration syntax и diff check PASS; full API check содержит только известные 22 typing errors.
+- Remaining: push follow-up, новые CI/Netlify/Codex, merge и production Supabase/Netlify rollout. Remote authenticated fixture BLOCKED Cloudflare Auth Admin IP `403`; три user-owned untracked files не изменены.
+
+Files/state: `supabase/functions/server/{index.ts,services/document-binary.ts}`, unit/database/integration tests, `supabase/migrations/20260811223321_serialize_document_exports.sql`, синхронные 4-language DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE.
+
+## 2026-08-12 — Закрыты concurrency/compensation findings Codex re-review PR #11
+
+- После follow-up `7837778` CI run `31540938092` прошёл за 52 секунды. Netlify canceled incremental preview `6a7b9cd2d9412e000833a5c8` с passing status, потому что frontend не менялся; тот же frontend artifact остаётся ready в `6a7b2e774d8b4a00084583b0`. Codex re-review `4911171318` для `7837778` нашёл ещё два P2: initial signed-URL compensation был Storage-first, а concurrent export мог сразу удалить object с ещё действующим 60-second signed URL.
+- Generate signed-URL compensation теперь проверяет tenant-scoped document delete до binary cleanup. Export replacement использует `storage_path` compare-and-swap для сериализации metadata commits; stale parallel request удаляет свой новый upload и возвращает `409 EXPORT_CONFLICT`.
+- Superseded binaries tracked в `retained_storage_paths` как `path/delete_after` и сохраняются 120 секунд: TTL URL 60 секунд плюс safety window 60 секунд. Expired objects удаляются только после подписи нового URL, cleanup metadata защищён compare-and-swap. Document delete остаётся DB-first, затем удаляет active и все retained paths. Migration `20260811221503_retain_document_storage_versions.sql` добавляет JSONB-array contract.
+- Staging: 35/35 migrations, `bright-api` v7 ACTIVE, health `200`; retained column/constraint green, последний pgTAP assertion `ok 14`, retained/acceptance residue 0. Security advisor показывает только pre-existing debt, новых document Storage findings нет. Deno binary/lifecycle `7/7`, focused service check, integration syntax и diff check PASS. Full API check остаётся на тех же 22 pre-existing typing errors. Remote authenticated fixture остаётся BLOCKED Cloudflare Auth Admin IP `403`.
+- Remaining: commit/push второго follow-up, новые CI/Netlify/Codex, затем merge и production migrations/Edge/Netlify rollout. Три существующих untracked user files не изменены.
+
+Files/state: `supabase/functions/server/{index.ts,services/document-binary.ts}`, `supabase/functions/server/services/document-binary.test.ts`, `supabase/migrations/20260811221503_retain_document_storage_versions.sql`, `supabase/tests/{database/document_storage_contract.test.sql,integration/document_binary_storage.test.mjs}`, синхронизированные 4-language STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/DEVLOG.
+
+## 2026-08-11 — Исправлены transactional Storage findings Codex в PR #11
+
+- PR #10 повторно подтверждён green на `adab3fe` и squash-merged в `main` как `55d1468`. PR #11 retargeted на `main`; конфликт squash-history устранён replay только двух его commits. Для head `50a46c2` CI run `31500547178` прошёл за 53 секунды, Netlify preview `6a7b2e774d8b4a00084583b0` ready; `/` и `/dashboard/docs` дали `200`, staging-only CSP и `noindex` подтверждены.
+- Codex review `4907243544` для `50a46c2` нашёл два P2: same-format re-export перезаписывал active object до DB metadata commit, а delete удалял binary до строки БД. Export теперь создаёт immutable UUID-versioned path `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>` с `upsert:false` и удаляет прежний object только после успешного metadata write. Delete сначала удаляет tenant-scoped document row, затем выполняет binary cleanup.
+- Follow-up migration `20260811142919_version_document_storage_objects.sql` добавляет `storage_version` и exact versioned-path constraint, сохраняя чтение legacy unversioned rows. Staging: 34/34 migrations, `bright-api` v6 ACTIVE, health `200`; schema/constraint/private buckets подтверждены, synthetic fixture residue 0. Advisors показали только ранее известный linter debt без новых document Storage findings.
+- Verification: Deno binary/service `5/5`, focused service `deno check`, integration `node --check` и `git diff --check` PASS. Full `bright-api` check всё ещё содержит те же 22 pre-existing logging/Hono/risk/usage typing errors. Remote staging Auth acceptance заблокирован до создания fixture известным Cloudflare IP-level `403`; final residue 0, поэтому новый authenticated remote path остаётся BLOCKED. Далее: push fix в PR #11, повторные CI/Netlify/Codex, merge, затем production Supabase/Netlify rollout и максимально доступный smoke-test.
+
+Files/state: PR #10 merge `55d1468`, PR #11, `supabase/functions/server/{index.ts,services/document-binary.ts}`, `supabase/functions/server/services/document-binary.test.ts`, `supabase/migrations/20260811142919_version_document_storage_objects.sql`, `supabase/tests/{database/document_storage_contract.test.sql,integration/document_binary_storage.test.mjs}`, синхронизированные 4-language STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/DEVLOG.
+
+## 2026-08-11 — Real PDF/DOCX AI Документолога и private Storage завершены в staging
+
+- Ранее были 15 templates, 4 языка, dynamic form и editable drafts, но “PDF” открывал browser print, download создавал `.txt`; отсутствовали private Storage, binary metadata, signed URL и tenant/user path contract. Работа находится в `agent/ai-document-binary-storage`, stacked на draft PR #10. Три существующих untracked user files сохранены и не staged.
+- Добавлена real generation на pinned `pdf-lib@1.17.1`, `@pdf-lib/fontkit@1.1.1`, `docx@9.7.1`. Pinned Noto Sans JP asset проверяется exact SHA-256, cached privately, полностью embedded в PDF и как `word/fonts/font1.odttf` в DOCX. Visual review обнаружил broken CFF glyph map при PDF subsetting; full-font embedding исправил все 4 языка.
+- Добавлены private buckets `generated-documents`/`document-assets`, limits 10/5 MiB, MIME allow-lists, binary metadata/checksum/FK/unique/canonical-path constraints `doc_generated` и restrictive direct-access deny policy для `anon`/`authenticated`. Path: `<tenant>/<user>/documents/<document-id>/document.<pdf|docx>`, download через 60-second signed URL. Generate/export/edit-stale/delete tenant-scoped, с compensation cleanup и audit logs.
+- Frontend print/`.txt` pseudo-export заменён реальными PDF/DOCX download, добавлены file status list/detail, copy для 4 locales и OpenAPI generate/export contract.
+- Migration `20260811131308` применена в staging `piqsyfwrjtormrlenjix`; `bright-api` v5 ACTIVE, health `ok`. Storage/RLS pgTAP 12/12 PASS. Предыдущий v3 remote E2E прошёл real DOCX/PDF download, direct authenticated Storage deny `400`, cross-tenant export `404`, edit/regenerate и delete cleanup. Повтор embedded-font v4/v5 acceptance до fixture creation блокируется IP-level Cloudflare `403` на Supabase Auth Admin; final residue: 0 acceptance users/tenants/documents/templates/generated rows/objects и 1 verified private font cache. Production намеренно не изменён: new buckets `0`, new columns `0`; preflight подтвердил, что у 2 legacy generated rows `storage_path` отсутствует.
+- Verification: Deno binary 4/4; DOCX ZIP integrity green, embedded `.odttf` `4,533,028` bytes, final DOCX `3,894,424` bytes; PDF `3,961,665` bytes и Quick Look visual green. Frontend Vitest 23/23 files, 109/109 tests; TypeScript, production build 3700 modules, raw audit total 0, production high/critical 0, focused docs API 5/5, new service `deno check`, integration `node --check`, `git diff --check` PASS. Full `bright-api` Deno check сохраняет 22 pre-existing type debts logging/Hono/risk/usage; local Supabase недоступен из-за stopped Docker.
+- Application/docs committed/pushed как `d8bec96` в `agent/ai-document-binary-storage`; draft PR #11 OPEN/DRAFT/MERGEABLE и stacked на head branch PR #10. CI workflow запускается только для PR с base `main`, поэтому checks #11 пока отсутствуют — это не failure. Remaining: review/merge PR #10, retarget #11 на `main`, пройти CI/Netlify/Codex, затем production migration/Edge rollout и authenticated smoke. Следующий product slice — LLM Router questions/polishing.
+
+Files: `supabase/migrations/20260811131308_ai_document_binary_storage.sql`, `supabase/functions/bright-api/deno.json`, `supabase/functions/server/{index.ts,openapi.ts}`, `supabase/functions/server/services/document-binary{,.test}.ts`, `supabase/tests/{database/document_storage_contract.test.sql,integration/document_binary_storage.test.mjs}`, `frontend/src/features/docs/**`, `frontend/src/app/i18n.ts`, synchronized 4-language STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/DEVLOG.
+
 ## 2026-08-11 — Завершены staging authenticated Edge acceptance и cleanup legacy keys
 
 - Ранее migrations и health `bright-api` в staging были green, но remote Auth/tenant acceptance блокировался parser'ом timestamp API keys в Supabase CLI `v2.112.0`. Integration script был привязан к local stack и не проверял ответы cleanup.

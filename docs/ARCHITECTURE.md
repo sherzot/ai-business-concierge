@@ -35,6 +35,13 @@
 - Supabase Free rejasida Branching yo'qligi sabab staging alohida project bo'ladi. Schema faqat versionlangan migrationlar orqali sinxronlanadi, test ma'lumotlari esa synthetic seed bilan yaratiladi.
 - `validate:deploy-env` build guardi context/project mos kelmasa fail-closed to'xtaydi. CSP tanlangan project-ref asosida build vaqtida yaratiladi.
 
+### 1.2 AI Hujjatchi private binary chegarasi
+
+- PDF va DOCX faqat `bright-api` ichida yaratiladi; browser binary yaratmaydi va Supabase Storage bilan direct CRUD qilmaydi.
+- Binarylar private `generated-documents` bucketida immutable `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>` yo'lida saqlanadi. `storage_path` CAS parallel export commitlarini serializatsiya qiladi; publish 5 daqiqalik provisional lease oladi va URL sign qilingach `download_expires_at`ni 65 soniyaga pin qiladi. `documents.row_version` edit/export/delete CAS chegarasi bo'lib, faqat committed yangi metadata/documentdan keyin superseded object o'chadi. Legacy unversioned yo'llar o'qiladi; restrictive Storage policy direct browser accessni yopadi.
+- `bright-api` active tenant membershipni tekshiradi. Generate binaryni O(n) PDF wrapping bilan oldindan tayyorlab, keyin document DB qatorini publish qiladi. Yuklab olish faqat 60 soniyali signed URL; export editable contentdan qayta generatsiya qiladi, delete/compensation DB-first bo'lib keyin private objectni cleanup qiladi.
+- To'rt til uchun pinned va SHA-256 bilan tasdiqlangan `Noto Sans JP` OTF ishlatiladi. Font PDFga to'liq, DOCXga obfuscated `.odttf` sifatida embed qilinadi va private `document-assets` bucketida cache qilinadi.
+
 ---
 
 ## 2. FRONTEND ARXITEKTURASI

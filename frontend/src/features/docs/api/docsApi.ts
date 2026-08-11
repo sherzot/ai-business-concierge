@@ -8,6 +8,11 @@ export type DocApiItem = {
   status?: "draft" | "review" | "approved" | "expired";
   updated_at?: string;
   content?: string;
+  file_ready?: boolean;
+  file_format?: "pdf" | "docx" | null;
+  file_size?: number | null;
+  mime_type?: string | null;
+  sha256?: string | null;
 };
 
 export type DocMetadata = {
@@ -52,7 +57,26 @@ export type GenerateDocumentResult = {
   requested_locale: Locale;
   applied_locale: Locale;
   file_ready: boolean;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+  sha256: string;
+  download_url: string;
+  download_expires_in: number;
   remaining: number | null;
+};
+
+export type ExportDocumentResult = {
+  document_id: string;
+  generated_id: string;
+  format: "pdf" | "docx";
+  file_ready: true;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+  sha256: string;
+  download_url: string;
+  download_expires_in: number;
 };
 
 export async function getDocTemplates(
@@ -94,9 +118,22 @@ export async function getDocById(tenantId: string, id: string) {
   return apiRequest<DocApiItem>(`/docs/${id}`, { tenantId });
 }
 
+export async function exportDoc(
+  tenantId: string,
+  id: string,
+  format: "pdf" | "docx",
+  locale: Locale,
+) {
+  return apiRequest<ExportDocumentResult>(`/docs/${id}/export`, {
+    tenantId,
+    method: "POST",
+    body: JSON.stringify({ format, locale }),
+  });
+}
+
 export async function createDoc(
   tenantId: string,
-  payload: { title: string; content: string; metadata?: DocMetadata }
+  payload: { title: string; content: string; metadata?: DocMetadata },
 ) {
   return apiRequest<{ document_id: string }>(`/docs/index`, {
     tenantId,
@@ -108,7 +145,7 @@ export async function createDoc(
 export async function updateDoc(
   tenantId: string,
   id: string,
-  payload: { title?: string; content?: string; metadata?: DocMetadata }
+  payload: { title?: string; content?: string; metadata?: DocMetadata },
 ) {
   return apiRequest<{ document_id: string }>(`/docs/${id}`, {
     tenantId,

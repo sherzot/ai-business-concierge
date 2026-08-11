@@ -41,6 +41,9 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
         status: doc.status ?? "draft",
         updatedAt: doc.updated_at ?? "",
         content: doc.content,
+        fileReady: doc.file_ready,
+        fileFormat: doc.file_format,
+        fileSize: doc.file_size,
       }));
       setDocs(mapped);
       setSelected(mapped[0]);
@@ -67,11 +70,11 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
         <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground">{translate("nav.docsTitle")}</h2>
       </header>
       {generatedNotice && (
-        <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
           <span>{generatedNotice}</span>
           <button
             onClick={() => setGeneratedNotice(null)}
-            className="text-xs font-semibold hover:text-emerald-900"
+            className="text-xs font-semibold hover:text-emerald-900 dark:hover:text-emerald-100"
           >
             {translate("docs.noticeClose")}
           </button>
@@ -103,6 +106,15 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
             setGeneratedNotice(
               translate("docs.generatedNotice", { title: result.title }),
             );
+            if (result.download_url) {
+              const link = window.document.createElement("a");
+              link.href = result.download_url;
+              link.download = result.file_name;
+              link.rel = "noopener noreferrer";
+              window.document.body.appendChild(link);
+              link.click();
+              window.document.body.removeChild(link);
+            }
             setActiveTab("my-docs");
           }}
         />
@@ -131,8 +143,10 @@ export function DocsPage({ tenant }: { tenant: { id: string; name: string } }) {
           <div className="hidden flex-1 flex-col bg-card md:flex">
             <DocDetail
               doc={selected}
+              tenantId={tenant.id}
               onEdit={() => setEditOpen(true)}
               onDelete={handleDelete}
+              onExported={loadDocs}
             />
           </div>
           <DocCreateModal
