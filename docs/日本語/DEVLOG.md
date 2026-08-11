@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-11 — Supabase publishable-key production handoff完了、source publish準備済み
+
+- Previously frontendはpublishable keyを優先していたがNetlifyにmodern envがなく、productionはlegacy anon fallbackを使用。Productionのactive modern `sb_publishable_...` keyをvalue非表示で確認し、`VITE_SUPABASE_PUBLISHABLE_KEY`をPersonal planの全scope/context向けpublic build envとして設定。
+- Clean tracked `main` snapshotをNetlify productionへdeploy: deploy `6a7a9c1ec552d009a42c6f97`、build `6a7a9c1ec552d009a42c6f95`、`ready`、published `2026-08-11T03:51:28.742Z`、33s、plugin `success`、87,160 filesでsecret match 0。Bundleはmodern-key prefix 1、project legacy JWT 0。Auth settings HTTP `200`、Realtime WebSocket `OPEN`、login console/Vite-overlay error 0、horizontal overflow 0。
+- Rollout確認後、Netlify frontend env `VITE_SUPABASE_ANON_KEY`のみ削除しmodern publishable envを保持。Supabase legacy API key自体はrevokeしていない。`config.ts`は`VITE_SUPABASE_PUBLISHABLE_KEY`のみ受け付け`sb_publishable_` formatをfail-fast検証。Legacy env type/fallbackとfallback testを削除しnegative contract testを追加。4-language `FIRST_PUSH`もmodern keyへ更新。
+- Verification: targeted config 3/3 tests PASS、TypeScript PASS、non-secret modern test envでVitest 23/23 files・108/108 tests PASS、production build 3700 modules PASS、9-file security gate PASS、`git diff --check` PASS。Modern local envなしの最初のfull runは13 suites/56 tests成功後、意図したconfig fail-fastで10 suites停止。Private local envは変更していない。
+- Source/docsはlocal branch `agent/remove-legacy-supabase-anon-fallback`。最初のsandboxed `gh auth status`はinvalid tokenを報告したが、user login後のsystem keyring checkで`sherzot` accountと`repo/workflow` scopesを確認。First next action: explicit stage/commit/push/PR、CI、final bundle/Auth/Realtime recheck。
+
+Files/state: `frontend/src/app/config.ts`、`frontend/src/app/__tests__/config.test.ts`、`frontend/src/env.d.ts`、`docs/FIRST_PUSH.md`、同期済み4-language STATUS/PLAN/DEVLOG/FIRST_PUSH、Netlify envとproduction deploy。
+
 ## 2026-08-10 — Inverse contrast hotfixをproductionへrelease
 
 - PR #4のDEVLOG closeout Codex findingはPR #5の4-language docs commitで対応。PR #5唯一のP1 Codex findingは具体的なgreen-gate ID不足で、GitHub run、Netlify preview、Vercel deployment identifiersをSTATUS/DEVLOGへ追加し`67ab618`として`main`へpush。GitHub threadへのreply/resolveは未実施。

@@ -1,7 +1,7 @@
 # AI Business Concierge — faol reja
 
-> Version: 5.0
-> Yangilandi: 2026-08-10
+> Version: 5.1
+> Yangilandi: 2026-08-11
 > Bu faylda faqat faol va navbatdagi ishlar turadi. 2026-07-24 gacha bo'lgan katta tarixiy reja [archive/PLAN_LEGACY_2026-07-24.md](archive/PLAN_LEGACY_2026-07-24.md)ga ko'chirilgan.
 
 ## Ishlash qoidasi
@@ -35,7 +35,8 @@
 - [ ] 2026-08-21gacha GHSA-qwww metadata exceptionini qayta tekshirish va npm advisory yangilansa exceptionni olib tashlash.
 - [x] Productionda `sb_publishable_...` mavjudligini tekshirish; `config.ts`, env type/example va CI'ni yangi contractga o'tkazish, legacy fallbackni rollout uchun vaqtincha saqlash.
 - [x] Publishable-key commit `35d4b91`ni push qilish, GitHub CI run `31192041119`ni green va Netlify production deployni `ready` holatda tasdiqlash; bundle legacy fallback ishlatayotganini aniqlash.
-- [ ] Netlify CLI loginidan keyin production publishable envni o'rnatish, qayta deploy, Auth/Realtime smoke-test, keyin legacy frontend env/fallbackni olib tashlash.
+- [x] Netlify production publishable envni o'rnatish, qayta deploy, Auth `200`/Realtime `OPEN` smoke-testini o'tkazish va legacy frontend envni olib tashlash.
+- [ ] Lokal no-fallback source va 4-tilli docsni commit/push/PR qilish, CI green bo'lgach final Netlify deploy va bundle/Auth/Realtime recheckni o'tkazish.
 - [x] Frontend direct Supabase chaqiruvlarini audit qilish; Auth/Realtimedan boshqa `from/rpc/storage/functions` operatsiyalariga regressiya gate qo'shish.
 - [x] Public table/view/functionlar uchun RLS va `anon`/`authenticated` grantlarini inventarizatsiya qilish; 32/32 table RLS, 8/8 view `security_invoker`, 6/6 `SECURITY DEFINER` browser EXECUTEdan yopiq ekanini tasdiqlash.
 - [x] Risk scanner server-only chegarasini qotirish: browser CRUD grant/policylarini olib tashlash va production migrationni qo'llash.

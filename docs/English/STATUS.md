@@ -1,6 +1,6 @@
 # AI Business Concierge — current status
 
-> Last code/platform snapshot verified: **2026-08-10**
+> Last code/platform snapshot verified: **2026-08-11**
 > Documentation normalized: **2026-08-07**
 > The local runtime, production health/auth, and remote GitHub Actions baseline were re-verified on 2026-08-07. The P0 commits were pushed and the new CI run completed fully green.
 > 2026-08-08: the publishable-key commit was pushed and passed CI/Netlify deploy, but the production bundle still uses the legacy fallback. Direct browser Data API access to risk-scanner tables was closed in production.
@@ -11,6 +11,7 @@
 > 2026-08-08: the Portfolio-inspired frontend redesign passed browser acceptance, commits `83bc7e0`/`509bc2d` were pushed, PR #2 is open, and CI is green.
 > 2026-08-10: PR #3 was merged into `main` as `79be466`; Codex review hotfix `aee6692` was also pushed to `main`. Netlify production deploy `6a79d69c9aa5a6bcf326e83c` is ready and `bright-api` v75 is ACTIVE; authenticated two-role smoke tests remain.
 > 2026-08-10: The user confirmed successful authenticated production checks for Leader Company Profile and the Super Admin dashboard. The landing Why Us fix from PR #4 and Company Dashboard fix from PR #5 are merged into `main` and shipped in Netlify production deploy `6a79e664a453161423131204`; an authenticated dashboard visual recheck remains.
+> 2026-08-11: Netlify production moved to the modern `sb_publishable_...` key, Auth `200` and Realtime `OPEN` smoke tests passed, and the legacy frontend env was deleted. Source fallback removal is ready on local `agent/remove-legacy-supabase-anon-fallback`; GitHub CLI auth is verified through the keyring, with push/PR/final deploy next.
 
 ## Current phase
 
@@ -25,7 +26,7 @@
 
 | Check | Status |
 |---|---|
-| Git | PR #4 and PR #5 squash-merged into `main` as `700483d` and `2466200` |
+| Git | `main` at `208473d`; no-fallback source is on local `agent/remove-legacy-supabase-anon-fallback`, with GitHub CLI auth verified |
 | Runtime | Node.js `22.18.0`; `.nvmrc` and package engine pin `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; verified with a fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -38,8 +39,8 @@
 | Visual browser acceptance | All 6/6 Why Us reasons render with inverse text in dark/light modes: title `rgb(244,243,239)`, background `rgb(17,19,24)`, overflow `0`, no console/overlay errors; dashboard inverse markup is covered by a regression test |
 | Preview CI | PR #5 code preview Netlify deploy `6a79e27ae3c42e00088ffd45` ready; latest docs-only deploy `6a79e3b03648850008d64852` canceled; Vercel deployment `Cg6Bt5HG1JJrGvwzDYaJqokQQU2q` ready |
 | Remote GitHub Actions | PR #5 run `31399751738`, commit `04cd48f`: success; prior code-only run `31399285836` also succeeded |
-| Production frontend | Netlify deploy `6a79e664a453161423131204` ready, published at 2026-08-10T14:56:55.975Z; 81s deploy, plugin success, 0 secret matches across 87,160 scanned files |
-| Frontend Supabase key contract | Code/deploy: publishable primary + temporary fallback; production bundle uses legacy anon fallback, Netlify env/login pending |
+| Production frontend | Netlify deploy `6a7a9c1ec552d009a42c6f97` ready, build `6a7a9c1ec552d009a42c6f95`, published at 2026-08-11T03:51:28.742Z; 33s deploy, plugin success, 0 secret matches across 87,160 files |
+| Frontend Supabase key contract | Production bundle uses the modern publishable key; 0 legacy project JWTs, Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env deleted. Code fallback is removed locally; final deploy pending |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; real Auth-token Edge tests 8/8; Realtime tables are SELECT-only and require active membership/tenant |
 | Migration history | Local/remote 32/32 aligned; production `db push --dry-run`: up to date |
 | Local Supabase services | Storage `v1.68.1`, Auth `v2.195.0`; all enabled containers healthy; Storage/Auth/Studio HTTP `200`; `imgproxy` stopped because transformations are disabled |
@@ -60,8 +61,8 @@
 
 ## Immediate order
 
-1. Visually recheck the Company Dashboard Business Status panel in authenticated production dark mode.
-2. Restore Netlify CLI login, set the production publishable env, redeploy, and smoke-test Auth/Realtime before removing the legacy fallback.
+1. Commit/push/PR the no-fallback branch, then verify CI and the final Netlify deploy.
+2. Visually recheck the Company Dashboard Business Status panel in authenticated production dark mode.
 3. Re-review GHSA-qwww by 2026-08-21, then continue Document Assistant PDF/DOCX/Storage work.
 
 Detailed tasks: [PLAN.md](PLAN.md). Canonical source: [Uzbek STATUS](../STATUS.md).

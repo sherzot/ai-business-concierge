@@ -1,6 +1,6 @@
 # AI Business Concierge — 現在の状態
 
-> 最終確認済みcode/platform snapshot: **2026-08-10**
+> 最終確認済みcode/platform snapshot: **2026-08-11**
 > ドキュメント整理日: **2026-08-07**
 > 2026-08-07にlocal runtime、production health/auth、remote GitHub Actions baselineを再確認。P0 commitsをpushし、new CI runはfully greenで完了。
 > 2026-08-08: publishable-key commitをpushしCI/Netlify deploy成功。ただしproduction bundleはまだlegacy fallbackを使用。Risk scanner tablesへのdirect browser Data API accessをproductionで閉鎖。
@@ -11,6 +11,7 @@
 > 2026-08-08: Portfolio-inspired frontend redesignはbrowser acceptance成功、commit `83bc7e0`/`509bc2d`をpush済み、PR #2 open、CI green。
 > 2026-08-10: PR #3を`79be466`として`main`へmergeし、Codex review hotfix `aee6692`も`main`へpush。Netlify production deploy `6a79d69c9aa5a6bcf326e83c`はready、`bright-api` v75はACTIVE。Authenticated 2-role smoke-testが残る。
 > 2026-08-10: UserがLeader Company ProfileとSuper Admin dashboardのauthenticated production checks成功を確認。PR #4のLanding Why Us fixとPR #5のCompany Dashboard fixは`main`へmergeし、Netlify production deploy `6a79e664a453161423131204`でship済み。Authenticated dashboard visual recheckが残る。
+> 2026-08-11: Netlify productionをmodern `sb_publishable_...` keyへ移行し、Auth `200`とRealtime `OPEN` smoke tests成功。Legacy frontend envを削除。Source fallback removalはlocal `agent/remove-legacy-supabase-anon-fallback`で準備済み。GitHub CLI authはkeyringで確認済み、次はpush/PR/final deploy。
 
 ## 現在のPhase
 
@@ -25,7 +26,7 @@
 
 | Check | 状態 |
 |---|---|
-| Git | PR #4とPR #5を`700483d`、`2466200`として`main`へsquash-merge |
+| Git | `main`は`208473d`; no-fallback sourceはlocal `agent/remove-legacy-supabase-anon-fallback`、GitHub CLI auth確認済み |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Supabase Edge Function `bright-api` v75、`ACTIVE`、`verify_jwt=false` |
@@ -38,8 +39,8 @@
 | Visual browser acceptance | Why Us 6/6 reasonsはdark/light modeでinverse text表示。Title `rgb(244,243,239)`、background `rgb(17,19,24)`、overflow `0`、console/overlay errorなし。Dashboard inverse markupはregression testで保護 |
 | Preview CI | PR #5 code preview Netlify deploy `6a79e27ae3c42e00088ffd45` ready。Latest docs-only deploy `6a79e3b03648850008d64852` canceled。Vercel deployment `Cg6Bt5HG1JJrGvwzDYaJqokQQU2q` ready |
 | Remote GitHub Actions | PR #5 run `31399751738`、commit `04cd48f`: success。Previous code-only run `31399285836`もsuccess |
-| Production frontend | Netlify deploy `6a79e664a453161423131204` ready、2026-08-10T14:56:55.975Zにpublished。Deploy 81s、plugin success、87,160 scanned filesでsecret match 0 |
-| Frontend Supabase key contract | Code/deployはpublishable primary + temporary fallback。Production bundleはlegacy anon fallback使用、Netlify env/login pending |
+| Production frontend | Netlify deploy `6a7a9c1ec552d009a42c6f97` ready、build `6a7a9c1ec552d009a42c6f95`、2026-08-11T03:51:28.742Zにpublished。Deploy 33s、plugin success、87,160 filesでsecret match 0 |
+| Frontend Supabase key contract | Production bundleはmodern publishable keyを使用。Project legacy JWT 0、Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み。Code fallbackはlocalで削除、final deploy pending |
 | DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、real Auth-token Edge tests 8/8。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |
 | Migration history | Local/remote 32/32整合、production `db push --dry-run`: up to date |
 | Local Supabase services | Storage `v1.68.1`、Auth `v2.195.0`。全enabled containers healthy、Storage/Auth/Studio HTTP `200`、transformations無効のため`imgproxy` stopped |
@@ -60,8 +61,8 @@
 
 ## 直近の順序
 
-1. Company Dashboard Business Status panelをauthenticated production dark modeでvisual recheck。
-2. Netlify CLI login、production publishable env、redeploy、Auth/Realtime smoke-test後にlegacy fallbackを削除。
+1. No-fallback branchをcommit/push/PRし、CIとfinal Netlify deployを確認。
+2. Company Dashboard Business Status panelをauthenticated production dark modeでvisual recheck。
 3. 2026-08-21までにGHSA-qwwwを再確認し、その後Document Assistant PDF/DOCX/Storageを継続。
 
 詳細: [PLAN.md](PLAN.md)。Canonical: [Uzbek STATUS](../STATUS.md)。

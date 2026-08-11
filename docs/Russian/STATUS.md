@@ -1,6 +1,6 @@
 # AI Business Concierge — текущее состояние
 
-> Последний подтверждённый snapshot кода/platform: **2026-08-10**
+> Последний подтверждённый snapshot кода/platform: **2026-08-11**
 > Документация упорядочена: **2026-08-07**
 > Local runtime, production health/auth и remote GitHub Actions baseline повторно проверены 2026-08-07. P0 commits отправлены, новый CI run завершён полностью green.
 > 2026-08-08: commit publishable key отправлен и прошёл CI/Netlify deploy, но production bundle пока использует legacy fallback. Прямой browser Data API доступ к risk scanner tables закрыт в production.
@@ -11,6 +11,7 @@
 > 2026-08-08: Portfolio-inspired frontend redesign прошёл browser acceptance, commits `83bc7e0`/`509bc2d` отправлены, PR #2 открыт, CI green.
 > 2026-08-10: PR #3 merged в `main` как `79be466`; Codex review hotfix `aee6692` также pushed в `main`. Netlify production deploy `6a79d69c9aa5a6bcf326e83c` ready, `bright-api` v75 ACTIVE; остаются authenticated smoke-tests двух ролей.
 > 2026-08-10: User подтвердил успешные authenticated production checks Leader Company Profile и Super Admin dashboard. Landing Why Us fix из PR #4 и Company Dashboard fix из PR #5 merged в `main` и shipped в Netlify production deploy `6a79e664a453161423131204`; остаётся authenticated dashboard visual recheck.
+> 2026-08-11: Netlify production переведён на modern `sb_publishable_...` key, smoke tests Auth `200` и Realtime `OPEN` прошли, legacy frontend env удалён. Source fallback removal готов в local `agent/remove-legacy-supabase-anon-fallback`; GitHub CLI auth подтверждён через keyring, далее push/PR/final deploy.
 
 ## Текущая фаза
 
@@ -25,7 +26,7 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | PR #4 и PR #5 squash-merged в `main` как `700483d` и `2466200` |
+| Git | `main` на `208473d`; no-fallback source в local `agent/remove-legacy-supabase-anon-fallback`, GitHub CLI auth подтверждён |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
 | Backend | Supabase Edge Function `bright-api` v75, `ACTIVE`, `verify_jwt=false` |
@@ -38,8 +39,8 @@
 | Visual browser acceptance | Все 6/6 причин Why Us отображаются inverse text в dark/light modes: title `rgb(244,243,239)`, background `rgb(17,19,24)`, overflow `0`, console/overlay errors нет; dashboard inverse markup закрыт regression test |
 | Preview CI | PR #5 code preview Netlify deploy `6a79e27ae3c42e00088ffd45` ready; latest docs-only deploy `6a79e3b03648850008d64852` canceled; Vercel deployment `Cg6Bt5HG1JJrGvwzDYaJqokQQU2q` ready |
 | Remote GitHub Actions | PR #5 run `31399751738`, commit `04cd48f`: success; previous code-only run `31399285836` также success |
-| Production frontend | Netlify deploy `6a79e664a453161423131204` ready, published 2026-08-10T14:56:55.975Z; deploy 81s, plugin success, 0 secret matches в 87,160 scanned files |
-| Frontend Supabase key contract | Code/deploy: publishable primary + temporary fallback; production bundle использует legacy anon fallback, Netlify env/login pending |
+| Production frontend | Netlify deploy `6a7a9c1ec552d009a42c6f97` ready, build `6a7a9c1ec552d009a42c6f95`, published 2026-08-11T03:51:28.742Z; deploy 33s, plugin success, 0 secret matches в 87,160 files |
+| Frontend Supabase key contract | Production bundle использует modern publishable key; project legacy JWT 0, Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён. Code fallback удалён локально; final deploy pending |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; real Auth-token Edge tests 8/8; Realtime tables SELECT-only и требуют active membership/tenant |
 | Migration history | Local/remote 32/32 совпадают; production `db push --dry-run`: up to date |
 | Local Supabase services | Storage `v1.68.1`, Auth `v2.195.0`; все enabled containers healthy; Storage/Auth/Studio HTTP `200`; `imgproxy` stopped, так как transformations выключены |
@@ -60,8 +61,8 @@
 
 ## Ближайший порядок
 
-1. Визуально перепроверить Company Dashboard Business Status panel в authenticated production dark mode.
-2. Восстановить Netlify CLI login, установить publishable env, redeploy и Auth/Realtime smoke-test до удаления legacy fallback.
+1. Commit/push/PR no-fallback branch, затем проверить CI и final Netlify deploy.
+2. Визуально перепроверить Company Dashboard Business Status panel в authenticated production dark mode.
 3. До 2026-08-21 пересмотреть GHSA-qwww, затем продолжить PDF/DOCX/Storage Документолога.
 
 Подробности: [PLAN.md](PLAN.md). Основной источник: [узбекский STATUS](../STATUS.md).

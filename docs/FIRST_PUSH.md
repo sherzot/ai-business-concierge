@@ -271,7 +271,7 @@ Tekshirish:
 | Key | Value | Tavsiya |
 |---|---|---|
 | `VITE_SUPABASE_PROJECT_ID` | `ufhepwdkjqptjvxrmpjn` | ✅ allaqachon bor |
-| `VITE_SUPABASE_ANON_KEY` | Dashboard → Settings → API → anon | ✅ allaqachon bor |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Dashboard → Settings → API Keys → Publishable key | ✅ modern public key |
 | `VITE_FEATURE_HR_CANDIDATES` | `true` | yangi (skeleton ko'rsatish uchun) |
 | `VITE_SENTRY_DSN` | (Phase 1 da) | bo'sh qoldiring |
 | `VITE_TELEGRAM_BOT_USERNAME` | (Phase 1 da) | bo'sh qoldiring |

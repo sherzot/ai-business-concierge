@@ -254,7 +254,7 @@ GitHubにプッシュした後、**Netlifyが自動でビルドする**（`main`
 | Key | Value | ステータス |
 |---|---|---|
 | `VITE_SUPABASE_PROJECT_ID` | `ufhepwdkjqptjvxrmpjn` | ✅ 既に設定済み |
-| `VITE_SUPABASE_ANON_KEY` | Dashboard → Settings → API → anon | ✅ 既に設定済み |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Dashboard → Settings → API Keys → Publishable key | ✅ modern public key |
 | `VITE_FEATURE_HR_CANDIDATES` | `true` | 新規（スケルトンを表示するため）|
 | `VITE_SENTRY_DSN` | （Phase 1）| 空のままに |
 | `VITE_TELEGRAM_BOT_USERNAME` | （Phase 1）| 空のままに |
