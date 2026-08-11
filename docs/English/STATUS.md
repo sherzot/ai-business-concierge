@@ -14,6 +14,7 @@
 > 2026-08-11: Netlify production moved to the modern `sb_publishable_...` key, Auth `200` and Realtime `OPEN` smoke tests passed, and the legacy frontend env was deleted. Source fallback removal was prepared on `agent/remove-legacy-supabase-anon-fallback`, and GitHub CLI auth was verified through the keyring.
 > 2026-08-11: The no-fallback source was merged to `main` through PR #6 as `2b71a49`; GitHub CI is green and final Netlify deploy `6a7ab5474835d660f21249cd` is ready. Production bundle/Auth/Realtime rechecks passed; the publishable-key handoff is complete.
 > 2026-08-11: The user opened an authenticated Leader production session; the Company Dashboard Business Status panel was fully checked in dark mode through computed contrast and visual screenshot review. Text is visible with no overlap, overflow, or browser errors; acceptance is complete.
+> 2026-08-11: The raw npm production audit returned zero vulnerabilities; the temporary GHSA-qwww metadata exception was removed and the exception-free production audit gate passed.
 
 ## Current phase
 
@@ -36,7 +37,7 @@
 | Type-check | Passed |
 | Unit tests | 23/23 files, 108/108 tests |
 | Production build/security check | Passed |
-| Production dependency audit | Scoped gate passed: 0 unexcepted high/critical; GHSA-qwww metadata exception expires 2026-08-21 |
+| Production dependency audit | Raw audit: 0 total vulnerabilities; scoped gate: 0 high/critical with no exceptions |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue system; landing, public/auth, product core, and admin shell redesign completed locally |
 | Visual browser acceptance | Landing Why Us 6/6 inverse text is green. Authenticated Company Dashboard dark mode: Business Status background `rgb(17,19,24)`; title/percentage contrast `16.73:1`, muted text `7.5:1`, success signal `10.66:1`; 12/12 text nodes inside the panel, overlap/overflow/console errors `0` |
 | Preview CI | PR #6 Netlify preview deploy `6a7ab3ed99861d0008a32837` ready; Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready |
@@ -63,8 +64,7 @@
 
 ## Immediate order
 
-1. Re-review GHSA-qwww by 2026-08-21.
-2. Decide production/preview environment, secret, and data separation.
-3. Continue Document Assistant PDF/DOCX/Storage work.
+1. Decide production/preview environment, secret, and data separation.
+2. Continue Document Assistant PDF/DOCX/Storage work.
 
 Detailed tasks: [PLAN.md](PLAN.md). Canonical source: [Uzbek STATUS](../STATUS.md).

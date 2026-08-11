@@ -4,6 +4,15 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Удалено временное metadata exception GHSA-qwww
+
+- Ранее production audit gate содержал exact-version exception GHSA-qwww до 2026-08-21 из-за расхождения npm/global и upstream React Router advisories по patched-статусу `react-router@7.18.2`. User и agent независимо запустили raw `npm audit --omit=dev --json` и оба получили 0 vulnerabilities; scoped gate также прошёл без exception warning, то есть exception больше не фильтровало advisory.
+- Из `frontend/scripts/audit-production.mjs` удалены GHSA-qwww allowlist, exact lockfile-version check, review deadline/evidence metadata и warning path исключения. Gate по-прежнему fail-closed при network/API/JSON сбоях и теперь без исключений блокирует все high/critical advisories. Dependencies и lockfile не изменились.
+- Проверка: raw production audit — info/low/moderate/high/critical всего 0, production dependencies 233; после удаления `npm run audit:production` PASS — high/critical 0; `npm run typecheck` PASS; Vitest с synthetic non-secret publishable env PASS — 23/23 files и 108/108 tests; production build PASS — 3700 modules; security gate PASS — 9 build/Netlify files; `git diff --check` PASS. Первый запуск tests без env values остановился после 13 files/56 passing tests: 10 suites упали на ожидаемом config fail-fast; полный run повторён с synthetic env.
+- Следующий активный порядок: решить разделение production/preview environment, secrets и data; затем продолжить AI Документолог PDF/DOCX/Storage.
+
+Files: `frontend/scripts/audit-production.mjs`, `docs/STATUS.md`, `docs/PLAN.md`, синхронизированные 4-language `DEVLOG/STATUS/PLAN`.
+
 ## 2026-08-11 — Authenticated dark-mode visual acceptance Company Dashboard завершён
 
 - Ранее inverse markup Business Status был защищён unit test и browser acceptance shared token на landing, но authenticated Company Dashboard visual recheck оставался open из-за отсутствия production credential у агента. User вошёл как Leader в visible agent-browser window; credential values не передавались агенту и не логировались.

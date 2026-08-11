@@ -4,6 +4,15 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-11 — GHSA-qwww vaqtinchalik metadata exceptioni olib tashlandi
+
+- Oldingi holatda npm/global advisory va React Router upstream advisory orasidagi `react-router@7.18.2` patched-range tafovuti sabab production audit gate'da faqat GHSA-qwww uchun exact-versiyali, 2026-08-21gacha amal qiladigan exception bor edi. User va agent alohida raw `npm audit --omit=dev --json` tekshiruvlarida jami vulnerability `0` natijasini oldi; scoped gate ham warning'siz green bo'ldi, ya'ni exception endi hech qanday advisory'ni filtrlab o'tkazmayotgan edi.
+- `frontend/scripts/audit-production.mjs`dan GHSA-qwww allowlist, lockfile exact-version tekshiruvi, deadline/evidence metadata va exception warning yo'li olib tashlandi. Gate network/API/JSON nosozligida fail-closed qoladi va endi istisnosiz barcha high/critical advisory'larni bloklaydi. Dependency va lockfile o'zgarmadi.
+- Tekshiruv: raw production audit — info/low/moderate/high/critical jami `0`, production dependency `233`; exception olib tashlangach `npm run audit:production` PASS — high/critical `0`; `npm run typecheck` PASS; synthetic non-secret publishable env bilan Vitest `23/23` fayl va `108/108` test PASS; production build `3700` module PASS; security gate `9` build/Netlify fayli PASS; `git diff --check` PASS. Env qiymatlarisiz dastlabki test run `13` fayl/`56` testdan keyin config fail-fast sabab `10` suite fail bo'ldi va yuqoridagi synthetic env bilan to'liq qayta ishlatildi.
+- Qolgan faol tartib: production/preview environment, secret va data ajratish qarorini qabul qilish; undan keyin AI Hujjatchi PDF/DOCX/Storage.
+
+Fayllar: `frontend/scripts/audit-production.mjs`, `docs/STATUS.md`, `docs/PLAN.md`, 4-tilli `DEVLOG/STATUS/PLAN`.
+
 ## 2026-08-11 — Company Dashboard authenticated dark-mode visual acceptance yakunlandi
 
 - Oldingi holatda “Biznes holati” inverse markup unit test va landingdagi shared token browser acceptance bilan himoyalangan, ammo agentda production credential bo'lmagani uchun authenticated Company Dashboard vizual recheck ochiq qolgan edi. User ko'rinadigan agent browser oynasida Rahbar akkaunti bilan login qildi; credential qiymatlari agentga berilmadi va loglanmadi.

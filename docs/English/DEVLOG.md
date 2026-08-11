@@ -4,6 +4,15 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-11 — Removed the temporary GHSA-qwww metadata exception
+
+- Previously the production audit gate carried an exact-version GHSA-qwww exception through 2026-08-21 because npm/global and upstream React Router advisories disagreed on whether `react-router@7.18.2` was patched. The user and agent independently ran raw `npm audit --omit=dev --json` checks and both received zero total vulnerabilities; the scoped gate also passed without an exception warning, proving that the exception was no longer filtering an advisory.
+- Removed the GHSA-qwww allowlist, exact lockfile-version check, review deadline/evidence metadata, and exception-warning path from `frontend/scripts/audit-production.mjs`. The gate remains fail-closed on network/API/JSON failures and now blocks every high/critical advisory without exceptions. Dependencies and the lockfile were unchanged.
+- Verification: raw production audit — zero info/low/moderate/high/critical vulnerabilities and 233 production dependencies; after removal, `npm run audit:production` PASS — zero high/critical; `npm run typecheck` PASS; Vitest with synthetic non-secret publishable env PASS — 23/23 files and 108/108 tests; production build PASS — 3700 modules; security gate PASS — 9 build/Netlify files; `git diff --check` PASS. The first test run without env values stopped after 13 files/56 passing tests with 10 suites failing on the intended config fail-fast; the complete run was repeated with the synthetic env.
+- Remaining active order: decide production/preview environment, secret, and data separation; then continue AI Document Assistant PDF/DOCX/Storage.
+
+Files: `frontend/scripts/audit-production.mjs`, `docs/STATUS.md`, `docs/PLAN.md`, and synchronized four-language `DEVLOG/STATUS/PLAN`.
+
 ## 2026-08-11 — Company Dashboard authenticated dark-mode visual acceptance completed
 
 - Previously the Business Status inverse markup was protected by a unit test and shared-token browser acceptance on the landing page, but the authenticated Company Dashboard visual recheck remained open because the agent had no production credential. The user signed into a visible agent-browser window with a Leader account; credential values were never given to or logged by the agent.

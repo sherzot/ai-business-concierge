@@ -4,6 +4,15 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-11 — Temporary GHSA-qwww metadata exceptionを削除
+
+- 以前はnpm/globalとupstream React Router advisoryで`react-router@7.18.2`のpatched statusが一致しなかったため、production audit gateに2026-08-21までのexact-version GHSA-qwww exceptionがあった。Userとagentがそれぞれraw `npm audit --omit=dev --json`を実行し、両方ともvulnerability合計0件。Scoped gateもexception warningなしで成功し、exceptionがadvisoryをfilterしていないことを確認した。
+- `frontend/scripts/audit-production.mjs`からGHSA-qwww allowlist、exact lockfile-version check、review deadline/evidence metadata、exception warning pathを削除。Gateはnetwork/API/JSON failureで引き続きfail-closedし、すべてのhigh/critical advisoryをexceptionなしでblockする。Dependenciesとlockfileは変更なし。
+- Verification: raw production auditはinfo/low/moderate/high/critical合計0件、production dependencies 233。削除後の`npm run audit:production` PASS — high/critical 0件。`npm run typecheck` PASS。Synthetic non-secret publishable envでVitest 23/23 files・108/108 tests PASS。Production build 3700 modules PASS。Security gate 9 build/Netlify files PASS。`git diff --check` PASS。Env valuesなしの初回test runは13 files/56 passing tests後、意図したconfig fail-fastにより10 suites fail。Synthetic envでfull runを再実行した。
+- Remaining active order: production/preview environment、secret、data分離を決定し、その後AI文書作成PDF/DOCX/Storageを継続。
+
+Files: `frontend/scripts/audit-production.mjs`、`docs/STATUS.md`、`docs/PLAN.md`、同期済み4-language `DEVLOG/STATUS/PLAN`。
+
 ## 2026-08-11 — Company Dashboard authenticated dark-mode visual acceptance完了
 
 - Previously Business Status inverse markupはunit testとlandingのshared-token browser acceptanceで保護していたが、agentにproduction credentialがなくauthenticated Company Dashboard visual recheckはopenだった。Userがvisible agent-browser windowでLeader accountへlogin。Credential valuesはagentへ渡されずlogにも記録していない。

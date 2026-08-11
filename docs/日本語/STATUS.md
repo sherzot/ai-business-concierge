@@ -14,6 +14,7 @@
 > 2026-08-11: Netlify productionをmodern `sb_publishable_...` keyへ移行し、Auth `200`とRealtime `OPEN` smoke tests成功。Legacy frontend envを削除。Source fallback removalは`agent/remove-legacy-supabase-anon-fallback`で準備し、GitHub CLI authをkeyringで確認。
 > 2026-08-11: No-fallback sourceをPR #6経由で`2b71a49`として`main`へmerge。GitHub CI green、final Netlify deploy `6a7ab5474835d660f21249cd` ready。Production bundle/Auth/Realtime recheck成功、publishable-key handoff完了。
 > 2026-08-11: UserがLeaderとしてauthenticated production sessionを開き、Company Dashboard Business Status panelをcomputed contrastとvisual screenshotでdark mode完全確認。Textは可読、overlap/overflow/browser errorなし、acceptance完了。
+> 2026-08-11: Raw npm production auditはvulnerability 0件。Temporary GHSA-qwww metadata exceptionを削除し、exceptionなしのproduction audit gate成功を確認。
 
 ## 現在のPhase
 
@@ -36,7 +37,7 @@
 | Type-check | 成功 |
 | Unit tests | 23/23 files、108/108 tests |
 | Production build/security check | 成功 |
-| Production dependency audit | Scoped gate: unexcepted high/critical 0; GHSA-qwww exceptionは2026-08-21まで |
+| Production dependency audit | Raw audit: vulnerability合計0件; scoped gateはexceptionなしでhigh/critical 0件 |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue。Landing、public/auth、product core、admin shell redesignをlocal完了 |
 | Visual browser acceptance | Landing Why Us 6/6 inverse text green。Authenticated Company Dashboard dark mode: Business Status background `rgb(17,19,24)`、title/percentage contrast `16.73:1`、muted text `7.5:1`、success signal `10.66:1`。12/12 text nodesがpanel内、overlap/overflow/console error `0` |
 | Preview CI | PR #6 Netlify preview deploy `6a7ab3ed99861d0008a32837` ready。Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready |
@@ -63,8 +64,7 @@
 
 ## 直近の順序
 
-1. 2026-08-21までにGHSA-qwwwを再確認。
-2. Production/preview environment、secret、data分離を決定。
-3. Document Assistant PDF/DOCX/Storageを継続。
+1. Production/preview environment、secret、data分離を決定。
+2. Document Assistant PDF/DOCX/Storageを継続。
 
 詳細: [PLAN.md](PLAN.md)。Canonical: [Uzbek STATUS](../STATUS.md)。

@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 5.3 · 更新 2026-08-11
+> Version 5.4 · 更新 2026-08-11
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -8,7 +8,7 @@
 - [x] User changesを保持しdocumentation workflowを`55ec941`でcommit。
 - [x] P0 commitsを`origin/main`へpushし、commit `06b5756`のCI run `31188866507`がfully greenと確認。
 - [x] Node 22 install、type-check、96 tests、build、security checkを実行。
-- [x] Scoped production audit: unexcepted high/critical 0; GHSA-qwww exceptionは2026-08-21まで。
+- [x] Scoped production audit: high/critical 0件。Temporary GHSA-qwww metadata exceptionは2026-08-11に削除。
 - [x] Production health `200`とunauthenticated protected route `401`を確認。
 - [x] DEVLOGとSTATUSへ証跡を記録。
 
@@ -23,7 +23,6 @@
 
 ## P1 — Supabase/Netlify security handoff完了
 
-- [ ] 2026-08-21までにGHSA-qwww metadata exceptionを再確認/削除。
 - [x] Production publishable keyを確認し、temporary rollout fallbackを保持してconfig、env type/example、CIを移行。
 - [x] Publishable-key commit `35d4b91`をpushし、GitHub CI run `31192041119` greenとNetlify production deploy readyを確認。Bundleがlegacy fallbackを使うことを特定。
 - [x] Netlify production publishable envを設定しredeploy、Auth `200`/Realtime `OPEN` smoke tests成功後、legacy frontend envを削除。

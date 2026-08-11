@@ -1,6 +1,6 @@
 # AI Business Concierge — активный план
 
-> Версия 5.3 · Обновлено 2026-08-11
+> Версия 5.4 · Обновлено 2026-08-11
 > Здесь только активные и следующие задачи. Старый master plan: [../archive/Russian/PLAN_LEGACY_2026-07-24.md](../archive/Russian/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — безопасное начало сессии
@@ -8,7 +8,7 @@
 - [x] Сохранить user changes и commit documentation workflow как `55ec941`.
 - [x] Отправить P0 commits в `origin/main` и подтвердить полностью green CI run `31188866507` для commit `06b5756`.
 - [x] Запустить Node 22 install, type-check, 96 tests, build и security check.
-- [x] Scoped production audit: 0 unexcepted high/critical; GHSA-qwww exception до 2026-08-21.
+- [x] Scoped production audit: high/critical 0; временное GHSA-qwww metadata exception удалено 2026-08-11.
 - [x] Проверить production health `200` и protected route без auth `401`.
 - [x] Записать доказательства в DEVLOG и STATUS.
 
@@ -23,7 +23,6 @@
 
 ## P1 — завершить Supabase/Netlify security handoff
 
-- [ ] Пересмотреть/удалить GHSA-qwww metadata exception до 2026-08-21.
 - [x] Подтвердить production publishable key; перевести config, env type/example и CI, сохранив temporary rollout fallback.
 - [x] Отправить publishable-key commit `35d4b91`, подтвердить green GitHub CI run `31192041119` и ready Netlify production deploy; определить, что bundle использует legacy fallback.
 - [x] Установить Netlify production publishable env, redeploy, пройти Auth `200`/Realtime `OPEN` smoke tests и удалить legacy frontend env.

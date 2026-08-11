@@ -1,6 +1,6 @@
 # AI Business Concierge — faol reja
 
-> Version: 5.3
+> Version: 5.4
 > Yangilandi: 2026-08-11
 > Bu faylda faqat faol va navbatdagi ishlar turadi. 2026-07-24 gacha bo'lgan katta tarixiy reja [archive/PLAN_LEGACY_2026-07-24.md](archive/PLAN_LEGACY_2026-07-24.md)ga ko'chirilgan.
 
@@ -16,7 +16,7 @@
 - [x] `git status` va oxirgi commitlarni tekshirish; docs workflow `55ec941` commitida saqlandi.
 - [x] P0 commitlarini `origin/main`ga push qilish va commit `06b5756` uchun CI run `31188866507` to'liq green ekanini tasdiqlash.
 - [x] Node 22 bilan `npm ci`, type-check, 96 unit test, build va security check baseline olish.
-- [x] Production dependency auditni scoped gate bilan tekshirish: unexcepted high/critical 0; GHSA-qwww/React Router 7.18.2 metadata exceptioni 2026-08-21gacha.
+- [x] Production dependency auditni scoped gate bilan tekshirish: high/critical 0; GHSA-qwww vaqtinchalik metadata exceptioni 2026-08-11da olib tashlandi.
 - [x] Production `bright-api` health `200`, protected endpoint authsiz `401` ekanini smoke-test qilish.
 - [x] Natijani `DEVLOG.md` va `STATUS.md`ga yozish.
 
@@ -31,7 +31,6 @@
 
 ## P1 — Supabase/Netlify security handoffini yakunlash
 
-- [ ] 2026-08-21gacha GHSA-qwww metadata exceptionini qayta tekshirish va npm advisory yangilansa exceptionni olib tashlash.
 - [x] Productionda `sb_publishable_...` mavjudligini tekshirish; `config.ts`, env type/example va CI'ni yangi contractga o'tkazish, legacy fallbackni rollout uchun vaqtincha saqlash.
 - [x] Publishable-key commit `35d4b91`ni push qilish, GitHub CI run `31192041119`ni green va Netlify production deployni `ready` holatda tasdiqlash; bundle legacy fallback ishlatayotganini aniqlash.
 - [x] Netlify production publishable envni o'rnatish, qayta deploy, Auth `200`/Realtime `OPEN` smoke-testini o'tkazish va legacy frontend envni olib tashlash.

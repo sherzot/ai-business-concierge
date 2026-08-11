@@ -15,6 +15,7 @@
 > 2026-08-11: Netlify production modern `sb_publishable_...` keyga o'tdi, Auth `200` va Realtime `OPEN` smoke-testlari o'tdi, legacy frontend env o'chirildi. Source fallback removal `agent/remove-legacy-supabase-anon-fallback` branchida tayyorlandi va GitHub CLI auth keyring orqali tasdiqlandi.
 > 2026-08-11: No-fallback source PR #6 orqali `2b71a49` bilan `main`ga merge qilindi; GitHub CI green va final Netlify deploy `6a7ab5474835d660f21249cd` ready. Production bundle/Auth/Realtime recheck to'liq o'tdi; publishable-key handoff yakunlandi.
 > 2026-08-11: User productionda Rahbar sifatida authenticated session ochdi; Company Dashboard “Biznes holati” paneli dark mode'da computed contrast va vizual screenshot bilan to'liq tekshirildi. Matn ko'rinadi, overlap/overflow/browser error yo'q; acceptance yakunlandi.
+> 2026-08-11: Raw npm production audit 0 ta vulnerability qaytardi; GHSA-qwww vaqtinchalik metadata exceptioni olib tashlandi va exception'siz production audit gate green tasdiqlandi.
 
 ## Hozir qayerdamiz
 
@@ -38,7 +39,7 @@
 | Unit test | 23/23 fayl, 108/108 test |
 | Production build | Muvaffaqiyatli |
 | Security check | 9 ta build/Netlify fayli muvaffaqiyatli |
-| Production dependency audit | Scoped gate o'tdi: unexcepted high/critical 0; GHSA-qwww metadata exceptioni 2026-08-21 gacha |
+| Production dependency audit | Raw audit: jami 0 vulnerability; scoped gate exception'siz high/critical 0 |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue tokenlari; landing, public/auth, product core va admin shell redesign lokal yakunlangan |
 | Visual browser acceptance | Landing Why Us 6/6 inverse text bilan green. Authenticated Company Dashboard dark mode'da “Biznes holati” fon `rgb(17,19,24)`; title/foiz kontrasti `16.73:1`, muted text `7.5:1`, success signal `10.66:1`; 12/12 text node panel ichida, overlap/overflow/console error `0` |
 | Preview CI | PR #6 Netlify preview deploy `6a7ab3ed99861d0008a32837` ready; Vercel deployment `EPxGDaLxfNeKnHPKfwsUzxp7sZfd` ready |
@@ -77,9 +78,8 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. 2026-08-21gacha GHSA-qwww metadata exceptionini qayta ko'rish.
-2. Production va preview environment/secret/data ajratish qarorini qabul qilish.
-3. AI Hujjatchi PDF/DOCX/Storage ishlariga o'tish.
+1. Production va preview environment/secret/data ajratish qarorini qabul qilish.
+2. AI Hujjatchi PDF/DOCX/Storage ishlariga o'tish.
 
 Batafsil tartib: [PLAN.md](PLAN.md).
 
@@ -95,5 +95,4 @@ Batafsil tartib: [PLAN.md](PLAN.md).
 - Asosiy JavaScript chunk taxminan 1.76 MB; route/module code splitting kerak.
 - `supabase.ts` static va dynamic import aralashmasi alohida chunkni cheklaydi.
 - Browserslist bazasi eskirgan.
-- npm global advisory metadata GHSA-qwww uchun React Router 7.18.2 ni noto'g'ri vulnerable deb hisoblamoqda; upstream repo advisory 7.18.2 ni patched deb belgilagan. Scoped exception 2026-08-21da avtomatik qayta ko'rishni talab qiladi.
 - Eski setup hujjatlarida legacy function/key nomlari uchrashi mumkin; joriy qaror uchun `STATUS.md` va eng yangi `DEVLOG` ustun.
