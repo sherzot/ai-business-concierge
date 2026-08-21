@@ -36,6 +36,7 @@
 > 2026-08-21: `4b51fec`をmainへpushし、CI `32461091448`とNetlify production deploy `6a88056075359300089b9fa5`はgreen。Stagingは37/37 migrations・`bright-api` v11へ更新。Stagingに`ANTHROPIC_API_KEY`がないためauthenticated smokeは`503 AI_UNAVAILABLE`でblocked、fixture residueは0/0/0/0。
 > 2026-08-21: Production authenticated binary acceptanceはgreen。DOCX/PDF signed downloads、direct Storage deny `400`、cross-tenant deny `404`、delete `200`。Authoritative document/generated/object residueは0/0/0、final fixtureは0/0/0/0/0。Smart CDN cached URLはdelete後最大60秒`200`を返し得る。
 > 2026-08-21: Telegram webhook v14はsecret不在時にinvalid POSTを`200`で受理。Pure guardと4/4 tests後、production v15はhealth `200`、invalid POST fail-closed `503`、PUT `405`。`67ac675`はmain、CI `32485618740`はgreen。Secret設定とTelegram `setWebhook`が残る。
+> 2026-08-21: HR Candidateにbounded REST/pagination/response、timeout、repository-tree aggregation、10-minute cacheを持つreal public GitHub adapterを追加。Deno 10/10とlive `octocat` smoke complete。Routeは`501`のまま。Supabase organizationはFreeのためPro+ Leaked Password ProtectionはBLOCKED。
 
 ## 現在のPhase
 
@@ -58,7 +59,7 @@
 | Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。37/37 migrations、`bright-api` v11 ACTIVE、health `200`、unauth docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list。Email confirmation ON、8-digit/1-minute OTP、TOTP ON。Auth settings HTTP `200`、autoconfirm false。Edgeはmodern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overridesを使用しlegacy anon/service-role API keysはdisabled |
 | Type-check | Clean temporary frontend installで成功 |
-| Unit tests | Frontend 26/26 files、117/117 tests。AI polish/router/usage Deno 18/18、従来document binary/lifecycle Deno 7/7 |
+| Unit tests | Frontend 26/26 files、117/117 tests。AI polish/router/usage Deno 18/18、HR GitHub analyzer Deno 10/10、Telegram webhook Deno 4/4、従来document binary/lifecycle Deno 7/7 |
 | Deployment environment guard | Node tests 14/14: isolation contract 10件 + Vite `.env` fallback/runtime-precedence 2件 + bundled-endpoint extraction regressions 2件 |
 | Production build/security check | Synthetic non-production refでbuild pass。CSPはそのrefから生成、10 build/Netlify filesを検査 |
 | Production dependency audit | Raw audit: vulnerability合計0件; scoped gateはexceptionなしでhigh/critical 0件 |
@@ -87,7 +88,7 @@
 | Resend inbox | Partial | Codeあり、receiving/delivery E2E未確認 |
 | AI Concierge/RAGとcost tracking | Partial | 基盤あり。Polishing request quotaはPostgreSQL atomic reservation/releaseでrace-safe、provider usageはoutput validation前に計上する。Migration rollout、citation UX、billing dashboard、unified endpoint enforcement、smoke testsが残る |
 | AI文書作成 | Production binary + staged AI polish preview / provider blocked | 15 templates、4言語、実PDF/DOCX/private Storageは稼働中。Polishing frontendはproduction、migrationと`bright-api` v11はstagingへdeploy済み。Auth/tenant/document boundariesとcleanupはgreenだが、stagingに`ANTHROPIC_API_KEY`がなくreal-provider smokeは`503 AI_UNAVAILABLE`。Production backend/migration rolloutは意図的に保留 |
-| HR Candidate Analysis | Skeleton | Scaffoldあり、production endpointは`501 NOT_IMPLEMENTED` |
+| HR Candidate Analysis | Partial / route blocked | Public GitHub analyzerとbounded cacheはreal・tested。CV/LLM/auth/rate-limitが残り、productionは`501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme と AI Sales Bot | Planned | Phase 3 |
 
 ## 直近の順序

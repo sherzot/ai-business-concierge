@@ -41,7 +41,7 @@
 | R-001 | リアル受信ボックス統合 | Email（Resend）webhook – 部分実装済み ✅ | Inbox |
 | R-002 | リアルタイム更新 | Supabase Realtime – inbox、tasks ✅ | Inbox、Tasks |
 | R-015 | タスク割り当て通知 | リーダーが割り当てた際の担当者への通知、確認、ステータスの透明性 ✅ | Tasks |
-| R-016 | HR Candidate Analysis | Skeleton; GitHub/CV/LLM business logicとtestsが残る | HR |
+| R-016 | HR Candidate Analysis | Partial。Public GitHub analyzer/cacheは10/10とlive public smokeをpass。CV/LLM、auth/rate-limit、route wiring、full-flow testsが残る | HR |
 | R-017 | AI rate limiting | Partial。Polishing check/incrementはservice-role-only PostgreSQL atomic reservationでrace-safe、local pgTAP 9/9 green、migrationはstagingへdeploy済み。Production rollout、他endpointのunified policy、`Retry-After`が残る | Backend |
 | R-018 | AI cost tracking | Partial; loggingあり、tenant dashboard/enforcementが残る | Backend |
 | R-019 | Vector Search (RAG) | Partial; vector/embedding基盤あり、explicit tool/citationsが残る | Docs |

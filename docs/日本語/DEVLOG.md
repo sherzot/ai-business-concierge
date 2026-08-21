@@ -4,6 +4,15 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-21 — HR GitHub analyzerとcacheを実装
+
+- `ANTHROPIC_API_KEY`待ちの間にsecret不要のHR Candidate P2を開始した。従来のanalyzerはprofileのみ取得し、repo pagination、aggregation、quality signals、cacheはTODOで、repository URLもprofile inputとして誤受理した。
+- Public REST adapterはexact profileを検証し、profileとrepo first pageを並列取得、paginationを3×100へ制限し、各requestを3秒、全analysisを5.5秒、responseを2 MiBへboundする。Top-6 repository treesを並列検査しREADME/test/CI、languages/stars/activity proxy、qualityをaggregateする。不完全なprovider dataは`partial`。Case-insensitive 10-minute/250-entry process cacheはstampedeをcoalesceしdefensive copyを返す。Authorizationでもsource of truthでもない。
+- Deno format/check、10/10 deterministic tests PASS。Unsafe provider URL rejectionも含む。Live public `octocat` smokeは`complete`、8 public repos、6 sampled repos、2 languagesを返した。Route、CV parser、scoring/report、auth/rate-limit、production `501`は意図的に未変更。CIはTelegram 4 testsに加えてHR 10 testsを実行する。
+- Supabase organization read-backは`free`。現行Supabase docsではLeaked Password ProtectionはPro+限定。Production/staging Auth configは未変更で、PLANへpaid-upgrade blockerを記録した。
+
+Files: `.github/workflows/ci.yml`、`supabase/functions/server/services/hr-candidate/github-analyzer{,.test}.ts`、`frontend/src/features/hr/candidates/README.md`、4言語`DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`。
+
 ## 2026-08-21 — Production Telegram webhook bypassをfail-closed化
 
 - Productionには`TELEGRAM_BOT_TOKEN`があり、`TELEGRAM_WEBHOOK_SECRET`がなく、`telegram-bot` v14 ACTIVE。StagingにはTelegram secrets/functionがない。GET healthは`200`だが、invalid-secret `{}` POSTは期待した`503`ではなく`200`を返した。

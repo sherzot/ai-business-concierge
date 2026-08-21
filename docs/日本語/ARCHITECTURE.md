@@ -3,7 +3,7 @@
 > プロジェクトアーキテクチャ、設計パターン、ユニットテストルール
 > バージョン: 1.3 | 更新: 2026-08-21
 >
-> Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate` foldersはTODO/stub logicを含むmodular scaffoldであり、production-ready referenceではない。
+> Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate`はpartialで、GitHub adapterはreal、残りのflowはscaffoldでproduction-ready referenceではない。
 
 ---
 
@@ -136,7 +136,7 @@ supabase/functions/server/
     services/
       llm-router.ts
       knowledge-base.ts
-      hr-candidate/        ← SKELETON structure; TODO/stubが残る
+      hr-candidate/        ← PARTIAL; GitHub adapterはreal、CV/LLM/orchestrator stubsが残る
         index.ts
         types.ts
         candidate-scorer.ts

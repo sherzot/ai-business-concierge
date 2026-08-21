@@ -4,6 +4,15 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-21 — Real HR GitHub analyzer and cache implemented
+
+- While waiting for `ANTHROPIC_API_KEY`, the secret-free HR Candidate P2 started. The previous analyzer fetched only the profile; repository pagination, aggregation, quality signals, and caching were TODO, and repository URLs were incorrectly accepted as profile input.
+- The public REST adapter now validates an exact profile, fetches profile plus first repository page in parallel, caps pagination at 3×100, and bounds each request to three seconds, the full analysis to 5.5 seconds, and each response to 2 MiB. It inspects the top six repository trees in parallel and aggregates README/test/CI, language/stars/activity proxy, and quality signals; incomplete provider data stays `partial`. A case-insensitive 10-minute, 250-entry process cache coalesces stampedes and returns defensive copies; it is neither authorization nor a source of truth.
+- Deno format/check and 10/10 deterministic tests passed, including unsafe provider URL rejection. A live public `octocat` smoke returned `complete`, eight public repositories, six sampled repositories, and two aggregated languages. The route, CV parser, scoring/report, auth/rate-limit, and production `501` intentionally remain unchanged. CI now runs these ten HR tests alongside the four Telegram tests.
+- Supabase organization read-back is `free`; current Supabase documentation limits Leaked Password Protection to Pro+. Production/staging Auth configuration was unchanged, and PLAN now records this as a paid-upgrade blocker.
+
+Files: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/github-analyzer{,.test}.ts`, `frontend/src/features/hr/candidates/README.md`, and four-language `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`.
+
 ## 2026-08-21 — Production Telegram webhook bypass made fail-closed
 
 - Production had `TELEGRAM_BOT_TOKEN`, lacked `TELEGRAM_WEBHOOK_SECRET`, and ran `telegram-bot` v14 ACTIVE; staging had no Telegram secrets/function. GET health returned `200`, but an invalid-secret `{}` POST returned `200` instead of expected `503`.

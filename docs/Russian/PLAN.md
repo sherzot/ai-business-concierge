@@ -53,11 +53,12 @@
 
 - [ ] После production v15 fail-closed `503` установить новый `TELEGRAM_WEBHOOK_SECRET` и повторно вызвать Telegram `setWebhook` с тем же значением.
 - [ ] E2E проверить Resend receiving, signature, tenant mapping и delivery.
-- [ ] Включить Leaked Password Protection и выбрать Netlify preview protection.
+- [ ] **BLOCKED — paid plan:** Supabase organization Free; включить Leaked Password Protection после подтверждённого Pro+ upgrade.
+- [ ] Выбрать Netlify preview protection.
 
 ## P2 — HR Candidate Analysis
 
-- [ ] Реализовать GitHub analysis/cache и PDF/DOCX parser.
+- [ ] Реализовать PDF/DOCX parser.
 - [ ] Подключить Sonnet structured scoring/reporting через LLM Router.
 - [ ] Добавить auth, roles, rate limit, cost log и Zod validation.
 - [ ] Завершить frontend, убрать `501` stub и протестировать полный flow.

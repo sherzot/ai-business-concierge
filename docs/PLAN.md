@@ -62,12 +62,11 @@
 - [ ] Production v15 fail-closed `503`dan keyin yangi `TELEGRAM_WEBHOOK_SECRET`ni o'rnatish va ayni qiymat bilan Telegram `setWebhook`ni qayta ulash.
 - [ ] Telegram `/start`, AI javob, locale, rate limit va feedback smoke-testini o'tkazish.
 - [ ] Resend receiving domain, webhook signature, tenant mapping va real deliveryni end-to-end tekshirish.
-- [ ] Supabase Leaked Password Protection'ni Dashboard orqali yoqish.
+- [ ] **BLOCKED — paid plan:** Supabase organization Free; Pro+ upgrade tasdiqlansa Leaked Password Protection'ni yoqish.
 - [ ] Netlify preview protection variantini tanlash.
 
 ## P2 — HR Candidate Analysis
 
-- [ ] GitHub analyzer va cache'ni real implementatsiya qilish.
 - [ ] PDF/DOCX CV parserni `pdfjs`/`mammoth` bilan ulash.
 - [ ] Sonnet structured scoring va report generatorni LLM Router orqali ulash.
 - [ ] Auth, role, rate limit, usage/cost log va Zod validationni route'ga qo'shish.

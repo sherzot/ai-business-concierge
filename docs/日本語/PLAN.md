@@ -53,11 +53,12 @@
 
 - [ ] Production v15 fail-closed `503`後、新しい`TELEGRAM_WEBHOOK_SECRET`を設定し、同じ値でTelegram `setWebhook`を再接続する。
 - [ ] Resend receiving、signature、tenant mapping、deliveryをE2E検証。
-- [ ] Leaked Password Protectionを有効化しNetlify preview protectionを選択。
+- [ ] **BLOCKED — paid plan:** Supabase organizationはFree。承認済みPro+ upgrade後にLeaked Password Protectionを有効化。
+- [ ] Netlify preview protectionを選択。
 
 ## P2 — HR Candidate Analysis
 
-- [ ] GitHub analysis/cacheとPDF/DOCX parserを実装。
+- [ ] PDF/DOCX parserを実装。
 - [ ] LLM Router経由でSonnet structured scoring/reportingを接続。
 - [ ] Auth、roles、rate limit、cost log、Zod validationを追加。
 - [ ] Frontendを完了し`501` stubを削除、full flowをtest。

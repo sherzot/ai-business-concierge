@@ -79,7 +79,7 @@ POST /v1/hr/candidates/analyze
 which currently returns `501 NOT_IMPLEMENTED`. The backend skeleton is at
 `supabase/functions/server/services/hr-candidate/`. Implementation gates:
 
-- [ ] `github-analyzer.ts` — fetch + aggregate
+- [x] `github-analyzer.ts` — bounded public REST fetch + aggregate + process cache
 - [ ] `cv-parser.ts`        — pdfjs / mammoth + Haiku post-process
 - [ ] `candidate-scorer.ts` — Sonnet structured output
 - [ ] `report-generator.ts` — Sonnet narrative + interview questions

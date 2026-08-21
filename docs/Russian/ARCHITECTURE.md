@@ -3,7 +3,7 @@
 > Архитектура проекта, паттерны проектирования и правила unit-тестирования
 > Версия: 1.3 | Обновлено: 2026-08-21
 >
-> Текущий runtime-статус находится в [STATUS.md](STATUS.md). Папки `hr-candidate` — modular scaffold с TODO/stub logic, а не production-ready эталон.
+> Текущий runtime-статус находится в [STATUS.md](STATUS.md). `hr-candidate` partial: GitHub adapter real, остальной flow остаётся scaffold и не является production-ready эталоном.
 
 ---
 
@@ -136,7 +136,7 @@ supabase/functions/server/
     services/
       llm-router.ts
       knowledge-base.ts
-      hr-candidate/        ← SKELETON structure; остаются TODO/stub
+      hr-candidate/        ← PARTIAL; GitHub adapter real, остаются CV/LLM/orchestrator stubs
         index.ts
         types.ts
         candidate-scorer.ts

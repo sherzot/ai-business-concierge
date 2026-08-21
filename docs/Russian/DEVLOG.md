@@ -4,6 +4,15 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-21 — Реализованы HR GitHub analyzer и cache
+
+- В ожидании `ANTHROPIC_API_KEY` начат не требующий secret HR Candidate P2. Прежний analyzer получал только profile; repo pagination, aggregation, quality signals и cache оставались TODO, а repository URL ошибочно принимался как profile input.
+- Public REST adapter проверяет exact profile, параллельно получает profile и первую страницу repos, ограничивает pagination 3×100, каждый request — 3 секунды, весь analysis — 5.5 секунды, response — 2 MiB. Top-6 repository trees проверяются параллельно; агрегируются README/test/CI, languages/stars/activity proxy и quality. Неполные provider data остаются `partial`. Case-insensitive process cache на 10 минут/250 entries объединяет stampede и возвращает defensive copies; он не является authorization или source of truth.
+- Deno format/check и 10/10 deterministic tests PASS, включая отклонение unsafe provider URL. Live public smoke `octocat` вернул `complete`, восемь public repos, шесть sampled repos и два языка. Route, CV parser, scoring/report, auth/rate-limit и production `501` намеренно не изменены. CI теперь запускает эти 10 HR tests вместе с 4 Telegram tests.
+- Read-back Supabase organization — `free`; текущая документация Supabase ограничивает Leaked Password Protection планом Pro+. Production/staging Auth config не менялся; PLAN фиксирует paid-upgrade blocker.
+
+Files: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/github-analyzer{,.test}.ts`, `frontend/src/features/hr/candidates/README.md`, четыре языка `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`.
+
 ## 2026-08-21 — Production Telegram webhook bypass переведён в fail-closed
 
 - В production был `TELEGRAM_BOT_TOKEN`, отсутствовал `TELEGRAM_WEBHOOK_SECRET`, `telegram-bot` v14 был ACTIVE; в staging нет Telegram secrets/function. GET health вернул `200`, но invalid-secret `{}` POST вернул `200` вместо ожидаемого `503`.

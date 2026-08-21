@@ -4,6 +4,15 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-21 — HR GitHub analyzer va cache real implementatsiya qilindi
+
+- `ANTHROPIC_API_KEY` kutilayotgan paytda secret talab qilmaydigan HR Candidate P2 boshlandi. Oldingi `github-analyzer.ts` profilni olsa-da, repo pagination, aggregation, repo sifati va cache TODO edi; URL parser repository pathlarni ham profil deb qabul qilardi.
+- Public REST adapter exact profil inputini tekshiradi, profil va birinchi repo sahifasini parallel oladi, paginationni 3×100 bilan cheklaydi, har requestga 3 soniya va butun analysisga 5.5 soniya timeout hamda 2 MiB response limiti qo'yadi. Top 6 repo tree'lari parallel tekshirilib README/test/CI, til/stars/activity proxy va quality aggregate qilinadi; qisman provider javobi `partial` bo'lib qoladi. Case-insensitive 10 daqiqalik, 250-entry process cache stampede'ni birlashtiradi va defensive copy qaytaradi; cache authorization yoki source of truth emas.
+- Deno format/check va 10/10 deterministic test PASS, jumladan unsafe provider URL rad etilishi; real public `octocat` smoke `complete`, 8 public repo, 6 sampled repo va 2 til aggregate'ini qaytardi. Route, CV parser, scoring/report, auth/rate-limit va production `501` ataylab o'zgarmadi. CI targeted Deno gate endi Telegram 4 test bilan birga HR 10 testni ham ishlatadi.
+- Supabase organization read-back `free`; joriy Supabase hujjatida Leaked Password Protection faqat Pro+ ekanligi tasdiqlandi. Production/staging Auth config o'zgarmadi; PLAN'dagi vazifa paid-upgrade blocker sifatida qayta belgilandi.
+
+Fayllar: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/github-analyzer{,.test}.ts`, `frontend/src/features/hr/candidates/README.md`, 4-tilli `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`.
+
 ## 2026-08-21 — Production Telegram webhook bypass fail-closed qilindi
 
 - Productionda `TELEGRAM_BOT_TOKEN` bor, `TELEGRAM_WEBHOOK_SECRET` yo'q va `telegram-bot` v14 ACTIVE edi; stagingda Telegram secret/function yo'q. GET health `200`, invalid secretli `{}` POST esa kutilgan `503` o'rniga `200` qaytardi.
