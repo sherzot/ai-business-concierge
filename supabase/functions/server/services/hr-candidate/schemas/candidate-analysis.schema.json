@@ -1,11 +1,27 @@
 {
-  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://ai-business-concierge.uz/schemas/candidate-analysis.schema.json",
   "title": "CandidateAnalysisResult",
   "description": "MVP output of the hr_candidate_analysis module. Session-only, no persistence.",
   "type": "object",
-  "required": ["request_id", "status", "duration_ms", "locale", "result"],
+  "required": ["request_id", "status", "duration_ms", "locale"],
   "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": { "status": { "const": "error" } },
+        "required": ["status"]
+      },
+      "then": {
+        "required": ["error"],
+        "not": { "required": ["result"] }
+      },
+      "else": {
+        "required": ["result"],
+        "not": { "required": ["error"] }
+      }
+    }
+  ],
   "properties": {
     "request_id": {
       "type": "string",
@@ -313,6 +329,7 @@
         "code": {
           "type": "string",
           "enum": [
+            "INVALID_REQUEST",
             "INVALID_GITHUB_INPUT",
             "GITHUB_USER_NOT_FOUND",
             "GITHUB_UNAVAILABLE",
@@ -322,6 +339,8 @@
             "UNAUTHENTICATED",
             "FORBIDDEN_ROLE",
             "RATE_LIMITED",
+            "RATE_LIMIT_UNAVAILABLE",
+            "NOT_IMPLEMENTED",
             "TIMEOUT",
             "INTERNAL"
           ]

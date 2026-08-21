@@ -14,6 +14,7 @@ export type AnalysisStatus = "ok" | "degraded" | "error";
 export type FetchStatus = "complete" | "partial" | "failed";
 
 export type ErrorCode =
+  | "INVALID_REQUEST"
   | "INVALID_GITHUB_INPUT"
   | "GITHUB_USER_NOT_FOUND"
   | "GITHUB_UNAVAILABLE"
@@ -23,6 +24,8 @@ export type ErrorCode =
   | "UNAUTHENTICATED"
   | "FORBIDDEN_ROLE"
   | "RATE_LIMITED"
+  | "RATE_LIMIT_UNAVAILABLE"
+  | "NOT_IMPLEMENTED"
   | "TIMEOUT"
   | "INTERNAL";
 

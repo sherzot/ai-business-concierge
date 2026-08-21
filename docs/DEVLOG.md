@@ -4,6 +4,15 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-21 — HR request boundary va orchestrator fail-closed qotirildi
+
+- Key talab qilmaydigan HR Candidate ishida request/orchestrator audit qilindi. Oldin runtime validation TODO edi, fulfilled `parse_status: failed` CV ham scoringga o'tishi mumkin edi, `Promise.race` timeout timerlari successdan keyin tozalanmasdi, request ID base36 shim JSON Schema ULID alifbosiga kafolat bermasdi va schema error response uchun ham `result`ni majburiy qilardi.
+- Pure request boundary GitHub profilini normalize qiladi, CV byte/MIME/5 MiB, filename 180, job description 5,000, locale va depth limitlarini provider chaqiruvidan oldin tekshiradi va CV byte'larini defensive copy qiladi. Canonical HR/manager/company_admin/super_admin hamda legacy leader role policy va Free/Tadbirkor/Biznes concurrent/minute/day policylari qo'shildi; main `501` stub tenant authdan keyin role'ni fail-closed tekshiradi. Persistent quota reservation hali ulanmagan.
+- Orchestrator dependency injection bilan testlanadigan bo'ldi: GitHub/CV parallel va bounded, GitHub failure `degraded`, failed CV hard error, invalid inputda provider call 0, timeout public envelope, timer cleanup va canonical 26-belgili Crockford ULID. JSON Schema error/success `result`/`error` exclusivitysi va `INVALID_REQUEST`/rate-unavailable/not-implemented kodlari bilan tuzatildi.
+- Yangi boundary 5/5, orchestrator 6/6 va schema 1/1, jami HR 30/30; Telegram bilan targeted Deno 34/34 PASS. Format/check/lint, JSON Schema AJV compile va YAML PASS. Full monolit `server/index.ts` check avvaldan mavjud 21 logging/Hono/risk typing xatosini qaytardi; yangi HR satriga tegishli error yo'q. Route `501`, provider/deploy/remote smoke o'zgarmadi.
+
+Fayllar: `.github/workflows/ci.yml`, `supabase/functions/server/index.ts`, `supabase/functions/server/services/hr-candidate/{index,index.test,request-boundary,request-boundary.test,schema.test,types}.ts`, `schemas/candidate-analysis.schema.json`, `frontend/src/features/hr/candidates/README.md`, `docs/HR_CANDIDATE_ANALYSIS.md`, 4-tilli `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`.
+
 ## 2026-08-21 — HR PDF/DOCX CV parserning secretsiz qismi implementatsiya qilindi
 
 - `ANTHROPIC_API_KEY` kutilayotgan paytda HR Candidate'ning key talab qilmaydigan keyingi qismi bajarildi. Oldingi `cv-parser.ts` PDF/DOCX extractor, sana/section parsing va semantic structure uchun faqat TODO/`NOT_IMPLEMENTED` edi.

@@ -45,6 +45,7 @@ import {
   summarizeDocumentPolishInstruction,
   validateDocumentPolishInput,
 } from "./services/document-polisher.ts";
+import { isHrCandidateRoleAllowed } from "./services/hr-candidate/request-boundary.ts";
 
 const app = new Hono();
 const BASE_PATH = "/make-server-6c2837d6";
@@ -3657,6 +3658,18 @@ const registerRoutes = (prefix: string) => {
   // Implementatsiya: services/hr-candidate/* (TODO bloklari to'ldirilgach)
   // ---------------------------------------------------------------------------
   app.post(`${prefix}/hr/candidates/analyze`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+    const tenantContext = ctx as TenantContext;
+    if (!isHrCandidateRoleAllowed(tenantContext.role)) {
+      return failure(
+        c,
+        403,
+        "FORBIDDEN_ROLE",
+        "HR Candidate Analysis uchun HR, manager yoki company admin roli kerak.",
+      );
+    }
+
     // MUHIM: multipart body'ni drain qilish kerak, aks holda Deno
     // response'ni flush qilolmaydi va function timeout'ga tushadi.
     try {
@@ -3665,10 +3678,6 @@ const registerRoutes = (prefix: string) => {
       // Drain xatosi — davom etamiz
     }
 
-    const ctx = await requireTenant(c);
-    if (!(ctx as any).tenantId) return ctx;
-
-    // TODO: rol guard — HR | MANAGER | TENANT_ADMIN | SUPER_ADMIN
     // TODO: usage-tracking guardUsage({ resource: 'ai_requests' })
     // TODO: services/hr-candidate/index.ts.analyzeCandidate() ni chaqirish
 

@@ -3,7 +3,7 @@
 > Loyiha arxitekturasi, design patternlar va unit testing qoidalari
 > Version: 1.3 | Yangilandi: 2026-08-21
 >
-> Bu hujjat joriy arxitektura chegaralari va target refactoring yo'nalishini birga ko'rsatadi. Runtime holati uchun [STATUS.md](STATUS.md) ustun. `hr-candidate` papkasi partial: GitHub adapter va local PDF/DOCX extractor real, ammo semantic LLM/scoring/report/orchestrator oqimi scaffold va production-ready etalon emas.
+> Bu hujjat joriy arxitektura chegaralari va target refactoring yo'nalishini birga ko'rsatadi. Runtime holati uchun [STATUS.md](STATUS.md) ustun. `hr-candidate` papkasi partial: GitHub, local PDF/DOCX, pure request policy va orchestrator failure boundary real; persistent quota va semantic LLM/scoring/report/HTTP wiring production-ready emas.
 
 ---
 
@@ -152,7 +152,7 @@ supabase/functions/server/
     services/                    # Application use cases
       llm-router.ts              #   ✅ Mavjud
       knowledge-base.ts          #   ✅ Mavjud
-      hr-candidate/              #   🚧 PARTIAL — GitHub + local PDF/DOCX real; semantic LLM/orchestrator stublari bor
+      hr-candidate/              #   🚧 PARTIAL — adapters/request/orchestrator real; quota + semantic LLM stublari bor
         index.ts                 #     Orchestrator
         types.ts                 #     Domain types
         candidate-scorer.ts      #     Domain service
@@ -194,7 +194,7 @@ router.post("/tasks", async (c) => {
 
 ### 3.3 Target pattern: modular service papkasi
 
-`hr-candidate` papkasi kerakli modular strukturani ko'rsatadi. GitHub public REST adapteri bounded timeout/pagination/response/cache bilan, local PDF/DOCX extractor esa file/expansion/text limitlari bilan real. Semantic CV structuring, scoring, report, auth/rate-limit va route wiringda TODO/stublar bor. Butun papkani production implementatsiya deb ko'chirmang. Ishlaydigan servis chegaralari uchun `llm-router.ts`, `knowledge-base.ts` va `document-generator.ts`; murakkab feature papka shakli uchun quyidagi target pattern ishlatiladi:
+`hr-candidate` papkasi kerakli modular strukturani ko'rsatadi. GitHub REST va local PDF/DOCX adapterlari bounded; pure request/role/tariff policy providerdan oldin ishlaydi; dependency-injected orchestrator invalid/failed/timeout/degraded oqimlarini boshqaradi. Persistent quota reservation, semantic CV structuring, scoring, report, usage log va HTTP route wiringda TODO/stublar bor. Butun papkani production implementatsiya deb ko'chirmang. Ishlaydigan servis chegaralari uchun `llm-router.ts`, `knowledge-base.ts` va `document-generator.ts`; murakkab feature papka shakli uchun quyidagi target pattern ishlatiladi:
 
 ```
 services/{domain}/
@@ -396,4 +396,4 @@ it('overdue: done status bo'lsa false', () => {
 
 *ARCHITECTURE.md — AI Business Concierge v1.0*
 *Sana: 2026-05-05*
-*HR Candidate papka strukturasi target modular pattern; GitHub adapteri va bounded local PDF/DOCX extractor real, semantic LLM/scoring/report/orchestrator oqimi partial scaffold.*
+*HR Candidate target modular pattern: bounded adapter/request/orchestrator boundary real; persistent quota va semantic LLM/scoring/report/HTTP wiring partial scaffold.*

@@ -3,7 +3,7 @@
 > Project architecture, design patterns, and unit testing rules
 > Version: 1.3 | Updated: 2026-08-21
 >
-> Current runtime status is in [STATUS.md](STATUS.md). `hr-candidate` is partial: the GitHub adapter and local PDF/DOCX extractor are real, while semantic LLM/scoring/report/orchestrator flow is scaffold logic and not a production-ready reference implementation.
+> Current runtime status is in [STATUS.md](STATUS.md). `hr-candidate` is partial: GitHub, local PDF/DOCX, pure request policy, and orchestrator failure boundaries are real; persistent quota and semantic LLM/scoring/report/HTTP wiring are not production-ready.
 
 ---
 
@@ -146,7 +146,7 @@ supabase/functions/server/
     services/
       llm-router.ts
       knowledge-base.ts
-      hr-candidate/        ← PARTIAL; real GitHub + local PDF/DOCX, semantic LLM/orchestrator stubs remain
+      hr-candidate/        ← PARTIAL; real adapters/request/orchestrator, quota + semantic LLM stubs remain
         index.ts           # Orchestrator
         types.ts
         candidate-scorer.ts
@@ -336,4 +336,4 @@ it('useTasks: starts with loading true, false after data arrives', async () => {
 
 *ARCHITECTURE.md — AI Business Concierge v1.0*
 *Date: 2026-05-05*
-*The HR Candidate folder is the target modular pattern; the GitHub adapter and bounded local PDF/DOCX extractor are real, while semantic LLM/scoring/report/orchestrator flow remains a partial scaffold.*
+*HR Candidate is the target modular pattern: bounded adapter/request/orchestrator boundaries are real; persistent quota and semantic LLM/scoring/report/HTTP wiring remain a partial scaffold.*

@@ -83,7 +83,7 @@ which currently returns `501 NOT_IMPLEMENTED`. The backend skeleton is at
 - [~] `cv-parser.ts`        — bounded pdfjs / mammoth extraction complete; Haiku structuring blocked on provider key
 - [ ] `candidate-scorer.ts` — Sonnet structured output
 - [ ] `report-generator.ts` — Sonnet narrative + interview questions
-- [ ] `index.ts`            — orchestrator (Promise.allSettled + timeouts)
+- [~] `index.ts`            — validation/parallel/timeout/failed-CV gates complete; LLM retry and usage logging remain
 
 Once those land, flip the route handler in `index.ts` from the 501 stub to
 call `analyzeCandidate(req)`.

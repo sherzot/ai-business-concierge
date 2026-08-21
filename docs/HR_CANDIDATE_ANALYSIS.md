@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Holat: SKELETON / DESIGN.** Frontend va backend scaffold fayllari mavjud, ammo CV parser, scorer va report generator production-ready emas; canonical endpoint `501 NOT_IMPLEMENTED` qaytaradi. Joriy holat: [STATUS.md](STATUS.md).
+> **Holat: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub adapter/cache, bounded local PDF/DOCX extraction, pure request/role/tariff policy va orchestrator failure semantics real/testlangan. Persistent quota, semantic LLM scorer/report va HTTP wiring qolgan; canonical endpoint `501 NOT_IMPLEMENTED`. Joriy holat: [STATUS.md](STATUS.md).
 
 > **AI Business Concierge — `hr_candidate_analysis` modul dizayn paketi**
 > Version: 1.0 (MVP design) · Sana: 2026-04-29 · Til: O'zbekcha / 日本語 / English
@@ -84,7 +84,7 @@ An HR manager submits a GitHub username (or URL), a CV (PDF/DOCX) and an optiona
 | Komponent | Mas'uliyat | Texnologiya |
 |---|---|---|
 | **github_analyzer** | Public profile → repo statistikasi, stack, faollik, README/CI/test signali, pinned repo sifati | `fetch` → GitHub REST v3 |
-| **cv_parser** | PDF/DOCX → tuzilgan matn → tajriba yillari, rollar, stack, ta'lim | `pdfjs-dist` (PDF), `docx` library (DOCX), regex + Claude Haiku post-processing |
+| **cv_parser** | PDF/DOCX → bounded local matn/signal; semantic rollar/ta'lim keyin | `pdfjs-dist` (PDF), `mammoth` (DOCX), regex + pending Claude Haiku post-processing |
 | **candidate_scorer** | GitHub + CV ma'lumotlarini birlashtirib 6 ta kategoriya bo'yicha 0–100 ball | Claude Sonnet 4 (structured output) |
 | **report_generator** | Skorlar + raw signal → narrativ summary + intervyu savollari + tavsiya | Claude Sonnet 4, locale-aware (uz/ja/en) |
 | **orchestrator (`index.ts`)** | Tool larni parallel/sequential ishlatish, timeout, partial failure handling | Native Promise.all + AbortController |
@@ -765,11 +765,12 @@ Effort: S (1–3 kun), M (1 hafta), L (2 hafta), XL (1 oy+).
 ## 12. Implementation Checklist (keyingi sessiya uchun)
 
 ### Backend agent
-- [ ] `services/hr-candidate/` papkasini yaratish (skeleton tayyor)
-- [ ] GitHub fetch + cache wiring
-- [ ] CV parser — pdfjs + mammoth integratsiya
+- [x] `services/hr-candidate/` modular papkasi
+- [x] GitHub fetch + cache wiring
+- [x] Bounded local CV parser — pdfjs + mammoth
+- [x] Request/role/tariff policy + orchestrator failure/schema tests
 - [ ] Sonnet structured output integration (LLM Router orqali)
-- [ ] Zod schemas + JSON Schema sync
+- [~] Runtime validator + JSON Schema sync tayyor; LLM output validation qolgan
 - [ ] Route mount: `app.route('/v1/hr/candidates', hrCandidateRoutes)`
 - [ ] Unit + integration tests
 

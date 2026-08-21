@@ -38,6 +38,7 @@
 > 2026-08-21: Telegram webhook v14 accepted invalid POST with `200` when the secret was absent. After a pure guard and 4/4 tests, production v15 has health `200`, invalid POST fail-closed `503`, PUT `405`. `67ac675` is on main and CI `32485618740` is green; secret setup plus Telegram `setWebhook` remain.
 > 2026-08-21: HR Candidate now has a real public GitHub adapter with bounded REST/pagination/response, timeout, repository-tree aggregation, and a ten-minute cache; Deno 10/10 and a live `octocat` smoke are complete. `8496aae` is on main and CI `32487503062` is green. The route remains `501`; Supabase Free keeps Pro+ Leaked Password Protection BLOCKED.
 > 2026-08-21: Secret-free PDF/DOCX parsing is implemented for HR Candidate with 5 MiB/file-magic/PDF 50-page/text bounds, DOCX ZIP-bomb defenses, and EN/UZ/RU/JA date/section signals. `2526d72` is on main and CI `32489478394` is green with Deno 22/22; Haiku semantic structuring and route `501` remain gated by the provider key.
+> 2026-08-21: The HR request boundary/orchestrator is hardened locally with pre-provider validation, tenant role guard, plan policy, failed-CV hard stop, timer cleanup, canonical ULID, and schema error/success exclusivity. New 12/12, HR 30/30, and targeted Deno 34/34 are green; persistent quota reservation/LLM/route wiring remain.
 
 ## Current phase
 
@@ -60,7 +61,7 @@
 | Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 37/37 migrations, `bright-api` v11 ACTIVE, health `200`, unauthenticated docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge uses modern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overrides; legacy anon/service-role API keys are disabled |
 | Type-check | Passed in a clean temporary frontend install |
-| Unit tests | Frontend 26/26 files, 117/117 tests; AI polish/router/usage Deno 18/18; HR GitHub analyzer 10/10 + CV parser 8/8; current targeted backend Deno 22/22; prior document binary/lifecycle Deno 7/7 |
+| Unit tests | Frontend 26/26 files, 117/117 tests; AI polish/router/usage Deno 18/18; HR GitHub 10 + CV 8 + boundary 5 + orchestrator 6 + schema 1 = 30/30; current targeted backend Deno 34/34 with Telegram; prior document binary/lifecycle Deno 7/7 |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks, 2 Vite `.env` fallback/runtime-precedence regressions, and 2 bundled-endpoint extraction regressions |
 | Production build/security check | Build passed with a synthetic non-production ref; CSP was generated from that ref; security checked 10 build/Netlify files |
 | Production dependency audit | Raw audit: 0 total vulnerabilities; scoped gate: 0 high/critical with no exceptions |
@@ -89,12 +90,12 @@
 | Resend inbox | Partial | Code exists; receiving/delivery E2E is unverified |
 | AI Concierge/RAG and cost tracking | Partial | Foundation exists; polishing request quota is race-safe through PostgreSQL atomic reservation/release, and provider usage is accounted before output validation. Migration rollout, citation UX, billing dashboard, unified endpoint enforcement, and full smoke tests remain |
 | AI Document Assistant | Production binary + staged AI polish preview / provider blocked | 15 templates, 4 languages, and real PDF/DOCX/private Storage are live. The polishing frontend is in production and migration plus `bright-api` v11 are in staging; Auth/tenant/document boundaries and cleanup are green, but real-provider smoke returns `503 AI_UNAVAILABLE` because staging lacks `ANTHROPIC_API_KEY`. Production backend/migration rollout is intentionally pending |
-| HR Candidate Analysis | Partial / route blocked | Public GitHub analyzer/cache and bounded local PDF/DOCX extraction are real and tested; Haiku structure, scoring/report, auth/rate-limit, and route wiring remain; production returns `501 NOT_IMPLEMENTED` |
+| HR Candidate Analysis | Partial / route blocked | GitHub/cache, local PDF/DOCX, pre-provider validation, tenant role guard, plan policy, and orchestrator failure semantics are real/tested; persistent quota reservation, Haiku/Sonnet, usage log, and route wiring remain; production `501` |
 | Billing / Click / Payme and AI Sales Bot | Planned | Phase 3 |
 
 ## Immediate order
 
-1. While `ANTHROPIC_API_KEY` is pending, implement HR Candidate route/orchestrator input validation, auth/role, rate limit, and safe error envelopes; retain `501` until the full flow is ready.
+1. While `ANTHROPIC_API_KEY` is pending, implement PostgreSQL-backed per-minute/day/concurrency quota reservation and a safe multipart HTTP adapter for HR Candidate; retain `501` until the full flow is ready.
 2. Once the key arrives, set it securely in staging Edge secrets and rerun the authenticated real-provider preview/save smoke to green.
 3. After green staging smoke, deploy production migration `20260821000000` plus `bright-api` and run smoke tests.
 

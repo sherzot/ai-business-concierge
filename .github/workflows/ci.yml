@@ -44,7 +44,10 @@ jobs:
           deno test \
             supabase/functions/telegram-bot/webhook-security.test.ts \
             supabase/functions/server/services/hr-candidate/github-analyzer.test.ts \
-            supabase/functions/server/services/hr-candidate/cv-parser.test.ts
+            supabase/functions/server/services/hr-candidate/cv-parser.test.ts \
+            supabase/functions/server/services/hr-candidate/request-boundary.test.ts \
+            supabase/functions/server/services/hr-candidate/index.test.ts \
+            supabase/functions/server/services/hr-candidate/schema.test.ts
 
       - name: Deno backend quality checks
         working-directory: .
@@ -56,14 +59,27 @@ jobs:
             supabase/functions/server/services/hr-candidate/github-analyzer.ts \
             supabase/functions/server/services/hr-candidate/github-analyzer.test.ts \
             supabase/functions/server/services/hr-candidate/cv-parser.ts \
-            supabase/functions/server/services/hr-candidate/cv-parser.test.ts
+            supabase/functions/server/services/hr-candidate/cv-parser.test.ts \
+            supabase/functions/server/services/hr-candidate/request-boundary.ts \
+            supabase/functions/server/services/hr-candidate/request-boundary.test.ts \
+            supabase/functions/server/services/hr-candidate/index.ts \
+            supabase/functions/server/services/hr-candidate/index.test.ts \
+            supabase/functions/server/services/hr-candidate/schema.test.ts
           deno check \
             supabase/functions/telegram-bot/index.ts \
             supabase/functions/server/services/hr-candidate/github-analyzer.test.ts \
-            supabase/functions/server/services/hr-candidate/cv-parser.test.ts
+            supabase/functions/server/services/hr-candidate/cv-parser.test.ts \
+            supabase/functions/server/services/hr-candidate/request-boundary.test.ts \
+            supabase/functions/server/services/hr-candidate/index.test.ts \
+            supabase/functions/server/services/hr-candidate/schema.test.ts
           deno lint \
             supabase/functions/server/services/hr-candidate/cv-parser.ts \
-            supabase/functions/server/services/hr-candidate/cv-parser.test.ts
+            supabase/functions/server/services/hr-candidate/cv-parser.test.ts \
+            supabase/functions/server/services/hr-candidate/request-boundary.ts \
+            supabase/functions/server/services/hr-candidate/request-boundary.test.ts \
+            supabase/functions/server/services/hr-candidate/index.ts \
+            supabase/functions/server/services/hr-candidate/index.test.ts \
+            supabase/functions/server/services/hr-candidate/schema.test.ts
 
       - name: Install dependencies
         run: npm ci

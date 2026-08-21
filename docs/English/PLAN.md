@@ -58,10 +58,10 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] Add provider-independent route/orchestrator input validation, auth, roles, rate limit, and safe error envelopes; retain `501` until the full flow is ready.
+- [ ] Add PostgreSQL-backed per-minute/day/concurrency quota reservation and a safe multipart HTTP adapter; retain `501` until the full flow is ready.
 - [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** wire CV semantic structuring plus Sonnet structured scoring/reporting through the LLM Router.
 - [ ] Wire usage/cost logging across all HR provider calls.
-- [ ] Complete frontend results, remove the `501` stub, and test the full flow.
+- [ ] Complete frontend results, remove the `501` stub, and run full-flow integration/manual acceptance after LLM integration.
 
 ## Later phases
 

@@ -39,6 +39,7 @@
 > 2026-08-21: Telegram webhook v14 secret yo'qligida invalid POSTni `200` bilan qabul qildi. Pure guard + 4/4 testdan keyin production v15: health `200`, invalid POST fail-closed `503`, PUT `405`. `67ac675` main va CI `32485618740` green; secret set + Telegram `setWebhook` qolgan.
 > 2026-08-21: HR Candidate public GitHub analyzer real adapterga o'tdi: bounded REST/pagination/response, timeout, repo-tree aggregation va 10 daqiqalik cache; Deno 10/10 va real `octocat` smoke complete. `8496aae` main va CI `32487503062` green. Route hanuz `501`; Supabase Free sabab Pro+ Leaked Password Protection BLOCKED.
 > 2026-08-21: HR Candidate secretsiz PDF/DOCX parseri implementatsiya qilindi: 5 MiB/file magic/PDF 50-page/text limitlari, DOCX ZIP-bomb himoyasi, EN/UZ/RU/JA sana/section va local signal extraction. `2526d72` main, CI `32489478394` green: Deno 22/22; Haiku semantic structuring va route `501` provider keygacha yopiq.
+> 2026-08-21: HR request boundary/orchestrator lokalda fail-closed qotirildi: pre-provider validation, tenant role guard, tariff policy, failed-CV hard stop, timer cleanup, canonical ULID va schema error/success exclusivity. Yangi 12/12, HR 30/30 va targeted Deno 34/34 green; persistent quota reservation/LLM/route wiring qolgan.
 
 ## Hozir qayerdamiz
 
@@ -61,7 +62,7 @@
 | Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 37/37 migration, `bright-api` v11 ACTIVE, health `200`, authsiz docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` modern key override'larida; legacy anon/service-role API keylari disabled |
 | Type-check | Clean temp frontend installida muvaffaqiyatli |
-| Unit test | Frontend 26/26 fayl, 117/117 test; AI polish/router/usage Deno 18/18; HR GitHub analyzer 10/10 + CV parser 8/8; joriy targeted backend Deno 22/22; oldingi document binary/lifecycle Deno 7/7 |
+| Unit test | Frontend 26/26 fayl, 117/117 test; AI polish/router/usage Deno 18/18; HR GitHub 10 + CV 8 + boundary 5 + orchestrator 6 + schema 1 = 30/30; Telegram bilan joriy targeted backend Deno 34/34; oldingi document binary/lifecycle Deno 7/7 |
 | Deploy environment guard | Node test 14/14: 10 isolation contracti + 2 Vite `.env` fallback/runtime-precedence + 2 bundled endpoint extraction regressiyasi |
 | Production build | Synthetic non-production project-ref bilan muvaffaqiyatli; CSP tanlangan refdan yaratildi |
 | Security check | 10 ta build/Netlify fayli muvaffaqiyatli |
@@ -94,7 +95,7 @@
 | AI Concierge / RAG | **Partial** | Claude router, OpenAI embedding va RAG fundamenti bor; explicit document search/citation va to'liq smoke-test qarzi bor |
 | AI usage/cost tracking | **Partial** | Log wiring va DB tracking bor; polishing request quota'si PostgreSQL atomik reservation/release bilan race-safe qilingan, provider usage output validatsiyasidan oldin hisoblanadi. Migration rollout, tenant billing dashboard va barcha endpointlar uchun yagona enforcement hali qolgan |
 | AI Hujjatchi | **Production binary + staged AI polish preview / provider blocked** | 15 shablon, 4 til va real PDF/DOCX/private Storage productionda. Polishing frontend productionga, migration va `bright-api` v11 stagingga chiqdi; Auth/tenant/document va cleanup green, ammo stagingda `ANTHROPIC_API_KEY` yo'qligi sabab real-provider smoke `503 AI_UNAVAILABLE`. Production backend/migration rollout ataylab kutilmoqda |
-| HR Candidate Analysis | **Partial / route blocked** | Public GitHub analyzer/cache va bounded local PDF/DOCX extraction real/testlangan; Haiku semantic structuring, scoring/report, auth/rate-limit va route wiring qolgan, production endpoint `501 NOT_IMPLEMENTED` |
+| HR Candidate Analysis | **Partial / route blocked** | GitHub/cache, local PDF/DOCX, pre-provider validation, tenant role guard, tariff policy va orchestrator failure semantics real/testlangan; persistent quota reservation, Haiku/Sonnet, usage log va route wiring qolgan, production `501` |
 | Billing / Click / Payme | **Planned** | Phase 3 |
 | AI Sotuvchi | **Planned** | Phase 3 |
 
@@ -109,7 +110,7 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. `ANTHROPIC_API_KEY` kutilganda HR Candidate route/orchestrator uchun input validation, auth/role, rate-limit va safe error envelope'ni implementatsiya qilish; `501`ni full-flow tayyor bo'lguncha saqlash.
+1. `ANTHROPIC_API_KEY` kutilganda HR Candidate uchun PostgreSQL-backed per-minute/day/concurrency quota reservation va safe multipart HTTP adapterini implementatsiya qilish; `501`ni full-flow tayyor bo'lguncha saqlash.
 2. Key kelgach uni staging Edge secrets'ga xavfsiz o'rnatish va authenticated real-provider preview/save smoke-testni qayta green qilish.
 3. Green staging smoke'dan keyin production `20260821000000` migration + `bright-api` rollout va smoke-testni bajarish.
 

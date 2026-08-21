@@ -3,7 +3,7 @@
 > プロジェクトアーキテクチャ、設計パターン、ユニットテストルール
 > バージョン: 1.3 | 更新: 2026-08-21
 >
-> Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate`はpartialで、GitHub adapterとlocal PDF/DOCX extractorはreal、semantic LLM/scoring/report/orchestrator flowはscaffoldでproduction-ready referenceではない。
+> Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate`はpartial。GitHub、local PDF/DOCX、pure request policy、orchestrator failure boundaryはreal。Persistent quotaとsemantic LLM/scoring/report/HTTP wiringはproduction-readyではない。
 
 ---
 
@@ -136,7 +136,7 @@ supabase/functions/server/
     services/
       llm-router.ts
       knowledge-base.ts
-      hr-candidate/        ← PARTIAL; GitHub + local PDF/DOCXはreal、semantic LLM/orchestrator stubsが残る
+      hr-candidate/        ← PARTIAL; adapters/request/orchestratorはreal、quota + semantic LLM stubsが残る
         index.ts
         types.ts
         candidate-scorer.ts
@@ -247,4 +247,4 @@ features/tasks/__tests__/
 ---
 
 *ARCHITECTURE.md — AI Business Concierge v1.0 · 2026-05-05*
-*HR Candidate folderはtarget modular pattern。GitHub adapterとbounded local PDF/DOCX extractorはreal、semantic LLM/scoring/report/orchestrator flowはpartial scaffold。*
+*HR Candidateはtarget modular pattern。Bounded adapter/request/orchestrator boundaryはreal、persistent quotaとsemantic LLM/scoring/report/HTTP wiringはpartial scaffold。*

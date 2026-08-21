@@ -4,6 +4,15 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-21 — HR request boundaryとorchestratorをfail-closed強化
+
+- Provider-independent HR request/orchestrator pathをauditした。Runtime validationはTODOで、fulfilled CVの`parse_status: failed`がscoringへ進み得た。`Promise.race` success後もtimeout timerが残り、base36 request-ID shimはschemaのULID alphabetを保証せず、schemaはerror responseにも`result`を必須としていた。
+- Pure request boundaryはexact GitHub profileをnormalizeし、provider前にCV bytes/MIME/5 MiB、filename 180、job description 5,000、locale、depthを検証しdefensive byte copyを返す。Canonical HR/manager/company_admin/super_adminとlegacy leader policy、Free/Entrepreneur/Business concurrent/minute/day policiesを追加。Main `501` stubはtenant auth後にroleをfail-closed検証する。Persistent quota reservationは未接続。
+- Dependency-injected orchestratorでparallel bounded GitHub/CV、GitHub degradation、failed-CV hard stop、invalid input時provider call 0、public timeout envelope、timer cleanup、canonical 26-character Crockford ULIDを検証。JSON Schemaはsuccess/errorの`result`/`error` exclusivityとinvalid-request/rate-unavailable/not-implemented codesを実装した。
+- 新規boundary 5/5、orchestrator 6/6、schema 1/1でHR 30/30、Telegram込みtargeted Deno 34/34 PASS。Format/check/lint、AJV schema compile、YAML PASS。Full monolith `server/index.ts` checkは既存21 logging/Hono/risk typing errorsのみで、新HR lineのerrorなし。Routeは`501`のまま、provider/deploy/remote smokeは未変更。
+
+Files: `.github/workflows/ci.yml`、`supabase/functions/server/index.ts`、`supabase/functions/server/services/hr-candidate/{index,index.test,request-boundary,request-boundary.test,schema.test,types}.ts`、`schemas/candidate-analysis.schema.json`、`frontend/src/features/hr/candidates/README.md`、`docs/HR_CANDIDATE_ANALYSIS.md`、4言語`DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`。
+
 ## 2026-08-21 — Secret不要のHR PDF/DOCX CV parserを実装
 
 - `ANTHROPIC_API_KEY`待ちの間に、次のprovider-independent HR Candidate sliceを完了した。従来の`cv-parser.ts`はPDF/DOCX extraction、dates/sections、semantic structureがTODO/`NOT_IMPLEMENTED`だった。

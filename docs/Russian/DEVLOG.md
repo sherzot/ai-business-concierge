@@ -4,6 +4,15 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-21 — HR request boundary и orchestrator усилены fail-closed
+
+- Проведён audit provider-independent HR request/orchestrator path. Runtime validation был TODO; fulfilled CV с `parse_status: failed` мог продолжить scoring; success в `Promise.race` оставлял timeout timers; base36 request-ID shim не гарантировал ULID alphabet schema; schema требовала `result` даже для error response.
+- Pure request boundary нормализует exact GitHub profile и до provider проверяет CV bytes/MIME/5 MiB, filename 180, job description 5,000, locale и depth, возвращая defensive byte copy. Добавлены canonical HR/manager/company_admin/super_admin плюс legacy leader policy и Free/Entrepreneur/Business concurrent/minute/day policies. Main `501` stub после tenant auth fail-closed проверяет role; persistent quota reservation ещё не подключён.
+- Dependency-injected orchestrator подтверждает parallel bounded GitHub/CV, GitHub degradation, failed-CV hard stop, 0 provider calls при invalid input, public timeout envelope, timer cleanup и canonical 26-character Crockford ULID. JSON Schema теперь требует exclusivity `result`/`error` для success/error и включает invalid-request/rate-unavailable/not-implemented codes.
+- Новые boundary 5/5, orchestrator 6/6 и schema 1/1: HR 30/30, targeted Deno с Telegram 34/34 PASS. Format/check/lint, AJV schema compile и YAML PASS. Full monolith `server/index.ts` check возвращает 21 прежнюю logging/Hono/risk typing error, новых HR errors нет. Route остаётся `501`; provider/deploy/remote smoke не менялись.
+
+Files: `.github/workflows/ci.yml`, `supabase/functions/server/index.ts`, `supabase/functions/server/services/hr-candidate/{index,index.test,request-boundary,request-boundary.test,schema.test,types}.ts`, `schemas/candidate-analysis.schema.json`, `frontend/src/features/hr/candidates/README.md`, `docs/HR_CANDIDATE_ANALYSIS.md`, четыре языка `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`.
+
 ## 2026-08-21 — Реализована не требующая secret часть HR PDF/DOCX CV parser
 
 - В ожидании `ANTHROPIC_API_KEY` завершён следующий provider-independent slice HR Candidate. Ранее `cv-parser.ts` содержал только TODO/`NOT_IMPLEMENTED` для PDF/DOCX extraction, dates/sections и semantic structure.

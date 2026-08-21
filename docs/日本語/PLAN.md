@@ -58,10 +58,10 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] Provider-independent route/orchestrator input validation、auth、roles、rate limit、safe error envelopesを追加し、full flow readyまで`501`を維持。
+- [ ] PostgreSQL-backed per-minute/day/concurrency quota reservationとsafe multipart HTTP adapterを追加し、full flow readyまで`501`を維持。
 - [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** LLM Router経由でCV semantic structuringとSonnet structured scoring/reportingを接続。
 - [ ] 全HR provider callsへusage/cost loggingを接続。
-- [ ] Frontendを完了し`501` stubを削除、full flowをtest。
+- [ ] Frontendを完了し`501` stubを削除、LLM integration後にfull-flow integration/manual acceptanceを実施。
 
 ## Later phases
 

@@ -4,6 +4,15 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-21 — HR request boundary and orchestrator hardened fail-closed
+
+- The provider-independent HR request/orchestrator path was audited. Runtime validation was TODO; a fulfilled CV with `parse_status: failed` could continue into scoring; successful `Promise.race` calls left timeout timers alive; the base36 request-ID shim did not guarantee the schema's ULID alphabet; and the schema required `result` even for error responses.
+- A pure request boundary normalizes exact GitHub profiles and validates CV bytes/MIME/5 MiB, filename 180, job description 5,000, locale, and depth before providers, returning a defensive byte copy. Canonical HR/manager/company_admin/super_admin plus legacy leader policy and Free/Entrepreneur/Business concurrent/minute/day policies were added. The main `501` stub now fail-closes on tenant role after authentication; persistent quota reservation is not yet wired.
+- The dependency-injected orchestrator now proves parallel bounded GitHub/CV collection, GitHub degradation, failed-CV hard stop, zero provider calls on invalid input, public timeout envelopes, timer cleanup, and canonical 26-character Crockford ULIDs. JSON Schema now enforces error/success `result`/`error` exclusivity and includes invalid-request/rate-unavailable/not-implemented codes.
+- New boundary 5/5, orchestrator 6/6, and schema 1/1 tests pass: HR 30/30 and targeted Deno 34/34 with Telegram. Format/check/lint, AJV schema compile, and YAML pass. Full monolith `server/index.ts` check still reports 21 pre-existing logging/Hono/risk typing errors, with none on new HR lines. The route stays `501`; no provider, deploy, or remote smoke changed.
+
+Files: `.github/workflows/ci.yml`, `supabase/functions/server/index.ts`, `supabase/functions/server/services/hr-candidate/{index,index.test,request-boundary,request-boundary.test,schema.test,types}.ts`, `schemas/candidate-analysis.schema.json`, `frontend/src/features/hr/candidates/README.md`, `docs/HR_CANDIDATE_ANALYSIS.md`, and four-language `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`.
+
 ## 2026-08-21 — Secret-free HR PDF/DOCX CV parsing implemented
 
 - While waiting for `ANTHROPIC_API_KEY`, the next provider-independent HR Candidate slice was completed. The prior `cv-parser.ts` contained only TODO/`NOT_IMPLEMENTED` paths for PDF/DOCX extraction, dates/sections, and semantic structure.

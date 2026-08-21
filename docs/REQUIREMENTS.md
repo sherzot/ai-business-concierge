@@ -29,7 +29,7 @@
 | R-001 | Real email inbox | Partial | Resend receiving, signature, mapping va real delivery smoke-test |
 | R-002 | Supabase Realtime | Done | Regressiya testlari bilan saqlash |
 | R-015 | Task assignment notifications | Done | Regressiya testlari bilan saqlash |
-| R-016 | HR Candidate Analysis | Partial | Public GitHub analyzer/cache hamda bounded local PDF/DOCX extraction tayyor (HR 18/18); Haiku/Sonnet, auth/rate limit, route wiring va full-flow testlar qolgan |
+| R-016 | HR Candidate Analysis | Partial | GitHub/cache, bounded PDF/DOCX, request/role policy va orchestrator/schema tayyor (HR 30/30); persistent quota, Haiku/Sonnet, usage log, route wiring va full-flow qolgan |
 | R-017 | AI rate limiting | Partial | Polishing quota check/incrementi service-role-only PostgreSQL atomik reservation bilan race-safe, local pgTAP 9/9 green va migration stagingga qo'llangan; production rollout, qolgan endpointlar uchun yagona quota siyosati va `Retry-After` qolgan |
 | R-018 | AI cost tracking | Partial | Log wiring mavjud; usage API, tenant dashboard va plan enforcement |
 | R-019 | Vector Search (RAG) | Partial | Embedding/match fundamenti bor; explicit docs tool, citation va cache |

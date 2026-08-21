@@ -38,6 +38,7 @@
 > 2026-08-21: Telegram webhook v14はsecret不在時にinvalid POSTを`200`で受理。Pure guardと4/4 tests後、production v15はhealth `200`、invalid POST fail-closed `503`、PUT `405`。`67ac675`はmain、CI `32485618740`はgreen。Secret設定とTelegram `setWebhook`が残る。
 > 2026-08-21: HR Candidateにbounded REST/pagination/response、timeout、repository-tree aggregation、10-minute cacheを持つreal public GitHub adapterを追加。Deno 10/10とlive `octocat` smoke complete。`8496aae`はmain、CI `32487503062`はgreen。Routeは`501`のまま、Supabase FreeのためPro+ Leaked Password ProtectionはBLOCKED。
 > 2026-08-21: HR Candidateへsecret-free PDF/DOCX parserを実装。5 MiB/file magic/PDF 50-page/text bounds、DOCX ZIP-bomb防御、EN/UZ/RU/JA date/section signalsを持つ。`2526d72`はmain、CI `32489478394`はDeno 22/22でgreen。Haiku semantic structuringとroute `501`はprovider key待ちでgated。
+> 2026-08-21: HR request boundary/orchestratorをlocalでfail-closed強化。Pre-provider validation、tenant role guard、plan policy、failed-CV hard stop、timer cleanup、canonical ULID、schema error/success exclusivityを実装。新規12/12、HR 30/30、targeted Deno 34/34 green。Persistent quota reservation/LLM/route wiringが残る。
 
 ## 現在のPhase
 
@@ -60,7 +61,7 @@
 | Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。37/37 migrations、`bright-api` v11 ACTIVE、health `200`、unauth docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list。Email confirmation ON、8-digit/1-minute OTP、TOTP ON。Auth settings HTTP `200`、autoconfirm false。Edgeはmodern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overridesを使用しlegacy anon/service-role API keysはdisabled |
 | Type-check | Clean temporary frontend installで成功 |
-| Unit tests | Frontend 26/26 files、117/117 tests。AI polish/router/usage Deno 18/18、HR GitHub analyzer 10/10 + CV parser 8/8、current targeted backend Deno 22/22、従来document binary/lifecycle Deno 7/7 |
+| Unit tests | Frontend 26/26 files、117/117 tests。AI polish/router/usage Deno 18/18、HR GitHub 10 + CV 8 + boundary 5 + orchestrator 6 + schema 1 = 30/30、Telegram込みcurrent targeted backend Deno 34/34、従来document binary/lifecycle Deno 7/7 |
 | Deployment environment guard | Node tests 14/14: isolation contract 10件 + Vite `.env` fallback/runtime-precedence 2件 + bundled-endpoint extraction regressions 2件 |
 | Production build/security check | Synthetic non-production refでbuild pass。CSPはそのrefから生成、10 build/Netlify filesを検査 |
 | Production dependency audit | Raw audit: vulnerability合計0件; scoped gateはexceptionなしでhigh/critical 0件 |
@@ -89,12 +90,12 @@
 | Resend inbox | Partial | Codeあり、receiving/delivery E2E未確認 |
 | AI Concierge/RAGとcost tracking | Partial | 基盤あり。Polishing request quotaはPostgreSQL atomic reservation/releaseでrace-safe、provider usageはoutput validation前に計上する。Migration rollout、citation UX、billing dashboard、unified endpoint enforcement、smoke testsが残る |
 | AI文書作成 | Production binary + staged AI polish preview / provider blocked | 15 templates、4言語、実PDF/DOCX/private Storageは稼働中。Polishing frontendはproduction、migrationと`bright-api` v11はstagingへdeploy済み。Auth/tenant/document boundariesとcleanupはgreenだが、stagingに`ANTHROPIC_API_KEY`がなくreal-provider smokeは`503 AI_UNAVAILABLE`。Production backend/migration rolloutは意図的に保留 |
-| HR Candidate Analysis | Partial / route blocked | Public GitHub analyzer/cacheとbounded local PDF/DOCX extractionはreal・tested。Haiku structure、scoring/report、auth/rate-limit、route wiringが残り、productionは`501 NOT_IMPLEMENTED` |
+| HR Candidate Analysis | Partial / route blocked | GitHub/cache、local PDF/DOCX、pre-provider validation、tenant role guard、plan policy、orchestrator failure semanticsはreal/tested。Persistent quota reservation、Haiku/Sonnet、usage log、route wiringが残りproductionは`501` |
 | Billing / Click / Payme と AI Sales Bot | Planned | Phase 3 |
 
 ## 直近の順序
 
-1. `ANTHROPIC_API_KEY`待ちの間に、HR Candidate route/orchestrator input validation、auth/role、rate limit、safe error envelopesを実装し、full flow readyまで`501`を維持する。
+1. `ANTHROPIC_API_KEY`待ちの間に、HR CandidateのPostgreSQL-backed per-minute/day/concurrency quota reservationとsafe multipart HTTP adapterを実装し、full flow readyまで`501`を維持する。
 2. Key到着後、staging Edge secretsへ安全に設定し、authenticated real-provider preview/save smokeをgreenにする。
 3. Green staging smoke後、production migration `20260821000000` + `bright-api`をdeployしsmoke testする。
 
