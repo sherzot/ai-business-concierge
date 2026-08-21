@@ -30,7 +30,7 @@
 | Supabase | 0 | ✅ ACTIVE_HEALTHY | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET` | — |
 | Anthropic Claude | 0 | ✅ Secret mavjud | `ANTHROPIC_API_KEY` | Smoke test kerak |
 | OpenAI (embedding) | 0 | ✅ Secret mavjud | `OPENAI_API_KEY` | KB seed/search smoke test kerak |
-| Telegram bot | 1 | ⚠️ Function ACTIVE, webhook secret yo'q | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` | Secret o'rnatish va webhookni yangilash |
+| Telegram bot | 1 | ⚠️ v15 ACTIVE, secret yo'qligida fail-closed `503` | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` | Secret o'rnatish va webhookni yangilash |
 | Sentry | 0 | ⚠️ ixtiyoriy | `SENTRY_DSN` (frontend + backend alohida) | §8 ga qarang |
 | Resend | 1 | ⚠️ Secretlar mavjud, delivery tasdiqlanmagan | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_WEBHOOK_SECRET` | Domain/email smoke test |
 | Click | 3 | ❌ keyinroq | `CLICK_MERCHANT_ID`, `CLICK_SERVICE_ID`, `CLICK_SECRET_KEY` | §6 ga qarang |
@@ -157,6 +157,8 @@ So'ng `services/knowledge-base.ts.searchKnowledgeBase()` chaqirilganda
 ---
 
 ## 5. Telegram bot
+
+> 2026-08-21 production: `telegram-bot` v15 ACTIVE. `TELEGRAM_BOT_TOKEN` nomi bor, `TELEGRAM_WEBHOOK_SECRET` yo'q; GET `200`, POST ataylab `503`. Secret set va `setWebhook` bajarilmaguncha bot update qabul qilmaydi.
 
 ### 5.1 Bot yaratish
 

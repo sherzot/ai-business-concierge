@@ -4,7 +4,7 @@
  *
  * Muhit o'zgaruvchilari:
  *   TELEGRAM_BOT_TOKEN        — BotFather dan olingan token
- *   TELEGRAM_WEBHOOK_SECRET   — Webhook xavfsizlik kaliti (ixtiyoriy)
+ *   TELEGRAM_WEBHOOK_SECRET   — Webhook xavfsizlik kaliti (majburiy)
  *   ANTHROPIC_API_KEY         — Claude API kaliti
  *   OPENAI_API_KEY            — Embedding API kaliti
  *   SUPABASE_URL / SB_URL     — Supabase URL
@@ -13,6 +13,7 @@
 
 import { webhookCallback } from "npm:grammy@1";
 import { bot } from "./bot.ts";
+import { authorizeTelegramWebhook } from "./webhook-security.ts";
 
 const SECRET = Deno.env.get("TELEGRAM_WEBHOOK_SECRET");
 
@@ -29,15 +30,17 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
-  // Webhook secret majburiy — sozlanmagan bo'lsa xizmat bekor
-  if (!SECRET) {
-    console.error("[SECURITY] TELEGRAM_WEBHOOK_SECRET sozlanmagan — webhook rad etildi");
+  const authorization = authorizeTelegramWebhook(
+    SECRET,
+    req.headers.get("X-Telegram-Bot-Api-Secret-Token"),
+  );
+  if (!authorization.allowed && authorization.status === 503) {
+    console.error(
+      "[SECURITY] TELEGRAM_WEBHOOK_SECRET sozlanmagan — webhook rad etildi",
+    );
     return new Response("Service Unavailable", { status: 503 });
   }
-
-  // Webhook secret tekshirish
-  const secretHeader = req.headers.get("X-Telegram-Bot-Api-Secret-Token");
-  if (secretHeader !== SECRET) {
+  if (!authorization.allowed) {
     return new Response("Unauthorized", { status: 401 });
   }
 

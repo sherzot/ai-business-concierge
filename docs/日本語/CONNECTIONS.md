@@ -28,7 +28,7 @@
 | Supabase | 0 | ✅ ACTIVE_HEALTHY | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET` |
 | Anthropic Claude | 0 | ✅ Secretあり、smoke test未実施 | `ANTHROPIC_API_KEY` |
 | OpenAI (embedding) | 0 | ✅ Secretあり、KB smoke test未実施 | `OPENAI_API_KEY` |
-| Telegram bot | 1 | ⚠️ Function ACTIVE、webhook secretなし | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` |
+| Telegram bot | 1 | ⚠️ v15 ACTIVE、webhook secret不在時fail-closed `503` | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` |
 | Sentry | 0 | ⚠️ 任意 | `SENTRY_DSN` |
 | Resend | 1 | ⚠️ Secretsあり、delivery未確認 | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_WEBHOOK_SECRET` |
 | Click | 3 | ❌ 後で | `CLICK_MERCHANT_ID`, `CLICK_SERVICE_ID`, `CLICK_SECRET_KEY` |
@@ -122,6 +122,8 @@ supabase secrets set OPENAI_API_KEY=sk-... --project-ref <ref>
 ---
 
 ## 5. Telegramボット
+
+> Production 2026-08-21: `telegram-bot` v15 ACTIVE。`TELEGRAM_BOT_TOKEN`は存在し、`TELEGRAM_WEBHOOK_SECRET`は不在。GET `200`、POSTは意図的に`503`。Secret設定と`setWebhook`完了までupdatesを受け付けない。
 
 ### 5.1 ボットの作成
 

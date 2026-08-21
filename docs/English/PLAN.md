@@ -51,7 +51,7 @@
 
 ## P2 — operational integrations
 
-- [ ] Verify/set `TELEGRAM_WEBHOOK_SECRET`, reconnect webhook and smoke-test bot flows.
+- [ ] After production v15 fail-closed `503`, set a new `TELEGRAM_WEBHOOK_SECRET` and reconnect Telegram `setWebhook` with the same value.
 - [ ] End-to-end test Resend receiving, signature, tenant mapping and delivery.
 - [ ] Enable Supabase Leaked Password Protection and select Netlify preview protection.
 

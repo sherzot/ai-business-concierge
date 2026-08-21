@@ -4,6 +4,14 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-21 — Production Telegram webhook bypass made fail-closed
+
+- Production had `TELEGRAM_BOT_TOKEN`, lacked `TELEGRAM_WEBHOOK_SECRET`, and ran `telegram-bot` v14 ACTIVE; staging had no Telegram secrets/function. GET health returned `200`, but an invalid-secret `{}` POST returned `200` instead of expected `503`.
+- Deployed v14 used `if (SECRET && secretHeader !== SECRET)`, bypassing validation when the secret was absent. The fail-closed decision was extracted into a pure helper: missing/empty config `503`, missing/wrong header `401`, exact-secret allow. GitHub CI now runs these four regression tests, the three-file format gate, and entrypoint check with pinned Deno `v2.1.14`; local YAML parse, tests 4/4, format 3/3, entrypoint check, and diff-check passed. No secret/token value was read or logged.
+- Only `telegram-bot` was deployed to production: v15 ACTIVE, health `200`, invalid POST `503 Service Unavailable`, PUT `405`. The bot is intentionally fail-closed; setting a new secret, calling Telegram `setWebhook` with the same value, and bot smoke remain.
+
+Files/state: `.github/workflows/ci.yml`, `supabase/functions/telegram-bot/{index.ts,webhook-security.ts,webhook-security.test.ts}`, production `telegram-bot` v15, four-language `DEVLOG/STATUS/PLAN/CONNECTIONS`.
+
 ## 2026-08-21 — Production authenticated PDF/DOCX acceptance is green
 
 - While waiting for the staging `ANTHROPIC_API_KEY`, an independent P1 debt item was closed: production `ufhepwdkjqptjvxrmpjn` was reconfirmed at 36/36 migrations with `bright-api` v76 ACTIVE. A phased acceptance client now creates synthetic Auth fixtures through SQL and uses normal password sign-in without the blocked Auth Admin endpoint; it accepts only `doc-acceptance-*` tenants and `@example.test` users, never logs tokens/keys/passwords, and has HTTP timeouts.

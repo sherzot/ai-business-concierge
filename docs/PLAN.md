@@ -59,7 +59,7 @@
 
 ## P2 — operatsion integratsiyalar
 
-- [ ] `TELEGRAM_WEBHOOK_SECRET` mavjudligini tekshirish, kerak bo'lsa o'rnatish va webhookni qayta ulash.
+- [ ] Production v15 fail-closed `503`dan keyin yangi `TELEGRAM_WEBHOOK_SECRET`ni o'rnatish va ayni qiymat bilan Telegram `setWebhook`ni qayta ulash.
 - [ ] Telegram `/start`, AI javob, locale, rate limit va feedback smoke-testini o'tkazish.
 - [ ] Resend receiving domain, webhook signature, tenant mapping va real deliveryni end-to-end tekshirish.
 - [ ] Supabase Leaked Password Protection'ni Dashboard orqali yoqish.

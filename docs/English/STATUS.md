@@ -35,6 +35,7 @@
 > 2026-08-21: The remaining five AI polishing review findings were closed locally: Telegram cache scope was restored, provider timeout now covers the complete body lifecycle, polishing quota is atomically reserved in PostgreSQL, stale AI output cannot overwrite the user draft, and the modal scrolls within short viewports. Backend 18/18, Telegram check, frontend 26/26 files and 117/117 tests, type-check/build, canonical fresh migration replay 37/37, and local database pgTAP 45/45 are green.
 > 2026-08-21: `4b51fec` was pushed to main; CI `32461091448` and Netlify production deploy `6a88056075359300089b9fa5` are green. Staging moved to 37/37 migrations and `bright-api` v11; authenticated smoke is blocked at `503 AI_UNAVAILABLE` because staging lacks `ANTHROPIC_API_KEY`, with fixture residue 0/0/0/0.
 > 2026-08-21: Production authenticated binary acceptance is green: DOCX/PDF signed downloads, direct Storage deny `400`, cross-tenant deny `404`, delete `200`; authoritative document/generated/object residue is 0/0/0 and final fixture residue is 0/0/0/0/0. A Smart CDN cached URL may remain `200` for up to 60 seconds after deletion.
+> 2026-08-21: Telegram webhook v14 accepted invalid POST with `200` when the secret was absent. After a pure guard and 4/4 tests, production v15 has health `200`, invalid POST fail-closed `503`, PUT `405`. Secret setup plus Telegram `setWebhook` remain.
 
 ## Current phase
 
@@ -82,7 +83,7 @@
 | Auth, multi-tenant, RBAC and core web modules | Done | Main product foundation works |
 | Realtime and task notifications | Done | Inbox, Tasks, Notifications, acknowledgement |
 | Admin platform | Partial | Core management/monitoring exists; tenant-profile/AI-stats authenticated smoke tests and Company Dashboard dark-contrast visual acceptance were confirmed in a user session |
-| Telegram | Partial / operational block | Verify `TELEGRAM_WEBHOOK_SECRET` and webhook |
+| Telegram | Partial / fail-closed operational block | Production v15 ACTIVE; health `200`, POST `503` while secret is absent. Secret setup, Telegram `setWebhook`, and bot smoke remain |
 | Resend inbox | Partial | Code exists; receiving/delivery E2E is unverified |
 | AI Concierge/RAG and cost tracking | Partial | Foundation exists; polishing request quota is race-safe through PostgreSQL atomic reservation/release, and provider usage is accounted before output validation. Migration rollout, citation UX, billing dashboard, unified endpoint enforcement, and full smoke tests remain |
 | AI Document Assistant | Production binary + staged AI polish preview / provider blocked | 15 templates, 4 languages, and real PDF/DOCX/private Storage are live. The polishing frontend is in production and migration plus `bright-api` v11 are in staging; Auth/tenant/document boundaries and cleanup are green, but real-provider smoke returns `503 AI_UNAVAILABLE` because staging lacks `ANTHROPIC_API_KEY`. Production backend/migration rollout is intentionally pending |

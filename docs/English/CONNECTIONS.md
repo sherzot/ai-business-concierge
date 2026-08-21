@@ -28,7 +28,7 @@
 | Supabase | 0 | ✅ ACTIVE_HEALTHY | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET` |
 | Anthropic Claude | 0 | ✅ Secret present; smoke test pending | `ANTHROPIC_API_KEY` |
 | OpenAI (embedding) | 0 | ✅ Secret present; KB smoke test pending | `OPENAI_API_KEY` |
-| Telegram bot | 1 | ⚠️ Function ACTIVE; webhook secret missing | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` |
+| Telegram bot | 1 | ⚠️ v15 ACTIVE; fail-closed `503` while secret is missing | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` |
 | Sentry | 0 | ⚠️ optional | `SENTRY_DSN` |
 | Resend | 1 | ⚠️ Secrets present; delivery unverified | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_WEBHOOK_SECRET` |
 | Click | 3 | ❌ later | `CLICK_MERCHANT_ID`, `CLICK_SERVICE_ID`, `CLICK_SECRET_KEY` |
@@ -124,6 +124,8 @@ supabase secrets set OPENAI_API_KEY=sk-... --project-ref <ref>
 ---
 
 ## 5. Telegram Bot
+
+> Production 2026-08-21: `telegram-bot` v15 is ACTIVE. `TELEGRAM_BOT_TOKEN` exists, `TELEGRAM_WEBHOOK_SECRET` is absent; GET is `200`, POST intentionally `503`. No updates are accepted until secret setup and `setWebhook` are complete.
 
 ### 5.1 Create Bot
 

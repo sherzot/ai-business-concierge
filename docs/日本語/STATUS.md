@@ -35,6 +35,7 @@
 > 2026-08-21: AI polishing reviewの残り5件をlocalで解消。Telegram cache scope、full-body lifecycle provider timeout、PostgreSQL atomic polishing quota reservation、stale AI outputからのuser draft保護、short viewport modal scrollを実装。Backend 18/18、Telegram check、frontend 26/26 files・117/117 tests、type-check/build、canonical fresh migration replay 37/37、local database pgTAP 45/45 green。
 > 2026-08-21: `4b51fec`をmainへpushし、CI `32461091448`とNetlify production deploy `6a88056075359300089b9fa5`はgreen。Stagingは37/37 migrations・`bright-api` v11へ更新。Stagingに`ANTHROPIC_API_KEY`がないためauthenticated smokeは`503 AI_UNAVAILABLE`でblocked、fixture residueは0/0/0/0。
 > 2026-08-21: Production authenticated binary acceptanceはgreen。DOCX/PDF signed downloads、direct Storage deny `400`、cross-tenant deny `404`、delete `200`。Authoritative document/generated/object residueは0/0/0、final fixtureは0/0/0/0/0。Smart CDN cached URLはdelete後最大60秒`200`を返し得る。
+> 2026-08-21: Telegram webhook v14はsecret不在時にinvalid POSTを`200`で受理。Pure guardと4/4 tests後、production v15はhealth `200`、invalid POST fail-closed `503`、PUT `405`。Secret設定とTelegram `setWebhook`が残る。
 
 ## 現在のPhase
 
@@ -82,7 +83,7 @@
 | Auth、multi-tenant、RBAC、主要web modules | Done | 基盤は動作 |
 | Realtimeとtask notifications | Done | Inbox、Tasks、Notifications、acknowledge |
 | Admin platform | Partial | 基本管理/monitoringあり。Tenant-profile/AI-stats authenticated smoke testsとCompany Dashboard dark-contrast visual acceptanceをuser sessionで確認済み |
-| Telegram | Partial / operational block | `TELEGRAM_WEBHOOK_SECRET`とwebhook確認が必要 |
+| Telegram | Partial / fail-closed operational block | Production v15 ACTIVE。Health `200`、secret不在時POST `503`。Secret設定、Telegram `setWebhook`、bot smokeが残る |
 | Resend inbox | Partial | Codeあり、receiving/delivery E2E未確認 |
 | AI Concierge/RAGとcost tracking | Partial | 基盤あり。Polishing request quotaはPostgreSQL atomic reservation/releaseでrace-safe、provider usageはoutput validation前に計上する。Migration rollout、citation UX、billing dashboard、unified endpoint enforcement、smoke testsが残る |
 | AI文書作成 | Production binary + staged AI polish preview / provider blocked | 15 templates、4言語、実PDF/DOCX/private Storageは稼働中。Polishing frontendはproduction、migrationと`bright-api` v11はstagingへdeploy済み。Auth/tenant/document boundariesとcleanupはgreenだが、stagingに`ANTHROPIC_API_KEY`がなくreal-provider smokeは`503 AI_UNAVAILABLE`。Production backend/migration rolloutは意図的に保留 |

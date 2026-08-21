@@ -35,6 +35,7 @@
 > 2026-08-21: Локально закрыты оставшиеся 5 findings AI polishing: восстановлен Telegram cache scope, provider timeout покрывает полный body lifecycle, polishing quota atomically резервируется в PostgreSQL, stale AI output не перезаписывает user draft, modal scroll остаётся внутри короткого viewport. Backend 18/18, Telegram check, frontend 26/26 files и 117/117 tests, type-check/build, canonical fresh migration replay 37/37 и local database pgTAP 45/45 green.
 > 2026-08-21: `4b51fec` pushed в main; CI `32461091448` и Netlify production deploy `6a88056075359300089b9fa5` green. Staging переведён на 37/37 migrations и `bright-api` v11; authenticated smoke заблокирован `503 AI_UNAVAILABLE`, потому что в staging нет `ANTHROPIC_API_KEY`, residue fixture 0/0/0/0.
 > 2026-08-21: Production authenticated binary acceptance green: DOCX/PDF signed downloads, direct Storage deny `400`, cross-tenant deny `404`, delete `200`; authoritative residue document/generated/object 0/0/0 и final fixture 0/0/0/0/0. Smart CDN cached URL может оставаться `200` до 60 секунд после удаления.
+> 2026-08-21: Telegram webhook v14 принимал invalid POST с `200` без secret. После pure guard и tests 4/4 production v15: health `200`, invalid POST fail-closed `503`, PUT `405`. Остаются secret setup и Telegram `setWebhook`.
 
 ## Текущая фаза
 
@@ -82,7 +83,7 @@
 | Auth, multi-tenant, RBAC и основные web-модули | Done | Основной фундамент работает |
 | Realtime и task notifications | Done | Inbox, Tasks, Notifications, acknowledge |
 | Admin platform | Partial | Основное управление/monitoring есть; tenant-profile/AI-stats authenticated smoke tests и Company Dashboard dark-contrast visual acceptance подтверждены в user session |
-| Telegram | Partial / operational block | Проверить `TELEGRAM_WEBHOOK_SECRET` и webhook |
+| Telegram | Partial / fail-closed operational block | Production v15 ACTIVE; health `200`, POST `503` без secret. Остаются secret setup, Telegram `setWebhook` и bot smoke |
 | Resend inbox | Partial | Код есть; receiving/delivery E2E не подтверждён |
 | AI Concierge/RAG и cost tracking | Partial | Основа есть; polishing request quota race-safe через PostgreSQL atomic reservation/release, provider usage учитывается до output validation. Остаются rollout migration, citation UX, billing dashboard, unified endpoint enforcement и smoke tests |
 | AI Документолог | Production binary + staged AI polish preview / provider blocked | 15 templates, 4 языка и real PDF/DOCX/private Storage работают. Polishing frontend в production, migration и `bright-api` v11 в staging; Auth/tenant/document boundaries и cleanup green, но real-provider smoke возвращает `503 AI_UNAVAILABLE`, потому что в staging нет `ANTHROPIC_API_KEY`. Production backend/migration rollout намеренно ожидает |

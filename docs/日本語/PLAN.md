@@ -51,7 +51,7 @@
 
 ## P2 — Operational integrations
 
-- [ ] `TELEGRAM_WEBHOOK_SECRET`を確認/設定し、webhookとbot flowを検証。
+- [ ] Production v15 fail-closed `503`後、新しい`TELEGRAM_WEBHOOK_SECRET`を設定し、同じ値でTelegram `setWebhook`を再接続する。
 - [ ] Resend receiving、signature、tenant mapping、deliveryをE2E検証。
 - [ ] Leaked Password Protectionを有効化しNetlify preview protectionを選択。
 

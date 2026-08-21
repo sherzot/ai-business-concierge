@@ -4,6 +4,14 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-21 — Production Telegram webhook bypass переведён в fail-closed
+
+- В production был `TELEGRAM_BOT_TOKEN`, отсутствовал `TELEGRAM_WEBHOOK_SECRET`, `telegram-bot` v14 был ACTIVE; в staging нет Telegram secrets/function. GET health вернул `200`, но invalid-secret `{}` POST вернул `200` вместо ожидаемого `503`.
+- Deployed v14 использовал `if (SECRET && secretHeader !== SECRET)`, обходя validation без secret. Fail-closed decision вынесен в pure helper: missing/empty config `503`, missing/wrong header `401`, exact-secret allow. GitHub CI теперь запускает эти четыре regression tests, format gate для трёх файлов и entrypoint check с pinned Deno `v2.1.14`; локально YAML parse, tests 4/4, format 3/3, entrypoint check и diff-check PASS. Значения secret/token не читались и не логировались.
+- Только `telegram-bot` deployed в production: v15 ACTIVE, health `200`, invalid POST `503 Service Unavailable`, PUT `405`. Bot намеренно fail-closed; остаются новый secret, Telegram `setWebhook` с тем же значением и bot smoke.
+
+Files/state: `.github/workflows/ci.yml`, `supabase/functions/telegram-bot/{index.ts,webhook-security.ts,webhook-security.test.ts}`, production `telegram-bot` v15, четыре языка `DEVLOG/STATUS/PLAN/CONNECTIONS`.
+
 ## 2026-08-21 — Production authenticated PDF/DOCX acceptance green
 
 - Пока ожидается staging `ANTHROPIC_API_KEY`, закрыт независимый P1 debt: production `ufhepwdkjqptjvxrmpjn` повторно подтверждён на 36/36 migrations и `bright-api` v76 ACTIVE. Добавлен phased acceptance client, который создаёт synthetic Auth fixtures через SQL и выполняет обычный password sign-in без заблокированного Auth Admin endpoint; он принимает только tenants `doc-acceptance-*` и users `@example.test`, не логирует token/key/password и задаёт HTTP timeouts.

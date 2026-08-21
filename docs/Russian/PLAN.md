@@ -51,7 +51,7 @@
 
 ## P2 — operational integrations
 
-- [ ] Проверить/установить `TELEGRAM_WEBHOOK_SECRET`, переподключить webhook и проверить bot flow.
+- [ ] После production v15 fail-closed `503` установить новый `TELEGRAM_WEBHOOK_SECRET` и повторно вызвать Telegram `setWebhook` с тем же значением.
 - [ ] E2E проверить Resend receiving, signature, tenant mapping и delivery.
 - [ ] Включить Leaked Password Protection и выбрать Netlify preview protection.
 
