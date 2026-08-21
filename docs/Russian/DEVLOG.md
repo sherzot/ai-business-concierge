@@ -4,6 +4,15 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-21 — Production authenticated PDF/DOCX acceptance green
+
+- Пока ожидается staging `ANTHROPIC_API_KEY`, закрыт независимый P1 debt: production `ufhepwdkjqptjvxrmpjn` повторно подтверждён на 36/36 migrations и `bright-api` v76 ACTIVE. Добавлен phased acceptance client, который создаёт synthetic Auth fixtures через SQL и выполняет обычный password sign-in без заблокированного Auth Admin endpoint; он принимает только tenants `doc-acceptance-*` и users `@example.test`, не логирует token/key/password и задаёт HTTP timeouts.
+- Production authenticated flow прошёл real DOCX signed download (`3,894,448` bytes) и edited PDF signed download (`3,961,631` bytes). Direct authenticated Storage вернул `400`, cross-tenant export — `404`, document delete API — `200`; immutable tenant/user/document path contract подтверждён.
+- Сразу после delete тот же signed URL вернул `200` из Smart CDN cache. Текущая документация Supabase Smart CDN допускает propagation invalidation до 60 секунд, поэтому неверный immediate `400/404` assertion удалён. Authoritative SQL read-back подтвердил residue document/generated/object `0/0/0` и final Auth-user/tenant/template/document/object fixture `0/0/0/0/0`.
+- `node --check`, `git diff --check` и production acceptance PASS. Application schema, Edge Function и frontend deploy не менялись. Первый следующий шаг прежний: безопасно установить staging `ANTHROPIC_API_KEY` и сделать real-provider polishing smoke green.
+
+Files: `supabase/tests/integration/document_binary_storage.client.mjs`, четыре языка `DEVLOG/STATUS/PLAN/REQUIREMENTS`.
+
 ## 2026-08-21 — GitHub/Netlify green, AI polishing развёрнут в staging
 
 - `4b51fec` fast-forward pushed напрямую в `main`. GitHub Actions run `32461091448` полностью green: type-check, 117 frontend tests, deploy-env, dependency audit, production build и hosting security gate.

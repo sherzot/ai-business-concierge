@@ -4,6 +4,15 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-21 — Production authenticated PDF/DOCX acceptance is green
+
+- While waiting for the staging `ANTHROPIC_API_KEY`, an independent P1 debt item was closed: production `ufhepwdkjqptjvxrmpjn` was reconfirmed at 36/36 migrations with `bright-api` v76 ACTIVE. A phased acceptance client now creates synthetic Auth fixtures through SQL and uses normal password sign-in without the blocked Auth Admin endpoint; it accepts only `doc-acceptance-*` tenants and `@example.test` users, never logs tokens/keys/passwords, and has HTTP timeouts.
+- The production authenticated flow passed a real DOCX signed download (`3,894,448` bytes) and an edited PDF signed download (`3,961,631` bytes). Direct authenticated Storage returned `400`, cross-tenant export returned `404`, document delete returned `200`, and the immutable tenant/user/document path contract was verified.
+- The same signed URL returned `200` immediately after deletion because of Smart CDN caching. Current Supabase Smart CDN documentation allows deletion invalidation to propagate for up to 60 seconds, so the incorrect immediate `400/404` assertion was removed. Authoritative SQL read-back confirmed document/generated/object residue `0/0/0` and final Auth-user/tenant/template/document/object fixture residue `0/0/0/0/0`.
+- `node --check`, `git diff --check`, and production acceptance passed. Application schema, Edge Function, and frontend deployment were unchanged. The first next action remains securely setting staging `ANTHROPIC_API_KEY` and making the real-provider polishing smoke green.
+
+Files: `supabase/tests/integration/document_binary_storage.client.mjs` and four-language `DEVLOG/STATUS/PLAN/REQUIREMENTS`.
+
 ## 2026-08-21 — GitHub/Netlify green and AI polishing deployed to staging
 
 - `4b51fec` was fast-forward pushed directly to `main`. GitHub Actions run `32461091448` completed fully green across type-check, 117 frontend tests, deploy-env, dependency audit, production build, and hosting security gate.

@@ -35,6 +35,7 @@
 > 2026-08-21: AI polishing reviewining 3 ta P2 va 1 ta P3 topilmasi lokalda yopildi: chat/polish token budjetlari ajratildi, yaroqsiz output usage/costi hisoblanadi, raw instruction logdan olib tashlandi va to'rt tilli xato envelope'i standartlashtirildi. Backend 14/14, frontend 26/26 fayl va 115/115 test green.
 > 2026-08-21: AI polishing reviewining qolgan 5 topilmasi lokalda yopildi: Telegram cache scope tiklandi, provider timeouti to'liq body lifecycle'ni qamradi, polish quota PostgreSQLda atomik rezervatsiya qilinadi, stale AI natijasi user draftini bosmaydi va modal qisqa viewportda scroll qiladi. Backend 18/18, Telegram check, frontend 26/26 fayl va 117/117 test, type-check/build, canonical fresh migration replay 37/37 va local database pgTAP 45/45 green.
 > 2026-08-21: `4b51fec` main'ga push qilindi, CI `32461091448` va Netlify production deploy `6a88056075359300089b9fa5` green. Staging 37/37 migration va `bright-api` v11ga o'tdi; authenticated smoke `ANTHROPIC_API_KEY` stagingda yo'qligi sabab `503 AI_UNAVAILABLE`da bloklandi, fixture qoldig'i 0/0/0/0.
+> 2026-08-21: Production authenticated binary acceptance green: DOCX/PDF signed download, direct Storage deny `400`, cross-tenant deny `404`, delete `200`; authoritative document/generated/object qoldig'i 0/0/0 va final fixture 0/0/0/0/0. Smart CDN cached URL delete'dan keyin 60 soniyagacha `200` berishi mumkin.
 
 ## Hozir qayerdamiz
 
@@ -72,7 +73,7 @@
 | Production frontend | Deploy `6a88056075359300089b9fa5` ready, build `6a88056075359300089b9fa3`, commit `4b51fec`, 34s, plugin success, secret match 0/87,170; `/` va `/dashboard/docs` `200`, CSP va production-only bundle green |
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |
 | DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; local real Auth tokenli Edge `8/8`; staging modern-key remote Edge `8/8`, cleanup 2 tenant/5 Auth user va yakuniy fixture `0/0`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |
-| Document binary/Storage acceptance | Real PDF/DOCX lifecycle Deno 7/7. Production private bucket/schema read-back, pgTAP oxirgi `ok 15`, health `200` va authsiz docs `401` green; authenticated synthetic acceptance Cloudflare `403` sabab birinchi fixturedan oldin BLOCKED, yakuniy Auth/tenant/template/document/generated/object qoldig'i 0/0/0/0/0/0 |
+| Document binary/Storage acceptance | Real PDF/DOCX lifecycle Deno 7/7. Production authenticated DOCX/PDF signed download green; direct Storage `400`, cross-tenant export `404`, delete `200`, document/generated/object residue 0/0/0 va final fixture 0/0/0/0/0. Smart CDN cached signed URL deletion invalidatsiyasi 60 soniyagacha tarqalishi mumkin |
 | Migration history | Canonical local fresh replay 37/37 va full database pgTAP 45/45 green, shu jumladan atomik quota 9/9; staging 37/37, production 36/36. User-owned duplicate migration nusxasi o'zgarmagan |
 | Local Supabase services | PostgreSQL-only stack fresh replay va pgTAP uchun healthy. Full stack startda analytics/vector/realtime/storage/studio health timeout berdi; remote staging acceptance bunga bog'lanmadi |
 
@@ -107,7 +108,7 @@
 
 1. `ANTHROPIC_API_KEY`ni staging Edge secrets'ga xavfsiz o'rnatish va authenticated real-provider preview/save smoke-testni qayta green qilish.
 2. Green staging smoke'dan keyin production `20260821000000` migration + `bright-api` rollout va smoke-testni bajarish.
-3. Web oqimi barqarorlashgach Telegram step-by-step hujjat yaratish va document yuborishni ulash; Cloudflare blokidan keyin binary authenticated acceptance'ni qayta o'tkazish.
+3. Web oqimi barqarorlashgach Telegram step-by-step hujjat yaratish va document yuborishni ulash.
 
 Batafsil tartib: [PLAN.md](PLAN.md).
 

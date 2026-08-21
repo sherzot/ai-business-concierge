@@ -48,7 +48,6 @@
 - [ ] `ANTHROPIC_API_KEY`をstaging Edge secretsへ安全に設定し、authenticated real-provider preview/save smokeをgreenにする。
 - [ ] Green staging smoke後、production migration `20260821000000` + `bright-api`をdeployし、public/protected smoke testsを行う。
 - [ ] Web flow安定後、Telegram wizardとfile送信を追加。
-- [ ] Cloudflare Auth Admin `403`を安全に解決後、production authenticated PDF/DOCX signed-download、cross-tenant deny、direct Storage deny、delete-cleanup synthetic acceptanceを再実行する。
 
 ## P2 — Operational integrations
 

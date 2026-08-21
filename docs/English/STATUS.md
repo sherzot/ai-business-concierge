@@ -34,6 +34,7 @@
 > 2026-08-21: Three P2 and one P3 AI polishing review findings were closed locally: chat/polish token budgets are separated, unusable outputs are usage/cost-accounted, raw instructions are removed from logs, and the four-locale error envelope is standardized. Backend 14/14 and frontend 26/26 files with 115/115 tests are green.
 > 2026-08-21: The remaining five AI polishing review findings were closed locally: Telegram cache scope was restored, provider timeout now covers the complete body lifecycle, polishing quota is atomically reserved in PostgreSQL, stale AI output cannot overwrite the user draft, and the modal scrolls within short viewports. Backend 18/18, Telegram check, frontend 26/26 files and 117/117 tests, type-check/build, canonical fresh migration replay 37/37, and local database pgTAP 45/45 are green.
 > 2026-08-21: `4b51fec` was pushed to main; CI `32461091448` and Netlify production deploy `6a88056075359300089b9fa5` are green. Staging moved to 37/37 migrations and `bright-api` v11; authenticated smoke is blocked at `503 AI_UNAVAILABLE` because staging lacks `ANTHROPIC_API_KEY`, with fixture residue 0/0/0/0.
+> 2026-08-21: Production authenticated binary acceptance is green: DOCX/PDF signed downloads, direct Storage deny `400`, cross-tenant deny `404`, delete `200`; authoritative document/generated/object residue is 0/0/0 and final fixture residue is 0/0/0/0/0. A Smart CDN cached URL may remain `200` for up to 60 seconds after deletion.
 
 ## Current phase
 
@@ -70,7 +71,7 @@
 | Production frontend | Deploy `6a88056075359300089b9fa5` ready, build `6a88056075359300089b9fa3`, commit `4b51fec`, 34s, plugin success, 0 secret matches across 87,170 files; `/` and `/dashboard/docs` `200`, CSP and production-only bundle green |
 | Frontend Supabase key contract | Code and production accept only the modern publishable key; bundle has 1 modern key, 0 JWT-like keys, no legacy env name, and the format guard; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env deleted |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup of two tenants/five Auth users, final fixture 0/0; Realtime tables are SELECT-only and require active membership/tenant |
-| Document binary/Storage acceptance | Real PDF/DOCX lifecycle passes 7/7 Deno tests. Production private-bucket/schema read-back, last pgTAP assertion `ok 15`, health `200`, and unauthenticated docs `401` are green; authenticated synthetic acceptance is BLOCKED by Cloudflare `403` before the first fixture, with final Auth/tenant/template/document/generated/object residue 0/0/0/0/0/0 |
+| Document binary/Storage acceptance | Real PDF/DOCX lifecycle passes 7/7 Deno tests. Production authenticated DOCX/PDF signed downloads are green; direct Storage `400`, cross-tenant export `404`, delete `200`, document/generated/object residue 0/0/0, and final fixture residue 0/0/0/0/0. Smart CDN cached signed-URL deletion invalidation can take up to 60 seconds |
 | Migration history | Canonical local fresh replay 37/37 and full database pgTAP 45/45 are green, including atomic quota 9/9; staging is 37/37 and production is 36/36. The user-owned duplicate migration copy remains unchanged |
 | Local Supabase services | PostgreSQL-only stack is healthy for fresh replay and pgTAP. Full-stack start timed out on analytics/vector/realtime/storage/studio health; remote staging acceptance did not depend on it |
 
@@ -92,6 +93,6 @@
 
 1. Securely set `ANTHROPIC_API_KEY` in staging Edge secrets and rerun the authenticated real-provider preview/save smoke to green.
 2. After green staging smoke, deploy production migration `20260821000000` plus `bright-api` and run smoke tests.
-3. Once the web flow is stable, add Telegram step-by-step generation and delivery; after the Cloudflare block, rerun binary authenticated acceptance.
+3. Once the web flow is stable, add Telegram step-by-step generation and delivery.
 
 Detailed tasks: [PLAN.md](PLAN.md). Canonical source: [Uzbek STATUS](../STATUS.md).

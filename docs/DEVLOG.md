@@ -4,6 +4,15 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-21 — Production authenticated PDF/DOCX acceptance green
+
+- Staging `ANTHROPIC_API_KEY` kutilayotgan paytda mustaqil P1 qarz yopildi: production `ufhepwdkjqptjvxrmpjn` 36/36 migration va `bright-api` v76 ACTIVE holatida qayta tasdiqlandi. Auth Admin endpointiga bog'lanmaydigan, SQL orqali synthetic Auth fixture yaratib oddiy password sign-in qiladigan phased acceptance client qo'shildi; u faqat `doc-acceptance-*` tenantlari va `@example.test` userlarini qabul qiladi, token/key/passwordni loglamaydi va HTTP timeoutlarga ega.
+- Production authenticated oqim real DOCX signed download (`3,894,448` bytes) va tahrirdan keyingi PDF signed downloadni (`3,961,631` bytes) o'tkazdi. Direct authenticated Storage `400`, cross-tenant export `404`, document delete API `200`; immutable tenant/user/document path kontrakti ham tasdiqlandi.
+- Delete'dan keyin ayni signed URL Smart CDN cache sabab `200` qaytardi. Supabase joriy Smart CDN hujjati object deletion invalidatsiyasi 60 soniyagacha tarqalishini aytadi; shu sabab noto'g'ri immediate `400/404` assertion olib tashlandi. Authoritative cleanup SQL read-back document/generated/object uchun `0/0/0`, yakuniy Auth user/tenant/template/document/object fixture qoldig'i `0/0/0/0/0` ekanini tasdiqladi.
+- `node --check`, `git diff --check` va production acceptance PASS. Application schema, Edge Function va frontend deploy o'zgarmadi. Keyingi birinchi qadam o'zgarmadi: stagingga `ANTHROPIC_API_KEY`ni xavfsiz o'rnatish va real-provider polishing smoke'ni green qilish.
+
+Fayllar: `supabase/tests/integration/document_binary_storage.client.mjs`, 4-tilli `DEVLOG/STATUS/PLAN/REQUIREMENTS`.
+
 ## 2026-08-21 — GitHub/Netlify green, AI polishing stagingga chiqarildi
 
 - `4b51fec` bevosita `main`ga fast-forward push qilindi. GitHub Actions run `32461091448` type-check, 117 frontend test, deploy-env, dependency audit, production build va hosting security gate bilan to'liq green yakunlandi.

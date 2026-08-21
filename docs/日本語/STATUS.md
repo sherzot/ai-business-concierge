@@ -34,6 +34,7 @@
 > 2026-08-21: AI polishing reviewのP2 3件・P3 1件をlocalで解消。Chat/polish token budgets分離、unusable outputのusage/cost計上、raw instruction log削除、4-locale error envelope標準化を実施。Backend 14/14、frontend 26/26 files・115/115 tests green。
 > 2026-08-21: AI polishing reviewの残り5件をlocalで解消。Telegram cache scope、full-body lifecycle provider timeout、PostgreSQL atomic polishing quota reservation、stale AI outputからのuser draft保護、short viewport modal scrollを実装。Backend 18/18、Telegram check、frontend 26/26 files・117/117 tests、type-check/build、canonical fresh migration replay 37/37、local database pgTAP 45/45 green。
 > 2026-08-21: `4b51fec`をmainへpushし、CI `32461091448`とNetlify production deploy `6a88056075359300089b9fa5`はgreen。Stagingは37/37 migrations・`bright-api` v11へ更新。Stagingに`ANTHROPIC_API_KEY`がないためauthenticated smokeは`503 AI_UNAVAILABLE`でblocked、fixture residueは0/0/0/0。
+> 2026-08-21: Production authenticated binary acceptanceはgreen。DOCX/PDF signed downloads、direct Storage deny `400`、cross-tenant deny `404`、delete `200`。Authoritative document/generated/object residueは0/0/0、final fixtureは0/0/0/0/0。Smart CDN cached URLはdelete後最大60秒`200`を返し得る。
 
 ## 現在のPhase
 
@@ -70,7 +71,7 @@
 | Production frontend | Deploy `6a88056075359300089b9fa5` ready、build `6a88056075359300089b9fa3`、commit `4b51fec`、34s、plugin success、87,170 filesでsecret match 0。`/`と`/dashboard/docs`は`200`、CSP・production-only bundle green |
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |
 | DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、local real Auth-token Edge tests 8/8。Staging modern-key remote Edge 8/8、2 tenants/5 Auth users cleanup、final fixture 0/0。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |
-| Document binary/Storage acceptance | 実PDF/DOCX lifecycleはDeno 7/7。Production private-bucket/schema read-back、pgTAP最終`ok 15`、health `200`、unauth docs `401`はgreen。Authenticated synthetic acceptanceはfirst fixture前にCloudflare `403`でBLOCKED、final Auth/tenant/template/document/generated/object residueは0/0/0/0/0/0 |
+| Document binary/Storage acceptance | 実PDF/DOCX lifecycleはDeno 7/7。Production authenticated DOCX/PDF signed downloadsはgreen。Direct Storage `400`、cross-tenant export `404`、delete `200`、document/generated/object residue 0/0/0、final fixture 0/0/0/0/0。Smart CDN cached signed URLのdeletion invalidationには最大60秒かかり得る |
 | Migration history | Canonical local fresh replay 37/37とfull database pgTAP 45/45 green（atomic quota 9/9を含む）。Staging 37/37、production 36/36。User-owned duplicate migration copyは未変更 |
 | Local Supabase services | PostgreSQL-only stackはfresh replayとpgTAPでhealthy。Full-stack startはanalytics/vector/realtime/storage/studio health timeout。Remote staging acceptanceは非依存 |
 
@@ -92,6 +93,6 @@
 
 1. `ANTHROPIC_API_KEY`をstaging Edge secretsへ安全に設定し、authenticated real-provider preview/save smokeをgreenにする。
 2. Green staging smoke後、production migration `20260821000000` + `bright-api`をdeployしsmoke testする。
-3. Web flow安定後にTelegram generation/deliveryを追加し、Cloudflare block後にbinary authenticated acceptanceを再実行する。
+3. Web flow安定後にTelegram generation/deliveryを追加する。
 
 詳細: [PLAN.md](PLAN.md)。Canonical: [Uzbek STATUS](../STATUS.md)。

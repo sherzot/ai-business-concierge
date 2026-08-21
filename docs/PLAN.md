@@ -56,7 +56,6 @@
 - [ ] `ANTHROPIC_API_KEY`ni staging Edge secrets'ga xavfsiz o'rnatish va authenticated real-provider preview/save smoke-testini green qilish.
 - [ ] Green staging smoke'dan keyin production `20260821000000` migration + `bright-api` rollout va public/protected smoke-testlarni bajarish.
 - [ ] Web oqimi barqarorlashgach Telegram step-by-step hujjat yaratish va document yuborishni ulash.
-- [ ] Cloudflare Auth Admin `403` blokini xavfsiz yo'l bilan yechgach production authenticated PDF/DOCX signed-download, cross-tenant deny, direct Storage deny va delete-cleanup synthetic acceptance'ni qayta o'tkazish.
 
 ## P2 — operatsion integratsiyalar
 

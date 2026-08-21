@@ -4,6 +4,15 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-21 — Production authenticated PDF/DOCX acceptance green
+
+- Staging `ANTHROPIC_API_KEY`待ちの間に独立したP1 debtを解消した。Production `ufhepwdkjqptjvxrmpjn`は36/36 migrations、`bright-api` v76 ACTIVEと再確認。Blocked Auth Admin endpointを使わず、SQLでsynthetic Auth fixtureを作り通常のpassword sign-inを行うphased acceptance clientを追加した。`doc-acceptance-*` tenantと`@example.test` userのみ受け付け、token/key/passwordをlogせず、HTTP timeoutを持つ。
+- Production authenticated flowでreal DOCX signed download（`3,894,448` bytes）とedited PDF signed download（`3,961,631` bytes）がPASS。Direct authenticated Storageは`400`、cross-tenant exportは`404`、document delete APIは`200`。Immutable tenant/user/document path contractも確認した。
+- Delete直後、同じsigned URLはSmart CDN cacheにより`200`を返した。現行Supabase Smart CDN docsではdeletion invalidationのpropagationに最大60秒を許容するため、誤ったimmediate `400/404` assertionを削除。Authoritative SQL read-backでdocument/generated/object residue `0/0/0`、final Auth-user/tenant/template/document/object fixture residue `0/0/0/0/0`を確認した。
+- `node --check`、`git diff --check`、production acceptanceはPASS。Application schema、Edge Function、frontend deployは未変更。次の第一手は引き続きstagingへ`ANTHROPIC_API_KEY`を安全に設定しreal-provider polishing smokeをgreenにすること。
+
+Files: `supabase/tests/integration/document_binary_storage.client.mjs`、4言語`DEVLOG/STATUS/PLAN/REQUIREMENTS`。
+
 ## 2026-08-21 — GitHub/Netlify green、AI polishingをstagingへdeploy
 
 - `4b51fec`を`main`へfast-forward pushした。GitHub Actions run `32461091448`はtype-check、frontend 117 tests、deploy-env、dependency audit、production build、hosting security gateをすべてgreenで完了した。

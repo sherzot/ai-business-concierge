@@ -34,6 +34,7 @@
 > 2026-08-21: Локально закрыты 3 P2 и 1 P3 findings AI polishing: chat/polish token budgets разделены, unusable outputs учитываются в usage/cost, raw instructions удалены из logs, four-locale error envelope стандартизирован. Backend 14/14, frontend 26/26 files и 115/115 tests green.
 > 2026-08-21: Локально закрыты оставшиеся 5 findings AI polishing: восстановлен Telegram cache scope, provider timeout покрывает полный body lifecycle, polishing quota atomically резервируется в PostgreSQL, stale AI output не перезаписывает user draft, modal scroll остаётся внутри короткого viewport. Backend 18/18, Telegram check, frontend 26/26 files и 117/117 tests, type-check/build, canonical fresh migration replay 37/37 и local database pgTAP 45/45 green.
 > 2026-08-21: `4b51fec` pushed в main; CI `32461091448` и Netlify production deploy `6a88056075359300089b9fa5` green. Staging переведён на 37/37 migrations и `bright-api` v11; authenticated smoke заблокирован `503 AI_UNAVAILABLE`, потому что в staging нет `ANTHROPIC_API_KEY`, residue fixture 0/0/0/0.
+> 2026-08-21: Production authenticated binary acceptance green: DOCX/PDF signed downloads, direct Storage deny `400`, cross-tenant deny `404`, delete `200`; authoritative residue document/generated/object 0/0/0 и final fixture 0/0/0/0/0. Smart CDN cached URL может оставаться `200` до 60 секунд после удаления.
 
 ## Текущая фаза
 
@@ -70,7 +71,7 @@
 | Production frontend | Deploy `6a88056075359300089b9fa5` ready, build `6a88056075359300089b9fa3`, commit `4b51fec`, 34s, plugin success, 0 secret matches в 87,170 files; `/` и `/dashboard/docs` `200`, CSP и production-only bundle green |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup двух tenants/пяти Auth users и final fixture 0/0; Realtime tables SELECT-only и требуют active membership/tenant |
-| Document binary/Storage acceptance | Real PDF/DOCX lifecycle Deno 7/7. Production private-bucket/schema read-back, последний pgTAP `ok 15`, health `200` и unauth docs `401` green; authenticated synthetic acceptance BLOCKED Cloudflare `403` до первого fixture, final Auth/tenant/template/document/generated/object residue 0/0/0/0/0/0 |
+| Document binary/Storage acceptance | Real PDF/DOCX lifecycle Deno 7/7. Production authenticated DOCX/PDF signed downloads green; direct Storage `400`, cross-tenant export `404`, delete `200`, residue document/generated/object 0/0/0 и final fixture 0/0/0/0/0. Invalidation cached signed URL в Smart CDN может занять до 60 секунд |
 | Migration history | Canonical local fresh replay 37/37 и full database pgTAP 45/45 green, включая atomic quota 9/9; staging 37/37, production 36/36. User-owned duplicate migration copy не изменена |
 | Local Supabase services | PostgreSQL-only stack healthy для fresh replay и pgTAP. Full-stack start завершился health timeout для analytics/vector/realtime/storage/studio; remote staging acceptance от него не зависел |
 
@@ -92,6 +93,6 @@
 
 1. Безопасно установить `ANTHROPIC_API_KEY` в staging Edge secrets и повторить authenticated real-provider preview/save smoke до green.
 2. После green staging smoke deploy production migration `20260821000000` + `bright-api` и выполнить smoke tests.
-3. После стабилизации web flow добавить Telegram generation/delivery; после Cloudflare block повторить binary authenticated acceptance.
+3. После стабилизации web flow добавить Telegram generation/delivery.
 
 Подробности: [PLAN.md](PLAN.md). Основной источник: [узбекский STATUS](../STATUS.md).
