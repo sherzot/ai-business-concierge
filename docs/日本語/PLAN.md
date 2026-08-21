@@ -45,7 +45,8 @@
 
 ## P1 — Phase 2 AI文書作成を完了
 
-- [ ] Local AI polishing preview closeout commitをGitHubへpushし、CIとNetlify preview、staging migration + `bright-api` deploy、authenticated real-provider preview/save smoke-testを行う。
+- [ ] `ANTHROPIC_API_KEY`をstaging Edge secretsへ安全に設定し、authenticated real-provider preview/save smokeをgreenにする。
+- [ ] Green staging smoke後、production migration `20260821000000` + `bright-api`をdeployし、public/protected smoke testsを行う。
 - [ ] Web flow安定後、Telegram wizardとfile送信を追加。
 - [ ] Cloudflare Auth Admin `403`を安全に解決後、production authenticated PDF/DOCX signed-download、cross-tenant deny、direct Storage deny、delete-cleanup synthetic acceptanceを再実行する。
 

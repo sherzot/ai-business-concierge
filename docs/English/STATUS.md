@@ -33,6 +33,7 @@
 > 2026-08-21: The landing hero TEAM/08 card and caption overlap was fixed locally; frontend 25/25 files and 112/112 tests plus type-check are green. At 2048×1080 browser acceptance measured a 12.73px gap and 0 overlap/overflow/console errors.
 > 2026-08-21: Three P2 and one P3 AI polishing review findings were closed locally: chat/polish token budgets are separated, unusable outputs are usage/cost-accounted, raw instructions are removed from logs, and the four-locale error envelope is standardized. Backend 14/14 and frontend 26/26 files with 115/115 tests are green.
 > 2026-08-21: The remaining five AI polishing review findings were closed locally: Telegram cache scope was restored, provider timeout now covers the complete body lifecycle, polishing quota is atomically reserved in PostgreSQL, stale AI output cannot overwrite the user draft, and the modal scrolls within short viewports. Backend 18/18, Telegram check, frontend 26/26 files and 117/117 tests, type-check/build, canonical fresh migration replay 37/37, and local database pgTAP 45/45 are green.
+> 2026-08-21: `4b51fec` was pushed to main; CI `32461091448` and Netlify production deploy `6a88056075359300089b9fa5` are green. Staging moved to 37/37 migrations and `bright-api` v11; authenticated smoke is blocked at `503 AI_UNAVAILABLE` because staging lacks `ANTHROPIC_API_KEY`, with fixture residue 0/0/0/0.
 
 ## Current phase
 
@@ -47,12 +48,12 @@
 
 | Check | Status |
 |---|---|
-| Git | Live GitHub `main` remains at `5e33f094`; the reviewed slice is included in this local closeout commit and has not been pushed, so the local branch is 1 commit ahead of remote |
+| Git | Live GitHub `main` and local `main` are synchronized by this closeout; only three user-owned untracked copies remain |
 | Runtime | Node.js `22.18.0`; `.nvmrc` and package engine pin `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; verified with a fresh local volume |
 | Backend | Production Supabase Edge Function `bright-api` v76, `ACTIVE`, `verify_jwt=false`; SHA matches staging v10 |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 36/36 migrations, `bright-api` v10 ACTIVE, health `200`, unauthenticated docs `401` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 37/37 migrations, `bright-api` v11 ACTIVE, health `200`, unauthenticated docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge uses modern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overrides; legacy anon/service-role API keys are disabled |
 | Type-check | Passed in a clean temporary frontend install |
 | Unit tests | Frontend 26/26 files, 117/117 tests; AI polish/router/usage Deno 18/18; prior document binary/lifecycle Deno 7/7 |
@@ -64,13 +65,13 @@
 | Delivery platform | Netlify only. The repository has no Vercel config/dependency; the external Vercel project remains, with `gitRepositoryConnected=false` verified |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs are absent; on Personal only browser-public `VITE_*` values use `All` scope |
 | Staging security advisor | Errors `0`; known `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | Final PR #11 run `31545572719` succeeded; main run `31545917894` for merge commit `8f179da` succeeded |
-| Netlify preview | Frontend artifact `6a7b2e774d8b4a00084583b0` ready; backend-only `7837778` incremental deploy `6a7b9cd2d9412e000833a5c8` canceled/PASS |
-| Production frontend | Deploy `6a7bad961b16200007cfd88e` ready, build `6a7bad961b16200007cfd88c`, commit `8f179da`, 32s, plugin success, 0 secret matches across 87,166 files; `/` and `/dashboard/docs` `200`, production-only CSP/bundle |
+| Remote GitHub Actions | Main run `32461091448` for commit `4b51fec` succeeded: type-check, 117 tests, deploy-env, audit, build, and security gate are green |
+| Netlify preview | No new deploy preview was created because this slice was pushed directly to `main`; Netlify used production context |
+| Production frontend | Deploy `6a88056075359300089b9fa5` ready, build `6a88056075359300089b9fa3`, commit `4b51fec`, 34s, plugin success, 0 secret matches across 87,170 files; `/` and `/dashboard/docs` `200`, CSP and production-only bundle green |
 | Frontend Supabase key contract | Code and production accept only the modern publishable key; bundle has 1 modern key, 0 JWT-like keys, no legacy env name, and the format guard; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env deleted |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup of two tenants/five Auth users, final fixture 0/0; Realtime tables are SELECT-only and require active membership/tenant |
 | Document binary/Storage acceptance | Real PDF/DOCX lifecycle passes 7/7 Deno tests. Production private-bucket/schema read-back, last pgTAP assertion `ok 15`, health `200`, and unauthenticated docs `401` are green; authenticated synthetic acceptance is BLOCKED by Cloudflare `403` before the first fixture, with final Auth/tenant/template/document/generated/object residue 0/0/0/0/0/0 |
-| Migration history | Canonical local fresh replay 37/37 and full database pgTAP 45/45 are green, including atomic quota 9/9; staging/production remain 36/36 and the new migration is not applied remotely. The user-owned duplicate migration copy was temporarily excluded and restored unchanged |
+| Migration history | Canonical local fresh replay 37/37 and full database pgTAP 45/45 are green, including atomic quota 9/9; staging is 37/37 and production is 36/36. The user-owned duplicate migration copy remains unchanged |
 | Local Supabase services | PostgreSQL-only stack is healthy for fresh replay and pgTAP. Full-stack start timed out on analytics/vector/realtime/storage/studio health; remote staging acceptance did not depend on it |
 
 ## Capability status
@@ -83,14 +84,14 @@
 | Telegram | Partial / operational block | Verify `TELEGRAM_WEBHOOK_SECRET` and webhook |
 | Resend inbox | Partial | Code exists; receiving/delivery E2E is unverified |
 | AI Concierge/RAG and cost tracking | Partial | Foundation exists; polishing request quota is race-safe through PostgreSQL atomic reservation/release, and provider usage is accounted before output validation. Migration rollout, citation UX, billing dashboard, unified endpoint enforcement, and full smoke tests remain |
-| AI Document Assistant | Production binary + hardened local AI polish preview | 15 templates, 4 languages, and real PDF/DOCX/private Storage are live. The tenant-scoped preview has locally tested scoped cache/budgets, full-lifecycle timeout, atomic quota, stale-draft protection, viewport scrolling, instruction-free logs, and four-locale UX; migration/staging/production deploy and real-provider smoke are pending. Binary authenticated synthetic recheck remains Cloudflare-blocked |
+| AI Document Assistant | Production binary + staged AI polish preview / provider blocked | 15 templates, 4 languages, and real PDF/DOCX/private Storage are live. The polishing frontend is in production and migration plus `bright-api` v11 are in staging; Auth/tenant/document boundaries and cleanup are green, but real-provider smoke returns `503 AI_UNAVAILABLE` because staging lacks `ANTHROPIC_API_KEY`. Production backend/migration rollout is intentionally pending |
 | HR Candidate Analysis | Skeleton | Scaffold exists; production endpoint returns `501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme and AI Sales Bot | Planned | Phase 3 |
 
 ## Immediate order
 
-1. Push the local closeout commit to GitHub, pass CI/Netlify preview, deploy the staging migration and Edge function, and run an authenticated real-provider preview/save smoke test.
-2. Once the web flow is stable, add Telegram step-by-step document generation and delivery.
-3. After resolving the Cloudflare block safely, rerun production authenticated PDF/DOCX/Storage synthetic acceptance.
+1. Securely set `ANTHROPIC_API_KEY` in staging Edge secrets and rerun the authenticated real-provider preview/save smoke to green.
+2. After green staging smoke, deploy production migration `20260821000000` plus `bright-api` and run smoke tests.
+3. Once the web flow is stable, add Telegram step-by-step generation and delivery; after the Cloudflare block, rerun binary authenticated acceptance.
 
 Detailed tasks: [PLAN.md](PLAN.md). Canonical source: [Uzbek STATUS](../STATUS.md).

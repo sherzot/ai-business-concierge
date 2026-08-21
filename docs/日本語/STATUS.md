@@ -33,6 +33,7 @@
 > 2026-08-21: Landing hero TEAM/08 cardとcaptionのoverlapをlocalで修正。Frontend 25/25 files・112/112 tests、type-check green。2048×1080 browser acceptanceはgap 12.73px、overlap/overflow/console errors 0。
 > 2026-08-21: AI polishing reviewのP2 3件・P3 1件をlocalで解消。Chat/polish token budgets分離、unusable outputのusage/cost計上、raw instruction log削除、4-locale error envelope標準化を実施。Backend 14/14、frontend 26/26 files・115/115 tests green。
 > 2026-08-21: AI polishing reviewの残り5件をlocalで解消。Telegram cache scope、full-body lifecycle provider timeout、PostgreSQL atomic polishing quota reservation、stale AI outputからのuser draft保護、short viewport modal scrollを実装。Backend 18/18、Telegram check、frontend 26/26 files・117/117 tests、type-check/build、canonical fresh migration replay 37/37、local database pgTAP 45/45 green。
+> 2026-08-21: `4b51fec`をmainへpushし、CI `32461091448`とNetlify production deploy `6a88056075359300089b9fa5`はgreen。Stagingは37/37 migrations・`bright-api` v11へ更新。Stagingに`ANTHROPIC_API_KEY`がないためauthenticated smokeは`503 AI_UNAVAILABLE`でblocked、fixture residueは0/0/0/0。
 
 ## 現在のPhase
 
@@ -47,12 +48,12 @@
 
 | Check | 状態 |
 |---|---|
-| Git | Live GitHub `main`は`5e33f094`のまま。Reviewed sliceはこのlocal closeout commitへ含まれ、未pushのためlocal branchはremoteより1 commit ahead |
+| Git | Live GitHub `main`とlocal `main`はこのcloseoutで同期。残るのは3件のuser-owned untracked copiesのみ |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Production Supabase Edge Function `bright-api` v76、`ACTIVE`、`verify_jwt=false`。SHAはstaging v10と一致 |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。36/36 migrations、`bright-api` v10 ACTIVE、health `200`、unauth docs `401` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。37/37 migrations、`bright-api` v11 ACTIVE、health `200`、unauth docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list。Email confirmation ON、8-digit/1-minute OTP、TOTP ON。Auth settings HTTP `200`、autoconfirm false。Edgeはmodern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overridesを使用しlegacy anon/service-role API keysはdisabled |
 | Type-check | Clean temporary frontend installで成功 |
 | Unit tests | Frontend 26/26 files、117/117 tests。AI polish/router/usage Deno 18/18、従来document binary/lifecycle Deno 7/7 |
@@ -64,13 +65,13 @@
 | Delivery platform | Netlifyのみ。RepositoryにVercel config/dependencyなし。External Vercel projectは保持し、`gitRepositoryConnected=false`を確認 |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase、`deploy-preview`/`branch-deploy`/`dev` -> staging。Optional URL envなし。Personalではbrowser-public `VITE_*`のみ`All` scopeを使用 |
 | Staging security advisor | Error `0`、既知`vector` public-schema warning `1`、server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | PR #11 final run `31545572719` success。Merge commit `8f179da`のmain run `31545917894` success |
-| Netlify preview | Frontend artifact `6a7b2e774d8b4a00084583b0` ready。Backend-only incremental deploy `6a7b9cd2d9412e000833a5c8`はcanceled/PASS |
-| Production frontend | Deploy `6a7bad961b16200007cfd88e` ready、build `6a7bad961b16200007cfd88c`、commit `8f179da`、32s、plugin success、87,166 filesでsecret match 0。`/`と`/dashboard/docs`は`200`、production-only CSP/bundle |
+| Remote GitHub Actions | Commit `4b51fec`のmain run `32461091448` success。Type-check、117 tests、deploy-env、audit、build、security gate green |
+| Netlify preview | Sliceを直接`main`へpushしたため新規deploy previewはなく、Netlify production contextが実行された |
+| Production frontend | Deploy `6a88056075359300089b9fa5` ready、build `6a88056075359300089b9fa3`、commit `4b51fec`、34s、plugin success、87,170 filesでsecret match 0。`/`と`/dashboard/docs`は`200`、CSP・production-only bundle green |
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |
 | DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、local real Auth-token Edge tests 8/8。Staging modern-key remote Edge 8/8、2 tenants/5 Auth users cleanup、final fixture 0/0。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |
 | Document binary/Storage acceptance | 実PDF/DOCX lifecycleはDeno 7/7。Production private-bucket/schema read-back、pgTAP最終`ok 15`、health `200`、unauth docs `401`はgreen。Authenticated synthetic acceptanceはfirst fixture前にCloudflare `403`でBLOCKED、final Auth/tenant/template/document/generated/object residueは0/0/0/0/0/0 |
-| Migration history | Canonical local fresh replay 37/37とfull database pgTAP 45/45 green（atomic quota 9/9を含む）。Staging/productionは36/36、新migrationはremote未適用。User-owned duplicate migration copyは一時除外後に未変更で復元 |
+| Migration history | Canonical local fresh replay 37/37とfull database pgTAP 45/45 green（atomic quota 9/9を含む）。Staging 37/37、production 36/36。User-owned duplicate migration copyは未変更 |
 | Local Supabase services | PostgreSQL-only stackはfresh replayとpgTAPでhealthy。Full-stack startはanalytics/vector/realtime/storage/studio health timeout。Remote staging acceptanceは非依存 |
 
 ## Capability状態
@@ -83,14 +84,14 @@
 | Telegram | Partial / operational block | `TELEGRAM_WEBHOOK_SECRET`とwebhook確認が必要 |
 | Resend inbox | Partial | Codeあり、receiving/delivery E2E未確認 |
 | AI Concierge/RAGとcost tracking | Partial | 基盤あり。Polishing request quotaはPostgreSQL atomic reservation/releaseでrace-safe、provider usageはoutput validation前に計上する。Migration rollout、citation UX、billing dashboard、unified endpoint enforcement、smoke testsが残る |
-| AI文書作成 | Production binary + hardened local AI polish preview | 15 templates、4言語、実PDF/DOCX/private Storageは稼働中。Tenant-scoped previewのscoped cache/budgets、full-lifecycle timeout、atomic quota、stale-draft protection、viewport scrolling、instruction-free logs、4-locale UXをlocal test済み。Migration/staging/production deployとreal-provider smokeが残る。Binary authenticated synthetic recheckはCloudflare block中 |
+| AI文書作成 | Production binary + staged AI polish preview / provider blocked | 15 templates、4言語、実PDF/DOCX/private Storageは稼働中。Polishing frontendはproduction、migrationと`bright-api` v11はstagingへdeploy済み。Auth/tenant/document boundariesとcleanupはgreenだが、stagingに`ANTHROPIC_API_KEY`がなくreal-provider smokeは`503 AI_UNAVAILABLE`。Production backend/migration rolloutは意図的に保留 |
 | HR Candidate Analysis | Skeleton | Scaffoldあり、production endpointは`501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme と AI Sales Bot | Planned | Phase 3 |
 
 ## 直近の順序
 
-1. Local closeout commitをGitHubへpushし、CI/Netlify preview、staging migration + Edge deploy、authenticated real-provider preview/save smokeを行う。
-2. Web flow安定後、Telegram step-by-step document generationとdeliveryを追加する。
-3. Cloudflare blockを安全に解決後、production authenticated PDF/DOCX/Storage synthetic acceptanceを再実行する。
+1. `ANTHROPIC_API_KEY`をstaging Edge secretsへ安全に設定し、authenticated real-provider preview/save smokeをgreenにする。
+2. Green staging smoke後、production migration `20260821000000` + `bright-api`をdeployしsmoke testする。
+3. Web flow安定後にTelegram generation/deliveryを追加し、Cloudflare block後にbinary authenticated acceptanceを再実行する。
 
 詳細: [PLAN.md](PLAN.md)。Canonical: [Uzbek STATUS](../STATUS.md)。

@@ -42,12 +42,12 @@
 | R-002 | リアルタイム更新 | Supabase Realtime – inbox、tasks ✅ | Inbox、Tasks |
 | R-015 | タスク割り当て通知 | リーダーが割り当てた際の担当者への通知、確認、ステータスの透明性 ✅ | Tasks |
 | R-016 | HR Candidate Analysis | Skeleton; GitHub/CV/LLM business logicとtestsが残る | HR |
-| R-017 | AI rate limiting | Partial。Polishing check/incrementはservice-role-only PostgreSQL atomic reservationでrace-safeとなりlocal pgTAP 9/9をPASS。Migration rollout、他endpointのunified policy、`Retry-After`が残る | Backend |
+| R-017 | AI rate limiting | Partial。Polishing check/incrementはservice-role-only PostgreSQL atomic reservationでrace-safe、local pgTAP 9/9 green、migrationはstagingへdeploy済み。Production rollout、他endpointのunified policy、`Retry-After`が残る | Backend |
 | R-018 | AI cost tracking | Partial; loggingあり、tenant dashboard/enforcementが残る | Backend |
 | R-019 | Vector Search (RAG) | Partial; vector/embedding基盤あり、explicit tool/citationsが残る | Docs |
 | R-020 | Admin Dashboard | Partial; core pagesあり、billing/advanced agentsが残る | Admin |
 | R-021 | AI書類メーカーbinary output | Production deployed / authenticated recheck pending。実PDF/DOCX、embedded Noto Sans JP、O(n) PDF wrap、binary-before-DB publish、private immutable Storage、provisional/final download lease、export/edit/delete CAS、DB-first compensation/delete、restrictive RLS、60s signed URLは稼働中。Production 36/36 migrations、`bright-api` v76、private-bucket/schema checks、public/protected smoke tests、pgTAP最終`ok 15`はgreen。Authenticated synthetic acceptanceはfixture前にCloudflare `403`でblock、residue 0 | Docs |
-| R-022 | AI文書作成polishing preview | Partial。Tenant-scoped endpoint、current-draft input、untrusted-data prompt、full-body timeout、atomic quota reservation、stale-draft protection、viewport scrolling、polish-only 8k budget、scoped hash cache、raw instructionなしのlog、UZ/RU/EN/JA UXをlocal test済み。Fresh replay 37/37とquota pgTAP 9/9 green。CI/preview、staging deploy、authenticated real-provider smoke、production rolloutが残る | Docs |
+| R-022 | AI文書作成polishing preview | Partial。Tenant-scoped endpoint、current-draft input、untrusted-data prompt、full-body timeout、atomic quota、stale-draft protection、viewport scrolling、scoped cache、4-locale UXはlocal/CI green。Frontendはproduction、stagingは37/37・`bright-api` v11。Stagingに`ANTHROPIC_API_KEY`がなくreal-provider smokeは`503 AI_UNAVAILABLE`。Secret設定とproduction backend rolloutが残る | Docs |
 | R-003 | 課金/支払い | サブスクリプション、プラン、支払い履歴 | 新規 |
 | R-004 | 監査ログ表示 | Admin audit logページとbackend endpoint ✅ | Settings |
 | R-005 | エクスポート/インポート | Excel、CSVエクスポート、一括インポート | Reports、Tasks |

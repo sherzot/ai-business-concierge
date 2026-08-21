@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-21 — GitHub/Netlify green and AI polishing deployed to staging
+
+- `4b51fec` was fast-forward pushed directly to `main`. GitHub Actions run `32461091448` completed fully green across type-check, 117 frontend tests, deploy-env, dependency audit, production build, and hosting security gate.
+- The main push triggered a Netlify production deploy rather than a preview: deploy `6a88056075359300089b9fa5`, build `6a88056075359300089b9fa3`, 34 seconds, plugin success, and zero secret matches across 87,170 files. `/` and `/dashboard/docs` returned `200`, CSP was present, and the bundle contained the production Supabase ref once and the staging ref zero times. Production Supabase intentionally remains at backend v76 and 36 migrations.
+- Canonical migration `20260821000000_atomic_ai_usage_reservations` was applied to staging `piqsyfwrjtormrlenjix`: history is 37/37, both RPCs exist, `service_role` has EXECUTE, and `anon`/`authenticated` are denied. `bright-api` v11 is ACTIVE; health returned `200`, while unauthenticated `/docs` and `/docs/:id/polish` returned `401 TENANT_REQUIRED`. Security advisor has no new error; the known 11 RLS/no-policy infos and `vector` warning remain.
+- The authenticated synthetic preview/save smoke passed Auth, tenant, and document boundaries but stopped at the real provider call with `503 AI_UNAVAILABLE`: staging Edge secrets do not include `ANTHROPIC_API_KEY`, while production contains that secret name. Synthetic tenant/document/membership/Auth-user residue is `0/0/0/0`; no secret value was read, copied, or logged.
+- First next action: securely set `ANTHROPIC_API_KEY` in staging and rerun the authenticated real-provider preview/save smoke to green. Only then deploy the production migration plus `bright-api`. The three user-owned untracked copies remain untouched.
+
+Files/state: GitHub `main`/CI, Netlify production deploy, staging Supabase migration/`bright-api` v11, and four-language `DEVLOG/STATUS/PLAN/REQUIREMENTS`.
+
 ## 2026-08-21 — Remaining five AI polishing review findings closed locally
 
 - The follow-up review confirmed five issues: Telegram Maslahatchi omitted the newly required `cacheScope`, so its entrypoint no longer type-checked; the Anthropic timeout was cleared after response headers and did not cover a delayed body; concurrent requests could exceed plan quota between check and increment; an AI result could overwrite edits made while polishing was in flight; and the edit modal could leave a short viewport.

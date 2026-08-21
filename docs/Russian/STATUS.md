@@ -33,6 +33,7 @@
 > 2026-08-21: Overlap landing hero TEAM/08 card и caption локально исправлен; frontend 25/25 files и 112/112 tests, type-check green. Browser acceptance 2048×1080: gap 12.73px, overlap/overflow/console errors 0.
 > 2026-08-21: Локально закрыты 3 P2 и 1 P3 findings AI polishing: chat/polish token budgets разделены, unusable outputs учитываются в usage/cost, raw instructions удалены из logs, four-locale error envelope стандартизирован. Backend 14/14, frontend 26/26 files и 115/115 tests green.
 > 2026-08-21: Локально закрыты оставшиеся 5 findings AI polishing: восстановлен Telegram cache scope, provider timeout покрывает полный body lifecycle, polishing quota atomically резервируется в PostgreSQL, stale AI output не перезаписывает user draft, modal scroll остаётся внутри короткого viewport. Backend 18/18, Telegram check, frontend 26/26 files и 117/117 tests, type-check/build, canonical fresh migration replay 37/37 и local database pgTAP 45/45 green.
+> 2026-08-21: `4b51fec` pushed в main; CI `32461091448` и Netlify production deploy `6a88056075359300089b9fa5` green. Staging переведён на 37/37 migrations и `bright-api` v11; authenticated smoke заблокирован `503 AI_UNAVAILABLE`, потому что в staging нет `ANTHROPIC_API_KEY`, residue fixture 0/0/0/0.
 
 ## Текущая фаза
 
@@ -47,12 +48,12 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | Live GitHub `main` остаётся на `5e33f094`; reviewed slice включён в этот local closeout commit и ещё не pushed, поэтому local branch на 1 commit впереди remote |
+| Git | Live GitHub `main` и local `main` синхронизированы этим closeout; остаются только три user-owned untracked copies |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
 | Backend | Production Supabase Edge Function `bright-api` v76, `ACTIVE`, `verify_jwt=false`; SHA совпадает со staging v10 |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 36/36 migrations, `bright-api` v10 ACTIVE, health `200`, unauth docs `401` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 37/37 migrations, `bright-api` v11 ACTIVE, health `200`, unauth docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge использует modern overrides `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY`; legacy anon/service-role API keys disabled |
 | Type-check | Успешно в clean temporary frontend install |
 | Unit tests | Frontend 26/26 files, 117/117 tests; AI polish/router/usage Deno 18/18; прежний document binary/lifecycle Deno 7/7 |
@@ -64,13 +65,13 @@
 | Delivery platform | Только Netlify. В repository нет Vercel config/dependency; внешний Vercel project сохранён, `gitRepositoryConnected=false` подтверждён |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs отсутствуют; на Personal только browser-public `VITE_*` используют `All` scope |
 | Staging security advisor | Errors `0`; известный `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | Final run PR #11 `31545572719` success; main run `31545917894` для merge commit `8f179da` success |
-| Netlify preview | Frontend artifact `6a7b2e774d8b4a00084583b0` ready; backend-only incremental deploy `6a7b9cd2d9412e000833a5c8` canceled/PASS |
-| Production frontend | Deploy `6a7bad961b16200007cfd88e` ready, build `6a7bad961b16200007cfd88c`, commit `8f179da`, 32s, plugin success, 0 secret matches в 87,166 files; `/` и `/dashboard/docs` `200`, production-only CSP/bundle |
+| Remote GitHub Actions | Main run `32461091448` для commit `4b51fec` success: type-check, 117 tests, deploy-env, audit, build и security gate green |
+| Netlify preview | Новый deploy preview не создан, потому что slice pushed напрямую в `main`; Netlify использовал production context |
+| Production frontend | Deploy `6a88056075359300089b9fa5` ready, build `6a88056075359300089b9fa3`, commit `4b51fec`, 34s, plugin success, 0 secret matches в 87,170 files; `/` и `/dashboard/docs` `200`, CSP и production-only bundle green |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup двух tenants/пяти Auth users и final fixture 0/0; Realtime tables SELECT-only и требуют active membership/tenant |
 | Document binary/Storage acceptance | Real PDF/DOCX lifecycle Deno 7/7. Production private-bucket/schema read-back, последний pgTAP `ok 15`, health `200` и unauth docs `401` green; authenticated synthetic acceptance BLOCKED Cloudflare `403` до первого fixture, final Auth/tenant/template/document/generated/object residue 0/0/0/0/0/0 |
-| Migration history | Canonical local fresh replay 37/37 и full database pgTAP 45/45 green, включая atomic quota 9/9; staging/production остаются 36/36, новая migration remote не применялась. User-owned duplicate migration copy временно исключалась и возвращена без изменений |
+| Migration history | Canonical local fresh replay 37/37 и full database pgTAP 45/45 green, включая atomic quota 9/9; staging 37/37, production 36/36. User-owned duplicate migration copy не изменена |
 | Local Supabase services | PostgreSQL-only stack healthy для fresh replay и pgTAP. Full-stack start завершился health timeout для analytics/vector/realtime/storage/studio; remote staging acceptance от него не зависел |
 
 ## Состояние возможностей
@@ -83,14 +84,14 @@
 | Telegram | Partial / operational block | Проверить `TELEGRAM_WEBHOOK_SECRET` и webhook |
 | Resend inbox | Partial | Код есть; receiving/delivery E2E не подтверждён |
 | AI Concierge/RAG и cost tracking | Partial | Основа есть; polishing request quota race-safe через PostgreSQL atomic reservation/release, provider usage учитывается до output validation. Остаются rollout migration, citation UX, billing dashboard, unified endpoint enforcement и smoke tests |
-| AI Документолог | Production binary + hardened local AI polish preview | 15 templates, 4 языка и real PDF/DOCX/private Storage работают. Для tenant-scoped preview локально протестированы scoped cache/budgets, full-lifecycle timeout, atomic quota, stale-draft protection, viewport scrolling, logs без instruction и four-locale UX; migration/staging/production deploy и real-provider smoke остаются. Binary authenticated synthetic recheck заблокирован Cloudflare |
+| AI Документолог | Production binary + staged AI polish preview / provider blocked | 15 templates, 4 языка и real PDF/DOCX/private Storage работают. Polishing frontend в production, migration и `bright-api` v11 в staging; Auth/tenant/document boundaries и cleanup green, но real-provider smoke возвращает `503 AI_UNAVAILABLE`, потому что в staging нет `ANTHROPIC_API_KEY`. Production backend/migration rollout намеренно ожидает |
 | HR Candidate Analysis | Skeleton | Scaffold есть; production endpoint возвращает `501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme и AI Sales Bot | Planned | Phase 3 |
 
 ## Ближайший порядок
 
-1. Push local closeout commit в GitHub, пройти CI/Netlify preview, deploy staging migration + Edge и выполнить authenticated real-provider preview/save smoke.
-2. После стабилизации web flow добавить Telegram step-by-step document generation и delivery.
-3. После безопасного решения Cloudflare block повторить production authenticated PDF/DOCX/Storage synthetic acceptance.
+1. Безопасно установить `ANTHROPIC_API_KEY` в staging Edge secrets и повторить authenticated real-provider preview/save smoke до green.
+2. После green staging smoke deploy production migration `20260821000000` + `bright-api` и выполнить smoke tests.
+3. После стабилизации web flow добавить Telegram generation/delivery; после Cloudflare block повторить binary authenticated acceptance.
 
 Подробности: [PLAN.md](PLAN.md). Основной источник: [узбекский STATUS](../STATUS.md).

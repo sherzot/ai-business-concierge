@@ -34,6 +34,7 @@
 > 2026-08-21: Landing hero TEAM/08 kartasi va pastki caption overlapi lokalda tuzatildi; frontend 25/25 fayl va 112/112 test, type-check green, 2048×1080 browser acceptance'da 12.73px gap, overlap/overflow/console error 0.
 > 2026-08-21: AI polishing reviewining 3 ta P2 va 1 ta P3 topilmasi lokalda yopildi: chat/polish token budjetlari ajratildi, yaroqsiz output usage/costi hisoblanadi, raw instruction logdan olib tashlandi va to'rt tilli xato envelope'i standartlashtirildi. Backend 14/14, frontend 26/26 fayl va 115/115 test green.
 > 2026-08-21: AI polishing reviewining qolgan 5 topilmasi lokalda yopildi: Telegram cache scope tiklandi, provider timeouti to'liq body lifecycle'ni qamradi, polish quota PostgreSQLda atomik rezervatsiya qilinadi, stale AI natijasi user draftini bosmaydi va modal qisqa viewportda scroll qiladi. Backend 18/18, Telegram check, frontend 26/26 fayl va 117/117 test, type-check/build, canonical fresh migration replay 37/37 va local database pgTAP 45/45 green.
+> 2026-08-21: `4b51fec` main'ga push qilindi, CI `32461091448` va Netlify production deploy `6a88056075359300089b9fa5` green. Staging 37/37 migration va `bright-api` v11ga o'tdi; authenticated smoke `ANTHROPIC_API_KEY` stagingda yo'qligi sabab `503 AI_UNAVAILABLE`da bloklandi, fixture qoldig'i 0/0/0/0.
 
 ## Hozir qayerdamiz
 
@@ -48,12 +49,12 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | Live GitHub `main` `5e33f094`da qolmoqda; review qilingan slice ushbu closeout commitida lokal `main`ga kiritildi, push qilinmagan, shu sabab lokal branch remote'dan 1 commit oldinda |
+| Git | Live GitHub `main` va lokal `main` ushbu closeout bilan sinxron; faqat uchta user-owned untracked nusxa qolgan |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Production Supabase Edge Function `bright-api` v76, `ACTIVE`, `verify_jwt=false`; SHA staging v10 bilan teng |
 | Health smoke-test | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 36/36 migration, `bright-api` v10 ACTIVE, health `200`, authsiz docs `401` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 37/37 migration, `bright-api` v11 ACTIVE, health `200`, authsiz docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` modern key override'larida; legacy anon/service-role API keylari disabled |
 | Type-check | Clean temp frontend installida muvaffaqiyatli |
 | Unit test | Frontend 26/26 fayl, 117/117 test; AI polish/router/usage Deno 18/18; oldingi document binary/lifecycle Deno 7/7 |
@@ -66,13 +67,13 @@
 | Delivery platform | Faol platforma faqat Netlify. Repo ichida Vercel config/dependency yo'q; external Vercel project saqlangan, `gitRepositoryConnected=false` tasdiqlandi |
 | Environment isolation | Netlify CLI authoritative read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envlari yo'q; Personal rejada faqat browser-public `VITE_*` qiymatlar `All` scope'da |
 | Staging security advisor | Error `0`; ma'lum `vector` public-schema warningi `1`; server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | PR #11 final run `31545572719` success; merge commit `8f179da` uchun main run `31545917894` success |
-| Netlify preview | Frontend artifact `6a7b2e774d8b4a00084583b0` ready; backend-only `7837778` incremental deployi `6a7b9cd2d9412e000833a5c8` canceled/PASS |
-| Production frontend | Deploy `6a7bad961b16200007cfd88e` ready, build `6a7bad961b16200007cfd88c`, commit `8f179da`, 32s, plugin success, secret match 0/87,166; `/` va `/dashboard/docs` `200`, production-only CSP/bundle |
+| Remote GitHub Actions | Commit `4b51fec` uchun main run `32461091448` success: type-check, 117 test, deploy-env, audit, build va security gate green |
+| Netlify preview | Bu slice bevosita `main`ga push qilingani uchun yangi deploy-preview yaratilmagan; Netlify production context ishlagan |
+| Production frontend | Deploy `6a88056075359300089b9fa5` ready, build `6a88056075359300089b9fa3`, commit `4b51fec`, 34s, plugin success, secret match 0/87,170; `/` va `/dashboard/docs` `200`, CSP va production-only bundle green |
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |
 | DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; local real Auth tokenli Edge `8/8`; staging modern-key remote Edge `8/8`, cleanup 2 tenant/5 Auth user va yakuniy fixture `0/0`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |
 | Document binary/Storage acceptance | Real PDF/DOCX lifecycle Deno 7/7. Production private bucket/schema read-back, pgTAP oxirgi `ok 15`, health `200` va authsiz docs `401` green; authenticated synthetic acceptance Cloudflare `403` sabab birinchi fixturedan oldin BLOCKED, yakuniy Auth/tenant/template/document/generated/object qoldig'i 0/0/0/0/0/0 |
-| Migration history | Canonical local fresh replay 37/37 va full database pgTAP 45/45 green, shu jumladan atomik quota 9/9; staging/production 36/36, yangi migration remote muhitlarga hali qo'llanmagan. User-owned duplicate migration nusxasi replaydan vaqtincha chiqarilib aynan joyiga qaytarildi |
+| Migration history | Canonical local fresh replay 37/37 va full database pgTAP 45/45 green, shu jumladan atomik quota 9/9; staging 37/37, production 36/36. User-owned duplicate migration nusxasi o'zgarmagan |
 | Local Supabase services | PostgreSQL-only stack fresh replay va pgTAP uchun healthy. Full stack startda analytics/vector/realtime/storage/studio health timeout berdi; remote staging acceptance bunga bog'lanmadi |
 
 ## Mahsulot va integratsiyalar holati
@@ -88,7 +89,7 @@
 | Resend email inbox | **Partial** | Webhook va mapping kodi mavjud; real receiving/delivery smoke-test tasdiqlanmagan |
 | AI Concierge / RAG | **Partial** | Claude router, OpenAI embedding va RAG fundamenti bor; explicit document search/citation va to'liq smoke-test qarzi bor |
 | AI usage/cost tracking | **Partial** | Log wiring va DB tracking bor; polishing request quota'si PostgreSQL atomik reservation/release bilan race-safe qilingan, provider usage output validatsiyasidan oldin hisoblanadi. Migration rollout, tenant billing dashboard va barcha endpointlar uchun yagona enforcement hali qolgan |
-| AI Hujjatchi | **Production binary + hardened local AI polish preview** | 15 shablon, 4 til, real PDF/DOCX/private Storage productionda. Tenant-scoped polishing previewda scoped cache/budget, full-lifecycle timeout, atomic quota, stale-draft himoyasi, viewport scroll va raw-instructionsiz 4-locale UX lokal testlangan; migration/staging/production deploy va real-provider smoke kutilmoqda. Binary authenticated synthetic recheck Cloudflare bilan bloklangan |
+| AI Hujjatchi | **Production binary + staged AI polish preview / provider blocked** | 15 shablon, 4 til va real PDF/DOCX/private Storage productionda. Polishing frontend productionga, migration va `bright-api` v11 stagingga chiqdi; Auth/tenant/document va cleanup green, ammo stagingda `ANTHROPIC_API_KEY` yo'qligi sabab real-provider smoke `503 AI_UNAVAILABLE`. Production backend/migration rollout ataylab kutilmoqda |
 | HR Candidate Analysis | **Skeleton** | Backend/frontend scaffold bor; production endpoint `501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme | **Planned** | Phase 3 |
 | AI Sotuvchi | **Planned** | Phase 3 |
@@ -104,9 +105,9 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. Lokal closeout commitini GitHubga push qilish, CI/Netlify previewdan o'tkazish, staging migration + Edge deploy va authenticated real-provider smoke-testni bajarish.
-2. Web oqimi barqarorlashgach Telegram step-by-step hujjat yaratish va document yuborishni ulash.
-3. Cloudflare blokini xavfsiz yo'l bilan yechgach production authenticated PDF/DOCX/Storage synthetic acceptance'ni qayta o'tkazish.
+1. `ANTHROPIC_API_KEY`ni staging Edge secrets'ga xavfsiz o'rnatish va authenticated real-provider preview/save smoke-testni qayta green qilish.
+2. Green staging smoke'dan keyin production `20260821000000` migration + `bright-api` rollout va smoke-testni bajarish.
+3. Web oqimi barqarorlashgach Telegram step-by-step hujjat yaratish va document yuborishni ulash; Cloudflare blokidan keyin binary authenticated acceptance'ni qayta o'tkazish.
 
 Batafsil tartib: [PLAN.md](PLAN.md).
 

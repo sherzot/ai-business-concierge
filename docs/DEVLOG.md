@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-21 — GitHub/Netlify green, AI polishing stagingga chiqarildi
+
+- `4b51fec` bevosita `main`ga fast-forward push qilindi. GitHub Actions run `32461091448` type-check, 117 frontend test, deploy-env, dependency audit, production build va hosting security gate bilan to'liq green yakunlandi.
+- Main push Netlify preview emas, production deployni ishga tushirdi: deploy `6a88056075359300089b9fa5`, build `6a88056075359300089b9fa3`, 34 soniya, plugin success va 87,170 faylda secret match `0`. `/` hamda `/dashboard/docs` `200`, CSP mavjud, bundle production Supabase refini 1 marta va staging refini 0 marta saqlaydi. Production Supabase backend ataylab v76/36 migration holatida qoldi.
+- Staging `piqsyfwrjtormrlenjix`ga canonical `20260821000000_atomic_ai_usage_reservations` migrationi qo'llandi: history 37/37, ikkala RPC mavjud, `service_role` EXECUTE oladi, `anon`/`authenticated` rad etiladi. `bright-api` v11 ACTIVE; health `200`, authsiz `/docs` va `/docs/:id/polish` `401 TENANT_REQUIRED`. Security advisor yangi error bermadi; oldingi 11 RLS/no-policy info va `vector` warningi saqlanadi.
+- Authenticated synthetic preview/save smoke Auth, tenant va document chegaralaridan o'tdi, ammo real provider chaqiruvi `503 AI_UNAVAILABLE`da to'xtadi: staging Edge secrets ro'yxatida `ANTHROPIC_API_KEY` yo'q, productionda esa nomi mavjud. Synthetic tenant/document/membership/Auth user qoldig'i `0/0/0/0`; secret qiymati o'qilmadi, ko'chirilmadi yoki loglanmadi.
+- Keyingi birinchi qadam: `ANTHROPIC_API_KEY`ni stagingga xavfsiz o'rnatish va authenticated real-provider preview/save smoke'ni qayta green qilish. Faqat shundan keyin production migration + `bright-api` rollout qilinadi. Uchta user-owned untracked nusxaga tegilmadi.
+
+Fayllar/state: GitHub `main`/CI, Netlify production deploy, staging Supabase migration/`bright-api` v11 va 4-tilli `DEVLOG/STATUS/PLAN/REQUIREMENTS`.
+
 ## 2026-08-21 — AI polishing reviewining qolgan besh topilmasi lokalda yopildi
 
 - Oldingi reviewda beshta muammo tasdiqlangan edi: Telegram Maslahatchi yangi majburiy `cacheScope`ni bermagani sabab entrypoint type-checkdan o'tmasdi; Anthropic timeouti response headeridan keyin bekor qilinib kechikkan bodyni qamramasdi; plan quota check va increment orasida parallel so'rovlar limitdan oshishi mumkin edi; polishing paytida yozilgan foydalanuvchi tahriri kech kelgan AI natijasi bilan bosilardi; edit modal qisqa viewportda ekrandan chiqardi.

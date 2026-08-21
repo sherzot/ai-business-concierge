@@ -45,7 +45,8 @@
 
 ## P1 — complete Phase 2 AI Document Assistant
 
-- [ ] Push the local AI polishing preview closeout commit to GitHub, pass CI and Netlify preview, deploy the staging migration plus `bright-api`, and run an authenticated real-provider preview/save smoke test.
+- [ ] Securely set `ANTHROPIC_API_KEY` in staging Edge secrets and make the authenticated real-provider preview/save smoke green.
+- [ ] After green staging smoke, deploy production migration `20260821000000` plus `bright-api` and run public/protected smoke tests.
 - [ ] After the web flow is stable, add Telegram step-by-step generation and file delivery.
 - [ ] After safely resolving the Cloudflare Auth Admin `403`, rerun production authenticated PDF/DOCX signed-download, cross-tenant deny, direct Storage deny, and delete-cleanup synthetic acceptance.
 

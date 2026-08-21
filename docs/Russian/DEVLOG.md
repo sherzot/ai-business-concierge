@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-21 — GitHub/Netlify green, AI polishing развёрнут в staging
+
+- `4b51fec` fast-forward pushed напрямую в `main`. GitHub Actions run `32461091448` полностью green: type-check, 117 frontend tests, deploy-env, dependency audit, production build и hosting security gate.
+- Main push запустил Netlify production deploy, а не preview: deploy `6a88056075359300089b9fa5`, build `6a88056075359300089b9fa3`, 34 секунды, plugin success, secret matches 0 в 87,170 файлах. `/` и `/dashboard/docs` вернули `200`, CSP присутствует, bundle содержит production Supabase ref 1 раз и staging ref 0 раз. Production Supabase намеренно оставлен на backend v76 и 36 migrations.
+- Canonical migration `20260821000000_atomic_ai_usage_reservations` применена к staging `piqsyfwrjtormrlenjix`: history 37/37, обе RPC существуют, `service_role` имеет EXECUTE, `anon`/`authenticated` запрещены. `bright-api` v11 ACTIVE; health `200`, unauthenticated `/docs` и `/docs/:id/polish` — `401 TENANT_REQUIRED`. Security advisor не дал новых errors; остались известные 11 RLS/no-policy info и warning `vector`.
+- Authenticated synthetic preview/save smoke прошёл Auth, tenant и document boundaries, но real provider call остановился на `503 AI_UNAVAILABLE`: в staging Edge secrets нет `ANTHROPIC_API_KEY`, тогда как в production такое имя есть. Residue synthetic tenant/document/membership/Auth user — `0/0/0/0`; значение secret не читалось, не копировалось и не логировалось.
+- Первый следующий шаг: безопасно установить `ANTHROPIC_API_KEY` в staging и повторить authenticated real-provider preview/save smoke до green. Только затем deploy production migration + `bright-api`. Три user-owned untracked copies не затронуты.
+
+Files/state: GitHub `main`/CI, Netlify production deploy, staging Supabase migration/`bright-api` v11 и четыре языка `DEVLOG/STATUS/PLAN/REQUIREMENTS`.
+
 ## 2026-08-21 — Локально закрыты оставшиеся пять findings review AI polishing
 
 - Follow-up review подтвердил пять проблем: Telegram Maslahatchi не передавал обязательный `cacheScope`, поэтому entrypoint перестал проходить type-check; Anthropic timeout очищался после headers и не покрывал задержанный body; параллельные requests могли превысить plan quota между check и increment; поздний AI result мог перезаписать user edits, сделанные во время polishing; edit modal выходил за границы короткого viewport.

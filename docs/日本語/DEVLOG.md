@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-21 — GitHub/Netlify green、AI polishingをstagingへdeploy
+
+- `4b51fec`を`main`へfast-forward pushした。GitHub Actions run `32461091448`はtype-check、frontend 117 tests、deploy-env、dependency audit、production build、hosting security gateをすべてgreenで完了した。
+- Main pushはpreviewではなくNetlify production deployを起動した。Deploy `6a88056075359300089b9fa5`、build `6a88056075359300089b9fa3`、34秒、plugin success、87,170 filesでsecret match 0。`/`と`/dashboard/docs`は`200`、CSPあり、bundle内production Supabase refは1、staging refは0。Production Supabaseは意図的にbackend v76・36 migrationsのままにした。
+- Canonical migration `20260821000000_atomic_ai_usage_reservations`をstaging `piqsyfwrjtormrlenjix`へ適用した。History 37/37、両RPCが存在し、`service_role`のみEXECUTE可、`anon`/`authenticated`は拒否。`bright-api` v11 ACTIVE、health `200`、unauthenticated `/docs`と`/docs/:id/polish`は`401 TENANT_REQUIRED`。Security advisorに新規errorはなく、既知の11件のRLS/no-policy infoと`vector` warningのみ残る。
+- Authenticated synthetic preview/save smokeはAuth、tenant、document boundaryを通過したが、real provider callで`503 AI_UNAVAILABLE`となった。Staging Edge secretsに`ANTHROPIC_API_KEY`がなく、productionには同名secretが存在する。Synthetic tenant/document/membership/Auth user residueは`0/0/0/0`。Secret値は読み取り、コピー、log出力していない。
+- 最初のnext actionは`ANTHROPIC_API_KEY`をstagingへ安全に設定し、authenticated real-provider preview/save smokeをgreenにすること。その後にのみproduction migration + `bright-api`をdeployする。3件のuser-owned untracked copiesは未変更。
+
+Files/state: GitHub `main`/CI、Netlify production deploy、staging Supabase migration/`bright-api` v11、4言語`DEVLOG/STATUS/PLAN/REQUIREMENTS`。
+
 ## 2026-08-21 — AI polishing reviewの残り5件をlocalで解消
 
 - Follow-up reviewで5件を確認した。Telegram Maslahatchiが必須`cacheScope`を渡さずentrypoint type-checkが失敗すること、Anthropic timeoutがresponse headers後に解除され遅延bodyを対象にしないこと、checkとincrementの間でconcurrent requestsがplan quotaを超え得ること、polishing中のuser editを遅いAI resultが上書きすること、短いviewportでedit modalが画面外へ出ること。

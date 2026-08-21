@@ -45,7 +45,8 @@
 
 ## P1 — завершить Phase 2 AI Документолог
 
-- [ ] Push local AI polishing preview closeout commit в GitHub, пройти CI и Netlify preview, deploy staging migration + `bright-api` и authenticated real-provider preview/save smoke-test.
+- [ ] Безопасно установить `ANTHROPIC_API_KEY` в staging Edge secrets и сделать authenticated real-provider preview/save smoke green.
+- [ ] После green staging smoke deploy production migration `20260821000000` + `bright-api` и выполнить public/protected smoke tests.
 - [ ] После стабильного web flow подключить Telegram wizard и отправку файла.
 - [ ] После безопасного решения Cloudflare Auth Admin `403` повторить production authenticated PDF/DOCX signed-download, cross-tenant deny, direct Storage deny и delete-cleanup synthetic acceptance.
 
