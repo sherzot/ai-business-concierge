@@ -10,6 +10,7 @@
 - Public REST adapter проверяет exact profile, параллельно получает profile и первую страницу repos, ограничивает pagination 3×100, каждый request — 3 секунды, весь analysis — 5.5 секунды, response — 2 MiB. Top-6 repository trees проверяются параллельно; агрегируются README/test/CI, languages/stars/activity proxy и quality. Неполные provider data остаются `partial`. Case-insensitive process cache на 10 минут/250 entries объединяет stampede и возвращает defensive copies; он не является authorization или source of truth.
 - Deno format/check и 10/10 deterministic tests PASS, включая отклонение unsafe provider URL. Live public smoke `octocat` вернул `complete`, восемь public repos, шесть sampled repos и два языка. Route, CV parser, scoring/report, auth/rate-limit и production `501` намеренно не изменены. CI теперь запускает эти 10 HR tests вместе с 4 Telegram tests.
 - Read-back Supabase organization — `free`; текущая документация Supabase ограничивает Leaked Password Protection планом Pro+. Production/staging Auth config не менялся; PLAN фиксирует paid-upgrade blocker.
+- `8496aae` pushed в `main`; GitHub CI `32487503062` завершился green за 58 секунд: Deno 14/14, frontend 26/26 files и 117/117 tests, deploy-env 14/14, audit 0 high/critical, build из 3,701 modules и security gate для 10 файлов PASS.
 
 Files: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/github-analyzer{,.test}.ts`, `frontend/src/features/hr/candidates/README.md`, четыре языка `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`.
 

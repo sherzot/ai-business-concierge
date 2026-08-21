@@ -37,7 +37,7 @@
 > 2026-08-21: `4b51fec` main'ga push qilindi, CI `32461091448` va Netlify production deploy `6a88056075359300089b9fa5` green. Staging 37/37 migration va `bright-api` v11ga o'tdi; authenticated smoke `ANTHROPIC_API_KEY` stagingda yo'qligi sabab `503 AI_UNAVAILABLE`da bloklandi, fixture qoldig'i 0/0/0/0.
 > 2026-08-21: Production authenticated binary acceptance green: DOCX/PDF signed download, direct Storage deny `400`, cross-tenant deny `404`, delete `200`; authoritative document/generated/object qoldig'i 0/0/0 va final fixture 0/0/0/0/0. Smart CDN cached URL delete'dan keyin 60 soniyagacha `200` berishi mumkin.
 > 2026-08-21: Telegram webhook v14 secret yo'qligida invalid POSTni `200` bilan qabul qildi. Pure guard + 4/4 testdan keyin production v15: health `200`, invalid POST fail-closed `503`, PUT `405`. `67ac675` main va CI `32485618740` green; secret set + Telegram `setWebhook` qolgan.
-> 2026-08-21: HR Candidate public GitHub analyzer real adapterga o'tdi: bounded REST/pagination/response, timeout, repo-tree aggregation va 10 daqiqalik cache; Deno 10/10 va real `octocat` smoke complete. Route hanuz `501`. Supabase organization Free bo'lgani uchun Pro+ Leaked Password Protection BLOCKED.
+> 2026-08-21: HR Candidate public GitHub analyzer real adapterga o'tdi: bounded REST/pagination/response, timeout, repo-tree aggregation va 10 daqiqalik cache; Deno 10/10 va real `octocat` smoke complete. `8496aae` main va CI `32487503062` green. Route hanuz `501`; Supabase Free sabab Pro+ Leaked Password Protection BLOCKED.
 
 ## Hozir qayerdamiz
 
@@ -70,7 +70,7 @@
 | Delivery platform | Faol platforma faqat Netlify. Repo ichida Vercel config/dependency yo'q; external Vercel project saqlangan, `gitRepositoryConnected=false` tasdiqlandi |
 | Environment isolation | Netlify CLI authoritative read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envlari yo'q; Personal rejada faqat browser-public `VITE_*` qiymatlar `All` scope'da |
 | Staging security advisor | Error `0`; ma'lum `vector` public-schema warningi `1`; server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | Commit `a2b4419` uchun main run `32484224203` 49 soniyada success: type-check, 117 test, deploy-env, audit, build va security gate green |
+| Remote GitHub Actions | Commit `8496aae` uchun main run `32487503062` 58 soniyada success: Deno 14/14, frontend 117/117, deploy-env 14/14, audit/build/security green |
 | Netlify preview | Bu slice bevosita `main`ga push qilingani uchun yangi deploy-preview yaratilmagan; Netlify production context ishlagan |
 | Production frontend | Deploy `6a88056075359300089b9fa5` ready, build `6a88056075359300089b9fa3`, commit `4b51fec`, 34s, plugin success, secret match 0/87,170; `/` va `/dashboard/docs` `200`, CSP va production-only bundle green |
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |

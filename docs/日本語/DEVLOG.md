@@ -10,6 +10,7 @@
 - Public REST adapterはexact profileを検証し、profileとrepo first pageを並列取得、paginationを3×100へ制限し、各requestを3秒、全analysisを5.5秒、responseを2 MiBへboundする。Top-6 repository treesを並列検査しREADME/test/CI、languages/stars/activity proxy、qualityをaggregateする。不完全なprovider dataは`partial`。Case-insensitive 10-minute/250-entry process cacheはstampedeをcoalesceしdefensive copyを返す。Authorizationでもsource of truthでもない。
 - Deno format/check、10/10 deterministic tests PASS。Unsafe provider URL rejectionも含む。Live public `octocat` smokeは`complete`、8 public repos、6 sampled repos、2 languagesを返した。Route、CV parser、scoring/report、auth/rate-limit、production `501`は意図的に未変更。CIはTelegram 4 testsに加えてHR 10 testsを実行する。
 - Supabase organization read-backは`free`。現行Supabase docsではLeaked Password ProtectionはPro+限定。Production/staging Auth configは未変更で、PLANへpaid-upgrade blockerを記録した。
+- `8496aae`を`main`へpush。GitHub CI `32487503062`は58秒でgreen。Deno 14/14、frontend 26/26 files・117/117 tests、deploy-env 14/14、audit 0 high/critical、3,701-module build、10-file security gateがPASS。
 
 Files: `.github/workflows/ci.yml`、`supabase/functions/server/services/hr-candidate/github-analyzer{,.test}.ts`、`frontend/src/features/hr/candidates/README.md`、4言語`DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`。
 
