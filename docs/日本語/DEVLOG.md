@@ -10,6 +10,7 @@
 - Parserは5 MiB、MIME、file magicを検証し、PDFを`pdfjs-dist`で50 pages/64,000 raw chars以内、DOCXを`mammoth`でlocal extractionする。DOCX preflightはZIP64、encryption、path traversal、2,048超entries、16 MiB single entry、32 MiB total expansion、250× compression ratioをfail-closedで拒否する。Filenameはcontrol charsを除いたbasenameへsanitizationし、raw CV textは保存・log出力しない。
 - EN/UZ/RU/JA date rangesとsection headings、overlapを二重計上しないexperience years、bounded tech-skill/language hintsをdeterministic extractionする。Prompt-injection sanitationは維持。Haiku role/education structuringは意図的に呼ばず、結果は`partial / SEMANTIC_STRUCTURING_PENDING`。Scanned/image-only PDFはfailedとなる。
 - Deno `v2.1.14`でreal `pdf-lib` PDFと`docx` DOCX fixturesを使う新規8/8 tests、format/check、combined targeted backend 22/22がPASS。Invalid magic、oversize、51-page PDF、scanned PDF、DOCX expansion bomb、localized dates/sectionsをcoverする。PDF pathはnative canvas dependencyなしのstandards polyfillsを使う。Routeとproduction `501`は未変更、deploy/remote smokeは未実施。
+- `2526d72`を`main`へpush。GitHub CI `32489478394`は59秒でgreen。Deno 22/22、frontend 26/26 files・117/117 tests、deploy-env 14/14、audit 0 high/critical、3,701-module build、10-file security gateがPASS。Frontend/runtime route未変更のためNetlifyは意図的にskipした。
 
 Files: `.github/workflows/ci.yml`、`supabase/functions/server/services/hr-candidate/cv-parser{,.test}.ts`、`frontend/src/features/hr/candidates/README.md`、4言語`DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`。
 
