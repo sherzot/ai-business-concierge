@@ -35,7 +35,7 @@
 > 2026-08-21: The remaining five AI polishing review findings were closed locally: Telegram cache scope was restored, provider timeout now covers the complete body lifecycle, polishing quota is atomically reserved in PostgreSQL, stale AI output cannot overwrite the user draft, and the modal scrolls within short viewports. Backend 18/18, Telegram check, frontend 26/26 files and 117/117 tests, type-check/build, canonical fresh migration replay 37/37, and local database pgTAP 45/45 are green.
 > 2026-08-21: `4b51fec` was pushed to main; CI `32461091448` and Netlify production deploy `6a88056075359300089b9fa5` are green. Staging moved to 37/37 migrations and `bright-api` v11; authenticated smoke is blocked at `503 AI_UNAVAILABLE` because staging lacks `ANTHROPIC_API_KEY`, with fixture residue 0/0/0/0.
 > 2026-08-21: Production authenticated binary acceptance is green: DOCX/PDF signed downloads, direct Storage deny `400`, cross-tenant deny `404`, delete `200`; authoritative document/generated/object residue is 0/0/0 and final fixture residue is 0/0/0/0/0. A Smart CDN cached URL may remain `200` for up to 60 seconds after deletion.
-> 2026-08-21: Telegram webhook v14 accepted invalid POST with `200` when the secret was absent. After a pure guard and 4/4 tests, production v15 has health `200`, invalid POST fail-closed `503`, PUT `405`. Secret setup plus Telegram `setWebhook` remain.
+> 2026-08-21: Telegram webhook v14 accepted invalid POST with `200` when the secret was absent. After a pure guard and 4/4 tests, production v15 has health `200`, invalid POST fail-closed `503`, PUT `405`. `67ac675` is on main and CI `32485618740` is green; secret setup plus Telegram `setWebhook` remain.
 
 ## Current phase
 

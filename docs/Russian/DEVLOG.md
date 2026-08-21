@@ -9,6 +9,7 @@
 - В production был `TELEGRAM_BOT_TOKEN`, отсутствовал `TELEGRAM_WEBHOOK_SECRET`, `telegram-bot` v14 был ACTIVE; в staging нет Telegram secrets/function. GET health вернул `200`, но invalid-secret `{}` POST вернул `200` вместо ожидаемого `503`.
 - Deployed v14 использовал `if (SECRET && secretHeader !== SECRET)`, обходя validation без secret. Fail-closed decision вынесен в pure helper: missing/empty config `503`, missing/wrong header `401`, exact-secret allow. GitHub CI теперь запускает эти четыре regression tests, format gate для трёх файлов и entrypoint check с pinned Deno `v2.1.14`; локально YAML parse, tests 4/4, format 3/3, entrypoint check и diff-check PASS. Значения secret/token не читались и не логировались.
 - Только `telegram-bot` deployed в production: v15 ACTIVE, health `200`, invalid POST `503 Service Unavailable`, PUT `405`. Bot намеренно fail-closed; остаются новый secret, Telegram `setWebhook` с тем же значением и bot smoke.
+- `67ac675` отправлен в `main`. GitHub CI run `32485618740` завершился green за 1m5s: Telegram 4/4, frontend 26/26 files и 117/117 tests, deploy-env 14/14, audit 0 high/critical, build из 3,701 modules и security gate для 10 файлов PASS. Commit отправлен с Netlify skip marker, поскольку frontend не менялся.
 
 Files/state: `.github/workflows/ci.yml`, `supabase/functions/telegram-bot/{index.ts,webhook-security.ts,webhook-security.test.ts}`, production `telegram-bot` v15, четыре языка `DEVLOG/STATUS/PLAN/CONNECTIONS`.
 

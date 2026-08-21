@@ -36,7 +36,7 @@
 > 2026-08-21: AI polishing reviewining qolgan 5 topilmasi lokalda yopildi: Telegram cache scope tiklandi, provider timeouti to'liq body lifecycle'ni qamradi, polish quota PostgreSQLda atomik rezervatsiya qilinadi, stale AI natijasi user draftini bosmaydi va modal qisqa viewportda scroll qiladi. Backend 18/18, Telegram check, frontend 26/26 fayl va 117/117 test, type-check/build, canonical fresh migration replay 37/37 va local database pgTAP 45/45 green.
 > 2026-08-21: `4b51fec` main'ga push qilindi, CI `32461091448` va Netlify production deploy `6a88056075359300089b9fa5` green. Staging 37/37 migration va `bright-api` v11ga o'tdi; authenticated smoke `ANTHROPIC_API_KEY` stagingda yo'qligi sabab `503 AI_UNAVAILABLE`da bloklandi, fixture qoldig'i 0/0/0/0.
 > 2026-08-21: Production authenticated binary acceptance green: DOCX/PDF signed download, direct Storage deny `400`, cross-tenant deny `404`, delete `200`; authoritative document/generated/object qoldig'i 0/0/0 va final fixture 0/0/0/0/0. Smart CDN cached URL delete'dan keyin 60 soniyagacha `200` berishi mumkin.
-> 2026-08-21: Telegram webhook v14 secret yo'qligida invalid POSTni `200` bilan qabul qildi. Pure guard + 4/4 testdan keyin production v15: health `200`, invalid POST fail-closed `503`, PUT `405`. Secret set + Telegram `setWebhook` qolgan.
+> 2026-08-21: Telegram webhook v14 secret yo'qligida invalid POSTni `200` bilan qabul qildi. Pure guard + 4/4 testdan keyin production v15: health `200`, invalid POST fail-closed `503`, PUT `405`. `67ac675` main va CI `32485618740` green; secret set + Telegram `setWebhook` qolgan.
 
 ## Hozir qayerdamiz
 

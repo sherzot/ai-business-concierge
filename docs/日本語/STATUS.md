@@ -35,7 +35,7 @@
 > 2026-08-21: AI polishing reviewの残り5件をlocalで解消。Telegram cache scope、full-body lifecycle provider timeout、PostgreSQL atomic polishing quota reservation、stale AI outputからのuser draft保護、short viewport modal scrollを実装。Backend 18/18、Telegram check、frontend 26/26 files・117/117 tests、type-check/build、canonical fresh migration replay 37/37、local database pgTAP 45/45 green。
 > 2026-08-21: `4b51fec`をmainへpushし、CI `32461091448`とNetlify production deploy `6a88056075359300089b9fa5`はgreen。Stagingは37/37 migrations・`bright-api` v11へ更新。Stagingに`ANTHROPIC_API_KEY`がないためauthenticated smokeは`503 AI_UNAVAILABLE`でblocked、fixture residueは0/0/0/0。
 > 2026-08-21: Production authenticated binary acceptanceはgreen。DOCX/PDF signed downloads、direct Storage deny `400`、cross-tenant deny `404`、delete `200`。Authoritative document/generated/object residueは0/0/0、final fixtureは0/0/0/0/0。Smart CDN cached URLはdelete後最大60秒`200`を返し得る。
-> 2026-08-21: Telegram webhook v14はsecret不在時にinvalid POSTを`200`で受理。Pure guardと4/4 tests後、production v15はhealth `200`、invalid POST fail-closed `503`、PUT `405`。Secret設定とTelegram `setWebhook`が残る。
+> 2026-08-21: Telegram webhook v14はsecret不在時にinvalid POSTを`200`で受理。Pure guardと4/4 tests後、production v15はhealth `200`、invalid POST fail-closed `503`、PUT `405`。`67ac675`はmain、CI `32485618740`はgreen。Secret設定とTelegram `setWebhook`が残る。
 
 ## 現在のPhase
 

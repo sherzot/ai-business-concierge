@@ -9,6 +9,7 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 - Productionda `TELEGRAM_BOT_TOKEN` bor, `TELEGRAM_WEBHOOK_SECRET` yo'q va `telegram-bot` v14 ACTIVE edi; stagingda Telegram secret/function yo'q. GET health `200`, invalid secretli `{}` POST esa kutilgan `503` o'rniga `200` qaytardi.
 - Deployed v14 source `if (SECRET && secretHeader !== SECRET)` bilan secret bo'lmaganda tekshiruvni chetlab o'tardi. Fail-closed qaror pure helperga ajratildi: missing/empty config `503`, missing/wrong header `401`, exact secret allow. GitHub CI'ga pinned Deno `v2.1.14` bilan shu 4 ta regression testi, 3-faylli format gate va entrypoint check qo'shildi; lokal YAML parse, test 4/4, format 3/3, entrypoint check va diff-check PASS. Secret/token qiymati o'qilmadi yoki loglanmadi.
 - Faqat `telegram-bot` productionga deploy qilindi: v15 ACTIVE, health `200`, invalid POST `503 Service Unavailable`, PUT `405`. Bot ataylab fail-closed; yangi secretni set qilish, ayni qiymat bilan Telegram `setWebhook`, so'ng bot smoke qolgan.
+- `67ac675` `main`ga push qilindi. GitHub CI run `32485618740` 1m5sda green: Telegram 4/4, frontend 26/26 fayl va 117/117 test, deploy-env 14/14, audit 0 high/critical, 3,701-modulli build va 10-faylli security gate PASS. Commit Netlify skip marker bilan yuborildi, chunki frontend o'zgarmadi.
 
 Fayllar/state: `.github/workflows/ci.yml`, `supabase/functions/telegram-bot/{index.ts,webhook-security.ts,webhook-security.test.ts}`, production `telegram-bot` v15, 4-tilli `DEVLOG/STATUS/PLAN/CONNECTIONS`.
 

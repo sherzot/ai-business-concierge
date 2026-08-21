@@ -35,7 +35,7 @@
 > 2026-08-21: Локально закрыты оставшиеся 5 findings AI polishing: восстановлен Telegram cache scope, provider timeout покрывает полный body lifecycle, polishing quota atomically резервируется в PostgreSQL, stale AI output не перезаписывает user draft, modal scroll остаётся внутри короткого viewport. Backend 18/18, Telegram check, frontend 26/26 files и 117/117 tests, type-check/build, canonical fresh migration replay 37/37 и local database pgTAP 45/45 green.
 > 2026-08-21: `4b51fec` pushed в main; CI `32461091448` и Netlify production deploy `6a88056075359300089b9fa5` green. Staging переведён на 37/37 migrations и `bright-api` v11; authenticated smoke заблокирован `503 AI_UNAVAILABLE`, потому что в staging нет `ANTHROPIC_API_KEY`, residue fixture 0/0/0/0.
 > 2026-08-21: Production authenticated binary acceptance green: DOCX/PDF signed downloads, direct Storage deny `400`, cross-tenant deny `404`, delete `200`; authoritative residue document/generated/object 0/0/0 и final fixture 0/0/0/0/0. Smart CDN cached URL может оставаться `200` до 60 секунд после удаления.
-> 2026-08-21: Telegram webhook v14 принимал invalid POST с `200` без secret. После pure guard и tests 4/4 production v15: health `200`, invalid POST fail-closed `503`, PUT `405`. Остаются secret setup и Telegram `setWebhook`.
+> 2026-08-21: Telegram webhook v14 принимал invalid POST с `200` без secret. После pure guard и tests 4/4 production v15: health `200`, invalid POST fail-closed `503`, PUT `405`. `67ac675` в main и CI `32485618740` green; остаются secret setup и Telegram `setWebhook`.
 
 ## Текущая фаза
 

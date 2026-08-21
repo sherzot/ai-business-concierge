@@ -9,6 +9,7 @@
 - Productionには`TELEGRAM_BOT_TOKEN`があり、`TELEGRAM_WEBHOOK_SECRET`がなく、`telegram-bot` v14 ACTIVE。StagingにはTelegram secrets/functionがない。GET healthは`200`だが、invalid-secret `{}` POSTは期待した`503`ではなく`200`を返した。
 - Deployed v14は`if (SECRET && secretHeader !== SECRET)`でsecret不在時にvalidationをbypassした。Fail-closed decisionをpure helperへ分離し、missing/empty config `503`、missing/wrong header `401`、exact-secret allowを実装。GitHub CIへpinned Deno `v2.1.14`による4 regression tests、3-file format gate、entrypoint checkを追加した。Local YAML parse、tests 4/4、format 3/3、entrypoint check、diff-check PASS。Secret/token値は読み取り・log出力していない。
 - `telegram-bot`だけをproductionへdeploy。v15 ACTIVE、health `200`、invalid POST `503 Service Unavailable`、PUT `405`。Botは意図的にfail-closed。新secret設定、同じ値でTelegram `setWebhook`、bot smokeが残る。
+- `67ac675`を`main`へpush。GitHub CI run `32485618740`は1m5sでgreen。Telegram 4/4、frontend 26/26 files・117/117 tests、deploy-env 14/14、audit 0 high/critical、3,701-module build、10-file security gateがPASS。Frontend未変更のためcommitにはNetlify skip markerを付けた。
 
 Files/state: `.github/workflows/ci.yml`、`supabase/functions/telegram-bot/{index.ts,webhook-security.ts,webhook-security.test.ts}`、production `telegram-bot` v15、4言語`DEVLOG/STATUS/PLAN/CONNECTIONS`。
 
