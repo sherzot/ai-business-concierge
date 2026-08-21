@@ -3,7 +3,7 @@
 > Архитектура проекта, паттерны проектирования и правила unit-тестирования
 > Версия: 1.3 | Обновлено: 2026-08-21
 >
-> Текущий runtime-статус находится в [STATUS.md](STATUS.md). `hr-candidate` partial: GitHub adapter real, остальной flow остаётся scaffold и не является production-ready эталоном.
+> Текущий runtime-статус находится в [STATUS.md](STATUS.md). `hr-candidate` partial: GitHub adapter и local PDF/DOCX extractor real, semantic LLM/scoring/report/orchestrator flow остаётся scaffold и не является production-ready эталоном.
 
 ---
 
@@ -136,7 +136,7 @@ supabase/functions/server/
     services/
       llm-router.ts
       knowledge-base.ts
-      hr-candidate/        ← PARTIAL; GitHub adapter real, остаются CV/LLM/orchestrator stubs
+      hr-candidate/        ← PARTIAL; GitHub + local PDF/DOCX real, остаются semantic LLM/orchestrator stubs
         index.ts
         types.ts
         candidate-scorer.ts
@@ -252,3 +252,4 @@ features/tasks/__tests__/
 ---
 
 *ARCHITECTURE.md — AI Business Concierge v1.0 · 2026-05-05*
+*Папка HR Candidate — target modular pattern; GitHub adapter и bounded local PDF/DOCX extractor real, а semantic LLM/scoring/report/orchestrator flow остаётся partial scaffold.*

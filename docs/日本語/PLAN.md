@@ -58,9 +58,9 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] PDF/DOCX parserを実装。
-- [ ] LLM Router経由でSonnet structured scoring/reportingを接続。
-- [ ] Auth、roles、rate limit、cost log、Zod validationを追加。
+- [ ] Provider-independent route/orchestrator input validation、auth、roles、rate limit、safe error envelopesを追加し、full flow readyまで`501`を維持。
+- [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** LLM Router経由でCV semantic structuringとSonnet structured scoring/reportingを接続。
+- [ ] 全HR provider callsへusage/cost loggingを接続。
 - [ ] Frontendを完了し`501` stubを削除、full flowをtest。
 
 ## Later phases

@@ -41,7 +41,7 @@
 | R-001 | Интеграция реального inbox | Email (Resend) webhook – частично ✅ | Inbox |
 | R-002 | Обновления в реальном времени | Supabase Realtime – inbox, tasks ✅ | Inbox, Tasks |
 | R-015 | Уведомления о назначении задач | Уведомление ответственному при назначении, подтверждение, прозрачность статусов ✅ | Tasks |
-| R-016 | HR Candidate Analysis | Partial; public GitHub analyzer/cache прошёл 10/10 и live public smoke. Остаются CV/LLM, auth/rate-limit, route wiring и full-flow tests | HR |
+| R-016 | HR Candidate Analysis | Partial; public GitHub analyzer/cache и bounded local PDF/DOCX extraction готовы (HR 18/18). Остаются Haiku/Sonnet, auth/rate-limit, route wiring и full-flow tests | HR |
 | R-017 | AI rate limiting | Partial; polishing check/increment race-safe через service-role-only PostgreSQL atomic reservation, local pgTAP 9/9 green и migration deployed в staging. Остаются production rollout, unified policy для остальных endpoints и `Retry-After` | Backend |
 | R-018 | AI cost tracking | Partial; logging есть, tenant dashboard/enforcement остаётся | Backend |
 | R-019 | Vector Search (RAG) | Partial; vector/embedding основа есть, explicit tool/citations остаются | Docs |

@@ -4,6 +4,15 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-21 — Secret-free HR PDF/DOCX CV parsing implemented
+
+- While waiting for `ANTHROPIC_API_KEY`, the next provider-independent HR Candidate slice was completed. The prior `cv-parser.ts` contained only TODO/`NOT_IMPLEMENTED` paths for PDF/DOCX extraction, dates/sections, and semantic structure.
+- The parser now validates the 5 MiB limit, MIME, and file magic; it extracts PDF locally with `pdfjs-dist` under 50-page/64,000-raw-character bounds and DOCX with `mammoth`. DOCX preflight rejects ZIP64, encryption, path traversal, over 2,048 entries, a 16 MiB entry, 32 MiB total expansion, or a 250× compression ratio. Filenames are sanitized to a basename without control characters; raw CV text is neither persisted nor logged.
+- EN/UZ/RU/JA date ranges and section headings, overlap-safe experience years, and bounded tech-skill/language hints are extracted deterministically. Prompt-injection sanitation remains. Haiku role/education structuring is intentionally not called; output stays `partial / SEMANTIC_STRUCTURING_PENDING`, while scanned/image-only PDF fails.
+- With Deno `v2.1.14`, 8/8 new tests using real `pdf-lib` PDF and `docx` DOCX fixtures, format/check, and the combined targeted backend 22/22 passed. Coverage includes invalid magic, oversize, 51-page PDF, scanned PDF, DOCX expansion bomb, and localized dates/sections. The PDF path uses standards polyfills without a native canvas dependency. The route and production `501` are unchanged; no deploy or remote smoke was performed.
+
+Files: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/cv-parser{,.test}.ts`, `frontend/src/features/hr/candidates/README.md`, and four-language `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`.
+
 ## 2026-08-21 — Real HR GitHub analyzer and cache implemented
 
 - While waiting for `ANTHROPIC_API_KEY`, the secret-free HR Candidate P2 started. The previous analyzer fetched only the profile; repository pagination, aggregation, quality signals, and caching were TODO, and repository URLs were incorrectly accepted as profile input.

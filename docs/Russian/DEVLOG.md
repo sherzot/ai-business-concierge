@@ -4,6 +4,15 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-21 — Реализована не требующая secret часть HR PDF/DOCX CV parser
+
+- В ожидании `ANTHROPIC_API_KEY` завершён следующий provider-independent slice HR Candidate. Ранее `cv-parser.ts` содержал только TODO/`NOT_IMPLEMENTED` для PDF/DOCX extraction, dates/sections и semantic structure.
+- Parser проверяет лимит 5 MiB, MIME и file magic; локально извлекает PDF через `pdfjs-dist` с пределами 50 страниц/64,000 raw символов и DOCX через `mammoth`. DOCX preflight fail-closed отклоняет ZIP64, encryption, path traversal, более 2,048 entries, entry 16 MiB, total expansion 32 MiB и compression ratio 250×. Filename очищается до basename без control chars; raw CV text не сохраняется и не логируется.
+- Детерминированно извлекаются date ranges и section headings EN/UZ/RU/JA, experience years без двойного подсчёта overlap и bounded tech-skill/language hints. Prompt-injection sanitation сохранена. Haiku role/education structuring намеренно не вызывается; результат остаётся `partial / SEMANTIC_STRUCTURING_PENDING`, scanned/image-only PDF завершается failed.
+- На Deno `v2.1.14` прошли 8/8 новых тестов с real `pdf-lib` PDF и `docx` DOCX fixtures, format/check и общий targeted backend 22/22. Покрыты invalid magic, oversize, PDF на 51 страницу, scanned PDF, DOCX expansion bomb и localized dates/sections. PDF path использует standards polyfills без native canvas dependency. Route и production `501` не менялись; deploy/remote smoke не выполнялись.
+
+Files: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/cv-parser{,.test}.ts`, `frontend/src/features/hr/candidates/README.md`, четыре языка `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`.
+
 ## 2026-08-21 — Реализованы HR GitHub analyzer и cache
 
 - В ожидании `ANTHROPIC_API_KEY` начат не требующий secret HR Candidate P2. Прежний analyzer получал только profile; repo pagination, aggregation, quality signals и cache оставались TODO, а repository URL ошибочно принимался как profile input.

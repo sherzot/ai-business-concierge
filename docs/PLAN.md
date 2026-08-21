@@ -67,9 +67,9 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] PDF/DOCX CV parserni `pdfjs`/`mammoth` bilan ulash.
-- [ ] Sonnet structured scoring va report generatorni LLM Router orqali ulash.
-- [ ] Auth, role, rate limit, usage/cost log va Zod validationni route'ga qo'shish.
+- [ ] Anthropic key talab qilmaydigan route/orchestrator input validation, auth, role, rate limit va safe error envelope'ni qo'shish; `501`ni full-flowgacha saqlash.
+- [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** CV semantic structuring, Sonnet structured scoring va report generatorni LLM Router orqali ulash.
+- [ ] Usage/cost logni barcha HR provider chaqiruvlariga ulash.
 - [ ] Frontend upload/result oqimini yakunlash va `501` stubni olib tashlash.
 - [ ] Unit, integration va manual acceptance testlarini o'tkazish.
 

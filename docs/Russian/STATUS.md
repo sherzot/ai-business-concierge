@@ -37,6 +37,7 @@
 > 2026-08-21: Production authenticated binary acceptance green: DOCX/PDF signed downloads, direct Storage deny `400`, cross-tenant deny `404`, delete `200`; authoritative residue document/generated/object 0/0/0 и final fixture 0/0/0/0/0. Smart CDN cached URL может оставаться `200` до 60 секунд после удаления.
 > 2026-08-21: Telegram webhook v14 принимал invalid POST с `200` без secret. После pure guard и tests 4/4 production v15: health `200`, invalid POST fail-closed `503`, PUT `405`. `67ac675` в main и CI `32485618740` green; остаются secret setup и Telegram `setWebhook`.
 > 2026-08-21: HR Candidate получил real public GitHub adapter с bounded REST/pagination/response, timeout, repository-tree aggregation и 10-minute cache; Deno 10/10 и live `octocat` smoke complete. `8496aae` в main, CI `32487503062` green. Route остаётся `501`; Supabase Free блокирует Pro+ Leaked Password Protection.
+> 2026-08-21: Для HR Candidate локально реализован secret-free PDF/DOCX parser с лимитами 5 MiB/file magic/PDF 50 pages/text, защитой DOCX ZIP-bomb и EN/UZ/RU/JA date/section signals. Новые 8/8 и общий Deno 22/22 green; Haiku semantic structuring и route `501` остаются gated до provider key.
 
 ## Текущая фаза
 
@@ -59,7 +60,7 @@
 | Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 37/37 migrations, `bright-api` v11 ACTIVE, health `200`, unauth docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge использует modern overrides `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY`; legacy anon/service-role API keys disabled |
 | Type-check | Успешно в clean temporary frontend install |
-| Unit tests | Frontend 26/26 files, 117/117 tests; AI polish/router/usage Deno 18/18; HR GitHub analyzer Deno 10/10; Telegram webhook Deno 4/4; прежний document binary/lifecycle Deno 7/7 |
+| Unit tests | Frontend 26/26 files, 117/117 tests; AI polish/router/usage Deno 18/18; HR GitHub analyzer 10/10 + CV parser 8/8; текущий targeted backend Deno 22/22; прежний document binary/lifecycle Deno 7/7 |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks + 2 Vite `.env` fallback/runtime-precedence + 2 bundled-endpoint extraction regressions |
 | Production build/security check | Build прошёл с synthetic non-production ref; CSP создан из этого ref; проверено 10 build/Netlify файлов |
 | Production dependency audit | Raw audit: всего 0 vulnerabilities; scoped gate без исключений: high/critical 0 |
@@ -88,13 +89,13 @@
 | Resend inbox | Partial | Код есть; receiving/delivery E2E не подтверждён |
 | AI Concierge/RAG и cost tracking | Partial | Основа есть; polishing request quota race-safe через PostgreSQL atomic reservation/release, provider usage учитывается до output validation. Остаются rollout migration, citation UX, billing dashboard, unified endpoint enforcement и smoke tests |
 | AI Документолог | Production binary + staged AI polish preview / provider blocked | 15 templates, 4 языка и real PDF/DOCX/private Storage работают. Polishing frontend в production, migration и `bright-api` v11 в staging; Auth/tenant/document boundaries и cleanup green, но real-provider smoke возвращает `503 AI_UNAVAILABLE`, потому что в staging нет `ANTHROPIC_API_KEY`. Production backend/migration rollout намеренно ожидает |
-| HR Candidate Analysis | Partial / route blocked | Public GitHub analyzer и bounded cache real и протестированы; остаются CV/LLM/auth/rate-limit, production возвращает `501 NOT_IMPLEMENTED` |
+| HR Candidate Analysis | Partial / route blocked | Public GitHub analyzer/cache и bounded local PDF/DOCX extraction real и протестированы; остаются Haiku structure, scoring/report, auth/rate-limit и route wiring, production возвращает `501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme и AI Sales Bot | Planned | Phase 3 |
 
 ## Ближайший порядок
 
-1. Безопасно установить `ANTHROPIC_API_KEY` в staging Edge secrets и повторить authenticated real-provider preview/save smoke до green.
-2. После green staging smoke deploy production migration `20260821000000` + `bright-api` и выполнить smoke tests.
-3. После стабилизации web flow добавить Telegram generation/delivery.
+1. Пока ожидается `ANTHROPIC_API_KEY`, реализовать для HR Candidate route/orchestrator input validation, auth/role, rate limit и safe error envelopes; сохранить `501` до готовности full flow.
+2. После получения key безопасно установить его в staging Edge secrets и повторить authenticated real-provider preview/save smoke до green.
+3. После green staging smoke deploy production migration `20260821000000` + `bright-api` и выполнить smoke tests.
 
 Подробности: [PLAN.md](PLAN.md). Основной источник: [узбекский STATUS](../STATUS.md).

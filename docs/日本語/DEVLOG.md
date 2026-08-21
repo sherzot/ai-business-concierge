@@ -4,6 +4,15 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-21 — Secret不要のHR PDF/DOCX CV parserを実装
+
+- `ANTHROPIC_API_KEY`待ちの間に、次のprovider-independent HR Candidate sliceを完了した。従来の`cv-parser.ts`はPDF/DOCX extraction、dates/sections、semantic structureがTODO/`NOT_IMPLEMENTED`だった。
+- Parserは5 MiB、MIME、file magicを検証し、PDFを`pdfjs-dist`で50 pages/64,000 raw chars以内、DOCXを`mammoth`でlocal extractionする。DOCX preflightはZIP64、encryption、path traversal、2,048超entries、16 MiB single entry、32 MiB total expansion、250× compression ratioをfail-closedで拒否する。Filenameはcontrol charsを除いたbasenameへsanitizationし、raw CV textは保存・log出力しない。
+- EN/UZ/RU/JA date rangesとsection headings、overlapを二重計上しないexperience years、bounded tech-skill/language hintsをdeterministic extractionする。Prompt-injection sanitationは維持。Haiku role/education structuringは意図的に呼ばず、結果は`partial / SEMANTIC_STRUCTURING_PENDING`。Scanned/image-only PDFはfailedとなる。
+- Deno `v2.1.14`でreal `pdf-lib` PDFと`docx` DOCX fixturesを使う新規8/8 tests、format/check、combined targeted backend 22/22がPASS。Invalid magic、oversize、51-page PDF、scanned PDF、DOCX expansion bomb、localized dates/sectionsをcoverする。PDF pathはnative canvas dependencyなしのstandards polyfillsを使う。Routeとproduction `501`は未変更、deploy/remote smokeは未実施。
+
+Files: `.github/workflows/ci.yml`、`supabase/functions/server/services/hr-candidate/cv-parser{,.test}.ts`、`frontend/src/features/hr/candidates/README.md`、4言語`DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`。
+
 ## 2026-08-21 — HR GitHub analyzerとcacheを実装
 
 - `ANTHROPIC_API_KEY`待ちの間にsecret不要のHR Candidate P2を開始した。従来のanalyzerはprofileのみ取得し、repo pagination、aggregation、quality signals、cacheはTODOで、repository URLもprofile inputとして誤受理した。

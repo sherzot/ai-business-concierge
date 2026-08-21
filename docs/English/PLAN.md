@@ -58,9 +58,9 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] Implement PDF/DOCX parsing.
-- [ ] Wire Sonnet structured scoring/reporting through the LLM Router.
-- [ ] Add auth, roles, rate limit, cost log and Zod validation.
+- [ ] Add provider-independent route/orchestrator input validation, auth, roles, rate limit, and safe error envelopes; retain `501` until the full flow is ready.
+- [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** wire CV semantic structuring plus Sonnet structured scoring/reporting through the LLM Router.
+- [ ] Wire usage/cost logging across all HR provider calls.
 - [ ] Complete frontend results, remove the `501` stub, and test the full flow.
 
 ## Later phases

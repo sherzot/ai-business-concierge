@@ -80,7 +80,7 @@ which currently returns `501 NOT_IMPLEMENTED`. The backend skeleton is at
 `supabase/functions/server/services/hr-candidate/`. Implementation gates:
 
 - [x] `github-analyzer.ts` — bounded public REST fetch + aggregate + process cache
-- [ ] `cv-parser.ts`        — pdfjs / mammoth + Haiku post-process
+- [~] `cv-parser.ts`        — bounded pdfjs / mammoth extraction complete; Haiku structuring blocked on provider key
 - [ ] `candidate-scorer.ts` — Sonnet structured output
 - [ ] `report-generator.ts` — Sonnet narrative + interview questions
 - [ ] `index.ts`            — orchestrator (Promise.allSettled + timeouts)

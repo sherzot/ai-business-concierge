@@ -4,6 +4,15 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-21 — HR PDF/DOCX CV parserning secretsiz qismi implementatsiya qilindi
+
+- `ANTHROPIC_API_KEY` kutilayotgan paytda HR Candidate'ning key talab qilmaydigan keyingi qismi bajarildi. Oldingi `cv-parser.ts` PDF/DOCX extractor, sana/section parsing va semantic structure uchun faqat TODO/`NOT_IMPLEMENTED` edi.
+- Parser endi 5 MiB input, MIME va file magicni tekshiradi; PDFni `pdfjs-dist` bilan 50 sahifa/64,000 raw belgi chegarasida, DOCXni `mammoth` bilan lokal o'qiydi. DOCX preflight ZIP64/encryption/path traversal, 2,048 entry, 16 MiB single-entry, 32 MiB total expanded size va 250× compression ratio limitlarini fail-closed qiladi. Filename basename/control-char bilan sanitizatsiya qilinadi; CV raw matni saqlanmaydi yoki loglanmaydi.
+- EN/UZ/RU/JA sana oralig'i va section headinglari, overlapni ikki marta sanamaydigan tajriba yillari, bounded tech-skill/language hintlari deterministik olinadi. Prompt-injection sanitation saqlandi. Haiku semantic role/education structuring ataylab chaqirilmaydi; natija `partial / SEMANTIC_STRUCTURING_PENDING`, scanned/image-only PDF esa fail bo'ladi.
+- Deno `v2.1.14`da real `pdf-lib` PDF va `docx` DOCX fixturelari bilan yangi 8/8 test, format/check va umumiy targeted backend 22/22 PASS. Testlar invalid magic, oversize, 51-page PDF, scanned PDF, DOCX expansion bomb, lokal sana/sectionlarni qoplaydi. PDF yo'li native canvasga tayanmaydigan standards polyfill bilan ishlaydi. Route va production `501` o'zgarmadi; deploy/remote smoke bajarilmadi.
+
+Fayllar: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/cv-parser{,.test}.ts`, `frontend/src/features/hr/candidates/README.md`, 4-tilli `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`.
+
 ## 2026-08-21 — HR GitHub analyzer va cache real implementatsiya qilindi
 
 - `ANTHROPIC_API_KEY` kutilayotgan paytda secret talab qilmaydigan HR Candidate P2 boshlandi. Oldingi `github-analyzer.ts` profilni olsa-da, repo pagination, aggregation, repo sifati va cache TODO edi; URL parser repository pathlarni ham profil deb qabul qilardi.
