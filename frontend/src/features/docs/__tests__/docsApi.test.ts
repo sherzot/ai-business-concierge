@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as apiClientModule from "../../../shared/lib/apiClient";
-import { exportDoc, generateDoc, getDocTemplates } from "../api/docsApi";
+import {
+  exportDoc,
+  generateDoc,
+  getDocTemplates,
+  polishDoc,
+} from "../api/docsApi";
 
 vi.mock("../../../shared/lib/apiClient");
 const mockApiRequest = vi.mocked(apiClientModule.apiRequest);
@@ -116,6 +121,35 @@ describe("exportDoc", () => {
       tenantId: "tenant-1",
       method: "POST",
       body: JSON.stringify({ format: "pdf", locale: "ja" }),
+    });
+  });
+});
+
+describe("polishDoc", () => {
+  it("tenant-scoped preview endpointiga instruction, content va localeni yuboradi", async () => {
+    mockApiRequest.mockResolvedValue({
+      document_id: "doc-1",
+      content: "Yaxshilangan hujjat",
+      model: "claude-sonnet-4-6",
+      complexity: "document",
+      cached: false,
+      remaining: 3,
+    });
+
+    await polishDoc("tenant-1", "doc-1", {
+      instruction: "Matnni rasmiyroq qiling",
+      content: "Boshlang'ich hujjat",
+      locale: "uz",
+    });
+
+    expect(mockApiRequest).toHaveBeenCalledWith("/docs/doc-1/polish", {
+      tenantId: "tenant-1",
+      method: "POST",
+      body: JSON.stringify({
+        instruction: "Matnni rasmiyroq qiling",
+        content: "Boshlang'ich hujjat",
+        locale: "uz",
+      }),
     });
   });
 });

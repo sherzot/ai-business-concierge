@@ -75,6 +75,7 @@ export async function askMaslahatchi(
     systemPrompt: SYSTEM_PROMPTS[locale],
     context: kbResult.contextText || undefined,
     locale,
+    cacheScope: tenantId,
   };
 
   const llmResponse = await callClaude(ANTHROPIC_API_KEY, request);

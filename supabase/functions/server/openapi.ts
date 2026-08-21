@@ -381,6 +381,49 @@ export const OPENAPI_SPEC = {
         },
       },
     },
+    "/docs/{id}/polish": {
+      post: {
+        tags: ["Documents", "AI"],
+        summary: "Preview an AI-polished document draft",
+        description:
+          "Validates active tenant access, routes the editing request to the document LLM strategy, and returns a preview without mutating the stored document. The user must explicitly save the preview through the document update endpoint.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["instruction", "content", "locale"],
+                properties: {
+                  instruction: { type: "string", minLength: 1, maxLength: 2000 },
+                  content: { type: "string", minLength: 1, maxLength: 24000 },
+                  locale: { type: "string", enum: ["uz", "ru", "en", "ja"] },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "AI-polished preview and model metadata",
+          },
+          "404": { description: "Document not found in the active tenant" },
+          "422": { description: "Invalid or unsafe editing request" },
+          "429": { description: "AI rate or plan limit reached" },
+          "502": { description: "AI provider returned an unusable response" },
+          "503": { description: "AI provider or rate-limit guard unavailable" },
+          "504": { description: "AI provider timed out" },
+        },
+      },
+    },
 
     // ── Dashboard / Analytics ─────────────────────────────────────────────────
     "/dashboard": {

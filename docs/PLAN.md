@@ -1,7 +1,7 @@
 # AI Business Concierge — faol reja
 
-> Version: 6.0
-> Yangilandi: 2026-08-12
+> Version: 6.1
+> Yangilandi: 2026-08-21
 > Bu faylda faqat faol va navbatdagi ishlar turadi. 2026-07-24 gacha bo'lgan katta tarixiy reja [archive/PLAN_LEGACY_2026-07-24.md](archive/PLAN_LEGACY_2026-07-24.md)ga ko'chirilgan.
 
 ## Ishlash qoidasi
@@ -53,7 +53,7 @@
 
 ## P1 — Phase 2 AI Hujjatchini tugallash
 
-- [ ] AI savol-javob/polishing oqimini LLM Router orqali ulash.
+- [ ] Lokal AI polishing preview closeout commitini GitHubga push qilish, CI va Netlify previewdan o'tkazish, staging migration + `bright-api` deploy qilish hamda authenticated real-provider preview/save smoke-testini bajarish.
 - [ ] Web oqimi barqarorlashgach Telegram step-by-step hujjat yaratish va document yuborishni ulash.
 - [ ] Cloudflare Auth Admin `403` blokini xavfsiz yo'l bilan yechgach production authenticated PDF/DOCX signed-download, cross-tenant deny, direct Storage deny va delete-cleanup synthetic acceptance'ni qayta o'tkazish.
 

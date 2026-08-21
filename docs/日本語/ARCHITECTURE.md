@@ -1,7 +1,7 @@
 # ARCHITECTURE.md — AI Business Concierge
 
 > プロジェクトアーキテクチャ、設計パターン、ユニットテストルール
-> バージョン: 1.2 | 更新: 2026-08-11
+> バージョン: 1.3 | 更新: 2026-08-21
 >
 > Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate` foldersはTODO/stub logicを含むmodular scaffoldであり、production-ready referenceではない。
 
@@ -41,6 +41,13 @@
 - Binaryはprivate `generated-documents`のimmutable `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>` pathへ保存する。`storage_path` CASがparallel exportをserializeし、publishは5分provisional leaseを取得、URL signing後に`download_expires_at`を65秒へpinする。`documents.row_version`はedit/export/deleteのCAS boundaryで、旧objectは新metadata/document commit後だけ削除。Legacy pathsはread可能、restrictive policyがdirect browser accessを遮断する。
 - `bright-api`はactive tenant membershipを確認する。GenerateはO(n) PDF wrappingでbinaryを準備してからdocument DB rowをpublish。Downloadは60秒signed URLのみ。Exportはeditable contentから再生成し、delete/compensationはDB-first後にprivate objectをcleanupする。
 - Pinned Noto Sans JP OTFをSHA-256検証し4言語をcoverする。PDFへfull embed、DOCXへobfuscated `.odttf`としてembedし、private `document-assets`へcacheする。
+
+### 1.3 AI文書作成polishing境界
+
+- Browserはcurrent editable draftとuser instructionをtenant-scoped `POST /docs/:id/polish`で送信し、`bright-api`はdocumentがactive tenantに属することを最初に確認する。
+- Model outputはDBへ自動保存しない。Frontendはedit textarea previewへだけ適用し、既存optimistic document updateはuserが**保存**を選択した場合のみ実行する。Request中にdraft revisionが変わった場合、遅いAI resultを適用しない。Modalはshort viewport内に制限しinternal scrollを使う。
+- System promptはdocument title/contentをuntrusted dataとして分離する。Tenant scope、完全なprompt、effective output-token budgetをSHA-256 cache keyへ含める。Shared document chatは2,000-token default、polishingはexplicit 8,000を使用する。
+- Raw document、output、instruction textはobservability storageへ書かず、interaction logはinstruction lengthのみ保持する。Provider tokens/costはoutput validation前に計上する。Authoritative polishing plan-quota check+incrementはservice-role-only `reserve_ai_request`内の1つのatomic PostgreSQL statementで実行し、provider callが完了しない場合はreservationを戻す。Safety、DB-backed minute rate limit、4-locale standard error envelope、fetchからcomplete response-body parsingまでを対象にするbounded timeoutをprovider boundaryで適用する。
 
 ---
 

@@ -2,7 +2,7 @@
 
 This document defines project requirements and future directions. Refer to this document when adding new features.
 
-> Updated 2026-08-12. Current operational snapshot: [STATUS.md](STATUS.md). Status terms are Done, Partial, Skeleton, and Planned.
+> Updated 2026-08-21. Current operational snapshot: [STATUS.md](STATUS.md). Status terms are Done, Partial, Skeleton, and Planned.
 
 ---
 
@@ -42,11 +42,12 @@ This document defines project requirements and future directions. Refer to this 
 | R-002 | Real-time updates | Supabase Realtime – inbox, tasks ✅ | Inbox, Tasks |
 | R-015 | Task assignment notifications | Alert assignee when leader assigns, acknowledgement, status transparency ✅ | Tasks |
 | R-016 | HR Candidate Analysis | Skeleton; GitHub/CV/LLM business logic and tests remain | HR |
-| R-017 | AI rate limiting | Partial; DB-backed AI limits exist, unified plan/endpoint policy remains | Backend |
+| R-017 | AI rate limiting | Partial; polishing check/increment is race-safe through a service-role-only PostgreSQL atomic reservation and passed local pgTAP 9/9. Migration rollout, unified policy for other endpoints, and `Retry-After` remain | Backend |
 | R-018 | AI cost tracking | Partial; logging exists, tenant usage dashboard/enforcement remains | Backend |
 | R-019 | Vector Search (RAG) | Partial; vector/embedding foundation exists, explicit tool/citations remain | Docs |
 | R-020 | Admin Dashboard | Partial; core pages exist, billing/advanced agents remain | Admin |
 | R-021 | AI Document Maker binary output | Production deployed / authenticated recheck pending; real PDF/DOCX, embedded Noto Sans JP, O(n) PDF wrap, binary-before-DB publish, private immutable Storage, provisional/final download lease, export/edit/delete CAS, DB-first compensation/delete, restrictive RLS, and 60s signed URLs are live. Production 36/36 migrations, `bright-api` v76, private-bucket/schema checks, public/protected smoke tests, and final pgTAP assertion `ok 15` are green; authenticated synthetic acceptance was blocked by Cloudflare `403` before fixture creation, with zero residue | Docs |
+| R-022 | AI Document Assistant polishing preview | Partial; tenant-scoped endpoint, current-draft input, untrusted-data prompt, full-body timeout, atomic quota reservation, stale-draft protection, viewport scrolling, polish-only 8k budget, scoped hash cache, instruction-free logs, and UZ/RU/EN/JA UX are locally tested; fresh replay 37/37 and quota pgTAP 9/9 are green. CI/preview, staging deployment, authenticated real-provider smoke, and production rollout remain | Docs |
 | R-003 | Billing/Payments | Subscription, plans, payment history | New |
 | R-004 | Audit log view | Admin audit log page and backend endpoint ✅ | Settings |
 | R-005 | Export/Import | Excel, CSV export; bulk import | Reports, Tasks |

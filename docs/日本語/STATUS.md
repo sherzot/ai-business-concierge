@@ -1,6 +1,6 @@
 # AI Business Concierge — 現在の状態
 
-> 最終確認済みcode/platform snapshot: **2026-08-12**
+> 最終確認済みcode/platform snapshot: **2026-08-21**
 > ドキュメント整理日: **2026-08-07**
 > 2026-08-07にlocal runtime、production health/auth、remote GitHub Actions baselineを再確認。P0 commitsをpushし、new CI runはfully greenで完了。
 > 2026-08-08: publishable-key commitをpushしCI/Netlify deploy成功。ただしproduction bundleはまだlegacy fallbackを使用。Risk scanner tablesへのdirect browser Data API accessをproductionで閉鎖。
@@ -29,6 +29,10 @@
 > 2026-08-12: `0532a74`のCodex P2をpost-signing final lease pinとdelete/export row-version CASでclose。Staging `bright-api` v9 ACTIVE、health `200`。
 > 2026-08-12: `661401a`のCodex P2をbinary-before-DB publishとO(n) PDF wrappingでclose。Staging `bright-api` v10 ACTIVE、health `200`、Deno 7/7。
 > 2026-08-12: PR #11 final head `6db478d`はCI/Netlify gatesとmajor issueなしのCodex re-reviewを通過し、`8f179da`として`main`へmerge。Productionへ36/36 migrations、`bright-api` v76、Netlify deploy `6a7bad961b16200007cfd88e`をrolloutし、public/protected smoke testsはgreen。Authenticated synthetic acceptanceはfixture作成前にCloudflare `403`でblockされ、final residueは0/0/0/0/0/0。
+> 2026-08-21: Tenant-scoped AI文書作成polishing previewをlocalで完了。Backend 9/9、frontend 24/24 files・111/111 tests、type-check/build/security/deploy-env/audit gatesはgreen。Staging/production deployとreal-provider smokeは未実施。
+> 2026-08-21: Landing hero TEAM/08 cardとcaptionのoverlapをlocalで修正。Frontend 25/25 files・112/112 tests、type-check green。2048×1080 browser acceptanceはgap 12.73px、overlap/overflow/console errors 0。
+> 2026-08-21: AI polishing reviewのP2 3件・P3 1件をlocalで解消。Chat/polish token budgets分離、unusable outputのusage/cost計上、raw instruction log削除、4-locale error envelope標準化を実施。Backend 14/14、frontend 26/26 files・115/115 tests green。
+> 2026-08-21: AI polishing reviewの残り5件をlocalで解消。Telegram cache scope、full-body lifecycle provider timeout、PostgreSQL atomic polishing quota reservation、stale AI outputからのuser draft保護、short viewport modal scrollを実装。Backend 18/18、Telegram check、frontend 26/26 files・117/117 tests、type-check/build、canonical fresh migration replay 37/37、local database pgTAP 45/45 green。
 
 ## 現在のPhase
 
@@ -43,20 +47,20 @@
 
 | Check | 状態 |
 |---|---|
-| Git | PR #10は`55d1468`、PR #11は`8f179da`としてmerged。PR #11 final head `6db478d`はCIとCodex re-review green |
+| Git | Live GitHub `main`は`5e33f094`のまま。Reviewed sliceはこのlocal closeout commitへ含まれ、未pushのためlocal branchはremoteより1 commit ahead |
 | Runtime | Node.js `22.18.0`; `.nvmrc`とpackage engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Production Supabase Edge Function `bright-api` v76、`ACTIVE`、`verify_jwt=false`。SHAはstaging v10と一致 |
 | Health | `200` |
 | Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。36/36 migrations、`bright-api` v10 ACTIVE、health `200`、unauth docs `401` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list。Email confirmation ON、8-digit/1-minute OTP、TOTP ON。Auth settings HTTP `200`、autoconfirm false。Edgeはmodern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overridesを使用しlegacy anon/service-role API keysはdisabled |
-| Type-check | 成功 |
-| Unit tests | Frontend 23/23 files、109/109 tests。Deno document binary/lifecycle 7/7 |
+| Type-check | Clean temporary frontend installで成功 |
+| Unit tests | Frontend 26/26 files、117/117 tests。AI polish/router/usage Deno 18/18、従来document binary/lifecycle Deno 7/7 |
 | Deployment environment guard | Node tests 14/14: isolation contract 10件 + Vite `.env` fallback/runtime-precedence 2件 + bundled-endpoint extraction regressions 2件 |
 | Production build/security check | Synthetic non-production refでbuild pass。CSPはそのrefから生成、10 build/Netlify filesを検査 |
 | Production dependency audit | Raw audit: vulnerability合計0件; scoped gateはexceptionなしでhigh/critical 0件 |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue。Landing、public/auth、product core、admin shell redesignをlocal完了 |
-| Visual browser acceptance | Landing Why Us 6/6 inverse text green。Authenticated Company Dashboard dark mode: Business Status background `rgb(17,19,24)`、title/percentage contrast `16.73:1`、muted text `7.5:1`、success signal `10.66:1`。12/12 text nodesがpanel内、overlap/overflow/console error `0` |
+| Visual browser acceptance | Landing Why Us 6/6 inverse text green。Landing hero TEAM/captionは2048×1080でgap 12.73px、overlap/overflow/console errors `0`。Authenticated Company Dashboard dark modeはtitle/percentage contrast `16.73:1`、muted text `7.5:1`、success signal `10.66:1`、panel内text node 12/12 |
 | Delivery platform | Netlifyのみ。RepositoryにVercel config/dependencyなし。External Vercel projectは保持し、`gitRepositoryConnected=false`を確認 |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase、`deploy-preview`/`branch-deploy`/`dev` -> staging。Optional URL envなし。Personalではbrowser-public `VITE_*`のみ`All` scopeを使用 |
 | Staging security advisor | Error `0`、既知`vector` public-schema warning `1`、server-only RLS/no-policy info `11` |
@@ -66,8 +70,8 @@
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |
 | DB/Edge security acceptance | Fresh migration replay 32/32、local pgTAP 21/21、local real Auth-token Edge tests 8/8。Staging modern-key remote Edge 8/8、2 tenants/5 Auth users cleanup、final fixture 0/0。Realtime tablesはSELECT-onlyでactive membership/tenant必須 |
 | Document binary/Storage acceptance | 実PDF/DOCX lifecycleはDeno 7/7。Production private-bucket/schema read-back、pgTAP最終`ok 15`、health `200`、unauth docs `401`はgreen。Authenticated synthetic acceptanceはfirst fixture前にCloudflare `403`でBLOCKED、final Auth/tenant/template/document/generated/object residueは0/0/0/0/0/0 |
-| Migration history | Local、staging、productionは36/36。4 document migrationsを適用し、`documents.row_version`、`doc_generated.download_expires_at`、2/2 private document bucketsを確認 |
-| Local Supabase services | Last full-stack snapshot: Storage `v1.68.1`、Auth `v2.195.0`、enabled containers healthy、Storage/Auth/Studio HTTP `200`。2026-08-11 closeout時はstack stoppedで、remote staging acceptanceは非依存 |
+| Migration history | Canonical local fresh replay 37/37とfull database pgTAP 45/45 green（atomic quota 9/9を含む）。Staging/productionは36/36、新migrationはremote未適用。User-owned duplicate migration copyは一時除外後に未変更で復元 |
+| Local Supabase services | PostgreSQL-only stackはfresh replayとpgTAPでhealthy。Full-stack startはanalytics/vector/realtime/storage/studio health timeout。Remote staging acceptanceは非依存 |
 
 ## Capability状態
 
@@ -78,14 +82,14 @@
 | Admin platform | Partial | 基本管理/monitoringあり。Tenant-profile/AI-stats authenticated smoke testsとCompany Dashboard dark-contrast visual acceptanceをuser sessionで確認済み |
 | Telegram | Partial / operational block | `TELEGRAM_WEBHOOK_SECRET`とwebhook確認が必要 |
 | Resend inbox | Partial | Codeあり、receiving/delivery E2E未確認 |
-| AI Concierge/RAGとcost tracking | Partial | 基盤あり、citation UX、plan enforcement、smoke-testが残る |
-| AI文書作成 | Production deployed / authenticated recheck pending | 15 templates、4言語、実PDF/DOCX、embedded Noto Sans JP、private Storage、60秒signed URL、tenant-scoped export/deleteをproductionへdeploy済み。Public/protected gatesはgreen、authenticated synthetic recheckはCloudflare block中 |
+| AI Concierge/RAGとcost tracking | Partial | 基盤あり。Polishing request quotaはPostgreSQL atomic reservation/releaseでrace-safe、provider usageはoutput validation前に計上する。Migration rollout、citation UX、billing dashboard、unified endpoint enforcement、smoke testsが残る |
+| AI文書作成 | Production binary + hardened local AI polish preview | 15 templates、4言語、実PDF/DOCX/private Storageは稼働中。Tenant-scoped previewのscoped cache/budgets、full-lifecycle timeout、atomic quota、stale-draft protection、viewport scrolling、instruction-free logs、4-locale UXをlocal test済み。Migration/staging/production deployとreal-provider smokeが残る。Binary authenticated synthetic recheckはCloudflare block中 |
 | HR Candidate Analysis | Skeleton | Scaffoldあり、production endpointは`501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme と AI Sales Bot | Planned | Phase 3 |
 
 ## 直近の順序
 
-1. LLM Router経由のAI questions/polishingを接続する。
+1. Local closeout commitをGitHubへpushし、CI/Netlify preview、staging migration + Edge deploy、authenticated real-provider preview/save smokeを行う。
 2. Web flow安定後、Telegram step-by-step document generationとdeliveryを追加する。
 3. Cloudflare blockを安全に解決後、production authenticated PDF/DOCX/Storage synthetic acceptanceを再実行する。
 

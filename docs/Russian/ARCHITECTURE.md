@@ -1,7 +1,7 @@
 # ARCHITECTURE.md — AI Business Concierge
 
 > Архитектура проекта, паттерны проектирования и правила unit-тестирования
-> Версия: 1.2 | Обновлено: 2026-08-11
+> Версия: 1.3 | Обновлено: 2026-08-21
 >
 > Текущий runtime-статус находится в [STATUS.md](STATUS.md). Папки `hr-candidate` — modular scaffold с TODO/stub logic, а не production-ready эталон.
 
@@ -41,6 +41,13 @@
 - Binary хранятся в private `generated-documents` по immutable path `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>`. `storage_path` CAS сериализует parallel exports; publish получает 5-minute provisional lease и pin `download_expires_at` на 65 секунд после URL signing. `documents.row_version` — CAS boundary для edit/export/delete; прежний object удаляется только после commit новой metadata/document. Legacy paths читаются, restrictive policy блокирует direct browser access.
 - `bright-api` проверяет active tenant membership. Generate готовит binary с O(n) PDF wrapping до публикации document DB row. Download выдаётся через 60-second signed URL; export регенерирует editable content, delete и compensation выполняются DB-first и затем cleanup private object.
 - Pinned Noto Sans JP OTF проверяется SHA-256, покрывает 4 языка, полностью embedded в PDF, как obfuscated `.odttf` в DOCX и cached в private `document-assets`.
+
+### 1.3 Граница polishing AI Документолога
+
+- Browser отправляет current editable draft и инструкцию user через tenant-scoped `POST /docs/:id/polish`; `bright-api` сначала проверяет принадлежность document активному tenant.
+- Model output автоматически в DB не сохраняется. Frontend применяет его только как preview edit textarea, а существующий optimistic document update выполняется лишь после нажатия **Сохранить**. Если draft revision изменился во время request, поздний AI result не применяется; modal ограничен коротким viewport и использует internal scroll.
+- System prompt отделяет document title/content как untrusted data. Tenant scope, полный prompt и effective output-token budget входят в SHA-256 cache key; общий document chat использует 2,000-token default, а polishing явно запрашивает 8,000.
+- Raw document, output и instruction text не пишутся в observability storage; interaction log хранит только длину instruction. Provider tokens/cost учитываются до output validation. Authoritative polishing plan-quota check+increment выполняется одним atomic PostgreSQL statement в service-role-only `reserve_ai_request`; reservation возвращается, если provider call не завершился. Safety, DB-backed minute rate limit, four-locale standard error envelope и bounded timeout, покрывающий fetch и полный response-body parsing, применяются на provider boundary.
 
 ---
 

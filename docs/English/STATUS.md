@@ -1,6 +1,6 @@
 # AI Business Concierge — current status
 
-> Last code/platform snapshot verified: **2026-08-12**
+> Last code/platform snapshot verified: **2026-08-21**
 > Documentation normalized: **2026-08-07**
 > The local runtime, production health/auth, and remote GitHub Actions baseline were re-verified on 2026-08-07. The P0 commits were pushed and the new CI run completed fully green.
 > 2026-08-08: the publishable-key commit was pushed and passed CI/Netlify deploy, but the production bundle still uses the legacy fallback. Direct browser Data API access to risk-scanner tables was closed in production.
@@ -29,6 +29,10 @@
 > 2026-08-12: Codex P2s on `0532a74` were closed with post-signing final lease pinning and delete/export row-version CAS. Staging `bright-api` v9 is ACTIVE, health `200`.
 > 2026-08-12: Codex P2s on `661401a` were closed with binary-before-DB publication and O(n) PDF wrapping. Staging `bright-api` v10 is ACTIVE, health `200`, Deno 7/7.
 > 2026-08-12: PR #11 final head `6db478d` passed CI/Netlify gates and a Codex re-review with no major issues, then merged to `main` as `8f179da`. Production shipped 36/36 migrations, `bright-api` v76, and Netlify deploy `6a7bad961b16200007cfd88e`; public/protected smoke tests are green. Authenticated synthetic acceptance was blocked by Cloudflare `403` before fixture creation, with final residue 0/0/0/0/0/0.
+> 2026-08-21: Tenant-scoped AI Document Assistant polishing preview is complete locally. Backend 9/9, frontend 24/24 files and 111/111 tests, type-check/build/security/deploy-env/audit gates are green; staging/production deploy and real-provider smoke remain pending.
+> 2026-08-21: The landing hero TEAM/08 card and caption overlap was fixed locally; frontend 25/25 files and 112/112 tests plus type-check are green. At 2048×1080 browser acceptance measured a 12.73px gap and 0 overlap/overflow/console errors.
+> 2026-08-21: Three P2 and one P3 AI polishing review findings were closed locally: chat/polish token budgets are separated, unusable outputs are usage/cost-accounted, raw instructions are removed from logs, and the four-locale error envelope is standardized. Backend 14/14 and frontend 26/26 files with 115/115 tests are green.
+> 2026-08-21: The remaining five AI polishing review findings were closed locally: Telegram cache scope was restored, provider timeout now covers the complete body lifecycle, polishing quota is atomically reserved in PostgreSQL, stale AI output cannot overwrite the user draft, and the modal scrolls within short viewports. Backend 18/18, Telegram check, frontend 26/26 files and 117/117 tests, type-check/build, canonical fresh migration replay 37/37, and local database pgTAP 45/45 are green.
 
 ## Current phase
 
@@ -43,20 +47,20 @@
 
 | Check | Status |
 |---|---|
-| Git | PR #10 merged as `55d1468` and PR #11 as `8f179da`; final PR #11 head `6db478d` passed CI and Codex re-review |
+| Git | Live GitHub `main` remains at `5e33f094`; the reviewed slice is included in this local closeout commit and has not been pushed, so the local branch is 1 commit ahead of remote |
 | Runtime | Node.js `22.18.0`; `.nvmrc` and package engine pin `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; verified with a fresh local volume |
 | Backend | Production Supabase Edge Function `bright-api` v76, `ACTIVE`, `verify_jwt=false`; SHA matches staging v10 |
 | Health | `200` |
 | Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 36/36 migrations, `bright-api` v10 ACTIVE, health `200`, unauthenticated docs `401` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge uses modern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overrides; legacy anon/service-role API keys are disabled |
-| Type-check | Passed |
-| Unit tests | Frontend 23/23 files, 109/109 tests; Deno document binary/lifecycle 7/7 |
+| Type-check | Passed in a clean temporary frontend install |
+| Unit tests | Frontend 26/26 files, 117/117 tests; AI polish/router/usage Deno 18/18; prior document binary/lifecycle Deno 7/7 |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks, 2 Vite `.env` fallback/runtime-precedence regressions, and 2 bundled-endpoint extraction regressions |
 | Production build/security check | Build passed with a synthetic non-production ref; CSP was generated from that ref; security checked 10 build/Netlify files |
 | Production dependency audit | Raw audit: 0 total vulnerabilities; scoped gate: 0 high/critical with no exceptions |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue system; landing, public/auth, product core, and admin shell redesign completed locally |
-| Visual browser acceptance | Landing Why Us 6/6 inverse text is green. Authenticated Company Dashboard dark mode: Business Status background `rgb(17,19,24)`; title/percentage contrast `16.73:1`, muted text `7.5:1`, success signal `10.66:1`; 12/12 text nodes inside the panel, overlap/overflow/console errors `0` |
+| Visual browser acceptance | Landing Why Us 6/6 inverse text is green. Landing hero TEAM/caption has a 12.73px gap at 2048×1080 with 0 overlap/overflow/console errors. Authenticated Company Dashboard dark mode has title/percentage contrast `16.73:1`, muted text `7.5:1`, success signal `10.66:1`, and 12/12 text nodes inside the panel |
 | Delivery platform | Netlify only. The repository has no Vercel config/dependency; the external Vercel project remains, with `gitRepositoryConnected=false` verified |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs are absent; on Personal only browser-public `VITE_*` values use `All` scope |
 | Staging security advisor | Errors `0`; known `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
@@ -66,8 +70,8 @@
 | Frontend Supabase key contract | Code and production accept only the modern publishable key; bundle has 1 modern key, 0 JWT-like keys, no legacy env name, and the format guard; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env deleted |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup of two tenants/five Auth users, final fixture 0/0; Realtime tables are SELECT-only and require active membership/tenant |
 | Document binary/Storage acceptance | Real PDF/DOCX lifecycle passes 7/7 Deno tests. Production private-bucket/schema read-back, last pgTAP assertion `ok 15`, health `200`, and unauthenticated docs `401` are green; authenticated synthetic acceptance is BLOCKED by Cloudflare `403` before the first fixture, with final Auth/tenant/template/document/generated/object residue 0/0/0/0/0/0 |
-| Migration history | Local, staging, and production are 36/36; all four document migrations are applied, with `documents.row_version`, `doc_generated.download_expires_at`, and 2/2 private document buckets verified |
-| Local Supabase services | Last full-stack snapshot: Storage `v1.68.1`, Auth `v2.195.0`, enabled containers healthy, Storage/Auth/Studio HTTP `200`. The stack was stopped at the 2026-08-11 closeout; remote staging acceptance did not depend on it |
+| Migration history | Canonical local fresh replay 37/37 and full database pgTAP 45/45 are green, including atomic quota 9/9; staging/production remain 36/36 and the new migration is not applied remotely. The user-owned duplicate migration copy was temporarily excluded and restored unchanged |
+| Local Supabase services | PostgreSQL-only stack is healthy for fresh replay and pgTAP. Full-stack start timed out on analytics/vector/realtime/storage/studio health; remote staging acceptance did not depend on it |
 
 ## Capability status
 
@@ -78,14 +82,14 @@
 | Admin platform | Partial | Core management/monitoring exists; tenant-profile/AI-stats authenticated smoke tests and Company Dashboard dark-contrast visual acceptance were confirmed in a user session |
 | Telegram | Partial / operational block | Verify `TELEGRAM_WEBHOOK_SECRET` and webhook |
 | Resend inbox | Partial | Code exists; receiving/delivery E2E is unverified |
-| AI Concierge/RAG and cost tracking | Partial | Foundation exists; citation UX, plan enforcement and full smoke tests remain |
-| AI Document Assistant | Production deployed / authenticated recheck pending | 15 templates, 4 languages, real PDF/DOCX, embedded Noto Sans JP, private Storage, 60-second signed URLs, and tenant-scoped export/delete are live; public/protected gates are green and authenticated synthetic recheck remains Cloudflare-blocked |
+| AI Concierge/RAG and cost tracking | Partial | Foundation exists; polishing request quota is race-safe through PostgreSQL atomic reservation/release, and provider usage is accounted before output validation. Migration rollout, citation UX, billing dashboard, unified endpoint enforcement, and full smoke tests remain |
+| AI Document Assistant | Production binary + hardened local AI polish preview | 15 templates, 4 languages, and real PDF/DOCX/private Storage are live. The tenant-scoped preview has locally tested scoped cache/budgets, full-lifecycle timeout, atomic quota, stale-draft protection, viewport scrolling, instruction-free logs, and four-locale UX; migration/staging/production deploy and real-provider smoke are pending. Binary authenticated synthetic recheck remains Cloudflare-blocked |
 | HR Candidate Analysis | Skeleton | Scaffold exists; production endpoint returns `501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme and AI Sales Bot | Planned | Phase 3 |
 
 ## Immediate order
 
-1. Connect the AI question/polishing flow through the LLM Router.
+1. Push the local closeout commit to GitHub, pass CI/Netlify preview, deploy the staging migration and Edge function, and run an authenticated real-provider preview/save smoke test.
 2. Once the web flow is stable, add Telegram step-by-step document generation and delivery.
 3. After resolving the Cloudflare block safely, rerun production authenticated PDF/DOCX/Storage synthetic acceptance.
 

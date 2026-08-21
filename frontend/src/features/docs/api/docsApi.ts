@@ -79,6 +79,15 @@ export type ExportDocumentResult = {
   download_expires_in: number;
 };
 
+export type PolishDocumentResult = {
+  document_id: string;
+  content: string;
+  model: string;
+  complexity: "document";
+  cached: boolean;
+  remaining: number | null;
+};
+
 export async function getDocTemplates(
   tenantId: string,
   locale: Locale = "uz",
@@ -128,6 +137,18 @@ export async function exportDoc(
     tenantId,
     method: "POST",
     body: JSON.stringify({ format, locale }),
+  });
+}
+
+export async function polishDoc(
+  tenantId: string,
+  id: string,
+  input: { instruction: string; content: string; locale: Locale },
+) {
+  return apiRequest<PolishDocumentResult>(`/docs/${id}/polish`, {
+    tenantId,
+    method: "POST",
+    body: JSON.stringify(input),
   });
 }
 

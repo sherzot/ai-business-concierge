@@ -1,6 +1,6 @@
 # AI Business Concierge — active plan
 
-> Version 6.0 · Updated 2026-08-12
+> Version 6.1 · Updated 2026-08-21
 > Only active and next work belongs here. The previous master plan is archived at [../archive/English/PLAN_LEGACY_2026-07-24.md](../archive/English/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — safe session start
@@ -45,7 +45,7 @@
 
 ## P1 — complete Phase 2 AI Document Assistant
 
-- [ ] Add LLM-guided questions and polishing.
+- [ ] Push the local AI polishing preview closeout commit to GitHub, pass CI and Netlify preview, deploy the staging migration plus `bright-api`, and run an authenticated real-provider preview/save smoke test.
 - [ ] After the web flow is stable, add Telegram step-by-step generation and file delivery.
 - [ ] After safely resolving the Cloudflare Auth Admin `403`, rerun production authenticated PDF/DOCX signed-download, cross-tenant deny, direct Storage deny, and delete-cleanup synthetic acceptance.
 

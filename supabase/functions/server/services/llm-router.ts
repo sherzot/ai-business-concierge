@@ -3,8 +3,8 @@
  * Phase 0.1 — AI Business Concierge
  *
  * Mantiq:
- *   simple/default  → Claude Haiku 3.5  (tez, arzon, 80% so'rovlar)
- *   document/analysis → Claude Sonnet 4 (chuqur, to'liq, 20% so'rovlar)
+ *   simple/default  → Claude Haiku 4.5  (tez, arzon, 80% so'rovlar)
+ *   document/analysis → Claude Sonnet 4.6 (chuqur, to'liq, 20% so'rovlar)
  */
 
 // ---------------------------------------------------------------------------
@@ -17,8 +17,11 @@ export type LLMRequest = {
   message: string;
   systemPrompt?: string;
   context?: string;  // Knowledge Base yoki boshqa kontekst
-  locale?: string;   // "uz" | "ru" | "en"
+  locale?: string;   // "uz" | "ru" | "en" | "ja"
   complexity?: ComplexityLevel; // majburiy emas — auto-detect qilinadi
+  cacheScope: string; // tenant yoki boshqa authorization scope
+  maxTokens?: number;
+  timeoutMs?: number;
 };
 
 export type LLMResponse = {
@@ -38,13 +41,13 @@ export type LLMResponse = {
 
 // Model identifikatorlari (env orqali o'zgartirish mumkin)
 export const HAIKU_MODEL =
-  Deno.env.get("CLAUDE_HAIKU_MODEL") ?? "claude-3-5-haiku-20241022";
+  Deno.env.get("CLAUDE_HAIKU_MODEL") ?? "claude-haiku-4-5-20251001";
 export const SONNET_MODEL =
   Deno.env.get("CLAUDE_SONNET_MODEL") ?? "claude-sonnet-4-6";
 
 // Narx (1M token uchun USD) — cost tracking uchun
 const PRICING: Record<string, { input: number; output: number }> = {
-  [HAIKU_MODEL]: { input: 0.8, output: 4.0 },
+  [HAIKU_MODEL]: { input: 1.0, output: 5.0 },
   [SONNET_MODEL]: { input: 3.0, output: 15.0 },
 };
 
@@ -55,6 +58,7 @@ const MAX_TOKENS: Record<ComplexityLevel, number> = {
   analysis: 1500,
   default: 800,
 };
+const MAX_PROVIDER_OUTPUT_TOKENS = 8_000;
 
 // ---------------------------------------------------------------------------
 // In-memory cache (cold start da tozalanadi, ~5 daqiqa TTL)
@@ -62,9 +66,48 @@ const MAX_TOKENS: Record<ComplexityLevel, number> = {
 
 const _cache = new Map<string, { text: string; ts: number }>();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 daqiqa
+const CACHE_MAX_ENTRIES = 250;
+const DEFAULT_TIMEOUT_MS = 30_000;
 
-const _cacheKey = (model: string, system: string, msg: string): string =>
-  `${model}::${system.slice(0, 60)}::${msg.slice(0, 120)}`;
+const _sha256Hex = async (value: string): Promise<string> => {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(value),
+  );
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+};
+
+export const buildLLMCacheKey = (input: {
+  model: string;
+  systemPrompt: string;
+  userContent: string;
+  locale: string;
+  complexity: ComplexityLevel;
+  cacheScope: string;
+  maxTokens: number;
+}): Promise<string> =>
+  _sha256Hex(JSON.stringify({
+    scope: input.cacheScope,
+    model: input.model,
+    system: input.systemPrompt,
+    user: input.userContent,
+    locale: input.locale,
+    complexity: input.complexity,
+    maxTokens: input.maxTokens,
+  }));
+
+const _pruneCache = (now: number) => {
+  for (const [key, entry] of _cache) {
+    if (now - entry.ts >= CACHE_TTL_MS) _cache.delete(key);
+  }
+  while (_cache.size >= CACHE_MAX_ENTRIES) {
+    const oldestKey = _cache.keys().next().value as string | undefined;
+    if (!oldestKey) break;
+    _cache.delete(oldestKey);
+  }
+};
 
 // ---------------------------------------------------------------------------
 // Murakkablikni aniqlash
@@ -138,7 +181,10 @@ export const callClaude = async (
 ): Promise<LLMResponse> => {
   const complexity = request.complexity ?? classifyComplexity(request.message);
   const model = _selectModel(complexity);
-  const maxTokens = MAX_TOKENS[complexity];
+  const maxTokens = Math.min(
+    Math.max(Math.floor(request.maxTokens ?? MAX_TOKENS[complexity]), 1),
+    MAX_PROVIDER_OUTPUT_TOKENS,
+  );
   const locale = request.locale ?? "uz";
 
   // System prompt — default (barcha 4 til uchun)
@@ -152,10 +198,26 @@ export const callClaude = async (
       ? "あなたはウズベキスタンの中小企業向けAIビジネスコンシェルジュです。簡潔、実用的、正確に回答してください。不明な場合は正直に伝えてください。"
       : "Sen AI Business Concierge — O'zbekiston kichik bizneslari uchun AI yordamchisi. Javoblar qisqa, amaliy va aniq bo'lsin. Bilmasang — halol ayt.");
 
-  // Cache tekshirish
-  const cacheKey = _cacheKey(model, systemPrompt, request.message);
+  // Xabarlar tuzish — agar kontekst bo'lsa uni ham qo'shish
+  const userContent = request.context
+    ? `Ma'lumot:\n${request.context}\n\nSavol: ${request.message}`
+    : request.message;
+
+  // Cache kaliti to'liq prompt va authorization scope'dan hash qilinadi.
+  // Bu bir xil boshlanadigan yoki boshqa tenantga tegishli promptlar to'qnashuvini yopadi.
+  const cacheKey = await buildLLMCacheKey({
+    model,
+    systemPrompt,
+    userContent,
+    locale,
+    complexity,
+    cacheScope: request.cacheScope,
+    maxTokens,
+  });
+  const now = Date.now();
+  _pruneCache(now);
   const cached = _cache.get(cacheKey);
-  if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
+  if (cached && now - cached.ts < CACHE_TTL_MS) {
     return {
       text: cached.text,
       model,
@@ -168,51 +230,61 @@ export const callClaude = async (
     };
   }
 
-  // Xabarlar tuzish — agar kontekst bo'lsa uni ham qo'shish
-  const userContent = request.context
-    ? `Ma'lumot:\n${request.context}\n\nSavol: ${request.message}`
-    : request.message;
-
   const start = Date.now();
+  const timeoutMs = Math.min(
+    Math.max(request.timeoutMs ?? DEFAULT_TIMEOUT_MS, 1_000),
+    120_000,
+  );
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: maxTokens,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userContent }],
+      }),
+      signal: controller.signal,
+    });
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
+    if (!response.ok) {
+      const errBody = await response.text();
+      throw new Error(`CLAUDE_ERROR:${response.status}:${errBody}`);
+    }
+
+    const data = await response.json();
+    const text: string = data.content?.[0]?.text ?? "";
+    const inputTokens: number = data.usage?.input_tokens ?? 0;
+    const outputTokens: number = data.usage?.output_tokens ?? 0;
+    const costUsd = _calcCost(model, inputTokens, outputTokens);
+    const latencyMs = Date.now() - start;
+
+    // Cachega yozish
+    _cache.set(cacheKey, { text, ts: Date.now() });
+
+    return {
+      text,
       model,
-      max_tokens: maxTokens,
-      system: systemPrompt,
-      messages: [{ role: "user", content: userContent }],
-    }),
-  });
-
-  if (!response.ok) {
-    const errBody = await response.text();
-    throw new Error(`CLAUDE_ERROR:${response.status}:${errBody}`);
+      complexity,
+      inputTokens,
+      outputTokens,
+      costUsd,
+      latencyMs,
+      cached: false,
+    };
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new Error(`CLAUDE_TIMEOUT:${timeoutMs}`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  const data = await response.json();
-  const text: string = data.content?.[0]?.text ?? "";
-  const inputTokens: number = data.usage?.input_tokens ?? 0;
-  const outputTokens: number = data.usage?.output_tokens ?? 0;
-  const costUsd = _calcCost(model, inputTokens, outputTokens);
-  const latencyMs = Date.now() - start;
-
-  // Cachega yozish
-  _cache.set(cacheKey, { text, ts: Date.now() });
-
-  return {
-    text,
-    model,
-    complexity,
-    inputTokens,
-    outputTokens,
-    costUsd,
-    latencyMs,
-    cached: false,
-  };
 };

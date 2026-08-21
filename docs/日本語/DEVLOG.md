@@ -4,6 +4,45 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-21 — AI polishing reviewの残り5件をlocalで解消
+
+- Follow-up reviewで5件を確認した。Telegram Maslahatchiが必須`cacheScope`を渡さずentrypoint type-checkが失敗すること、Anthropic timeoutがresponse headers後に解除され遅延bodyを対象にしないこと、checkとincrementの間でconcurrent requestsがplan quotaを超え得ること、polishing中のuser editを遅いAI resultが上書きすること、短いviewportでedit modalが画面外へ出ること。
+- Telegram callerへtenant-scoped cacheを追加した。LLM timeoutはfetch、error body、JSON body parsingの全体を対象にする。Polishing quotaのauthoritative decisionはservice-role-only PostgreSQL `reserve_ai_request`へ移し、limit checkとincrementを1つのatomic statementで実行する。Provider callが完了しない場合は`release_ai_request`がreservationを戻す。Token accountingは分離され、requestは二重計上しない。
+- React modalはrequest開始時のdraft revisionとcurrent revisionを比較する。Request中にuserが編集した場合、stale resultを適用せず、4言語のretry messageを表示する。Dialogは`100dvh`で制限しinternal vertical scrollを持つ。不要なlayerは追加せず、use caseはvertical sliceのまま、quota invariantはPostgreSQL、draft invariantはReact、timeout lifecycleはprovider adapterが所有する。
+- Verification: fix前はtimeout regressionが6/7でFAIL、reservation testはmissing exportsでFAIL。Fix後はDeno polish/router/usage 18/18、Telegram entrypoint `deno check`、`git diff --check`がPASS。Secret-free clean temporary frontend installでtargeted modal 3/3、full suite 26/26 files・117/117 tests、TypeScript、3,701-module production buildがPASS。Docker Desktopを起動し、user-owned duplicate migrationをrestore trap下で一時除外して未変更で復元した。Canonical fresh migration replay 37/37、新quota pgTAP 9/9、full local database suite 3/3 files・45/45 testsがPASS。Final production reviewではcommitをblockする新しいverified findingはなく、intended filesにsecret signatureは見つからなかった。Full `server/index.ts` checkは既知の22件のmonolith type errorsに残り、新規行のerrorは0。Real Anthropic、staging/production deploy、authenticated remote smokeは未実施。
+- Remaining/next: local closeout commitをGitHubへpushし、CI/Netlify preview、staging migration + `bright-api` deploy、authenticated real-provider preview/save smokeを行う。3件のuser-owned untracked copiesは未変更でcommitから除外した。
+
+Files: `supabase/functions/{server/index.ts,server/services/llm-router.ts,server/services/llm-router.test.ts,server/services/usage-tracking.ts,server/services/usage-tracking.test.ts,telegram-bot/services/maslahatchi.ts}`, `supabase/migrations/20260821000000_atomic_ai_usage_reservations.sql`, `supabase/tests/database/ai_usage_reservation.test.sql`, `frontend/src/features/docs/{components/DocEditModal.tsx,__tests__/DocEditModal.test.tsx}`, `frontend/src/app/i18n.ts`, 4言語`DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`。
+
+## 2026-08-21 — AI polishing review findingsをlocalで解消
+
+- Local polishing reviewで4件のdefectを確認した。Shared `document` chat budgetも8,000 tokensへ拡大していたこと、unusable model outputでprovider usage/costが記録されないこと、raw user instruction excerptが`ai_interactions`へ保持されること、quota/rate-limit errorsがfrontend envelopeと4 locale contractに一致しないこと。
+- LLM Routerはshared `document` defaultを2,000 tokensへ戻し、polishingのみexplicit 8,000を要求する。Effective output budgetもcache keyへ含めた。Provider usage/costはoutput validation前に記録し、empty-output regressionで順序を確認する。AI interactionはraw instructionではなく`instruction_length`のみ保持する。
+- Polish document-not-found、minute rate-limit、guard-unavailable、plan-quota failureはUZ/RU/EN/JA messages付きstandard `failure()` envelopeで返す。Frontend parserはstandard envelopeを優先しつつlegacy `error.message`にも対応する。DB schema、migration、RLS、tenant authorizationは未変更。
+- Verification: Deno polish/router 14/14、focused service `deno check` PASS。Full `index.ts` checkは従来と同じ23件のmonolith type errorsを返し、新polishing pathのerrorは0。Secret-free clean `/tmp` frontend installで26/26 files・115/115 tests、TypeScript、3,701-module production build、10-file security gate、deploy-env 14/14、production audit total vulnerabilities 0がPASS。Real Anthropic、staging/production deploy、authenticated remote smokeは未実施。
+- Remaining/next: final diff確認、commit、CI/Netlify preview、staging `bright-api` deploy、authenticated real-provider preview/save smokeを行う。3件のuser-owned untracked copiesは未変更。
+
+Files: `supabase/functions/server/{index.ts,services/llm-router.ts,services/llm-router.test.ts,services/document-polisher.ts,services/document-polisher.test.ts}`, `frontend/src/shared/lib/{apiClient.ts,apiError.ts,apiError.test.ts}`, 4言語`DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`。
+
+## 2026-08-21 — Landing heroのTEAM/caption overlapを解消
+
+- 提供された2048×1080 production screenshotで、`LandingSystemVisual`の`TEAM / 08` cardが`ONE TENANT · ONE OPERATIONAL VIEW` captionとoverlapしていることを確認。SVG geometryはTEAMを`y=274`、height `58`で配置し`332`まで伸び、caption baselineは`y=322`だった。
+- TEAMを`y=244`へ移動。新しいDOM-geometry regression testはcard bottomとcaption baseline間に最低16 SVG unitsのclearanceを要求する。
+- Clean temporary installでtargeted landing tests 2/2 files・6/6 tests、full frontend suite 25/25 files・112/112 tests、TypeScript PASS。2048×1080 in-app browser acceptanceではreal gap `12.73px`、overlap `false`、horizontal overflow `false`、console errors `0`。Hero copy、CTA、motionは未変更。
+- Remaining: AI polishing sliceと一緒にreview/commitし、CIとNetlify previewを通す。Production deployは未実施で、active P1 orderは変更なし。
+
+Files: `frontend/src/features/landing/components/LandingSystemVisual.tsx`, `frontend/src/features/landing/__tests__/LandingSystemVisual.test.tsx`, 4言語`DEVLOG/STATUS`。
+
+## 2026-08-21 — AI文書作成polishing previewをlocalで完了
+
+- Productionではprivate Storageへの実PDF/DOCX生成が稼働していたが、既存editable documentをAIへ依頼して改善するflowはなかった。Audit開始時、local `main`と`origin/main`は`5e33f094`で一致し、既存3件のuntracked user filesを保持した。
+- Tenant-protected `POST /v1/docs/:id/polish`、Anthropic LLM Router integration、4-locale edit-modal flowを追加。Model結果はtextareaのreview previewだけに適用し、保存済みdocumentはuserが明示的に**保存**を選ぶまで変更しない。Endpointはtenantでdocumentをauthorizeし、safety/rate/usage guardsを適用、document contentなしでaudit/usage metadataを記録する。
+- Routerをcurrent Claude Haiku 4.5/Sonnet 4.6 defaults、tenant-scoped full-prompt SHA-256 cache key、250-entry bounded TTL cache、bounded timeout、document output 8,000-token budgetで強化。Promptはtitle/contentをuntrusted dataとして分離し、facts/citations/legal guaranteesの捏造を禁止する。Input/output limitsとUZ/RU/EN/JA errorsも追加した。
+- 検証: backend 9/9、clean `/tmp` installでfrontend 24/24 files・111/111 testsとTypeScript成功。Production build 3,700 modules、security gate 10 files、deploy-env 14/14、production dependency high/critical 0も成功。Workspace `node_modules`はiCloud read hangのためfrontend gatesをclean copyで実行。Full `index.ts` Deno checkは既存23件のmonolith typing errorsのみで失敗し、新endpoint/serviceを指すerrorはない。Real Anthropic call、browser visual acceptance、staging/production deploy、remote smokeは未実施。
+- 次のaction: review/commit、CIとNetlify preview、staging `bright-api` deploy、authenticated real-provider preview/save smokeを行い、その後にproduction rolloutを判断する。
+
+Files: `supabase/functions/server/{index.ts,openapi.ts,services/llm-router.ts,services/llm-router.test.ts,services/document-polisher.ts,services/document-polisher.test.ts}`, `frontend/src/features/docs/{api/docsApi.ts,components/DocEditModal.tsx,__tests__/docsApi.test.ts,__tests__/DocEditModal.test.tsx}`, `frontend/src/app/i18n.ts`, 4言語`DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`。
+
 ## 2026-08-12 — AI文書作成production rollout完了
 
 - PR #10を`55d1468`としてmerge。PR #11 final head `6db478d`はCI run `31545572719`、backend-only Netlify PASS、major issueなしのCodex re-reviewを通過し、`8f179da`として`main`へsquash-merge。Merge commitのGitHub Actions run `31545917894`も成功。

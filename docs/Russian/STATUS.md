@@ -1,6 +1,6 @@
 # AI Business Concierge — текущее состояние
 
-> Последний подтверждённый snapshot кода/platform: **2026-08-12**
+> Последний подтверждённый snapshot кода/platform: **2026-08-21**
 > Документация упорядочена: **2026-08-07**
 > Local runtime, production health/auth и remote GitHub Actions baseline повторно проверены 2026-08-07. P0 commits отправлены, новый CI run завершён полностью green.
 > 2026-08-08: commit publishable key отправлен и прошёл CI/Netlify deploy, но production bundle пока использует legacy fallback. Прямой browser Data API доступ к risk scanner tables закрыт в production.
@@ -29,6 +29,10 @@
 > 2026-08-12: P2 Codex для `0532a74` закрыты post-signing final lease pin и delete/export row-version CAS. Staging `bright-api` v9 ACTIVE, health `200`.
 > 2026-08-12: P2 Codex для `661401a` закрыты binary-before-DB publish и O(n) PDF wrapping. Staging `bright-api` v10 ACTIVE, health `200`, Deno 7/7.
 > 2026-08-12: Final head PR #11 `6db478d` прошёл CI/Netlify gates и Codex re-review без major issues, затем merged в `main` как `8f179da`. В production выпущены 36/36 migrations, `bright-api` v76 и Netlify deploy `6a7bad961b16200007cfd88e`; public/protected smoke tests green. Authenticated synthetic acceptance заблокирован Cloudflare `403` до создания fixture, финальный residue 0/0/0/0/0/0.
+> 2026-08-21: Tenant-scoped polishing preview AI Документолога локально готов. Backend 9/9, frontend 24/24 files и 111/111 tests, type-check/build/security/deploy-env/audit gates green; staging/production deploy и real-provider smoke остаются.
+> 2026-08-21: Overlap landing hero TEAM/08 card и caption локально исправлен; frontend 25/25 files и 112/112 tests, type-check green. Browser acceptance 2048×1080: gap 12.73px, overlap/overflow/console errors 0.
+> 2026-08-21: Локально закрыты 3 P2 и 1 P3 findings AI polishing: chat/polish token budgets разделены, unusable outputs учитываются в usage/cost, raw instructions удалены из logs, four-locale error envelope стандартизирован. Backend 14/14, frontend 26/26 files и 115/115 tests green.
+> 2026-08-21: Локально закрыты оставшиеся 5 findings AI polishing: восстановлен Telegram cache scope, provider timeout покрывает полный body lifecycle, polishing quota atomically резервируется в PostgreSQL, stale AI output не перезаписывает user draft, modal scroll остаётся внутри короткого viewport. Backend 18/18, Telegram check, frontend 26/26 files и 117/117 tests, type-check/build, canonical fresh migration replay 37/37 и local database pgTAP 45/45 green.
 
 ## Текущая фаза
 
@@ -43,20 +47,20 @@
 
 | Проверка | Состояние |
 |---|---|
-| Git | PR #10 merged как `55d1468`, PR #11 как `8f179da`; final head PR #11 `6db478d` прошёл CI и Codex re-review |
+| Git | Live GitHub `main` остаётся на `5e33f094`; reviewed slice включён в этот local closeout commit и ещё не pushed, поэтому local branch на 1 commit впереди remote |
 | Runtime | Node.js `22.18.0`; `.nvmrc` и package engine `22.x` |
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
 | Backend | Production Supabase Edge Function `bright-api` v76, `ACTIVE`, `verify_jwt=false`; SHA совпадает со staging v10 |
 | Health | `200` |
 | Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 36/36 migrations, `bright-api` v10 ACTIVE, health `200`, unauth docs `401` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge использует modern overrides `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY`; legacy anon/service-role API keys disabled |
-| Type-check | Успешно |
-| Unit tests | Frontend 23/23 файлов, 109/109 тестов; Deno document binary/lifecycle 7/7 |
+| Type-check | Успешно в clean temporary frontend install |
+| Unit tests | Frontend 26/26 files, 117/117 tests; AI polish/router/usage Deno 18/18; прежний document binary/lifecycle Deno 7/7 |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks + 2 Vite `.env` fallback/runtime-precedence + 2 bundled-endpoint extraction regressions |
 | Production build/security check | Build прошёл с synthetic non-production ref; CSP создан из этого ref; проверено 10 build/Netlify файлов |
 | Production dependency audit | Raw audit: всего 0 vulnerabilities; scoped gate без исключений: high/critical 0 |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue; landing, public/auth, product core и admin shell redesign завершён локально |
-| Visual browser acceptance | Landing Why Us 6/6 inverse text green. Authenticated Company Dashboard dark mode: Business Status background `rgb(17,19,24)`; title/percentage contrast `16.73:1`, muted text `7.5:1`, success signal `10.66:1`; 12/12 text nodes внутри panel, overlap/overflow/console errors `0` |
+| Visual browser acceptance | Landing Why Us 6/6 inverse text green. Landing hero TEAM/caption: gap 12.73px на 2048×1080, overlap/overflow/console errors `0`. Authenticated Company Dashboard dark mode: title/percentage contrast `16.73:1`, muted text `7.5:1`, success signal `10.66:1`, 12/12 text nodes внутри panel |
 | Delivery platform | Только Netlify. В repository нет Vercel config/dependency; внешний Vercel project сохранён, `gitRepositoryConnected=false` подтверждён |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs отсутствуют; на Personal только browser-public `VITE_*` используют `All` scope |
 | Staging security advisor | Errors `0`; известный `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
@@ -66,8 +70,8 @@
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup двух tenants/пяти Auth users и final fixture 0/0; Realtime tables SELECT-only и требуют active membership/tenant |
 | Document binary/Storage acceptance | Real PDF/DOCX lifecycle Deno 7/7. Production private-bucket/schema read-back, последний pgTAP `ok 15`, health `200` и unauth docs `401` green; authenticated synthetic acceptance BLOCKED Cloudflare `403` до первого fixture, final Auth/tenant/template/document/generated/object residue 0/0/0/0/0/0 |
-| Migration history | Local, staging и production 36/36; четыре document migrations применены, `documents.row_version`, `doc_generated.download_expires_at` и 2/2 private document buckets подтверждены |
-| Local Supabase services | Последний full-stack snapshot: Storage `v1.68.1`, Auth `v2.195.0`, enabled containers healthy, Storage/Auth/Studio HTTP `200`. На closeout 2026-08-11 stack был stopped; remote staging acceptance от него не зависел |
+| Migration history | Canonical local fresh replay 37/37 и full database pgTAP 45/45 green, включая atomic quota 9/9; staging/production остаются 36/36, новая migration remote не применялась. User-owned duplicate migration copy временно исключалась и возвращена без изменений |
+| Local Supabase services | PostgreSQL-only stack healthy для fresh replay и pgTAP. Full-stack start завершился health timeout для analytics/vector/realtime/storage/studio; remote staging acceptance от него не зависел |
 
 ## Состояние возможностей
 
@@ -78,14 +82,14 @@
 | Admin platform | Partial | Основное управление/monitoring есть; tenant-profile/AI-stats authenticated smoke tests и Company Dashboard dark-contrast visual acceptance подтверждены в user session |
 | Telegram | Partial / operational block | Проверить `TELEGRAM_WEBHOOK_SECRET` и webhook |
 | Resend inbox | Partial | Код есть; receiving/delivery E2E не подтверждён |
-| AI Concierge/RAG и cost tracking | Partial | Основа есть; citation UX, plan enforcement и smoke-test остаются |
-| AI Документолог | Production deployed / authenticated recheck pending | 15 templates, 4 языка, real PDF/DOCX, embedded Noto Sans JP, private Storage, 60-second signed URL и tenant-scoped export/delete работают в production; public/protected gates green, authenticated synthetic recheck заблокирован Cloudflare |
+| AI Concierge/RAG и cost tracking | Partial | Основа есть; polishing request quota race-safe через PostgreSQL atomic reservation/release, provider usage учитывается до output validation. Остаются rollout migration, citation UX, billing dashboard, unified endpoint enforcement и smoke tests |
+| AI Документолог | Production binary + hardened local AI polish preview | 15 templates, 4 языка и real PDF/DOCX/private Storage работают. Для tenant-scoped preview локально протестированы scoped cache/budgets, full-lifecycle timeout, atomic quota, stale-draft protection, viewport scrolling, logs без instruction и four-locale UX; migration/staging/production deploy и real-provider smoke остаются. Binary authenticated synthetic recheck заблокирован Cloudflare |
 | HR Candidate Analysis | Skeleton | Scaffold есть; production endpoint возвращает `501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme и AI Sales Bot | Planned | Phase 3 |
 
 ## Ближайший порядок
 
-1. Подключить AI questions/polishing через LLM Router.
+1. Push local closeout commit в GitHub, пройти CI/Netlify preview, deploy staging migration + Edge и выполнить authenticated real-provider preview/save smoke.
 2. После стабилизации web flow добавить Telegram step-by-step document generation и delivery.
 3. После безопасного решения Cloudflare block повторить production authenticated PDF/DOCX/Storage synthetic acceptance.
 

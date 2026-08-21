@@ -6,8 +6,9 @@
  *   • Foydalanuvchining tarifi (free / starter / pro / company) ga qarab
  *     kunlik AI so'rovi va hujjat generatsiya limitini tekshiradi.
  *   • Limit yetganda 429 RATE_LIMITED qaytaradi.
- *   • Har muvaffaqiyatli so'rov uchun `usage_tracking` jadvaliga
- *     `increment_usage()` orqali increment qiladi.
+ *   • AI request limitlari provider chaqiruvidan oldin PostgreSQL'da atomik
+ *     rezervatsiya qilinadi; muvaffaqiyatsiz provider chaqiruvi rezervatsiyani
+ *     qaytaradi.
  *
  * Migrationga qarang:
  *   20260417_phase0_new_tables.sql — usage_tracking jadval + increment_usage funksiyasi
@@ -106,6 +107,87 @@ export async function recordUsage(
   }
 }
 
+export type AiRequestReservationResult =
+  | { ok: true; remaining: number; plan: Plan }
+  | {
+    ok: false;
+    remaining: 0;
+    plan: Plan;
+    reason: "limit" | "unavailable";
+  };
+
+/**
+ * Bitta AI request o'rnini PostgreSQL'da atomik rezervatsiya qiladi.
+ * Limitni tekshirish va counterni oshirish bitta DB statement ichida bajariladi,
+ * shuning uchun parallel so'rovlar bitta qolgan o'rinni birga ishlata olmaydi.
+ */
+export async function reserveAiRequest(
+  supabase: SupabaseClient,
+  tenantId: string,
+  userId: string,
+  plan: Plan,
+): Promise<AiRequestReservationResult> {
+  const limit = PLAN_LIMITS[plan].ai_requests;
+  try {
+    const { data, error } = await supabase.rpc("reserve_ai_request", {
+      p_tenant_id: tenantId,
+      p_user_id: userId,
+      p_limit: limit,
+    });
+
+    if (error) {
+      console.error("usage-tracking: reserveAiRequest failed", error.message);
+      return { ok: false, remaining: 0, plan, reason: "unavailable" };
+    }
+
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row || typeof row.allowed !== "boolean") {
+      console.error("usage-tracking: reserveAiRequest returned invalid data");
+      return { ok: false, remaining: 0, plan, reason: "unavailable" };
+    }
+
+    if (!row.allowed) {
+      return { ok: false, remaining: 0, plan, reason: "limit" };
+    }
+
+    return {
+      ok: true,
+      remaining: limit === -1
+        ? Number.POSITIVE_INFINITY
+        : Math.max(0, Number(row.remaining ?? 0)),
+      plan,
+    };
+  } catch (error) {
+    console.error("usage-tracking: reserveAiRequest failed", error);
+    return { ok: false, remaining: 0, plan, reason: "unavailable" };
+  }
+}
+
+/** Providerga yetib bormagan request uchun oldingi rezervatsiyani qaytaradi. */
+export async function releaseAiRequestReservation(
+  supabase: SupabaseClient,
+  tenantId: string,
+  userId: string,
+): Promise<boolean> {
+  try {
+    const { data, error } = await supabase.rpc("release_ai_request", {
+      p_tenant_id: tenantId,
+      p_user_id: userId,
+    });
+    if (error) {
+      console.error(
+        "usage-tracking: releaseAiRequestReservation failed",
+        error.message,
+      );
+      return false;
+    }
+    return data === true;
+  } catch (error) {
+    console.error("usage-tracking: releaseAiRequestReservation failed", error);
+    return false;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Helperlar
 // ---------------------------------------------------------------------------
@@ -158,7 +240,7 @@ async function getPeriodUsage(
     return 0;
   }
 
-  return (data ?? []).reduce(
+  return ((data ?? []) as Array<Record<string, unknown>>).reduce(
     (sum, row) => sum + Number(row?.[column] ?? 0),
     0,
   );

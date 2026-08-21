@@ -4,7 +4,7 @@ const nodes = [
   { label: "INBOX", value: "24", x: 70, y: 72 },
   { label: "TASKS", value: "12", x: 330, y: 52 },
   { label: "DOCS", value: "15", x: 360, y: 250 },
-  { label: "TEAM", value: "08", x: 76, y: 274 },
+  { label: "TEAM", value: "08", x: 76, y: 244 },
 ] as const;
 
 export function LandingSystemVisual() {

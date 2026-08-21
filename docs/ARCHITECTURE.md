@@ -1,7 +1,7 @@
 # ARCHITECTURE.md — AI Business Concierge
 
 > Loyiha arxitekturasi, design patternlar va unit testing qoidalari
-> Version: 1.2 | Yangilandi: 2026-08-11
+> Version: 1.3 | Yangilandi: 2026-08-21
 >
 > Bu hujjat joriy arxitektura chegaralari va target refactoring yo'nalishini birga ko'rsatadi. Runtime holati uchun [STATUS.md](STATUS.md) ustun. `hr-candidate` papkalari scaffold bo'lib, production-ready etalon emas.
 
@@ -41,6 +41,13 @@
 - Binarylar private `generated-documents` bucketida immutable `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>` yo'lida saqlanadi. `storage_path` CAS parallel export commitlarini serializatsiya qiladi; publish 5 daqiqalik provisional lease oladi va URL sign qilingach `download_expires_at`ni 65 soniyaga pin qiladi. `documents.row_version` edit/export/delete CAS chegarasi bo'lib, faqat committed yangi metadata/documentdan keyin superseded object o'chadi. Legacy unversioned yo'llar o'qiladi; restrictive Storage policy direct browser accessni yopadi.
 - `bright-api` active tenant membershipni tekshiradi. Generate binaryni O(n) PDF wrapping bilan oldindan tayyorlab, keyin document DB qatorini publish qiladi. Yuklab olish faqat 60 soniyali signed URL; export editable contentdan qayta generatsiya qiladi, delete/compensation DB-first bo'lib keyin private objectni cleanup qiladi.
 - To'rt til uchun pinned va SHA-256 bilan tasdiqlangan `Noto Sans JP` OTF ishlatiladi. Font PDFga to'liq, DOCXga obfuscated `.odttf` sifatida embed qilinadi va private `document-assets` bucketida cache qilinadi.
+
+### 1.3 AI Hujjatchi polishing chegarasi
+
+- Browser current editable draft va foydalanuvchi ko'rsatmasini tenant-scoped `POST /docs/:id/polish` orqali yuboradi; `bright-api` avval document ID ayni active tenantga tegishli ekanini tekshiradi.
+- Model javobi DBga avtomatik yozilmaydi. Frontend uni faqat edit textarea previewiga qo'llaydi; mavjud optimistic document update faqat foydalanuvchi **Saqlash**ni bosganda ishlaydi. Request davomida draft revisioni o'zgarsa kech kelgan AI natijasi qo'llanmaydi; modal qisqa viewportda ichki scroll bilan chegaralanadi.
+- System prompt document title/contentni untrusted data sifatida ajratadi. Tenant scope, to'liq prompt va effective output-token budjeti SHA-256 cache keyga kiradi; umumiy document chat 2,000 token defaultda, polishing esa explicit 8,000 token bilan chegaralangan.
+- Raw hujjat, output va instruction matni observability storage'ga yozilmaydi; interaction log faqat instruction uzunligini saqlaydi. Provider token/costi output validatsiyasidan oldin hisoblanadi. Polishing plan quota'sining authoritative check+incrementi service-role-only `reserve_ai_request` RPCsida bitta atomik PostgreSQL statement sifatida bajariladi; providerga yetib bormagan xatoda reservation qaytariladi. Safety, DB-backed minute rate limit, to'rt tilli standart error envelope va fetch hamda to'liq response body parsingni qamraydigan bounded timeout provider chegarasida qo'llanadi.
 
 ---
 

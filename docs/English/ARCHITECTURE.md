@@ -1,7 +1,7 @@
 # ARCHITECTURE.md — AI Business Concierge
 
 > Project architecture, design patterns, and unit testing rules
-> Version: 1.2 | Updated: 2026-08-11
+> Version: 1.3 | Updated: 2026-08-21
 >
 > Current runtime status is in [STATUS.md](STATUS.md). The `hr-candidate` folders are a modular scaffold with TODO/stub logic, not a production-ready reference implementation.
 
@@ -41,6 +41,13 @@
 - Binaries live in private `generated-documents` at immutable `<tenant>/<user>/documents/<document-id>/document-<storage-version>.<pdf|docx>` paths. `storage_path` CAS serializes parallel exports; publication takes a five-minute provisional lease and pins `download_expires_at` to 65 seconds after URL signing. `documents.row_version` is the edit/export/delete CAS boundary, and superseded objects are removed only after the new metadata/document commit. Legacy paths remain readable and restrictive Storage policy blocks direct browser access.
 - `bright-api` validates active tenant membership. Generate prepares the binary with O(n) PDF wrapping before publishing the document DB row. Downloads use 60-second signed URLs; export regenerates editable content, while delete and compensation are DB-first and clean private objects afterward.
 - A pinned SHA-256-verified `Noto Sans JP` OTF covers all four languages. It is fully embedded in PDF, embedded as obfuscated `.odttf` in DOCX, and cached in private `document-assets`.
+
+### 1.3 AI Document Assistant polishing boundary
+
+- The browser sends the current editable draft and user instruction through tenant-scoped `POST /docs/:id/polish`; `bright-api` first verifies that the document belongs to the active tenant.
+- Model output is never persisted automatically. The frontend applies it only to the edit-textarea preview, and the existing optimistic document update runs only when the user selects **Save**. If the draft revision changes during a request, the late AI result is not applied; the modal is bounded to short viewports with internal scrolling.
+- The system prompt isolates document title/content as untrusted data. Tenant scope, the complete prompt, and the effective output-token budget are included in the SHA-256 cache key; shared document chat defaults to 2,000 tokens while polishing explicitly opts into 8,000.
+- Raw document, output, and instruction text is not written to observability storage; interaction logs retain only instruction length. Provider tokens/cost are accounted before output validation. The authoritative polishing plan-quota check and increment run as one atomic PostgreSQL statement in the service-role-only `reserve_ai_request` RPC; a reservation is released when the provider call does not complete. Safety, the DB-backed minute rate limit, the four-locale standard error envelope, and a bounded timeout covering fetch plus complete response-body parsing apply at the provider boundary.
 
 ---
 

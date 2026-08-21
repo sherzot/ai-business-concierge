@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../../app/config";
+import { resolveApiErrorMessage } from "./apiError";
 import { supabase } from "./supabase";
 
 export type ApiOptions = RequestInit & { tenantId?: string };
@@ -29,7 +30,7 @@ export async function apiRequest<T>(endpoint: string, options: ApiOptions = {}):
   const traceId = result?.meta?.trace_id;
 
   if (!response.ok) {
-    const msg = result?.meta?.errors?.[0]?.message ?? result?.message ?? `API Error: ${response.statusText}`;
+    const msg = resolveApiErrorMessage(result, response.statusText);
     const err = new Error(msg) as ApiError;
     err.traceId = traceId;
     throw err;

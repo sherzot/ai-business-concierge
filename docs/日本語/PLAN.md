@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 6.0 · 更新 2026-08-12
+> Version 6.1 · 更新 2026-08-21
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -45,7 +45,7 @@
 
 ## P1 — Phase 2 AI文書作成を完了
 
-- [ ] LLM質問/polishingを追加。
+- [ ] Local AI polishing preview closeout commitをGitHubへpushし、CIとNetlify preview、staging migration + `bright-api` deploy、authenticated real-provider preview/save smoke-testを行う。
 - [ ] Web flow安定後、Telegram wizardとfile送信を追加。
 - [ ] Cloudflare Auth Admin `403`を安全に解決後、production authenticated PDF/DOCX signed-download、cross-tenant deny、direct Storage deny、delete-cleanup synthetic acceptanceを再実行する。
 

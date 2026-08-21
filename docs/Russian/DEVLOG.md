@@ -4,6 +4,45 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-21 — Локально закрыты оставшиеся пять findings review AI polishing
+
+- Follow-up review подтвердил пять проблем: Telegram Maslahatchi не передавал обязательный `cacheScope`, поэтому entrypoint перестал проходить type-check; Anthropic timeout очищался после headers и не покрывал задержанный body; параллельные requests могли превысить plan quota между check и increment; поздний AI result мог перезаписать user edits, сделанные во время polishing; edit modal выходил за границы короткого viewport.
+- Telegram caller теперь использует tenant-scoped cache. LLM timeout покрывает fetch, чтение error body и JSON body. Authoritative решение polishing quota перенесено в service-role-only PostgreSQL `reserve_ai_request`: check limit и increment выполняются одним atomic statement, а `release_ai_request` возвращает reservation, если provider call не завершился. Token accounting остаётся отдельно, request не считается дважды.
+- React modal сравнивает current draft revision с revision на старте request. Если user редактирует текст во время запроса, stale result не применяется и показывается localized retry message на четырёх языках. Dialog ограничен `100dvh` и имеет internal vertical scroll. Лишние слои не добавлялись: use case остался vertical slice; quota invariant принадлежит PostgreSQL, draft invariant — React, timeout lifecycle — provider adapter.
+- Verification: до fix timeout regression падал 6/7, reservation test — из-за missing exports. После fix Deno polish/router/usage 18/18 PASS, Telegram entrypoint `deno check` и `git diff --check` PASS. В secret-free clean temporary frontend install: targeted modal 3/3, full suite 26/26 files и 117/117 tests, TypeScript и production build 3,701 modules PASS. Docker Desktop запущен; user-owned duplicate migration временно исключён под restore trap и возвращён без изменений. Canonical fresh migration replay 37/37, новый quota pgTAP 9/9 и полный local database suite 3/3 files — 45/45 tests PASS. Final production review не нашёл нового verified finding, блокирующего commit; в intended files не найдено secret signature. Full `server/index.ts` check остаётся на 22 известных monolith type errors, ни один не относится к новым строкам. Real Anthropic, staging/production deploy и authenticated remote smoke не выполнялись.
+- Remaining/next: push local closeout commit в GitHub, пройти CI/Netlify preview, deploy staging migration + `bright-api` и выполнить authenticated real-provider preview/save smoke. Три user-owned untracked copies не изменялись и исключены из commit.
+
+Files: `supabase/functions/{server/index.ts,server/services/llm-router.ts,server/services/llm-router.test.ts,server/services/usage-tracking.ts,server/services/usage-tracking.test.ts,telegram-bot/services/maslahatchi.ts}`, `supabase/migrations/20260821000000_atomic_ai_usage_reservations.sql`, `supabase/tests/database/ai_usage_reservation.test.sql`, `frontend/src/features/docs/{components/DocEditModal.tsx,__tests__/DocEditModal.test.tsx}`, `frontend/src/app/i18n.ts`, четыре языка `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`.
+
+## 2026-08-21 — Локально закрыты findings review AI polishing
+
+- Review локального polishing подтвердил четыре дефекта: общий `document` chat budget также вырос до 8,000 tokens; usage/cost provider не записывался при unusable model output; raw excerpt user instruction сохранялся в `ai_interactions`; quota/rate-limit errors не соответствовали frontend envelope и контракту четырёх locale.
+- LLM Router снова использует 2,000-token default для общего `document`, а polishing явно запрашивает 8,000; effective output budget также входит в cache key. Provider usage/cost записывается до output validation, и empty-output regression подтверждает этот порядок. AI interaction хранит только `instruction_length`, без raw instruction.
+- Polish document-not-found, minute rate-limit, guard-unavailable и plan-quota failures возвращаются через стандартный `failure()` envelope с UZ/RU/EN/JA messages. Frontend parser сохраняет приоритет standard envelope и поддерживает legacy `error.message`. DB schema, migration, RLS и tenant authorization не изменились.
+- Verification: Deno polish/router 14/14 и focused service `deno check` PASS. Full `index.ts` check вернул те же 23 pre-existing monolith type errors, ни один не относится к новому polishing path. В secret-free clean `/tmp` frontend install прошли 26/26 files и 115/115 tests, TypeScript, production build 3,701 modules, security gate 10 files, deploy-env 14/14 и production audit с 0 total vulnerabilities. Real Anthropic, staging/production deploy и authenticated remote smoke не выполнялись.
+- Remaining/next: проверить final diff, commit, пройти CI/Netlify preview, deploy staging `bright-api` и authenticated real-provider preview/save smoke. Три user-owned untracked copies не изменялись.
+
+Files: `supabase/functions/server/{index.ts,services/llm-router.ts,services/llm-router.test.ts,services/document-polisher.ts,services/document-polisher.test.ts}`, `frontend/src/shared/lib/{apiClient.ts,apiError.ts,apiError.test.ts}`, четыре языка `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`.
+
+## 2026-08-21 — Закрыт overlap TEAM/caption в landing hero
+
+- На предоставленном production screenshot 2048×1080 подтверждено, что card `TEAM / 08` в `LandingSystemVisual` перекрывает caption `ONE TENANT · ONE OPERATIONAL VIEW`. SVG geometry ставила TEAM в `y=274` при height `58`, то есть до `332`, а caption baseline находился на `y=322`.
+- TEAM поднят до `y=244`. Новый DOM-geometry regression test требует минимум 16 SVG units clearance между bottom card и caption baseline.
+- В clean temporary install targeted landing tests прошли 2/2 files и 6/6 tests, full frontend suite — 25/25 files и 112/112 tests, TypeScript PASS. In-app browser acceptance на 2048×1080 измерил real gap `12.73px`, overlap `false`, horizontal overflow `false`, console errors `0`. Hero copy, CTA и motion не изменены.
+- Remaining: review/commit fix вместе с AI polishing slice, затем CI и Netlify preview. Production deploy не выполнялся, active P1 order не изменился.
+
+Files: `frontend/src/features/landing/components/LandingSystemVisual.tsx`, `frontend/src/features/landing/__tests__/LandingSystemVisual.test.tsx`, четыре языка `DEVLOG/STATUS`.
+
+## 2026-08-21 — Локально завершён polishing preview AI Документолога
+
+- Production уже создавал реальные PDF/DOCX в private Storage, но user не мог попросить AI отредактировать существующий editable document. В начале аудита local `main` совпадал с `origin/main` на `5e33f094`; три существующих untracked user files сохранены.
+- Добавлены tenant-protected `POST /v1/docs/:id/polish`, интеграция Anthropic LLM Router и edit-modal flow на четырёх языках. Ответ модели применяется только как preview в textarea; сохранённый document меняется лишь после явного нажатия **Сохранить**. Endpoint проверяет document по tenant, применяет safety/rate/usage guards и пишет audit/usage metadata без document content.
+- Router усилен current Claude Haiku 4.5/Sonnet 4.6 defaults, tenant-scoped SHA-256 ключом полного prompt, ограниченным TTL cache на 250 entries, timeout и 8,000-token budget для document output. Prompt отделяет title/content как untrusted data и запрещает выдумывать facts, citations и legal guarantees. Добавлены input/output limits и ошибки UZ/RU/EN/JA.
+- Проверка: backend 9/9; frontend 24/24 files и 111/111 tests плюс TypeScript прошли в clean `/tmp` install; production build 3,700 modules, security gate 10 files, deploy-env 14/14 и production audit high/critical 0 прошли. Workspace `node_modules` зависал на iCloud read, поэтому frontend gates выполнены в clean copy. Full `index.ts` Deno check по-прежнему падает только на 23 существующих monolith typing errors; ошибок нового endpoint/service нет. Real Anthropic call, browser visual acceptance, staging/production deploy и remote smoke не выполнялись.
+- Следующий шаг: review/commit, CI и Netlify preview, staging deploy `bright-api`, затем authenticated real-provider preview/save smoke до рассмотрения production rollout.
+
+Files: `supabase/functions/server/{index.ts,openapi.ts,services/llm-router.ts,services/llm-router.test.ts,services/document-polisher.ts,services/document-polisher.test.ts}`, `frontend/src/features/docs/{api/docsApi.ts,components/DocEditModal.tsx,__tests__/docsApi.test.ts,__tests__/DocEditModal.test.tsx}`, `frontend/src/app/i18n.ts`, четыре языка `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`.
+
 ## 2026-08-12 — Production rollout AI Документолога завершён
 
 - PR #10 merged как `55d1468`. Final head PR #11 `6db478d` прошёл CI run `31545572719`, backend-only Netlify PASS и Codex re-review без major issues, затем squash-merged в `main` как `8f179da`. GitHub Actions run `31545917894` для merge commit завершён успешно.

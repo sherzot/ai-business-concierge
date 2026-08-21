@@ -1,6 +1,6 @@
 # AI Business Concierge — requirements
 
-> Yangilandi: 2026-08-12
+> Yangilandi: 2026-08-21
 > Holat qiymatlari: **Done** — ishlaydigan implementatsiya bor; **Partial** — bir qismi yoki operatsion verifikatsiya qolgan; **Skeleton** — scaffold bor, business logic ishlamaydi; **Planned** — boshlanmagan.
 
 ## Hozirgi platforma capabilitylari
@@ -14,7 +14,7 @@
 | Tasks | Done | Board/list CRUD, Realtime, assignment notification va acknowledge |
 | HR employee management | Done | Employee profile/invite/status oqimlari |
 | Docs library | Done | List, search, CRUD va 15 ta 4 tilli template |
-| AI Hujjatchi | Production deployed / authenticated recheck pending | Qoralama va real PDF/DOCX, embedded font, private Storage va signed URL productionda; authenticated synthetic recheck Cloudflare bilan bloklangan |
+| AI Hujjatchi | Production binary + local AI polish preview | Qoralama va real PDF/DOCX/private Storage productionda; tenant-scoped AI polishing preview lokalda 4 til bilan testlangan, staging/production rollout kutilmoqda |
 | Integrations | Partial | Telegram/Email fundamenti bor; ayrim production smoke-testlar qolgan |
 | AI Concierge | Partial | Router, safety, cost log va RAG fundamenti bor; to'liq semantic/citation UX qarzi mavjud |
 | Admin platforma | Partial | Asosiy boshqaruv/monitoring sahifalari bor; advanced agent va billing qismlari yo'q |
@@ -30,11 +30,12 @@
 | R-002 | Supabase Realtime | Done | Regressiya testlari bilan saqlash |
 | R-015 | Task assignment notifications | Done | Regressiya testlari bilan saqlash |
 | R-016 | HR Candidate Analysis | Skeleton | GitHub/CV/LLM implementatsiyasi, auth/rate limit/testlar |
-| R-017 | AI rate limiting | Partial | Endpoint/plan bo'yicha yagona quota siyosati va `Retry-After` |
+| R-017 | AI rate limiting | Partial | Polishing quota check/incrementi service-role-only PostgreSQL atomik reservation bilan race-safe implementatsiya qilindi va local pgTAP 9/9dan o'tdi; migration rollout, qolgan endpointlar uchun yagona quota siyosati va `Retry-After` qolgan |
 | R-018 | AI cost tracking | Partial | Log wiring mavjud; usage API, tenant dashboard va plan enforcement |
 | R-019 | Vector Search (RAG) | Partial | Embedding/match fundamenti bor; explicit docs tool, citation va cache |
 | R-020 | Admin Dashboard | Partial | Billing/MRR/churn va advanced AI agent monitoring |
 | R-021 | AI Hujjatchi binary output | Production deployed / authenticated recheck pending | Real PDF/DOCX, embedded Noto Sans JP, O(n) PDF wrap, binary-before-DB publish, private immutable Storage, provisional/final download lease, export/edit/delete CAS, DB-first compensation/delete, restrictive RLS va 60s signed URL productionda. 36/36 migration, `bright-api` v76, private bucket/schema, public/protected smoke va pgTAP oxirgi `ok 15` green; authenticated synthetic acceptance Cloudflare `403` sabab fixture oldidan bloklangan, qoldiq 0 |
+| R-022 | AI Hujjatchi polishing preview | Partial | Tenant-scoped endpoint, current-draft input, untrusted-data prompt, full-body timeout, atomic quota reservation, stale-draft himoyasi, viewport scroll, polish-only 8k budget, scoped hash cache, raw-instructionsiz log va UZ/RU/EN/JA UX lokalda testlangan; fresh replay 37/37 va quota pgTAP 9/9 green. CI/preview, staging deploy, real-provider authenticated smoke va production rollout qolgan |
 | R-003 | Billing/To'lovlar | Planned | Click/Payme, subscription lifecycle va idempotency |
 | R-004 | Audit log ko'rinishi | Done | Retention va filterlarni keyin kengaytirish |
 | R-005 | Export/Import | Planned | Reports/Tasks CSV/Excel va bulk import |

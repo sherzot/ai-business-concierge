@@ -11,7 +11,12 @@ import {
 } from "./services/knowledge-base.ts";
 import { checkAiSafety, wrapUserMessage } from "./services/ai-safety.ts";
 import riskScanRoutes from "./routes/risk-scan.ts";
-import { guardUsage, recordUsage } from "./services/usage-tracking.ts";
+import {
+  guardUsage,
+  recordUsage,
+  releaseAiRequestReservation,
+  reserveAiRequest,
+} from "./services/usage-tracking.ts";
 import {
   DocumentValidationError,
   documentMessage,
@@ -32,6 +37,14 @@ import {
   isDocumentDownloadLeaseActive,
   safeDownloadName,
 } from "./services/document-binary.ts";
+import {
+  DocumentPolishValidationError,
+  accountForAndNormalizePolishedDocument,
+  buildDocumentPolishPrompt,
+  documentPolishMessage,
+  summarizeDocumentPolishInstruction,
+  validateDocumentPolishInput,
+} from "./services/document-polisher.ts";
 
 const app = new Hono();
 const BASE_PATH = "/make-server-6c2837d6";
@@ -725,7 +738,7 @@ const writeAiInteraction = async (
 };
 
 // ---------------------------------------------------------------------------
-// insertAiUsageLog — ai_usage_logs jadvaliga non-blocking yozish
+// insertAiUsageLog — ai_usage_logs jadvaliga yozish
 // Billing va cost tracking uchun. service_role client ishlatadi (RLS bypass).
 // ---------------------------------------------------------------------------
 type AiUsageLogEntry = {
@@ -743,7 +756,7 @@ type AiUsageLogEntry = {
   traceId: string;
 };
 
-const insertAiUsageLog = (entry: AiUsageLogEntry): void => {
+const insertAiUsageLog = async (entry: AiUsageLogEntry): Promise<void> => {
   // provider constraint: ('claude','openai','fallback')
   const providerNorm =
     entry.provider === "openai_fallback"
@@ -752,9 +765,8 @@ const insertAiUsageLog = (entry: AiUsageLogEntry): void => {
         ? entry.provider
         : "fallback";
 
-  supabase
-    .from("ai_usage_logs")
-    .insert({
+  try {
+    const { error } = await supabase.from("ai_usage_logs").insert({
       tenant_id: entry.tenantId,
       user_id: entry.userId ?? null,
       endpoint: entry.endpoint,
@@ -767,10 +779,14 @@ const insertAiUsageLog = (entry: AiUsageLogEntry): void => {
       cached: entry.cached,
       latency_ms: entry.latencyMs,
       trace_id: entry.traceId,
-    })
-    .then(({ error }) => {
-      if (error) console.error("[ai_usage_log] insert error:", error.message);
     });
+    if (error) console.error("[ai_usage_log] insert error:", error.message);
+  } catch (error) {
+    console.error(
+      "[ai_usage_log] insert failed:",
+      error instanceof Error ? error.message : String(error),
+    );
+  }
 };
 
 app.use("*", async (c, next) => {
@@ -3437,6 +3453,7 @@ const registerRoutes = (prefix: string) => {
           context: kbContext || undefined,
           locale,
           complexity,
+          cacheScope: (ctx as TenantContext).tenantId,
         });
         reply = claudeRes.text || reply;
         llmProvider = "claude";
@@ -4151,6 +4168,279 @@ const registerRoutes = (prefix: string) => {
       mime_type: generatedFile?.mime_type ?? null,
       sha256: generatedFile?.sha256 ?? null,
     });
+  });
+
+  app.post(`${prefix}/docs/:id/polish`, async (c) => {
+    const ctx = await requireTenant(c);
+    if (!(ctx as any).tenantId) return ctx;
+    const tenantContext = ctx as TenantContext;
+    const { tenantId, userId } = tenantContext;
+    if (!userId) {
+      return failure(c, 401, "UNAUTHORIZED", "Foydalanuvchi topilmadi.");
+    }
+
+    const id = c.req.param("id");
+    const body = await c.req.json().catch(() => ({}));
+    const locale: DocumentLocale = isDocumentLocale(body?.locale)
+      ? body.locale
+      : "uz";
+    if (body?.locale && !isDocumentLocale(body.locale)) {
+      return failure(
+        c,
+        422,
+        "VALIDATION_ERROR",
+        documentMessage(locale, "invalidLocale"),
+      );
+    }
+
+    let polishInput: ReturnType<typeof validateDocumentPolishInput>;
+    try {
+      polishInput = validateDocumentPolishInput(body ?? {}, locale);
+    } catch (error) {
+      if (error instanceof DocumentPolishValidationError) {
+        return failure(c, 422, error.code, error.message);
+      }
+      throw error;
+    }
+
+    const instructionSafety = checkAiSafety(polishInput.instruction);
+    if (!instructionSafety.safe) {
+      const localizedSafetyMessage = locale === "ru"
+        ? instructionSafety.messageRu ?? instructionSafety.message
+        : locale === "en"
+        ? "The instruction looks like an attempt to change system rules. Enter a normal document editing request."
+        : locale === "ja"
+        ? "システムルールを変更しようとする指示は使用できません。通常の書類編集指示を入力してください。"
+        : instructionSafety.message;
+      return failure(
+        c,
+        422,
+        instructionSafety.code,
+        localizedSafetyMessage,
+      );
+    }
+    try {
+      polishInput = validateDocumentPolishInput(
+        { ...polishInput, instruction: instructionSafety.sanitized },
+        locale,
+      );
+    } catch (error) {
+      if (error instanceof DocumentPolishValidationError) {
+        return failure(c, 422, error.code, error.message);
+      }
+      throw error;
+    }
+
+    const { data: document, error: documentError } = await supabase
+      .from("documents")
+      .select("id, title")
+      .eq("tenant_id", tenantId)
+      .eq("id", id)
+      .maybeSingle();
+    if (documentError || !document) {
+      if (documentError) console.error("Document polish fetch error", documentError);
+      return failure(
+        c,
+        404,
+        "NOT_FOUND",
+        documentPolishMessage(locale, "documentNotFound"),
+      );
+    }
+
+    if (!ANTHROPIC_API_KEY) {
+      const message = locale === "ru"
+        ? "AI-редактор временно недоступен."
+        : locale === "en"
+        ? "The AI editor is temporarily unavailable."
+        : locale === "ja"
+        ? "AI編集機能は一時的に利用できません。"
+        : "AI tahrirlash vaqtincha ishlamayapti.";
+      return failure(c, 503, "AI_UNAVAILABLE", message);
+    }
+
+    const aiRateLimit = await checkAiRateLimit(tenantId, userId);
+    if (aiRateLimit === "limited") {
+      return failure(
+        c,
+        429,
+        "RATE_LIMITED",
+        documentPolishMessage(locale, "rateLimited", {
+          limit: String(AI_LIMIT),
+        }),
+      );
+    }
+    if (aiRateLimit === "unavailable") {
+      return failure(
+        c,
+        503,
+        "RATE_LIMIT_UNAVAILABLE",
+        documentPolishMessage(locale, "rateLimitUnavailable"),
+      );
+    }
+
+    const usageGate = await guardUsage({
+      supabase,
+      tenantId,
+      userId,
+      resource: "ai_requests",
+    });
+    if (!usageGate.ok) {
+      return failure(
+        c,
+        429,
+        usageGate.body.error.code,
+        documentPolishMessage(locale, "usageLimitReached", {
+          plan: usageGate.body.error.plan,
+        }),
+      );
+    }
+
+    const prompt = buildDocumentPolishPrompt({
+      title: document.title,
+      content: polishInput.content,
+      instruction: polishInput.instruction,
+      locale,
+    });
+
+    const reservation = await reserveAiRequest(
+      supabase,
+      tenantId,
+      userId,
+      usageGate.plan,
+    );
+    if (!reservation.ok) {
+      if (reservation.reason === "limit") {
+        return failure(
+          c,
+          429,
+          "RATE_LIMITED",
+          documentPolishMessage(locale, "usageLimitReached", {
+            plan: reservation.plan,
+          }),
+        );
+      }
+      return failure(
+        c,
+        503,
+        "RATE_LIMIT_UNAVAILABLE",
+        documentPolishMessage(locale, "rateLimitUnavailable"),
+      );
+    }
+    const traceId = getTraceId(c);
+    const startedAt = Date.now();
+    let providerResponseReceived = false;
+
+    try {
+      const llm = await callClaude(ANTHROPIC_API_KEY, {
+        message: prompt.message,
+        systemPrompt: prompt.systemPrompt,
+        locale,
+        complexity: "document",
+        cacheScope: tenantId,
+        maxTokens: 8_000,
+        timeoutMs: 120_000,
+      });
+      providerResponseReceived = true;
+      const latencyMs = Date.now() - startedAt;
+
+      const content = await accountForAndNormalizePolishedDocument(
+        llm.text,
+        locale,
+        async () => {
+          await insertAiUsageLog({
+            tenantId,
+            userId,
+            endpoint: `/v1/docs/:id/polish`,
+            model: llm.model,
+            provider: "claude",
+            complexity: llm.complexity,
+            promptTokens: llm.inputTokens,
+            completionTokens: llm.outputTokens,
+            costUsd: llm.costUsd,
+            cached: llm.cached,
+            latencyMs,
+            traceId,
+          });
+          await recordUsage(supabase, tenantId, userId, {
+            ai_tokens: llm.inputTokens + llm.outputTokens,
+          });
+        },
+      );
+      await writeAiInteraction(tenantContext, {
+        role: "AI_DOCUMENT_EDITOR",
+        prompt_name: "document_polish",
+        prompt_version: "v1",
+        locale,
+        input_excerpt: summarizeDocumentPolishInstruction(
+          polishInput.instruction,
+        ),
+        output_excerpt: "",
+        tools_used: [{ name: llm.model, success: true }],
+        success_flag: true,
+        latency_ms: latencyMs,
+        trace_id: traceId,
+      });
+      await writeAuditLog(tenantContext, {
+        event_type: "doc_ai_polish_preview",
+        entity_type: "document",
+        entity_id: id,
+        trace_id: traceId,
+        payload: {
+          document_id: id,
+          model: llm.model,
+          cached: llm.cached,
+        },
+      });
+
+      return success(c, {
+        document_id: id,
+        content,
+        model: llm.model,
+        complexity: llm.complexity,
+        cached: llm.cached,
+        remaining: reservation.remaining === Number.POSITIVE_INFINITY
+          ? null
+          : reservation.remaining,
+      });
+    } catch (error) {
+      if (!providerResponseReceived) {
+        await releaseAiRequestReservation(supabase, tenantId, userId);
+      }
+      const latencyMs = Date.now() - startedAt;
+      const errorCode = error instanceof DocumentPolishValidationError
+        ? error.code
+        : error instanceof Error && error.message.startsWith("CLAUDE_TIMEOUT")
+        ? "AI_TIMEOUT"
+        : "AI_ERROR";
+      await writeAiInteraction(tenantContext, {
+        role: "AI_DOCUMENT_EDITOR",
+        prompt_name: "document_polish",
+        prompt_version: "v1",
+        locale,
+        input_excerpt: summarizeDocumentPolishInstruction(
+          polishInput.instruction,
+        ),
+        output_excerpt: "",
+        tools_used: [{ name: "claude", success: false, error_code: errorCode }],
+        success_flag: false,
+        error_code: errorCode,
+        latency_ms: latencyMs,
+        trace_id: traceId,
+      });
+      console.error("Document polish AI error", errorCode);
+
+      if (error instanceof DocumentPolishValidationError) {
+        return failure(c, 502, error.code, error.message);
+      }
+      const message = locale === "ru"
+        ? "AI не смог отредактировать документ. Попробуйте ещё раз."
+        : locale === "en"
+        ? "AI could not edit the document. Please try again."
+        : locale === "ja"
+        ? "AIが書類を編集できませんでした。もう一度お試しください。"
+        : "AI hujjatni tahrirlay olmadi. Qayta urinib ko'ring.";
+      return failure(c, errorCode === "AI_TIMEOUT" ? 504 : 502, errorCode, message);
+    }
   });
 
   app.post(`${prefix}/docs/:id/export`, async (c) => {
@@ -5234,6 +5524,7 @@ Be concise, professional, and data-driven. You can help with: user management, c
           context: undefined,
           locale: reqLocale,
           complexity: "analysis",
+          cacheScope: `admin:${user.id}`,
         });
         if (claudeRes.text) reply = claudeRes.text;
         adminModel = claudeRes.model;

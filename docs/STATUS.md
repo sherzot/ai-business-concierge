@@ -1,6 +1,6 @@
 # AI Business Concierge — joriy holat
 
-> Kod/platforma bo'yicha oxirgi tasdiqlangan snapshot: **2026-08-12**
+> Kod/platforma bo'yicha oxirgi tasdiqlangan snapshot: **2026-08-21**
 > Hujjatlar tartiblangan sana: **2026-08-07**
 > Lokal runtime, production health/auth va remote GitHub Actions baseline'i 2026-08-07 kuni qayta tekshirildi. P0 commitlari push qilindi va yangi CI run to'liq green yakunlandi.
 > 2026-08-08: publishable-key commit push/CI/Netlify deploy qilindi, ammo production bundle hali legacy fallback ishlatmoqda. Risk scanner jadvallarining browser Data API ruxsatlari productionda yopildi.
@@ -30,6 +30,10 @@
 > 2026-08-12: `0532a74` Codex P2lari URL-signingdan keyingi final lease pin va delete/export row-version CAS bilan yopildi. Staging `bright-api` v9 ACTIVE, health `200`.
 > 2026-08-12: `661401a` Codex P2lari binary-before-DB publish va O(n) PDF wrapping bilan yopildi. Staging `bright-api` v10 ACTIVE, health `200`, Deno 7/7.
 > 2026-08-12: PR #11 final head `6db478d` uchun CI/Netlify gate'lari va Codex “major issue yo'q” re-reviewi green bo'ldi; PR `8f179da` bilan `main`ga merge qilindi. Production 36/36 migration, `bright-api` v76 va Netlify deploy `6a7bad961b16200007cfd88e` bilan chiqarildi; public/protected smoke-testlar green, authenticated synthetic acceptance Cloudflare `403` sabab fixture yaratilishidan oldin bloklandi va qoldiq 0/0/0/0/0/0.
+> 2026-08-21: AI Hujjatchi tenant-scoped savol/polishing previewi lokalda tayyorlandi. Backend 9/9, frontend 24/24 fayl va 111/111 test, type-check/build/security/deploy-env/audit gate'lari green; staging/production deploy va real-provider smoke hali bajarilmagan.
+> 2026-08-21: Landing hero TEAM/08 kartasi va pastki caption overlapi lokalda tuzatildi; frontend 25/25 fayl va 112/112 test, type-check green, 2048×1080 browser acceptance'da 12.73px gap, overlap/overflow/console error 0.
+> 2026-08-21: AI polishing reviewining 3 ta P2 va 1 ta P3 topilmasi lokalda yopildi: chat/polish token budjetlari ajratildi, yaroqsiz output usage/costi hisoblanadi, raw instruction logdan olib tashlandi va to'rt tilli xato envelope'i standartlashtirildi. Backend 14/14, frontend 26/26 fayl va 115/115 test green.
+> 2026-08-21: AI polishing reviewining qolgan 5 topilmasi lokalda yopildi: Telegram cache scope tiklandi, provider timeouti to'liq body lifecycle'ni qamradi, polish quota PostgreSQLda atomik rezervatsiya qilinadi, stale AI natijasi user draftini bosmaydi va modal qisqa viewportda scroll qiladi. Backend 18/18, Telegram check, frontend 26/26 fayl va 117/117 test, type-check/build, canonical fresh migration replay 37/37 va local database pgTAP 45/45 green.
 
 ## Hozir qayerdamiz
 
@@ -44,21 +48,21 @@
 
 | Tekshiruv | Holat |
 |---|---|
-| Git | PR #10 `55d1468`, PR #11 `8f179da` bilan `main`ga merged; final PR #11 head `6db478d` uchun CI va Codex re-review green |
+| Git | Live GitHub `main` `5e33f094`da qolmoqda; review qilingan slice ushbu closeout commitida lokal `main`ga kiritildi, push qilinmagan, shu sabab lokal branch remote'dan 1 commit oldinda |
 | Runtime | Node.js `22.18.0`; `frontend/.nvmrc` va package engine `22.x` |
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Production Supabase Edge Function `bright-api` v76, `ACTIVE`, `verify_jwt=false`; SHA staging v10 bilan teng |
 | Health smoke-test | `200` |
 | Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 36/36 migration, `bright-api` v10 ACTIVE, health `200`, authsiz docs `401` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` modern key override'larida; legacy anon/service-role API keylari disabled |
-| Type-check | Muvaffaqiyatli |
-| Unit test | Frontend 23/23 fayl, 109/109 test; document binary/lifecycle Deno 7/7 |
+| Type-check | Clean temp frontend installida muvaffaqiyatli |
+| Unit test | Frontend 26/26 fayl, 117/117 test; AI polish/router/usage Deno 18/18; oldingi document binary/lifecycle Deno 7/7 |
 | Deploy environment guard | Node test 14/14: 10 isolation contracti + 2 Vite `.env` fallback/runtime-precedence + 2 bundled endpoint extraction regressiyasi |
 | Production build | Synthetic non-production project-ref bilan muvaffaqiyatli; CSP tanlangan refdan yaratildi |
 | Security check | 10 ta build/Netlify fayli muvaffaqiyatli |
 | Production dependency audit | Raw audit: jami 0 vulnerability; scoped gate exception'siz high/critical 0 |
 | Frontend design system | Portfolio-inspired warm/ink/Sher-blue tokenlari; landing, public/auth, product core va admin shell redesign lokal yakunlangan |
-| Visual browser acceptance | Landing Why Us 6/6 inverse text bilan green. Authenticated Company Dashboard dark mode'da “Biznes holati” fon `rgb(17,19,24)`; title/foiz kontrasti `16.73:1`, muted text `7.5:1`, success signal `10.66:1`; 12/12 text node panel ichida, overlap/overflow/console error `0` |
+| Visual browser acceptance | Landing Why Us 6/6 inverse text bilan green. Landing hero TEAM/caption 2048×1080da 12.73px gap, overlap/overflow/console error `0`. Authenticated Company Dashboard dark mode'da “Biznes holati” title/foiz kontrasti `16.73:1`, muted text `7.5:1`, success signal `10.66:1`; 12/12 text node panel ichida |
 | Delivery platform | Faol platforma faqat Netlify. Repo ichida Vercel config/dependency yo'q; external Vercel project saqlangan, `gitRepositoryConnected=false` tasdiqlandi |
 | Environment isolation | Netlify CLI authoritative read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envlari yo'q; Personal rejada faqat browser-public `VITE_*` qiymatlar `All` scope'da |
 | Staging security advisor | Error `0`; ma'lum `vector` public-schema warningi `1`; server-only RLS/no-policy info `11` |
@@ -68,8 +72,8 @@
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |
 | DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; local real Auth tokenli Edge `8/8`; staging modern-key remote Edge `8/8`, cleanup 2 tenant/5 Auth user va yakuniy fixture `0/0`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |
 | Document binary/Storage acceptance | Real PDF/DOCX lifecycle Deno 7/7. Production private bucket/schema read-back, pgTAP oxirgi `ok 15`, health `200` va authsiz docs `401` green; authenticated synthetic acceptance Cloudflare `403` sabab birinchi fixturedan oldin BLOCKED, yakuniy Auth/tenant/template/document/generated/object qoldig'i 0/0/0/0/0/0 |
-| Migration history | Local, staging va production 36/36; to'rtta document migration productionga qo'llangan, `documents.row_version`/`doc_generated.download_expires_at` va 2/2 private document bucket tasdiqlangan |
-| Local Supabase services | Oxirgi full-stack snapshot: Storage `v1.68.1`, Auth `v2.195.0`, enabled containerlar healthy va Storage/Auth/Studio HTTP `200`. 2026-08-11 closeoutida stack ishlamayotgan edi; remote staging acceptance bunga bog'lanmadi |
+| Migration history | Canonical local fresh replay 37/37 va full database pgTAP 45/45 green, shu jumladan atomik quota 9/9; staging/production 36/36, yangi migration remote muhitlarga hali qo'llanmagan. User-owned duplicate migration nusxasi replaydan vaqtincha chiqarilib aynan joyiga qaytarildi |
+| Local Supabase services | PostgreSQL-only stack fresh replay va pgTAP uchun healthy. Full stack startda analytics/vector/realtime/storage/studio health timeout berdi; remote staging acceptance bunga bog'lanmadi |
 
 ## Mahsulot va integratsiyalar holati
 
@@ -83,8 +87,8 @@
 | Telegram bot | **Partial / operational block** | Bot funksiyalari mavjud; `TELEGRAM_WEBHOOK_SECRET` productionda qayta tekshirilishi kerak |
 | Resend email inbox | **Partial** | Webhook va mapping kodi mavjud; real receiving/delivery smoke-test tasdiqlanmagan |
 | AI Concierge / RAG | **Partial** | Claude router, OpenAI embedding va RAG fundamenti bor; explicit document search/citation va to'liq smoke-test qarzi bor |
-| AI usage/cost tracking | **Partial** | Log wiring va DB tracking bor; tenant billing dashboard/plan enforcement yo'q |
-| AI Hujjatchi | **Production deployed / authenticated recheck pending** | 15 shablon, 4 til, real PDF/DOCX, embedded Noto Sans JP, private Storage, 60 soniyali signed URL va tenant-scoped export/delete productionda; public/protected gate'lar green, authenticated synthetic recheck Cloudflare bilan bloklangan |
+| AI usage/cost tracking | **Partial** | Log wiring va DB tracking bor; polishing request quota'si PostgreSQL atomik reservation/release bilan race-safe qilingan, provider usage output validatsiyasidan oldin hisoblanadi. Migration rollout, tenant billing dashboard va barcha endpointlar uchun yagona enforcement hali qolgan |
+| AI Hujjatchi | **Production binary + hardened local AI polish preview** | 15 shablon, 4 til, real PDF/DOCX/private Storage productionda. Tenant-scoped polishing previewda scoped cache/budget, full-lifecycle timeout, atomic quota, stale-draft himoyasi, viewport scroll va raw-instructionsiz 4-locale UX lokal testlangan; migration/staging/production deploy va real-provider smoke kutilmoqda. Binary authenticated synthetic recheck Cloudflare bilan bloklangan |
 | HR Candidate Analysis | **Skeleton** | Backend/frontend scaffold bor; production endpoint `501 NOT_IMPLEMENTED` |
 | Billing / Click / Payme | **Planned** | Phase 3 |
 | AI Sotuvchi | **Planned** | Phase 3 |
@@ -100,7 +104,7 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. AI savol-javob/polishing oqimini LLM Router orqali ulash.
+1. Lokal closeout commitini GitHubga push qilish, CI/Netlify previewdan o'tkazish, staging migration + Edge deploy va authenticated real-provider smoke-testni bajarish.
 2. Web oqimi barqarorlashgach Telegram step-by-step hujjat yaratish va document yuborishni ulash.
 3. Cloudflare blokini xavfsiz yo'l bilan yechgach production authenticated PDF/DOCX/Storage synthetic acceptance'ni qayta o'tkazish.
 
