@@ -38,7 +38,7 @@
 > 2026-08-21: Telegram webhook v14 accepted invalid POST with `200` when the secret was absent. After a pure guard and 4/4 tests, production v15 has health `200`, invalid POST fail-closed `503`, PUT `405`. `67ac675` is on main and CI `32485618740` is green; secret setup plus Telegram `setWebhook` remain.
 > 2026-08-21: HR Candidate now has a real public GitHub adapter with bounded REST/pagination/response, timeout, repository-tree aggregation, and a ten-minute cache; Deno 10/10 and a live `octocat` smoke are complete. `8496aae` is on main and CI `32487503062` is green. The route remains `501`; Supabase Free keeps Pro+ Leaked Password Protection BLOCKED.
 > 2026-08-21: Secret-free PDF/DOCX parsing is implemented for HR Candidate with 5 MiB/file-magic/PDF 50-page/text bounds, DOCX ZIP-bomb defenses, and EN/UZ/RU/JA date/section signals. `2526d72` is on main and CI `32489478394` is green with Deno 22/22; Haiku semantic structuring and route `501` remain gated by the provider key.
-> 2026-08-21: The HR request boundary/orchestrator is hardened locally with pre-provider validation, tenant role guard, plan policy, failed-CV hard stop, timer cleanup, canonical ULID, and schema error/success exclusivity. New 12/12, HR 30/30, and targeted Deno 34/34 are green; persistent quota reservation/LLM/route wiring remain.
+> 2026-08-21: The HR request boundary/orchestrator is hardened fail-closed with pre-provider validation, tenant role guard, plan policy, failed-CV hard stop, timer cleanup, canonical ULID, and schema exclusivity. `2656e6a` is on main and CI `32491296828` is green with Deno 34/34; persistent quota/LLM/route wiring remain.
 
 ## Current phase
 
@@ -70,7 +70,7 @@
 | Delivery platform | Netlify only. The repository has no Vercel config/dependency; the external Vercel project remains, with `gitRepositoryConnected=false` verified |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs are absent; on Personal only browser-public `VITE_*` values use `All` scope |
 | Staging security advisor | Errors `0`; known `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | Main run `32489478394` for commit `2526d72` succeeded in 59 seconds: Deno 22/22, frontend 117/117, deploy-env 14/14, audit 0 high/critical, 3,701-module build, and 10-file security green |
+| Remote GitHub Actions | Main run `32491296828` for commit `2656e6a` succeeded in 1m9s: Deno 34/34, frontend 117/117, deploy-env 14/14, audit 0 high/critical, 3,701-module build, and 10-file security green |
 | Netlify preview | No new deploy preview was created because this slice was pushed directly to `main`; Netlify used production context |
 | Production frontend | Deploy `6a88056075359300089b9fa5` ready, build `6a88056075359300089b9fa3`, commit `4b51fec`, 34s, plugin success, 0 secret matches across 87,170 files; `/` and `/dashboard/docs` `200`, CSP and production-only bundle green |
 | Frontend Supabase key contract | Code and production accept only the modern publishable key; bundle has 1 modern key, 0 JWT-like keys, no legacy env name, and the format guard; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env deleted |

@@ -38,7 +38,7 @@
 > 2026-08-21: Telegram webhook v14はsecret不在時にinvalid POSTを`200`で受理。Pure guardと4/4 tests後、production v15はhealth `200`、invalid POST fail-closed `503`、PUT `405`。`67ac675`はmain、CI `32485618740`はgreen。Secret設定とTelegram `setWebhook`が残る。
 > 2026-08-21: HR Candidateにbounded REST/pagination/response、timeout、repository-tree aggregation、10-minute cacheを持つreal public GitHub adapterを追加。Deno 10/10とlive `octocat` smoke complete。`8496aae`はmain、CI `32487503062`はgreen。Routeは`501`のまま、Supabase FreeのためPro+ Leaked Password ProtectionはBLOCKED。
 > 2026-08-21: HR Candidateへsecret-free PDF/DOCX parserを実装。5 MiB/file magic/PDF 50-page/text bounds、DOCX ZIP-bomb防御、EN/UZ/RU/JA date/section signalsを持つ。`2526d72`はmain、CI `32489478394`はDeno 22/22でgreen。Haiku semantic structuringとroute `501`はprovider key待ちでgated。
-> 2026-08-21: HR request boundary/orchestratorをlocalでfail-closed強化。Pre-provider validation、tenant role guard、plan policy、failed-CV hard stop、timer cleanup、canonical ULID、schema error/success exclusivityを実装。新規12/12、HR 30/30、targeted Deno 34/34 green。Persistent quota reservation/LLM/route wiringが残る。
+> 2026-08-21: HR request boundary/orchestratorをfail-closed強化。Pre-provider validation、tenant role guard、plan policy、failed-CV hard stop、timer cleanup、canonical ULID、schema exclusivityを実装。`2656e6a`はmain、CI `32491296828`はDeno 34/34でgreen。Persistent quota/LLM/route wiringが残る。
 
 ## 現在のPhase
 
@@ -70,7 +70,7 @@
 | Delivery platform | Netlifyのみ。RepositoryにVercel config/dependencyなし。External Vercel projectは保持し、`gitRepositoryConnected=false`を確認 |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase、`deploy-preview`/`branch-deploy`/`dev` -> staging。Optional URL envなし。Personalではbrowser-public `VITE_*`のみ`All` scopeを使用 |
 | Staging security advisor | Error `0`、既知`vector` public-schema warning `1`、server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | Commit `2526d72`のmain run `32489478394`は59秒でsuccess。Deno 22/22、frontend 117/117、deploy-env 14/14、audit 0 high/critical、3,701-module build、10-file security green |
+| Remote GitHub Actions | Commit `2656e6a`のmain run `32491296828`は1m9sでsuccess。Deno 34/34、frontend 117/117、deploy-env 14/14、audit 0 high/critical、3,701-module build、10-file security green |
 | Netlify preview | Sliceを直接`main`へpushしたため新規deploy previewはなく、Netlify production contextが実行された |
 | Production frontend | Deploy `6a88056075359300089b9fa5` ready、build `6a88056075359300089b9fa3`、commit `4b51fec`、34s、plugin success、87,170 filesでsecret match 0。`/`と`/dashboard/docs`は`200`、CSP・production-only bundle green |
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |

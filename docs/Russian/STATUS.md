@@ -38,7 +38,7 @@
 > 2026-08-21: Telegram webhook v14 принимал invalid POST с `200` без secret. После pure guard и tests 4/4 production v15: health `200`, invalid POST fail-closed `503`, PUT `405`. `67ac675` в main и CI `32485618740` green; остаются secret setup и Telegram `setWebhook`.
 > 2026-08-21: HR Candidate получил real public GitHub adapter с bounded REST/pagination/response, timeout, repository-tree aggregation и 10-minute cache; Deno 10/10 и live `octocat` smoke complete. `8496aae` в main, CI `32487503062` green. Route остаётся `501`; Supabase Free блокирует Pro+ Leaked Password Protection.
 > 2026-08-21: Для HR Candidate реализован secret-free PDF/DOCX parser с лимитами 5 MiB/file magic/PDF 50 pages/text, защитой DOCX ZIP-bomb и EN/UZ/RU/JA date/section signals. `2526d72` в main, CI `32489478394` green с Deno 22/22; Haiku semantic structuring и route `501` остаются gated до provider key.
-> 2026-08-21: HR request boundary/orchestrator локально усилен fail-closed: pre-provider validation, tenant role guard, plan policy, failed-CV hard stop, timer cleanup, canonical ULID и schema error/success exclusivity. Новые 12/12, HR 30/30 и targeted Deno 34/34 green; остаются persistent quota reservation/LLM/route wiring.
+> 2026-08-21: HR request boundary/orchestrator усилен fail-closed: pre-provider validation, tenant role guard, plan policy, failed-CV hard stop, timer cleanup, canonical ULID и schema exclusivity. `2656e6a` в main, CI `32491296828` green с Deno 34/34; остаются persistent quota/LLM/route wiring.
 
 ## Текущая фаза
 
@@ -70,7 +70,7 @@
 | Delivery platform | Только Netlify. В repository нет Vercel config/dependency; внешний Vercel project сохранён, `gitRepositoryConnected=false` подтверждён |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs отсутствуют; на Personal только browser-public `VITE_*` используют `All` scope |
 | Staging security advisor | Errors `0`; известный `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | Main run `32489478394` для commit `2526d72` success за 59 секунд: Deno 22/22, frontend 117/117, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files green |
+| Remote GitHub Actions | Main run `32491296828` для commit `2656e6a` success за 1m9s: Deno 34/34, frontend 117/117, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files green |
 | Netlify preview | Новый deploy preview не создан, потому что slice pushed напрямую в `main`; Netlify использовал production context |
 | Production frontend | Deploy `6a88056075359300089b9fa5` ready, build `6a88056075359300089b9fa3`, commit `4b51fec`, 34s, plugin success, 0 secret matches в 87,170 files; `/` и `/dashboard/docs` `200`, CSP и production-only bundle green |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
