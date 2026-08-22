@@ -1,6 +1,6 @@
 # AI Business Concierge — faol reja
 
-> Version: 6.7
+> Version: 6.8
 > Yangilandi: 2026-08-22
 > Bu faylda faqat faol va navbatdagi ishlar turadi. 2026-07-24 gacha bo'lgan katta tarixiy reja [archive/PLAN_LEGACY_2026-07-24.md](archive/PLAN_LEGACY_2026-07-24.md)ga ko'chirilgan.
 
@@ -67,7 +67,8 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** raw sanitized CV inputni in-memory orchestrator seam orqali tayyor provider-stage pipeline'ga berish, server composition rootda key/accounting closure'ni ulash va real staging live smoke qilish.
+- [ ] Server composition root factory'da server-only key, tenant/request cache scope va atomic accounting closure'ni provider stagesga inject qilish; missing config va mock-provider regressiyalarini yozish.
+- [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** staging secretni o'rnatish va authenticated real-provider live smoke qilish.
 - [ ] LLM integrationdan keyin tayyor quota lifecycle boundary bilan active route wiring, `501` removal, full-flow integration va manual acceptance testlarini o'tkazish.
 
 ## Keyingi phase'lar

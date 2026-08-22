@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-22 — HR raw CVのin-memory provider orchestration seamを完了
+
+- `cv-parser.ts`はbackward-compatibleな`parseCv()`に加えてexplicit `parseCvForAnalysis()`を提供する。Public `CvSignals`と、16,000 chars bounded・NFKC-normalized・injection token redacted済み`semanticText`を分離。Textはsignals/results、log、persistenceへ入らず、failed/scanned CVではprivate field自体を返さない。
+- Injectable provider stagesがある場合、orchestratorはsemantic CV -> local evidence merge -> deterministic baseline scoring -> provider refinement/finalization -> deterministic baseline report -> provider narrative/finalizationを実行する。Semantic textは`structureCv` argumentとしてのみ存在し、final JSON envelopeはmerged bounded signalsのみを含む。Stagesなしのdefault pathはdeterministic behaviorを保持し、semantic-input invariant違反はprovider call前にfail-closed。
+- Parser 10/10、orchestrator 8/8、HR backend 88/88、Telegram込みtargeted Deno 92/92 PASS。変更4 filesはformat/check/lintを通過。`116c833`を`main`へpushし、GitHub CI `32553502762`は1m15sでgreen: Deno 92/92、backend quality、frontend 28/28 files・127/127 tests、deploy-env 14/14、audit high/critical 0、3,701-module build、10-file security。Netlifyはskip、staging/production DB/Edge、live provider、`501`は未変更。
+
+残作業: server-only key、tenant/request cache scope、atomic accounting closureをprovider stagesへ結ぶserver composition-root factory。Key到着後のreal staging smoke。その後quota lifecycleを使うactive-route/full-flow wiringと`501`削除。
+
+Files: `supabase/functions/server/services/hr-candidate/{cv-parser,index}{,.test}.ts`、4言語同期`DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/HR_CANDIDATE_ANALYSIS` documentation。
+
 ## 2026-08-22 — Mock HR provider-stage pipelineをend-to-endで完了
 
 - 新規`provider-stages.ts`はCV semantic、scoring refinement、report narrativeをprompt -> LLM Router -> metadata-only accounting -> strict validationとして1つのinjectable boundaryに統合。Module自身はsecret/DB clientを読まず、composition rootがserver-only key、tenant cache scope、accounting closureを注入する。Default routerはreal invocation時だけdynamic loadする。

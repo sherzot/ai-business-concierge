@@ -3,7 +3,7 @@
 > プロジェクトアーキテクチャ、設計パターン、ユニットテストルール
 > バージョン: 1.3 | 更新: 2026-08-21
 >
-> Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate`はpartial。Bounded adapters、request policy、PostgreSQL quota/finally-release、multipart、minimized prompt、model/budget/cacheを選択するinjectable provider-stage boundary、exact output validation前のmetadata accounting、deterministic merge/scoring/reportはreal。Configurationはcomposition rootが所有し、raw CV in-memory seam、key wiring、live smoke、full routeはpartial。
+> Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate`はpartial。Bounded adapters、local PDF/DOCXとprivate sanitized-text in-memory seam、request policy、PostgreSQL quota/finally-release、multipart、injectable provider-stage orchestration、deterministic merge/scoring/reportはreal。Server key/accounting composition、live smoke、full HTTP wiringはproduction-readyではない。
 
 ---
 
@@ -247,4 +247,4 @@ features/tasks/__tests__/
 ---
 
 *ARCHITECTURE.md — AI Business Concierge v1.0 · 2026-05-05*
-*HR Candidateはtarget modular pattern。Bounded adapter/request/quota-lifecycle/multipart/orchestrator、minimized prompt/injectable provider-stage/strict output、deterministic merge boundaryはreal、key composition/full HTTP wiringはpartial scaffold。*
+*HR Candidateはtarget modular pattern。Bounded adapter/request/quota-lifecycle/multipart/orchestrator、private in-memory CV seam、minimized prompt/injectable provider-stage/strict output、deterministic merge boundaryはreal、key/accounting compositionとfull HTTP wiringはpartial scaffold。*

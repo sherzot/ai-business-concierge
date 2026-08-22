@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — HR raw-CV in-memory provider orchestration seam completed
+
+- `cv-parser.ts` now exposes explicit `parseCvForAnalysis()` beside backward-compatible `parseCv()`. Public `CvSignals` are separated from `semanticText`, which is bounded to 16,000 characters, NFKC-normalized, and stripped of injection tokens. Text is never included in signals/results, logged, or persisted, and failed/scanned CVs omit the private field entirely.
+- When injectable provider stages are supplied, the orchestrator runs semantic CV -> local evidence merge -> deterministic baseline scoring -> provider refinement/finalization -> deterministic baseline report -> provider narrative/finalization. Semantic text exists only as the `structureCv` argument; the final JSON envelope contains only merged bounded signals. The default path without stages preserves deterministic behavior, and a broken semantic-input invariant fails closed before any provider call.
+- Parser 10/10, orchestrator 8/8, HR backend 88/88, and targeted Deno with Telegram 92/92 passed; the four changed files passed format/check/lint. `116c833` was pushed to `main`; GitHub CI `32553502762` passed in 1m15s with Deno 92/92, backend quality, frontend 28/28 files and 127/127 tests, deploy-env 14/14, audit 0 high/critical, a 3,701-module build, and 10-file security. Netlify was skipped; staging/production DB/Edge, live provider, and `501` were unchanged.
+
+Remaining: a server composition-root factory that binds the server-only key, tenant/request cache scope, and atomic accounting closure to provider stages; a real staging smoke after the key arrives; then active-route/full-flow wiring through quota lifecycle and removal of `501`.
+
+Files: `supabase/functions/server/services/hr-candidate/{cv-parser,index}{,.test}.ts` and synchronized four-language `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/HR_CANDIDATE_ANALYSIS` documentation.
+
 ## 2026-08-22 — Mocked HR provider-stage pipeline completed end to end
 
 - New `provider-stages.ts` composes CV semantics, scoring refinement, and report narrative as prompt -> LLM Router -> metadata-only accounting -> strict validation behind one injectable boundary. The module reads neither secrets nor a DB client; the composition root supplies the server-only key, tenant cache scope, and accounting closure. The default router is dynamically loaded only for a real invocation.

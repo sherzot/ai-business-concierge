@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-22 — HR raw CV in-memory provider orchestration seam yakunlandi
+
+- `cv-parser.ts` endi backward-compatible `parseCv()` bilan birga explicit `parseCvForAnalysis()` seam beradi. Public `CvSignals` va 16,000 belgigacha bounded, NFKC-normalized, injection-tokenlari redacted `semanticText` ajratilgan; matn signal/resultga qo'shilmaydi, log/persistence yo'q, failed yoki scanned CV'da private field umuman qaytmaydi.
+- Orchestrator injectable provider stages berilganda semantic CV -> local evidence merge -> deterministic baseline scoring -> provider refinement/finalize -> deterministic baseline report -> provider narrative/finalize tartibini bajaradi. Semantic matn faqat `structureCv` argumenti sifatida yashaydi; final JSON envelope faqat merged bounded signalsni saqlaydi. Provider stages yo'q default oqim oldingi deterministic xulqni saqlaydi; semantic input invariant buzilsa provider chaqirilmasdan fail-closed bo'ladi.
+- Parser 10/10, orchestrator 8/8, HR backend 88/88 va Telegram bilan Deno 92/92 PASS; o'zgargan 4 fayl format/check/lintdan o'tdi. `116c833` `main`ga push qilindi; GitHub CI `32553502762` 1m15sda Deno 92/92, backend quality, frontend 28/28 fayl va 127/127 test, deploy-env 14/14, audit 0 high/critical, 3,701-module build va 10-file security bilan green. Netlify skip; staging/production DB/Edge, live provider va `501` o'zgarmadi.
+
+Qolgan ish: server composition rootda server-only key, tenant/request cache scope va atomic accounting closure'ni provider stagesga bog'laydigan factory; key kelgach real staging smoke; keyin quota lifecycle bilan active route/full-flow va `501` removal.
+
+Fayllar: `supabase/functions/server/services/hr-candidate/{cv-parser,index}{,.test}.ts` va 4-tilli `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/HR_CANDIDATE_ANALYSIS`.
+
 ## 2026-08-22 — HR provider-stage pipeline mock bilan end-to-end tayyorlandi
 
 - Yangi `provider-stages.ts` CV semantic, scoring refinement va report narrative uchun prompt -> LLM Router -> metadata-only accounting -> strict validation oqimini bitta injectable boundaryga yig'di. Module secret yoki DB clientni o'zi o'qimaydi; composition root server-only key, tenant cache scope va accounting closure'ni beradi. Default router faqat real invocation paytida dynamic yuklanadi.

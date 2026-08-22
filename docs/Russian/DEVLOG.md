@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — Завершён in-memory provider orchestration seam для raw CV
+
+- `cv-parser.ts` теперь предоставляет explicit `parseCvForAnalysis()` рядом с backward-compatible `parseCv()`. Public `CvSignals` отделены от `semanticText`, который ограничен 16,000 chars, NFKC-normalized и очищен от injection tokens. Текст не входит в signals/results, не логируется и не сохраняется; failed/scanned CV полностью omits private field.
+- При injected provider stages orchestrator выполняет semantic CV -> local evidence merge -> deterministic baseline scoring -> provider refinement/finalization -> deterministic baseline report -> provider narrative/finalization. Semantic text живёт только как argument `structureCv`; final JSON envelope содержит лишь merged bounded signals. Default path без stages сохраняет deterministic behavior, а нарушение semantic-input invariant fail-closed до provider call.
+- Parser 10/10, orchestrator 8/8, HR backend 88/88 и targeted Deno с Telegram 92/92 PASS; четыре изменённых файла прошли format/check/lint. `116c833` отправлен в `main`; GitHub CI `32553502762` green за 1m15s: Deno 92/92, backend quality, frontend 28/28 files и 127/127 tests, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files. Netlify skipped; staging/production DB/Edge, live provider и `501` без изменений.
+
+Осталось: server composition-root factory, связывающий server-only key, tenant/request cache scope и atomic accounting closure с provider stages; real staging smoke после получения key; затем active-route/full-flow wiring через quota lifecycle и удаление `501`.
+
+Файлы: `supabase/functions/server/services/hr-candidate/{cv-parser,index}{,.test}.ts` и синхронная четырёхъязычная документация `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/HR_CANDIDATE_ANALYSIS`.
+
 ## 2026-08-22 — Mocked HR provider-stage pipeline завершён end-to-end
 
 - Новый `provider-stages.ts` объединяет CV semantic, scoring refinement и report narrative в prompt -> LLM Router -> metadata-only accounting -> strict validation через один injectable boundary. Модуль не читает secret или DB client; composition root передаёт server-only key, tenant cache scope и accounting closure. Default router загружается динамически только при real invocation.

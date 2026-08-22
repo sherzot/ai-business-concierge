@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Статус: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX, request/role/plan policy, PostgreSQL quota/finally-release, bounded multipart, atomic usage accounting, minimized prompts, injectable Haiku/Sonnet provider stages со strict output/account-before-validation, deterministic merge/scoring/report, orchestrator и frontend real/tested. Остаются raw CV in-memory seam, server key/accounting composition, live smoke и full HTTP wiring; canonical endpoint возвращает `501 NOT_IMPLEMENTED`. Текущее состояние: [STATUS.md](STATUS.md).
+> **Статус: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX и sanitized raw-CV in-memory seam, request/role/plan policy, PostgreSQL quota/finally-release, bounded multipart, atomic usage accounting, minimized prompts, injectable Haiku/Sonnet provider stages со strict output/account-before-validation, deterministic merge/scoring/report, provider-stage orchestrator и frontend real/tested. Остаются server key/accounting composition, live smoke и full HTTP wiring; canonical endpoint возвращает `501 NOT_IMPLEMENTED`. Текущее состояние: [STATUS.md](STATUS.md).
 
 > **AI Business Concierge — Пакет проектирования модуля `hr_candidate_analysis`**
 > Версия: 1.0 (MVP дизайн) · Дата: 2026-04-29
@@ -326,7 +326,7 @@ Accept-Language: uz | ja | en   (по умолчанию: uz)
 
 ### 6.3 Инструмент 3 — `candidate-scorer.ts`
 
-> Текущая реализация даёт provider-independent rubric, bounded weighted overall/grade и conservative UZ/JA/EN flags только по complete сопоставимым GitHub evidence. Injectable Sonnet/Haiku stage объединяет model/budget/cache policy, minimized prompts, account-before-validation и strict validation; deterministic finalize сохраняет пересчитанные overall/grade и local flags. Остаются raw CV seam, server key/accounting composition и live smoke.
+> Текущая реализация даёт provider-independent rubric, bounded weighted overall/grade и conservative UZ/JA/EN flags только по complete сопоставимым GitHub evidence. Injectable Sonnet/Haiku stage объединяет model/budget/cache policy, private sanitized-CV seam, minimized prompts, account-before-validation и strict validation; deterministic finalize сохраняет пересчитанные overall/grade и local flags. Остаются server key/accounting composition и live smoke.
 
 ```
 Модель:  Claude Sonnet 4 (глубокий) или Haiku (быстрый)
