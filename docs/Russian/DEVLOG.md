@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — HR quota-lease lifecycle завершён без provider key
+
+- Persistent quota reserve/release adapters объединены boundary `executeWithHrCandidateQuota`. При denial analysis/release не начинаются; после accepted lease success, provider rejection и timeout-shaped failure вызывают release ровно один раз в `finally`.
+- Cleanup `false`/throw не заменяет исходный analysis success/error; PostgreSQL bounded expiry 45 секунд остаётся защитой от orphan lease. Minute/day counters сохраняются для accepted request, release применяется только к concurrency lease. Route остаётся disabled, production сохраняет `501`.
+- Новые lifecycle regression 5/5, quota 12/12, HR backend 70/70, targeted Deno с Telegram 74/74 PASS. `8b11515` отправлен в `main`; GitHub CI `32552288887` green за 58s: Deno 74/74, backend quality, frontend 28/28 files и 127/127 tests, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files. Netlify намеренно skipped; staging/production DB и Edge не менялись.
+
+Осталось: после получения key подключить real semantic/scoring/report LLM calls к готовому strict-output/accounting contract; после green authenticated staging full flow подключить lifecycle boundary к canonical HTTP route и убрать `501`.
+
+Файлы: `supabase/functions/server/services/hr-candidate/quota{,.test}.ts` и синхронная документация на четырёх языках.
+
 ## 2026-08-22 — Усилен HR provider-output contract и исправлен edge case report schema
 
 - Без `ANTHROPIC_API_KEY` подготовлена safety boundary вокруг будущих live provider calls. `provider-contract.ts` принимает CV semantic, scoring refinement и report narrative только как exact JSON либо exact `json` fence и fail-closed проверяет exact keys, bounded Unicode strings/arrays/numbers/dates, role-fit policy и coverage категорий interview. Raw output и private CV values не попадают в public errors/logs.

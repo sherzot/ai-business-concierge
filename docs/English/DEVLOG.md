@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — HR quota-lease lifecycle completed without the provider key
+
+- The persistent quota reserve/release adapters are now joined by one `executeWithHrCandidateQuota` lifecycle boundary. A denial starts neither analysis nor release; after an accepted lease, success, provider rejection, and timeout-shaped failures all call release exactly once in `finally`.
+- Cleanup returning `false` or throwing cannot replace the original analysis success/error; the PostgreSQL 45-second bounded expiry remains the orphan-lease backstop. Minute/day counters stay consumed for an accepted request, while only the concurrency lease is released. The route remains disabled and production stays `501`.
+- Five new lifecycle regressions passed, quota is 12/12, HR backend 70/70, and targeted Deno with Telegram 74/74. `8b11515` was pushed to `main`; GitHub CI `32552288887` passed in 58s with Deno 74/74, backend quality, frontend 28/28 files and 127/127 tests, deploy-env 14/14, audit 0 high/critical, a 3,701-module build, and 10-file security. Netlify was intentionally skipped; staging/production DB and Edge were unchanged.
+
+Remaining: connect real semantic/scoring/report LLM calls to the prepared strict-output/accounting contract after the key arrives; once authenticated staging full flow is green, wire this lifecycle boundary into the canonical HTTP route and remove `501`.
+
+Files: `supabase/functions/server/services/hr-candidate/quota{,.test}.ts` and synchronized four-language project documentation.
+
 ## 2026-08-22 — HR provider-output contract and report schema edge case hardened
 
 - A key-independent safety boundary now surrounds future live provider calls. `provider-contract.ts` accepts CV semantic, scoring-refinement, and report-narrative responses only as exact JSON or an exact `json` fence, then fail-closed validates exact keys, bounded Unicode strings/arrays/numbers/dates, role-fit policy, and interview-category coverage. Raw model output and private CV values are never placed in public errors or logs.

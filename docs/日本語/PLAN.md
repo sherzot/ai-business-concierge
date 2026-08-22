@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 6.4 · 更新 2026-08-22
+> Version 6.5 · 更新 2026-08-22
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -59,7 +59,7 @@
 ## P2 — HR Candidate Analysis
 
 - [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** Real CV semantic structuringとSonnet scoring/report LLM Router callを準備済みstrict-output・account-before-validation contractへ接続。
-- [ ] LLM integration後にquota-lease releaseとactive routeを接続し、`501`を削除してfull-flow integration/manual acceptanceを実施。
+- [ ] LLM integration後、準備済みquota lifecycle boundary経由でactive routeを接続し、`501`を削除してfull-flow integration/manual acceptanceを実施。
 
 ## Later phases
 

@@ -29,8 +29,8 @@
 | R-001 | Real email inbox | Partial | Resend receiving, signature, mapping va real delivery smoke-test |
 | R-002 | Supabase Realtime | Done | Regressiya testlari bilan saqlash |
 | R-015 | Task assignment notifications | Done | Regressiya testlari bilan saqlash |
-| R-016 | HR Candidate Analysis | Partial | GitHub/cache, bounded PDF/DOCX, request/role, PostgreSQL quota, bounded multipart, atomic/idempotent usage-cost persistence, strict provider output va account-before-validation contracti, deterministik scorer, 3-tilli evidence report, orchestrator/schema va frontend boundary tayyor (backend HR 65/65; frontend 12/12); real Haiku/Sonnet invocation, active route va full-flow qolgan |
-| R-017 | AI rate limiting | Partial | Polishing daily reservation va HR tenant minute/day/concurrency lease service-role-only PostgreSQLda race-safe; staging HR pgTAP 22-case success. Production rollout, qolgan endpointlar uchun yagona quota siyosati va `Retry-After` qolgan |
+| R-016 | HR Candidate Analysis | Partial | GitHub/cache, bounded PDF/DOCX, request/role, PostgreSQL quota/finally-release lifecycle, bounded multipart, atomic/idempotent usage-cost persistence, strict provider output va account-before-validation contracti, deterministik scorer, 3-tilli evidence report, orchestrator/schema va frontend boundary tayyor (backend HR 70/70; frontend 12/12); real Haiku/Sonnet invocation, active route va full-flow qolgan |
+| R-017 | AI rate limiting | Partial | Polishing daily reservation va HR tenant minute/day/concurrency lease service-role-only PostgreSQLda race-safe; HR lease denial/success/error/cleanup lifecycle'i `finally` bilan testlangan, staging pgTAP 22-case success. Production rollout, qolgan endpointlar uchun yagona quota siyosati va `Retry-After` qolgan |
 | R-018 | AI cost tracking | Partial | Log wiring mavjud; usage API, tenant dashboard va plan enforcement |
 | R-019 | Vector Search (RAG) | Partial | Embedding/match fundamenti bor; explicit docs tool, citation va cache |
 | R-020 | Admin Dashboard | Partial | Billing/MRR/churn va advanced AI agent monitoring |

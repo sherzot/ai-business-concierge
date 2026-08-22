@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Статус: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX, request/role/plan policy, PostgreSQL leases, bounded multipart, atomic usage accounting, strict provider-output/account-before-validation, deterministic scoring/evidence report, orchestrator и frontend real/tested. Остаются real semantic CV/Sonnet invocation и full HTTP wiring; canonical endpoint возвращает `501 NOT_IMPLEMENTED`. Текущее состояние: [STATUS.md](STATUS.md).
+> **Статус: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX, request/role/plan policy, PostgreSQL leases с finally-release lifecycle, bounded multipart, atomic usage accounting, strict provider-output/account-before-validation, deterministic scoring/evidence report, orchestrator и frontend real/tested. Остаются real semantic CV/Sonnet invocation и full HTTP wiring; canonical endpoint возвращает `501 NOT_IMPLEMENTED`. Текущее состояние: [STATUS.md](STATUS.md).
 
 > **AI Business Concierge — Пакет проектирования модуля `hr_candidate_analysis`**
 > Версия: 1.0 (MVP дизайн) · Дата: 2026-04-29
@@ -410,6 +410,8 @@ Accept-Language: uz | ja | en   (по умолчанию: uz)
 | Предприниматель | 2 | 5 | 20 |
 | Бизнес | 5 | 20 | 100 |
 | Компания | 10 | 60 | 500 |
+
+Реализация: service-role-only PostgreSQL RPC атомарно резервирует minute/day counters и 45-секундный concurrency lease. Pure lifecycle boundary не запускает operation при denial и освобождает accepted lease через `finally` после success/error; cleanup failure не заменяет исходный outcome, bounded DB expiry очищает orphan lease.
 
 ---
 

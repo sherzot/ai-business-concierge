@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-22 — Provider keyなしでHR quota-lease lifecycleを完了
+
+- Persistent quota reserve/release adapterを`executeWithHrCandidateQuota` lifecycle boundaryで統合。Denial時はanalysis/releaseを開始せず、accepted lease後はsuccess、provider rejection、timeout-shaped failureの全てでreleaseを`finally`からexactly once呼ぶ。
+- Cleanupが`false`/throwでも元のanalysis success/errorを置換しない。PostgreSQLの45秒bounded expiryがorphan leaseのbackstop。Accepted requestのminute/day counterは保持し、releaseするのはconcurrency leaseのみ。Routeはdisabled、productionは`501`のまま。
+- 新規lifecycle regression 5/5、quota 12/12、HR backend 70/70、Telegram込みtargeted Deno 74/74 PASS。`8b11515`を`main`へpushし、GitHub CI `32552288887`は58sでgreen: Deno 74/74、backend quality、frontend 28/28 files・127/127 tests、deploy-env 14/14、audit high/critical 0、3,701-module build、10-file security。Netlifyは意図的にskip、staging/production DB・Edgeは未変更。
+
+残作業: key受領後にreal semantic/scoring/report LLM callを準備済みstrict-output/accounting contractへ接続。Authenticated staging full flow green後、lifecycle boundaryをcanonical HTTP routeへ接続して`501`を削除する。
+
+Files: `supabase/functions/server/services/hr-candidate/quota{,.test}.ts`、4言語同期documentation。
+
 ## 2026-08-22 — HR provider-output contractとreport schema edge caseを強化
 
 - `ANTHROPIC_API_KEY`なしで、将来のlive provider callを囲むsafety boundaryを準備した。`provider-contract.ts`はCV semantic、scoring refinement、report narrativeをexact JSONまたはexact `json` fenceとしてのみ受け入れ、exact keys、bounded Unicode strings/arrays/numbers/dates、role-fit policy、interview category coverageをfail-closed検証する。Raw outputやprivate CV valueはpublic error/logへ出さない。

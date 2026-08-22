@@ -45,6 +45,7 @@
 > 2026-08-22: HR provider usage/cost accounting is atomic and idempotent; staging has 40 migrations, remote transactional acceptance and Deno 51/51 are green. Prompt/CV/output data is not stored; production and `501` are unchanged.
 > 2026-08-22: Deterministic six-category HR scoring and a UZ/JA/EN evidence-linked report fallback are complete. Scoring `5395da1` CI `32547412956` and final `b222cf9` CI `32547588906` are green: Deno 60/60 plus all quality/frontend/security gates passed. Semantic provider refinement, accounting call-sites, and production `501` are unchanged.
 > 2026-08-22: The strict HR provider JSON/bounds and fail-closed account-before-validation boundary is ready, raw output is excluded from the accounting type boundary, and the low-evidence report schema edge case is fixed. Final `550ca8b` CI `32552046675` is green: Deno 69/69 and all quality/frontend/security gates passed; live provider/route, staging/production runtime, and `501` are unchanged.
+> 2026-08-22: The HR quota reserve/execute/finally-release lifecycle is complete across denial, success, provider failure, and cleanup failure. `8b11515` CI `32552288887` is green: Deno 74/74 and all gates passed; the active route and production `501` are unchanged.
 > 2026-08-22: `36b9553` is on main and GitHub CI `32546561166` completed green in 1m12s; Netlify was skipped because frontend runtime did not change.
 
 ## Current phase
@@ -68,7 +69,7 @@
 | Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 40 migrations, `bright-api` v11 ACTIVE, health `200`, unauthenticated docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge uses modern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overrides; legacy anon/service-role API keys are disabled |
 | Type-check | Passed in a clean temporary frontend install |
-| Unit tests | Frontend 28/28 files, 127/127 tests, including HR Candidate 12/12; AI polish/router/usage Deno 18/18; HR GitHub 10 + CV 8 + boundary 5 + quota 7 + multipart 6 + accounting 4 + provider contract 8 + scorer 4 + report 6 + orchestrator 6 + schema 1 = 65/65; targeted backend with Telegram 69/69 |
+| Unit tests | Frontend 28/28 files, 127/127 tests, including HR Candidate 12/12; AI polish/router/usage Deno 18/18; HR GitHub 10 + CV 8 + boundary 5 + quota/lifecycle 12 + multipart 6 + accounting 4 + provider contract 8 + scorer 4 + report 6 + orchestrator 6 + schema 1 = 70/70; targeted backend with Telegram 74/74 |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks, 2 Vite `.env` fallback/runtime-precedence regressions, and 2 bundled-endpoint extraction regressions |
 | Production build/security check | Build passed with a synthetic non-production ref; CSP was generated from that ref; security checked 10 build/Netlify files |
 | Production dependency audit | Raw audit: 0 total vulnerabilities; scoped gate: 0 high/critical with no exceptions |
@@ -77,7 +78,7 @@
 | Delivery platform | Netlify only. The repository has no Vercel config/dependency; the external Vercel project remains, with `gitRepositoryConnected=false` verified |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs are absent; on Personal only browser-public `VITE_*` values use `All` scope |
 | Staging security advisor | Errors `0`; known `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | Final code commit `550ca8b` main run `32552046675` succeeded in 1m15s: Deno 69/69 plus backend quality, frontend 28/28 files and 127/127 tests, deploy-env 14/14, audit 0 high/critical, a 3,701-module build, and 10-file security green |
+| Remote GitHub Actions | Final code commit `8b11515` main run `32552288887` succeeded in 58s: Deno 74/74 plus backend quality, frontend 28/28 files and 127/127 tests, deploy-env 14/14, audit 0 high/critical, a 3,701-module build, and 10-file security green |
 | Netlify preview | No new deploy preview was created because this slice was pushed directly to `main`; Netlify used production context |
 | Production frontend | Deploy `6a89065505b5600008dd0385` ready, build `6a89065505b5600008dd0383`, commit `f77dd9a`, 29s, plugin success, 0 secret matches across 87,145 files; `/` and `/dashboard/hr/candidates` `200`, CSP and production-only `index-DipHAHEa.js` green |
 | Frontend Supabase key contract | Code and production accept only the modern publishable key; bundle has 1 modern key, 0 JWT-like keys, no legacy env name, and the format guard; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env deleted |
@@ -97,13 +98,13 @@
 | Resend inbox | Partial | Code exists; receiving/delivery E2E is unverified |
 | AI Concierge/RAG and cost tracking | Partial | Foundation exists; polishing request quota is race-safe through PostgreSQL atomic reservation/release, and provider usage is accounted before output validation. Migration rollout, citation UX, billing dashboard, unified endpoint enforcement, and full smoke tests remain |
 | AI Document Assistant | Production binary + staged AI polish preview / provider blocked | 15 templates, 4 languages, and real PDF/DOCX/private Storage are live. The polishing frontend is in production and migration plus `bright-api` v11 are in staging; Auth/tenant/document boundaries and cleanup are green, but real-provider smoke returns `503 AI_UNAVAILABLE` because staging lacks `ANTHROPIC_API_KEY`. Production backend/migration rollout is intentionally pending |
-| HR Candidate Analysis | Partial / provider blocked | Bounded adapters, request/role, PostgreSQL quota, multipart, atomic usage/cost persistence, strict provider output/account-before-validation, deterministic scoring, three-locale evidence reporting, orchestrator, and frontend boundary are tested; real Haiku/Sonnet invocation, active route, and full flow remain; production `501` |
+| HR Candidate Analysis | Partial / provider blocked | Bounded adapters, request/role, PostgreSQL quota and finally-release lifecycle, multipart, atomic usage/cost persistence, strict provider output/account-before-validation, deterministic scoring, three-locale evidence reporting, orchestrator, and frontend boundary are tested; real Haiku/Sonnet invocation, active route, and full flow remain; production `501` |
 | Billing / Click / Payme and AI Sales Bot | Planned | Phase 3 |
 
 ## Immediate order
 
 1. After `ANTHROPIC_API_KEY` arrives, wire semantic CV structuring and Sonnet refinement over the deterministic scoring/report baselines; account for each response through the prepared RPC before output validation and retain `501` until full flow is ready.
 2. Once the key arrives, set it securely in staging Edge secrets, wire semantic CV/scoring/reporting, and make authenticated real-provider smoke green.
-3. After green staging smoke, remove `501` with quota-lease release/wiring; separately smoke the AI Document Assistant production `20260821000000` migration plus `bright-api` rollout.
+3. After green staging smoke, wire the prepared quota lifecycle boundary into the canonical route and remove `501`; separately smoke the AI Document Assistant production `20260821000000` migration plus `bright-api` rollout.
 
 Detailed tasks: [PLAN.md](PLAN.md). Canonical source: [Uzbek STATUS](../STATUS.md).

@@ -41,8 +41,8 @@
 | R-001 | Интеграция реального inbox | Email (Resend) webhook – частично ✅ | Inbox |
 | R-002 | Обновления в реальном времени | Supabase Realtime – inbox, tasks ✅ | Inbox, Tasks |
 | R-015 | Уведомления о назначении задач | Уведомление ответственному при назначении, подтверждение, прозрачность статусов ✅ | Tasks |
-| R-016 | HR Candidate Analysis | Partial; bounded adapters, request/role, PostgreSQL quota, multipart, atomic/idempotent usage-cost persistence, strict provider-output и account-before-validation contract, deterministic scorer, three-locale evidence report, orchestrator/schema и frontend boundary готовы (backend HR 65/65; frontend 12/12). Остаются real Haiku/Sonnet invocation, active route и full flow | HR |
-| R-017 | AI rate limiting | Partial; polishing daily reservation и HR tenant minute/day/concurrency lease race-safe в service-role-only PostgreSQL; staging HR pgTAP runner 22 cases success. Остаются production rollout, unified policy для остальных endpoints и `Retry-After` | Backend |
+| R-016 | HR Candidate Analysis | Partial; bounded adapters, request/role, PostgreSQL quota/finally-release lifecycle, multipart, atomic/idempotent usage-cost persistence, strict provider-output и account-before-validation contract, deterministic scorer, three-locale evidence report, orchestrator/schema и frontend boundary готовы (backend HR 70/70; frontend 12/12). Остаются real Haiku/Sonnet invocation, active route и full flow | HR |
+| R-017 | AI rate limiting | Partial; polishing daily reservation и HR tenant minute/day/concurrency lease race-safe в service-role-only PostgreSQL; HR denial/success/error/cleanup lease lifecycle проверен с `finally`, staging HR pgTAP runner 22 cases success. Остаются production rollout, unified policy для остальных endpoints и `Retry-After` | Backend |
 | R-018 | AI cost tracking | Partial; logging есть, tenant dashboard/enforcement остаётся | Backend |
 | R-019 | Vector Search (RAG) | Partial; vector/embedding основа есть, explicit tool/citations остаются | Docs |
 | R-020 | Admin Dashboard | Partial; core pages есть, billing/advanced agents остаются | Admin |

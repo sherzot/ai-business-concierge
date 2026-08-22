@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Status: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache、bounded local PDF/DOCX、request/role/plan policy、PostgreSQL leases、bounded multipart、atomic usage accounting、strict provider-output/account-before-validation、deterministic scoring/evidence report、orchestrator、frontendはreal/tested。Real semantic CV/Sonnet invocationとfull HTTP wiringが残り、canonical endpointは`501 NOT_IMPLEMENTED`を返す。現在状態: [STATUS.md](STATUS.md)。
+> **Status: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache、bounded local PDF/DOCX、request/role/plan policy、PostgreSQL leases・finally-release lifecycle、bounded multipart、atomic usage accounting、strict provider-output/account-before-validation、deterministic scoring/evidence report、orchestrator、frontendはreal/tested。Real semantic CV/Sonnet invocationとfull HTTP wiringが残り、canonical endpointは`501 NOT_IMPLEMENTED`を返す。現在状態: [STATUS.md](STATUS.md)。
 
 > **AI Business Concierge — `hr_candidate_analysis` モジュール設計パッケージ**
 > バージョン: 1.0 (MVP設計) · 日付: 2026-04-29
@@ -411,7 +411,7 @@ Accept-Language: uz | ja | en   （デフォルト: uz）
 | ビジネス | 5 | 20 | 100 |
 | 企業 | 10 | 60 | 500 |
 
-実装: service-role-only PostgreSQL RPCがtenant state rowをlockし、minute/day counterと45秒concurrency leaseをatomicにreserveする。Private tableはbrowserとdirect service-table accessを拒否し、DBの`free/starter/pro/company` planをこのpolicyへmapする。
+実装: service-role-only PostgreSQL RPCがtenant state rowをlockし、minute/day counterと45秒concurrency leaseをatomicにreserveする。Pure lifecycle boundaryはdenial時にoperationを開始せず、accepted leaseをsuccess/error後に`finally`でreleaseする。Cleanup failureは元のoutcomeを置換せず、bounded DB expiryがorphan leaseを解消する。Private tableはbrowserとdirect service-table accessを拒否し、DBの`free/starter/pro/company` planをこのpolicyへmapする。
 
 ---
 

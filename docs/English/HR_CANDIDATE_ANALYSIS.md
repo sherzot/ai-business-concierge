@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Status: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX, request/role/plan policy, PostgreSQL leases, bounded multipart, atomic usage accounting, strict provider-output/account-before-validation, deterministic scoring/evidence reporting, orchestrator, and frontend are real/tested. Real semantic CV/Sonnet invocation and full HTTP wiring remain; the canonical endpoint returns `501 NOT_IMPLEMENTED`. Current state: [STATUS.md](STATUS.md).
+> **Status: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX, request/role/plan policy, PostgreSQL leases with finally-release lifecycle, bounded multipart, atomic usage accounting, strict provider-output/account-before-validation, deterministic scoring/evidence reporting, orchestrator, and frontend are real/tested. Real semantic CV/Sonnet invocation and full HTTP wiring remain; the canonical endpoint returns `501 NOT_IMPLEMENTED`. Current state: [STATUS.md](STATUS.md).
 
 > **AI Business Concierge — `hr_candidate_analysis` Module Design Package**
 > Version: 1.0 (MVP design) · Date: 2026-04-29
@@ -411,7 +411,7 @@ Hiring recommendation logic:
 | Business | 5 | 20 | 100 |
 | Company | 10 | 60 | 500 |
 
-Implementation: a service-role-only PostgreSQL RPC locks one tenant state row and atomically reserves minute/day counters plus a 45-second concurrency lease. Private tables deny browser and direct service-table access; database `free/starter/pro/company` plans map to this policy.
+Implementation: a service-role-only PostgreSQL RPC locks one tenant state row and atomically reserves minute/day counters plus a 45-second concurrency lease. A pure lifecycle boundary starts no operation after denial and releases accepted leases through `finally` after success/error; cleanup failure does not replace the original outcome, and bounded DB expiry clears an orphan. Private tables deny browser and direct service-table access; database `free/starter/pro/company` plans map to this policy.
 
 ---
 

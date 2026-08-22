@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Holat: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub adapter/cache, bounded local PDF/DOCX extraction, pure request/role/tariff policy, PostgreSQL minute/day/concurrency lease, bounded multipart, atomic usage accounting, strict provider output/account-before-validation contracti, deterministic scorer/evidence report, orchestrator va frontend real/testlangan. Real semantic CV/Sonnet invocation va full HTTP wiring qolgan; canonical endpoint `501 NOT_IMPLEMENTED`. Joriy holat: [STATUS.md](STATUS.md).
+> **Holat: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub adapter/cache, bounded local PDF/DOCX extraction, pure request/role/tariff policy, PostgreSQL minute/day/concurrency lease va finally-release lifecycle, bounded multipart, atomic usage accounting, strict provider output/account-before-validation contracti, deterministic scorer/evidence report, orchestrator va frontend real/testlangan. Real semantic CV/Sonnet invocation va full HTTP wiring qolgan; canonical endpoint `501 NOT_IMPLEMENTED`. Joriy holat: [STATUS.md](STATUS.md).
 
 > **AI Business Concierge — `hr_candidate_analysis` modul dizayn paketi**
 > Version: 1.0 (MVP design) · Sana: 2026-04-29 · Til: O'zbekcha / 日本語 / English
@@ -675,7 +675,7 @@ Tarif (SPEC.md): Tadbirkor (49,000 so'm/oy) → 20 candidate analiz/oy → $1.16
 | Biznes | 5 | 20 | 100 |
 | Kompaniya | 10 | 60 | 500 |
 
-Implementatsiya: service-role-only PostgreSQL RPC tenant state rowini lock qilib minute/day counterni va 45 soniyalik concurrency lease'ni atomik rezervatsiya qiladi. Private jadvallar browser va direct service table access uchun yopiq; adapter DBdagi `free/starter/pro/company` planlarini yuqoridagi policyga map qiladi.
+Implementatsiya: service-role-only PostgreSQL RPC tenant state rowini lock qilib minute/day counterni va 45 soniyalik concurrency lease'ni atomik rezervatsiya qiladi. Pure lifecycle boundary denialda operationni boshlamaydi va accepted lease'ni success/error holatida `finally` orqali release qiladi; cleanup failure asl natijani bosmaydi, bounded DB expiry orphan lease'ni tozalaydi. Private jadvallar browser va direct service table access uchun yopiq; adapter DBdagi `free/starter/pro/company` planlarini yuqoridagi policyga map qiladi.
 
 ### 7.5 Observability
 

@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-22 — HR quota lease lifecycle keydan mustaqil yakunlandi
+
+- Persistent quota reserve/release adapterlari endi bitta `executeWithHrCandidateQuota` lifecycle boundary orqali bog'landi. Reservation denialda analysis va release umuman boshlanmaydi; lease olingach success, provider rejection yoki timeout-shaped xatoda release aynan bir marta `finally`da chaqiriladi.
+- Cleanup `false` yoki throw bo'lsa asl analysis success/errori bosilmaydi; PostgreSQLdagi 45 soniyalik bounded expiry orphan lease'ni yakuniy himoya sifatida tozalaydi. Minute/day counter accepted request uchun saqlanadi, faqat concurrency lease release qilinadi. Route hali aktiv emas va production `501` saqlandi.
+- Yangi lifecycle regressionlari 5/5, quota jami 12/12, HR backend 70/70 va Telegram bilan Deno 74/74 PASS. `8b11515` `main`ga push qilindi; GitHub CI `32552288887` 58 soniyada Deno 74/74, backend quality, frontend 28/28 fayl va 127/127 test, deploy-env 14/14, audit 0 high/critical, 3,701-module build va 10-file security bilan green. Netlify `[skip netlify]` bilan ataylab skip qilindi; staging/production DB va Edge o'zgarmadi.
+
+Qolgan ish: `ANTHROPIC_API_KEY` kelgach real semantic/scoring/report LLM chaqiruvlarini tayyor strict-output/accounting contractiga ulash; authenticated staging full-flow green bo'lgach lifecycle boundaryni canonical HTTP routega ulab `501`ni olib tashlash.
+
+Fayllar: `supabase/functions/server/services/hr-candidate/quota{,.test}.ts` va 4-tilli `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/HR_CANDIDATE_ANALYSIS`.
+
 ## 2026-08-22 — HR provider output kontrakti va report schema edge-case'i qotirildi
 
 - `ANTHROPIC_API_KEY`ni kutmasdan real provider chaqiruvining atrofidagi xavfsizlik chegarasi tayyorlandi. Yangi `provider-contract.ts` CV semantic, scoring refinement va report narrative javoblarini faqat exact JSON yoki exact `json` fence sifatida qabul qiladi; root/nested exact-key, Unicode/string/array/numeric/date, role-fit va interview-category coverage limitlarini fail-closed tekshiradi. Raw output yoki private CV qiymati xato envelope/logga chiqarilmaydi.

@@ -41,8 +41,8 @@
 | R-001 | リアル受信ボックス統合 | Email（Resend）webhook – 部分実装済み ✅ | Inbox |
 | R-002 | リアルタイム更新 | Supabase Realtime – inbox、tasks ✅ | Inbox、Tasks |
 | R-015 | タスク割り当て通知 | リーダーが割り当てた際の担当者への通知、確認、ステータスの透明性 ✅ | Tasks |
-| R-016 | HR Candidate Analysis | Partial。Bounded adapters、request/role、PostgreSQL quota、multipart、atomic/idempotent usage-cost persistence、strict provider-output・account-before-validation contract、deterministic scorer、3-locale evidence report、orchestrator/schema、frontend boundaryはready（backend HR 65/65、frontend 12/12）。Real Haiku/Sonnet invocation、active route、full flowが残る | HR |
-| R-017 | AI rate limiting | Partial。Polishing daily reservationとHR tenant minute/day/concurrency leaseはservice-role-only PostgreSQLでrace-safe。Staging HR pgTAP 22-case runner success。Production rollout、他endpointのunified policy、`Retry-After`が残る | Backend |
+| R-016 | HR Candidate Analysis | Partial。Bounded adapters、request/role、PostgreSQL quota/finally-release lifecycle、multipart、atomic/idempotent usage-cost persistence、strict provider-output・account-before-validation contract、deterministic scorer、3-locale evidence report、orchestrator/schema、frontend boundaryはready（backend HR 70/70、frontend 12/12）。Real Haiku/Sonnet invocation、active route、full flowが残る | HR |
+| R-017 | AI rate limiting | Partial。Polishing daily reservationとHR tenant minute/day/concurrency leaseはservice-role-only PostgreSQLでrace-safe。HR denial/success/error/cleanup lease lifecycleを`finally`で検証し、staging HR pgTAP 22-case runner success。Production rollout、他endpointのunified policy、`Retry-After`が残る | Backend |
 | R-018 | AI cost tracking | Partial; loggingあり、tenant dashboard/enforcementが残る | Backend |
 | R-019 | Vector Search (RAG) | Partial; vector/embedding基盤あり、explicit tool/citationsが残る | Docs |
 | R-020 | Admin Dashboard | Partial; core pagesあり、billing/advanced agentsが残る | Admin |
