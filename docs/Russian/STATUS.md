@@ -41,6 +41,7 @@
 > 2026-08-21: HR request boundary/orchestrator усилен fail-closed: pre-provider validation, tenant role guard, plan policy, failed-CV hard stop, timer cleanup, canonical ULID и schema exclusivity. `2656e6a` в main, CI `32491296828` green с Deno 34/34; остаются persistent quota/LLM/route wiring.
 > 2026-08-22: HR tenant quota и multipart boundary завершены без provider secret: PostgreSQL minute/day/concurrency lease, DB plan mapping, bounded streaming 5 MiB + 64 KiB и safe drain disabled route. В staging 39 migrations, remote pgTAP runner 22 cases success; Deno 47/47 и frontend 117/117 green. Production DB/Edge не менялся; local fresh replay blocked из-за Docker socket.
 > 2026-08-22: Frontend boundary upload/state/result HR Candidate доведён до production-grade: bounded client validation, tenant/session-first multipart, timeout/cancellation, защита stale response, runtime result validation и accessible responsive UX. Frontend 28/28 файлов, 127/127 tests и все build/security gates green; desktop/mobile browser acceptance без horizontal overflow. Backend route намеренно остаётся `501`.
+> 2026-08-22: `f77dd9a` в main, GitHub CI `32545770532` green, Netlify production deploy `6a89065505b5600008dd0385` ready. `/` и `/dashboard/hr/candidates` возвращают `200`; CSP и production-only bundle green. Provider route остаётся `501`.
 
 ## Текущая фаза
 
@@ -72,9 +73,9 @@
 | Delivery platform | Только Netlify. В repository нет Vercel config/dependency; внешний Vercel project сохранён, `gitRepositoryConnected=false` подтверждён |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs отсутствуют; на Personal только browser-public `VITE_*` используют `All` scope |
 | Staging security advisor | Errors `0`; известный `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | Main run `32543760806` для commit `398e46e` success за 1m15s: Deno 47/47 и quality checks, frontend 117/117, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files green |
+| Remote GitHub Actions | Main run `32545770532` для commit `f77dd9a` success за 57s: Deno quality, frontend 28/28 files и 127/127 tests, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files green |
 | Netlify preview | Новый deploy preview не создан, потому что slice pushed напрямую в `main`; Netlify использовал production context |
-| Production frontend | Deploy `6a88056075359300089b9fa5` ready, build `6a88056075359300089b9fa3`, commit `4b51fec`, 34s, plugin success, 0 secret matches в 87,170 files; `/` и `/dashboard/docs` `200`, CSP и production-only bundle green |
+| Production frontend | Deploy `6a89065505b5600008dd0385` ready, build `6a89065505b5600008dd0383`, commit `f77dd9a`, 29s, plugin success, 0 secret matches в 87,145 files; `/` и `/dashboard/hr/candidates` `200`, CSP и production-only `index-DipHAHEa.js` green |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup двух tenants/пяти Auth users и final fixture 0/0; Realtime tables SELECT-only и требуют active membership/tenant |
 | Document binary/Storage acceptance | Real PDF/DOCX lifecycle Deno 7/7. Production authenticated DOCX/PDF signed downloads green; direct Storage `400`, cross-tenant export `404`, delete `200`, residue document/generated/object 0/0/0 и final fixture 0/0/0/0/0. Invalidation cached signed URL в Smart CDN может занять до 60 секунд |
