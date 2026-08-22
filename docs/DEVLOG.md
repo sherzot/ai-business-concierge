@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-22 — HR server provider composition va accounting binding yakunlandi
+
+- Yangi `provider-composition.ts` server-only key, service-role client va canonical tenant/user/request contextini injectable provider stagesga bog'laydi. Cache scope tenant+request+stage bo'yicha ajratiladi; completed response metadata'si strict output parse'dan oldin mavjud atomic `record_hr_candidate_ai_usage` RPC closure'iga beriladi. CV matni va API key accounting argumentlariga kirmaydi.
+- Tenant/user UUID, request ULID va service client's `rpc` capability providerga murojaatdan oldin fail-closed tekshiriladi; missing key ham bir xil safe `PROVIDER_CONFIGURATION_UNAVAILABLE` xatosini beradi. `HrUsageContext` validatsiyasi accounting adapter bilan shared bo'ldi, shu sabab malformed tenant ID endi DBga ham yetmaydi. Accounting unavailable bo'lsa untracked provider output qaytarilmaydi.
+- Composition 3/3, HR backend 91/91 va Telegram bilan Deno 95/95 PASS; format/check/lint green. `2e4db5c` `main`ga push qilindi; GitHub CI `32553827974` 1m06sda Deno 95/95, backend quality, frontend 28/28 fayl va 127/127 test, deploy-env 14/14, audit 0 high/critical, 3,701-module build va 10-file security bilan green. Netlify skip; staging/production DB/Edge, live provider va `501` o'zgarmadi.
+
+Qolgan ish: quota lifecycle, provider composition va analyzer'ni bitta key-independent application execution boundaryda yig'ish; key kelgach staging live smoke; keyin canonical route/full-flow activation va `501` removal.
+
+Fayllar: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/{provider-composition{,.test},provider-stages,usage-accounting{,.test}}.ts` va 4-tilli loyiha hujjatlari.
+
 ## 2026-08-22 — HR raw CV in-memory provider orchestration seam yakunlandi
 
 - `cv-parser.ts` endi backward-compatible `parseCv()` bilan birga explicit `parseCvForAnalysis()` seam beradi. Public `CvSignals` va 16,000 belgigacha bounded, NFKC-normalized, injection-tokenlari redacted `semanticText` ajratilgan; matn signal/resultga qo'shilmaydi, log/persistence yo'q, failed yoki scanned CV'da private field umuman qaytmaydi.

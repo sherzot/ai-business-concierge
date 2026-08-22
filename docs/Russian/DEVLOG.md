@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — Завершены HR server provider composition и accounting binding
+
+- Новый `provider-composition.ts` связывает server-only key, service-role client и canonical tenant/user/request context с injectable provider stages. Cache scope изолирован по tenant+request+stage; metadata completed response передаётся в существующий atomic RPC `record_hr_candidate_ai_usage` до strict output parsing. CV text и API key не входят в accounting arguments.
+- Tenant/user UUID, request ULID и `rpc` capability service client проверяются fail-closed до provider request; missing key даёт тот же safe `PROVIDER_CONFIGURATION_UNAVAILABLE`. Validation `HrUsageContext` shared с accounting adapter, поэтому malformed tenant ID не достигает DB. При accounting unavailable untracked provider output отклоняется.
+- Composition 3/3, HR backend 91/91 и targeted Deno с Telegram 95/95 PASS; format/check/lint green. `2e4db5c` отправлен в `main`; GitHub CI `32553827974` green за 1m06s: Deno 95/95, backend quality, frontend 28/28 files и 127/127 tests, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files. Netlify skipped; staging/production DB/Edge, live provider и `501` без изменений.
+
+Осталось: объединить quota lifecycle, provider composition и analyzer в одном key-independent application execution boundary; после key выполнить staging live smoke; затем активировать canonical route/full flow и убрать `501`.
+
+Файлы: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/{provider-composition{,.test},provider-stages,usage-accounting{,.test}}.ts` и синхронная четырёхъязычная документация.
+
 ## 2026-08-22 — Завершён in-memory provider orchestration seam для raw CV
 
 - `cv-parser.ts` теперь предоставляет explicit `parseCvForAnalysis()` рядом с backward-compatible `parseCv()`. Public `CvSignals` отделены от `semanticText`, который ограничен 16,000 chars, NFKC-normalized и очищен от injection tokens. Текст не входит в signals/results, не логируется и не сохраняется; failed/scanned CV полностью omits private field.

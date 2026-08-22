@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — HR server provider composition and accounting binding completed
+
+- New `provider-composition.ts` binds a server-only key, service-role client, and canonical tenant/user/request context to injectable provider stages. Cache scope is isolated by tenant+request+stage; completed-response metadata is passed to the existing atomic `record_hr_candidate_ai_usage` RPC closure before strict output parsing. CV text and the API key never enter accounting arguments.
+- Tenant/user UUIDs, request ULID, and the service client's `rpc` capability are checked fail-closed before any provider request; a missing key returns the same safe `PROVIDER_CONFIGURATION_UNAVAILABLE` error. `HrUsageContext` validation is shared with the accounting adapter, so malformed tenant IDs no longer reach the DB. Untracked provider output is rejected when accounting is unavailable.
+- Composition 3/3, HR backend 91/91, and targeted Deno with Telegram 95/95 passed; format/check/lint are green. `2e4db5c` was pushed to `main`; GitHub CI `32553827974` passed in 1m06s with Deno 95/95, backend quality, frontend 28/28 files and 127/127 tests, deploy-env 14/14, audit 0 high/critical, a 3,701-module build, and 10-file security. Netlify was skipped; staging/production DB/Edge, live provider, and `501` were unchanged.
+
+Remaining: combine quota lifecycle, provider composition, and the analyzer behind one key-independent application execution boundary; perform a staging live smoke after the key arrives; then activate the canonical route/full flow and remove `501`.
+
+Files: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/{provider-composition{,.test},provider-stages,usage-accounting{,.test}}.ts`, and synchronized four-language project documentation.
+
 ## 2026-08-22 — HR raw-CV in-memory provider orchestration seam completed
 
 - `cv-parser.ts` now exposes explicit `parseCvForAnalysis()` beside backward-compatible `parseCv()`. Public `CvSignals` are separated from `semanticText`, which is bounded to 16,000 characters, NFKC-normalized, and stripped of injection tokens. Text is never included in signals/results, logged, or persisted, and failed/scanned CVs omit the private field entirely.

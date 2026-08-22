@@ -1,6 +1,6 @@
 # AI Business Concierge — активный план
 
-> Версия 6.8 · Обновлено 2026-08-22
+> Версия 6.9 · Обновлено 2026-08-22
 > Здесь только активные и следующие задачи. Старый master plan: [../archive/Russian/PLAN_LEGACY_2026-07-24.md](../archive/Russian/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — безопасное начало сессии
@@ -58,7 +58,7 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] Добавить server composition-root factory, который inject server-only key, tenant/request cache scope и atomic accounting closure в provider stages; покрыть missing configuration и mocked-provider behavior.
+- [ ] Объединить canonical tenant/user context, quota reserve/finally-release, provider composition и analyzer в одном key-independent application execution boundary; покрыть denial/config/provider failure mapping, сохраняя route disabled.
 - [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** установить staging secret и выполнить authenticated real-provider live smoke.
 - [ ] После LLM integration подключить active route через готовую quota lifecycle boundary, убрать `501` и выполнить full-flow integration/manual acceptance.
 

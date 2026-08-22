@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-22 — HR server provider compositionとaccounting bindingを完了
+
+- 新規`provider-composition.ts`はserver-only key、service-role client、canonical tenant/user/request contextをinjectable provider stagesへ結合する。Cache scopeはtenant+request+stageで分離し、completed response metadataをstrict output parsing前に既存atomic `record_hr_candidate_ai_usage` RPC closureへ渡す。CV textとAPI keyはaccounting argumentsへ入らない。
+- Tenant/user UUID、request ULID、service clientの`rpc` capabilityをprovider request前にfail-closed検証し、missing keyも同じsafe `PROVIDER_CONFIGURATION_UNAVAILABLE`を返す。`HrUsageContext` validationをaccounting adapterとshared化し、malformed tenant IDはDBへ到達しない。Accounting unavailable時はuntracked provider outputをreject。
+- Composition 3/3、HR backend 91/91、Telegram込みtargeted Deno 95/95 PASS。Format/check/lint green。`2e4db5c`を`main`へpushし、GitHub CI `32553827974`は1m06sでgreen: Deno 95/95、backend quality、frontend 28/28 files・127/127 tests、deploy-env 14/14、audit high/critical 0、3,701-module build、10-file security。Netlifyはskip、staging/production DB/Edge、live provider、`501`は未変更。
+
+残作業: quota lifecycle、provider composition、analyzerを1つのkey-independent application execution boundaryへ統合。Key到着後にstaging live smoke、その後canonical route/full flowをactivateし`501`を削除。
+
+Files: `.github/workflows/ci.yml`、`supabase/functions/server/services/hr-candidate/{provider-composition{,.test},provider-stages,usage-accounting{,.test}}.ts`、4言語同期project documentation。
+
 ## 2026-08-22 — HR raw CVのin-memory provider orchestration seamを完了
 
 - `cv-parser.ts`はbackward-compatibleな`parseCv()`に加えてexplicit `parseCvForAnalysis()`を提供する。Public `CvSignals`と、16,000 chars bounded・NFKC-normalized・injection token redacted済み`semanticText`を分離。Textはsignals/results、log、persistenceへ入らず、failed/scanned CVではprivate field自体を返さない。
