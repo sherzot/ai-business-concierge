@@ -8,6 +8,7 @@ import type {
 } from "./types.ts";
 import type {
   HrProviderStage,
+  HrUsageReceipt,
   HrUsageRecordResult,
 } from "./usage-accounting.ts";
 
@@ -53,14 +54,14 @@ export async function accountAndValidateHrProviderOutput<T>(input: {
   invoke: () => Promise<LLMResponse>;
   account: (
     stage: HrProviderStage,
-    response: LLMResponse,
+    receipt: HrUsageReceipt,
   ) => Promise<HrUsageRecordResult>;
   validate: (rawOutput: string) => T;
 }): Promise<T> {
   const response = await input.invoke();
   let accounting: HrUsageRecordResult;
   try {
-    accounting = await input.account(input.stage, response);
+    accounting = await input.account(input.stage, usageReceipt(response));
   } catch {
     throw new HrProviderContractError(
       "USAGE_ACCOUNTING_UNAVAILABLE",
@@ -80,6 +81,18 @@ export async function accountAndValidateHrProviderOutput<T>(input: {
     if (error instanceof HrProviderContractError) throw error;
     throw new HrProviderContractError("INVALID_PROVIDER_OUTPUT", input.stage);
   }
+}
+
+function usageReceipt(response: LLMResponse): HrUsageReceipt {
+  return {
+    model: response.model,
+    complexity: response.complexity,
+    inputTokens: response.inputTokens,
+    outputTokens: response.outputTokens,
+    costUsd: response.costUsd,
+    latencyMs: response.latencyMs,
+    cached: response.cached,
+  };
 }
 
 export function validateCvSemanticOutput(rawOutput: string): CvSemanticOutput {

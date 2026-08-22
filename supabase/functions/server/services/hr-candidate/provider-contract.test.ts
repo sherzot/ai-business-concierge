@@ -192,7 +192,8 @@ Deno.test("CV semantic output rejects invalid dates, duplicates, and unknown fie
 
 Deno.test("completed provider usage is accounted before output validation", async () => {
   const events: string[] = [];
-  let accountedText = "";
+  let accountingReceivedText = false;
+  let accountedOutputTokens = -1;
   let error: unknown;
   try {
     await accountAndValidateHrProviderOutput({
@@ -201,9 +202,10 @@ Deno.test("completed provider usage is accounted before output validation", asyn
         events.push("invoke");
         return Promise.resolve({ ...RECEIPT, text: "invalid json" });
       },
-      account: (_stage, response) => {
+      account: (_stage, receipt) => {
         events.push("account");
-        accountedText = response.text;
+        accountingReceivedText = "text" in receipt;
+        accountedOutputTokens = receipt.outputTokens;
         return Promise.resolve("recorded");
       },
       validate: (raw) => {
@@ -216,7 +218,8 @@ Deno.test("completed provider usage is accounted before output validation", asyn
   }
 
   assertEquals(events, ["invoke", "account", "validate"], "operation order");
-  assert(accountedText === "invalid json", "same completed response accounted");
+  assert(!accountingReceivedText, "raw model output stays outside accounting");
+  assert(accountedOutputTokens === 40, "completed usage receipt accounted");
   assert(
     error instanceof HrProviderContractError &&
       error.code === "INVALID_PROVIDER_OUTPUT",

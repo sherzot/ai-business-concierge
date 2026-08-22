@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.49.8";
-import type { LLMResponse } from "../llm-router.ts";
-import { recordHrProviderUsage } from "./usage-accounting.ts";
+import {
+  type HrUsageReceipt,
+  recordHrProviderUsage,
+} from "./usage-accounting.ts";
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
@@ -12,8 +14,7 @@ const CONTEXT = {
   requestId: "01K36X8M3M0123456789ABCDEF",
 };
 
-const USAGE: LLMResponse = {
-  text: "private model output",
+const USAGE: HrUsageReceipt = {
   model: "claude-sonnet-4-6",
   complexity: "analysis",
   inputTokens: 120,

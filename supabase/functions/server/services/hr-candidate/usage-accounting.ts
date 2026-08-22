@@ -14,6 +14,17 @@ export type HrUsageContext = {
 
 export type HrUsageRecordResult = "recorded" | "duplicate" | "unavailable";
 
+export type HrUsageReceipt = Pick<
+  LLMResponse,
+  | "model"
+  | "complexity"
+  | "inputTokens"
+  | "outputTokens"
+  | "costUsd"
+  | "latencyMs"
+  | "cached"
+>;
+
 /**
  * Persists one already-completed Claude call and its token counter atomically.
  * The PostgreSQL RPC owns idempotency, tenant membership, and numeric bounds.
@@ -22,7 +33,7 @@ export async function recordHrProviderUsage(
   supabase: SupabaseClient,
   context: HrUsageContext,
   stage: HrProviderStage,
-  response: LLMResponse,
+  response: HrUsageReceipt,
 ): Promise<HrUsageRecordResult> {
   if (!isSafeUsage(context, response)) return "unavailable";
 
@@ -53,7 +64,7 @@ export async function recordHrProviderUsage(
 
 function isSafeUsage(
   context: HrUsageContext,
-  response: LLMResponse,
+  response: HrUsageReceipt,
 ): boolean {
   const tokensAreSafe = Number.isInteger(response.inputTokens) &&
     response.inputTokens >= 0 && response.inputTokens <= 5_000_000 &&
