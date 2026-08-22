@@ -21,7 +21,7 @@
 - [x] Tasks – board/list, CRUD
 - [x] HR – кейсы, опросы
 - [x] Docs – список, поиск, индекс
-- [x] Integrations – Telegram, Email, AmoCRM
+- [x] Integrations – основы Telegram, Email и AmoCRM; остаются secure Telegram rollout execution и production smoke
 - [x] AI Concierge – чат, инструменты
 - [x] Settings – профиль, язык
 

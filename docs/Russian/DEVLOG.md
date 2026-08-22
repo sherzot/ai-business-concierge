@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — Telegram webhook rollout стал secret-safe и transactional
+
+- Production `telegram-bot` v15 был fail-closed на `503`: в remote project есть имя `TELEGRAM_BOT_TOKEN`, но нет local secure token access и `TELEGRAM_WEBHOOK_SECRET`. Новый operations helper проверяет exact Supabase project/HTTPS endpoint, запрещает случайную rotation существующего secret, создаёт random secret из 96 символов и устанавливает его через временный env-file с mode `0600`, не передавая значение в process arguments или logs.
+- Supabase secret set и Telegram `setWebhook` объединены в один flow: при ошибке до Telegram commit новый secret удаляется и восстанавливается fail-closed state; после success проверяются exact URL через `getWebhookInfo`, health `200` и POST без secret `401`. Token/secret redacted из всех errors. Contract сверён с официальными Telegram правилами charset/length для `secret_token`.
+- Новый contract 6/6, Telegram с guard 10/10 и targeted Deno с HR 111/111 PASS; format/check/lint green. Final `67381df` в main; GitHub CI `32555376998` green за 53s: Deno 111/111, frontend 28/28 files и 127/127 tests, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files. Netlify skipped; secrets не читались и не устанавливались, runtime не менялся, production POST всё ещё `503`.
+
+Осталось: безопасно передать `TELEGRAM_BOT_TOKEN` из BotFather/password manager в local session, один раз выполнить helper, затем проверить `/start`, locale, AI, rate limit и feedback. Staging blockers `ANTHROPIC_API_KEY` остаются отдельно.
+
+Файлы: `.github/workflows/ci.yml`, `scripts/telegram-webhook-rollout{,.test}.ts`, four-language `DEVLOG/STATUS/PLAN/CONNECTIONS/REQUIREMENTS`.
+
 ## 2026-08-22 — HR provider failure закрыт typed `AI_UNAVAILABLE`
 
 - Provider contract/accounting/config failure теперь normalize в localized `AI_UNAVAILABLE` без raw details; application map в HTTP `503`, quota cleanup сохраняется. Backend type/schema и frontend UZ/RU/EN/JA copy синхронны.

@@ -53,6 +53,7 @@
 > 2026-08-22: HR application boundary объединяет role/input precheck, один request ULID, provider composition и quota reserve/execute/finally-release с typed HTTP mapping. `eac2a3d` CI `32554187835` green: Deno 102/102 и все gates прошли; global 30s deadline, live smoke и `501` остаются.
 > 2026-08-22: HR application execution теперь enforce maximum 30s global deadline и typed `504 TIMEOUT`; background provider accounting и quota cleanup завершаются после deadline. `11ab6af` CI `32554430334` green: Deno 103/103 и все gates прошли; typed provider-unavailable, live smoke и `501` остаются.
 > 2026-08-22: Provider/config/accounting failure теперь map в localized `AI_UNAVAILABLE` и HTTP `503`; backend schema и four-locale frontend copy синхронны. `f184434` CI `32554684769` green: Deno 105/105 и все gates прошли; live smoke и `501` остаются.
+> 2026-08-22: Для Telegram secret + `setWebhook` готов secret-safe transactional rollout helper: exact-target preflight, запрет accidental rotation, temporary env-file, pre-commit rollback, subprocess env isolation, strict Telegram result, redaction и post-commit `getWebhookInfo`/health/401 verification. Final `67381df` CI `32555376998` green: Deno 111/111 и все gates прошли. Token/secret не читались и не устанавливались; production остаётся fail-closed `503` до secure local access к `TELEGRAM_BOT_TOKEN`.
 > 2026-08-22: `36b9553` в main, GitHub CI `32546561166` green за 1m12s; Netlify skipped, поскольку frontend runtime не менялся.
 
 ## Текущая фаза
@@ -76,7 +77,7 @@
 | Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 40 migrations, `bright-api` v11 ACTIVE, health `200`, unauth docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge использует modern overrides `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY`; legacy anon/service-role API keys disabled |
 | Type-check | Успешно в clean temporary frontend install |
-| Unit tests | Frontend 28/28 files, 127/127 tests, HR Candidate frontend 12/12; HR backend application 9 + orchestrator 9 и все остальные слои = 101/101; targeted с Telegram 105/105 |
+| Unit tests | Frontend 28/28 files, 127/127 tests; HR backend 101/101, Telegram guard 4/4 и Telegram rollout helper 6/6; targeted Deno 111/111 |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks + 2 Vite `.env` fallback/runtime-precedence + 2 bundled-endpoint extraction regressions |
 | Production build/security check | Build прошёл с synthetic non-production ref; CSP создан из этого ref; проверено 10 build/Netlify файлов |
 | Production dependency audit | Raw audit: всего 0 vulnerabilities; scoped gate без исключений: high/critical 0 |
@@ -85,7 +86,7 @@
 | Delivery platform | Только Netlify. В repository нет Vercel config/dependency; внешний Vercel project сохранён, `gitRepositoryConnected=false` подтверждён |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs отсутствуют; на Personal только browser-public `VITE_*` используют `All` scope |
 | Staging security advisor | Errors `0`; известный `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | Final code commit `f184434` main run `32554684769` success за 1m08s: Deno 105/105 и все backend/frontend/build/security gates green |
+| Remote GitHub Actions | Final code commit `67381df` main run `32555376998` success за 53s: Deno 111/111 и все backend/frontend/build/security gates green |
 | Netlify preview | Новый deploy preview не создан, потому что slice pushed напрямую в `main`; Netlify использовал production context |
 | Production frontend | Deploy `6a89065505b5600008dd0385` ready, build `6a89065505b5600008dd0383`, commit `f77dd9a`, 29s, plugin success, 0 secret matches в 87,145 files; `/` и `/dashboard/hr/candidates` `200`, CSP и production-only `index-DipHAHEa.js` green |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
@@ -101,7 +102,7 @@
 | Auth, multi-tenant, RBAC и основные web-модули | Done | Основной фундамент работает |
 | Realtime и task notifications | Done | Inbox, Tasks, Notifications, acknowledge |
 | Admin platform | Partial | Основное управление/monitoring есть; tenant-profile/AI-stats authenticated smoke tests и Company Dashboard dark-contrast visual acceptance подтверждены в user session |
-| Telegram | Partial / fail-closed operational block | Production v15 ACTIVE; health `200`, POST `503` без secret. Остаются secret setup, Telegram `setWebhook` и bot smoke |
+| Telegram | Partial / fail-closed operational block | Production v15 ACTIVE; health `200`, POST `503` без secret. Secret-safe transactional rollout helper local/CI green; остаются secure local access к `TELEGRAM_BOT_TOKEN`, запуск helper и bot smoke |
 | Resend inbox | Partial | Код есть; receiving/delivery E2E не подтверждён |
 | AI Concierge/RAG и cost tracking | Partial | Основа есть; polishing request quota race-safe через PostgreSQL atomic reservation/release, provider usage учитывается до output validation. Остаются rollout migration, citation UX, billing dashboard, unified endpoint enforcement и smoke tests |
 | AI Документолог | Production binary + staged AI polish preview / provider blocked | 15 templates, 4 языка и real PDF/DOCX/private Storage работают. Polishing frontend в production, migration и `bright-api` v11 в staging; Auth/tenant/document boundaries и cleanup green, но real-provider smoke возвращает `503 AI_UNAVAILABLE`, потому что в staging нет `ANTHROPIC_API_KEY`. Production backend/migration rollout намеренно ожидает |

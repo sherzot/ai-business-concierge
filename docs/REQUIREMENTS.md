@@ -15,7 +15,7 @@
 | HR employee management | Done | Employee profile/invite/status oqimlari |
 | Docs library | Done | List, search, CRUD va 15 ta 4 tilli template |
 | AI Hujjatchi | Production binary + staged AI polish preview | Qoralama va real PDF/DOCX/private Storage productionda; polishing frontend productionda, migration/Edge stagingda. Staging provider secreti va production backend rollout kutilmoqda |
-| Integrations | Partial | Telegram/Email fundamenti bor; ayrim production smoke-testlar qolgan |
+| Integrations | Partial | Telegram/Email fundamenti bor; Telegram secret-safe transactional rollout helper tayyor, secure token access va production smoke-testlar qolgan |
 | AI Concierge | Partial | Router, safety, cost log va RAG fundamenti bor; to'liq semantic/citation UX qarzi mavjud |
 | Admin platforma | Partial | Asosiy boshqaruv/monitoring sahifalari bor; advanced agent va billing qismlari yo'q |
 | Settings va lokalizatsiya | Done | Profil, til, theme; `uz`, `ru`, `en`, `ja` |

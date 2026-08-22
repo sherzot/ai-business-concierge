@@ -1,6 +1,6 @@
 # AI Business Concierge — active plan
 
-> Version 7.2 · Updated 2026-08-22
+> Version 7.3 · Updated 2026-08-22
 > Only active and next work belongs here. The previous master plan is archived at [../archive/English/PLAN_LEGACY_2026-07-24.md](../archive/English/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — safe session start
@@ -51,7 +51,7 @@
 
 ## P2 — operational integrations
 
-- [ ] After production v15 fail-closed `503`, set a new `TELEGRAM_WEBHOOK_SECRET` and reconnect Telegram `setWebhook` with the same value.
+- [ ] **BLOCKED — secure `TELEGRAM_BOT_TOKEN` access:** run the transactional helper once to set the production secret and Telegram `setWebhook`; the helper handles rollback and post-commit verification.
 - [ ] End-to-end test Resend receiving, signature, tenant mapping and delivery.
 - [ ] **BLOCKED — paid plan:** the Supabase organization is Free; enable Leaked Password Protection after an approved Pro+ upgrade.
 - [ ] Select Netlify preview protection.

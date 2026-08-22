@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — Telegram webhook rollout made secret-safe and transactional
+
+- Production `telegram-bot` v15 was fail-closed at `503`: the remote project has the `TELEGRAM_BOT_TOKEN` name, but local secure token access and `TELEGRAM_WEBHOOK_SECRET` are absent. The new operations helper validates the exact Supabase project/HTTPS endpoint, refuses accidental rotation of an existing secret, creates a 96-character random secret, and sets it through a `0600` temporary env file without putting it in process arguments or logs.
+- Supabase secret setup and Telegram `setWebhook` now run as one flow: a pre-commit Telegram failure unsets the new secret and restores fail-closed state; after success, `getWebhookInfo` exact URL, health `200`, and unauthenticated POST `401` are verified. Token/secret values are redacted from all errors. The contract was checked against the official Telegram `secret_token` charset/length rules.
+- New contract 6/6, Telegram with guard 10/10, and targeted Deno with HR 111/111 passed; format/check/lint are green. Final `67381df` is on main; GitHub CI `32555376998` passed in 53s with Deno 111/111, frontend 28/28 files and 127/127 tests, deploy-env 14/14, audit 0 high/critical, a 3,701-module build, and 10-file security. Netlify was skipped; no secret was read or set, runtime is unchanged, and production POST remains `503`.
+
+Remaining: provide `TELEGRAM_BOT_TOKEN` securely from BotFather/password manager to the local session, run the helper once, then smoke `/start`, locale, AI, rate limit, and feedback. Staging `ANTHROPIC_API_KEY` blockers remain separate.
+
+Files: `.github/workflows/ci.yml`, `scripts/telegram-webhook-rollout{,.test}.ts`, and four-language `DEVLOG/STATUS/PLAN/CONNECTIONS/REQUIREMENTS`.
+
 ## 2026-08-22 — HR provider failures closed with typed `AI_UNAVAILABLE`
 
 - Provider contract/accounting/config failures now normalize to a localized `AI_UNAVAILABLE` envelope without raw details; the application maps it to HTTP `503` while preserving quota cleanup. Backend type/schema and frontend UZ/RU/EN/JA copy share one contract.

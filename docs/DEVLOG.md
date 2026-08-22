@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-22 — Telegram webhook rollout secret-safe va transactional qilindi
+
+- Production `telegram-bot` v15 fail-closed `503` holatida edi: remote projectda `TELEGRAM_BOT_TOKEN` nomi bor, ammo lokal xavfsiz token access va `TELEGRAM_WEBHOOK_SECRET` yo'q. Yangi operatsion helper exact Supabase project/HTTPS endpointni tekshiradi, mavjud secretni tasodifan rotate qilishni rad etadi, 96-belgili random secret yaratadi va uni process argumenti yoki logga chiqarmasdan `0600` temp env-file orqali o'rnatadi.
+- Helper Supabase secret set va Telegram `setWebhook`ni bitta oqimga yig'di: Telegram commitdan oldin xato bo'lsa yangi secret unset qilinib oldingi fail-closed state tiklanadi; successdan keyin `getWebhookInfo` exact URL, health `200` va secretsiz POST `401` bilan tekshiriladi. Token/secret barcha error matnlaridan redacted. Rasmiy Telegram `secret_token` charset/length contracti bilan solishtirildi.
+- Yangi contract 6/6, Telegram guard bilan 10/10 va HR bilan targeted Deno 111/111 PASS; format/check/lint green. Final `67381df` main; GitHub CI `32555376998` 53sda Deno 111/111, frontend 28/28 fayl/127/127 test, deploy-env 14/14, audit 0 high/critical, 3,701-module build va 10-file security bilan green. Netlify skip; hech qanday secret o'qilmadi/o'rnatilmadi, runtime o'zgarmadi va production POST hali `503`.
+
+Qolgan ish: `TELEGRAM_BOT_TOKEN`ni BotFather/password managerdan lokal sessiyaga xavfsiz berib helperni bir marta bajarish, keyin `/start`, locale, AI, rate-limit va feedback smoke. `ANTHROPIC_API_KEY` staging bloklari alohida qoladi.
+
+Fayllar: `.github/workflows/ci.yml`, `scripts/telegram-webhook-rollout{,.test}.ts`, 4-tilli `DEVLOG/STATUS/PLAN/CONNECTIONS/REQUIREMENTS`.
+
 ## 2026-08-22 — HR provider failure typed `AI_UNAVAILABLE` bilan yopildi
 
 - Provider contract/accounting/config failure endi raw detailni yashirgan localized `AI_UNAVAILABLE` envelope'iga normalize qilinadi; application uni HTTP `503`ga map qiladi va accepted quota lease cleanup'i saqlanadi. Backend type/schema hamda frontend UZ/RU/EN/JA fallback copy bir contractga keldi.

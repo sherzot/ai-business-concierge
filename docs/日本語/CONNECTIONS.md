@@ -131,26 +131,29 @@ supabase secrets set OPENAI_API_KEY=sk-... --project-ref <ref>
 2. `/newbot` → ボット名とユーザー名を指定
 3. BotFatherがトークン（`123456789:ABC-DEF...`）を提供
 
-### 5.2 Webhookシークレット
+### 5.2 Webhook secretと接続の安全なrollout
+
+`scripts/telegram-webhook-rollout.ts`はrandom secretを生成し、mode `0600`のtemporary env-file経由でSupabaseへ設定、Telegram `setWebhook`を呼び出し、exact URL・health・unauthorized POSTを検証する。Telegram commit前のfailureでは新secretを自動unsetする。既存secretの偶発rotationは拒否する。
+
+Bot tokenをshell historyへ残さず入力し、exact production project refを指定する:
 
 ```bash
-openssl rand -hex 32
+read -rs "TELEGRAM_BOT_TOKEN?Bot token: " && echo
+export TELEGRAM_BOT_TOKEN
+export SUPABASE_PROJECT_REF="<production-project-ref>"
+export TELEGRAM_WEBHOOK_URL="https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1/telegram-bot"
+
+npx -y deno@2.1.14 run \
+  --allow-env=TELEGRAM_BOT_TOKEN,SUPABASE_PROJECT_REF,TELEGRAM_WEBHOOK_URL,TELEGRAM_WEBHOOK_SECRET \
+  --allow-write \
+  --allow-run=npx \
+  --allow-net="api.telegram.org,${SUPABASE_PROJECT_REF}.supabase.co" \
+  scripts/telegram-webhook-rollout.ts
+
+unset TELEGRAM_BOT_TOKEN
 ```
 
-### 5.3 設定
-
-```bash
-supabase secrets set TELEGRAM_BOT_TOKEN=123456789:ABC... --project-ref <ref>
-supabase secrets set TELEGRAM_WEBHOOK_SECRET=<random-hex> --project-ref <ref>
-```
-
-### 5.4 Webhookの接続（フェーズ1）
-
-```bash
-curl -F "url=https://<your-project>.supabase.co/functions/v1/telegram-bot" \
-     -F "secret_token=<TELEGRAM_WEBHOOK_SECRET>" \
-     "https://api.telegram.org/bot<TOKEN>/setWebhook"
-```
+Helperはtoken/secretをoutputしない。`TELEGRAM_WEBHOOK_SECRET`の手動指定は不要で、defaultは96文字random hex。
 
 ---
 

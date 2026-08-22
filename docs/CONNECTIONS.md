@@ -180,27 +180,29 @@ So'ng `services/knowledge-base.ts.searchKnowledgeBase()` chaqirilganda
    history - Suhbatlar tarixi
    ```
 
-### 5.2 Webhook secret yaratish
+### 5.2 Webhook secret va ulanishni xavfsiz rollout qilish
+
+`scripts/telegram-webhook-rollout.ts` random secret yaratadi, uni temp `0600` env-file orqali Supabase'ga o'rnatadi, Telegram `setWebhook`ni bajaradi va exact URL/health/unauthorized POSTni tekshiradi. Telegram commitdan oldin xato bo'lsa secret avtomatik unset qilinadi. Mavjud secret bo'lsa tasodifiy rotationni oldini olish uchun helper ishlamaydi.
+
+Bot tokenni shell historyga yozmasdan kiriting va production project refni aniq bering:
 
 ```bash
-# Random 32-belgi secret
-openssl rand -hex 32
+read -rs "TELEGRAM_BOT_TOKEN?Bot token: " && echo
+export TELEGRAM_BOT_TOKEN
+export SUPABASE_PROJECT_REF="<production-project-ref>"
+export TELEGRAM_WEBHOOK_URL="https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1/telegram-bot"
+
+npx -y deno@2.1.14 run \
+  --allow-env=TELEGRAM_BOT_TOKEN,SUPABASE_PROJECT_REF,TELEGRAM_WEBHOOK_URL,TELEGRAM_WEBHOOK_SECRET \
+  --allow-write \
+  --allow-run=npx \
+  --allow-net="api.telegram.org,${SUPABASE_PROJECT_REF}.supabase.co" \
+  scripts/telegram-webhook-rollout.ts
+
+unset TELEGRAM_BOT_TOKEN
 ```
 
-### 5.3 Sozlash
-
-```bash
-supabase secrets set TELEGRAM_BOT_TOKEN=123456789:ABC... --project-ref <ref>
-supabase secrets set TELEGRAM_WEBHOOK_SECRET=<random-hex> --project-ref <ref>
-```
-
-### 5.4 Webhook ulash (Phase 1 da)
-
-```bash
-curl -F "url=https://<your-project>.supabase.co/functions/v1/telegram-bot" \
-     -F "secret_token=<TELEGRAM_WEBHOOK_SECRET>" \
-     "https://api.telegram.org/bot<TOKEN>/setWebhook"
-```
+Helper secret yoki token qiymatini outputga chiqarmaydi. `TELEGRAM_WEBHOOK_SECRET`ni qo'lda berish shart emas; default 96-belgili random hex ishlatiladi.
 
 ---
 

@@ -53,6 +53,7 @@
 > 2026-08-22: HR application boundaryがrole/input precheck、1つのrequest ULID、provider composition、quota reserve/execute/finally-releaseをtyped HTTP mappingで統合。`eac2a3d` CI `32554187835` green: Deno 102/102と全gateが通過。Global 30s deadline、live smoke、`501`が残る。
 > 2026-08-22: HR application executionへmaximum 30s global deadlineとtyped `504 TIMEOUT`をenforce。Background provider accountingとquota cleanupはdeadline後も完了する。`11ab6af` CI `32554430334` green: Deno 103/103と全gateが通過。Typed provider-unavailable、live smoke、`501`が残る。
 > 2026-08-22: Provider/config/accounting failureをlocalized `AI_UNAVAILABLE`とHTTP `503`へmapし、backend schemaと4-locale frontend copyを同期。`f184434` CI `32554684769` green: Deno 105/105と全gateが通過。Live smoke、`501`が残る。
+> 2026-08-22: Telegram secret + `setWebhook`用secret-safe transactional rollout helperを実装。Exact-target preflight、accidental rotation拒否、temporary env-file、pre-commit rollback、subprocess env isolation、strict Telegram result、redaction、post-commit `getWebhookInfo`/health/401 verificationを行う。Final `67381df` CI `32555376998` green: Deno 111/111と全gateが通過。Token/secretのread/setはなく、productionはsecure local `TELEGRAM_BOT_TOKEN` access待ちでfail-closed `503`のまま。
 > 2026-08-22: `36b9553`はmain、GitHub CI `32546561166`は1m12sでgreen。Frontend runtime未変更のためNetlifyはskip。
 
 ## 現在のPhase
@@ -76,7 +77,7 @@
 | Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。40 migrations、`bright-api` v11 ACTIVE、health `200`、unauth docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list。Email confirmation ON、8-digit/1-minute OTP、TOTP ON。Auth settings HTTP `200`、autoconfirm false。Edgeはmodern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overridesを使用しlegacy anon/service-role API keysはdisabled |
 | Type-check | Clean temporary frontend installで成功 |
-| Unit tests | Frontend 28/28 files・127/127 tests、HR frontend 12/12。HR backend application 9 + orchestrator 9と残り全layerで101/101、Telegram込み105/105 |
+| Unit tests | Frontend 28/28 files・127/127 tests。HR backend 101/101、Telegram guard 4/4、Telegram rollout helper 6/6、targeted Deno 111/111 |
 | Deployment environment guard | Node tests 14/14: isolation contract 10件 + Vite `.env` fallback/runtime-precedence 2件 + bundled-endpoint extraction regressions 2件 |
 | Production build/security check | Synthetic non-production refでbuild pass。CSPはそのrefから生成、10 build/Netlify filesを検査 |
 | Production dependency audit | Raw audit: vulnerability合計0件; scoped gateはexceptionなしでhigh/critical 0件 |
@@ -85,7 +86,7 @@
 | Delivery platform | Netlifyのみ。RepositoryにVercel config/dependencyなし。External Vercel projectは保持し、`gitRepositoryConnected=false`を確認 |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase、`deploy-preview`/`branch-deploy`/`dev` -> staging。Optional URL envなし。Personalではbrowser-public `VITE_*`のみ`All` scopeを使用 |
 | Staging security advisor | Error `0`、既知`vector` public-schema warning `1`、server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | Final code commit `f184434`のmain run `32554684769`は1m08sでsuccess。Deno 105/105と全backend/frontend/build/security gates green |
+| Remote GitHub Actions | Final code commit `67381df`のmain run `32555376998`は53sでsuccess。Deno 111/111と全backend/frontend/build/security gates green |
 | Netlify preview | Sliceを直接`main`へpushしたため新規deploy previewはなく、Netlify production contextが実行された |
 | Production frontend | Deploy `6a89065505b5600008dd0385` ready、build `6a89065505b5600008dd0383`、commit `f77dd9a`、29s、plugin success、87,145 filesでsecret match 0。`/`と`/dashboard/hr/candidates`は`200`、CSP・production-only `index-DipHAHEa.js` green |
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |
@@ -101,7 +102,7 @@
 | Auth、multi-tenant、RBAC、主要web modules | Done | 基盤は動作 |
 | Realtimeとtask notifications | Done | Inbox、Tasks、Notifications、acknowledge |
 | Admin platform | Partial | 基本管理/monitoringあり。Tenant-profile/AI-stats authenticated smoke testsとCompany Dashboard dark-contrast visual acceptanceをuser sessionで確認済み |
-| Telegram | Partial / fail-closed operational block | Production v15 ACTIVE。Health `200`、secret不在時POST `503`。Secret設定、Telegram `setWebhook`、bot smokeが残る |
+| Telegram | Partial / fail-closed operational block | Production v15 ACTIVE。Health `200`、secret不在時POST `503`。Secret-safe transactional rollout helperはlocal/CI green。Secure local `TELEGRAM_BOT_TOKEN` access、helper実行、bot smokeが残る |
 | Resend inbox | Partial | Codeあり、receiving/delivery E2E未確認 |
 | AI Concierge/RAGとcost tracking | Partial | 基盤あり。Polishing request quotaはPostgreSQL atomic reservation/releaseでrace-safe、provider usageはoutput validation前に計上する。Migration rollout、citation UX、billing dashboard、unified endpoint enforcement、smoke testsが残る |
 | AI文書作成 | Production binary + staged AI polish preview / provider blocked | 15 templates、4言語、実PDF/DOCX/private Storageは稼働中。Polishing frontendはproduction、migrationと`bright-api` v11はstagingへdeploy済み。Auth/tenant/document boundariesとcleanupはgreenだが、stagingに`ANTHROPIC_API_KEY`がなくreal-provider smokeは`503 AI_UNAVAILABLE`。Production backend/migration rolloutは意図的に保留 |

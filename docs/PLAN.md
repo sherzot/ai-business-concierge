@@ -1,6 +1,6 @@
 # AI Business Concierge — faol reja
 
-> Version: 7.2
+> Version: 7.3
 > Yangilandi: 2026-08-22
 > Bu faylda faqat faol va navbatdagi ishlar turadi. 2026-07-24 gacha bo'lgan katta tarixiy reja [archive/PLAN_LEGACY_2026-07-24.md](archive/PLAN_LEGACY_2026-07-24.md)ga ko'chirilgan.
 
@@ -59,7 +59,7 @@
 
 ## P2 — operatsion integratsiyalar
 
-- [ ] Production v15 fail-closed `503`dan keyin yangi `TELEGRAM_WEBHOOK_SECRET`ni o'rnatish va ayni qiymat bilan Telegram `setWebhook`ni qayta ulash.
+- [ ] **BLOCKED — secure `TELEGRAM_BOT_TOKEN` access:** transactional helper bilan production secret + Telegram `setWebhook`ni bir marta ulash; helper rollback va post-commit verificationni bajaradi.
 - [ ] Telegram `/start`, AI javob, locale, rate limit va feedback smoke-testini o'tkazish.
 - [ ] Resend receiving domain, webhook signature, tenant mapping va real deliveryni end-to-end tekshirish.
 - [ ] **BLOCKED — paid plan:** Supabase organization Free; Pro+ upgrade tasdiqlansa Leaked Password Protection'ni yoqish.

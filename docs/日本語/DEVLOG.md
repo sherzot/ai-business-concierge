@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-22 — Telegram webhook rolloutをsecret-safeかつtransactional化
+
+- Production `telegram-bot` v15はfail-closed `503`。Remote projectには`TELEGRAM_BOT_TOKEN`名があるが、local secure token accessと`TELEGRAM_WEBHOOK_SECRET`がない。新operations helperはexact Supabase project/HTTPS endpointを検証し、既存secretの偶発rotationを拒否、96文字random secretを生成し、process arguments/logへ値を出さずmode `0600`のtemporary env-file経由で設定する。
+- Supabase secret setとTelegram `setWebhook`を1 flowへ統合。Telegram commit前のfailureでは新secretをunsetしてfail-closed stateを復元し、success後は`getWebhookInfo` exact URL、health `200`、secretなしPOST `401`を検証する。全errorからtoken/secretをredact。Official Telegram `secret_token` charset/length contractとも照合した。
+- 新contract 6/6、guard込みTelegram 10/10、HR込みtargeted Deno 111/111 PASS。Format/check/lint green。Final `67381df`はmain、GitHub CI `32555376998`は53sでDeno 111/111、frontend 28/28 files・127/127 tests、deploy-env 14/14、audit high/critical 0、3,701-module build、10-file securityがgreen。Netlifyはskip。Secretのread/setやruntime変更はなく、production POSTはまだ`503`。
+
+残作業: BotFather/password managerから`TELEGRAM_BOT_TOKEN`をlocal sessionへ安全に渡しhelperを1回実行後、`/start`、locale、AI、rate limit、feedback smokeを行う。Staging `ANTHROPIC_API_KEY` blockersは別途残る。
+
+Files: `.github/workflows/ci.yml`、`scripts/telegram-webhook-rollout{,.test}.ts`、4言語`DEVLOG/STATUS/PLAN/CONNECTIONS/REQUIREMENTS`。
+
 ## 2026-08-22 — HR provider failureをtyped `AI_UNAVAILABLE`でclose
 
 - Provider contract/accounting/config failureをraw detailなしのlocalized `AI_UNAVAILABLE`へnormalizeし、applicationはHTTP `503`へmap、quota cleanupを保持。Backend type/schemaとfrontend UZ/RU/EN/JA copyを同期。

@@ -21,7 +21,7 @@ This document defines project requirements and future directions. Refer to this 
 - [x] Tasks – board/list, CRUD
 - [x] HR – cases, surveys
 - [x] Docs – list, search, index
-- [x] Integrations – Telegram, Email, AmoCRM
+- [x] Integrations – Telegram, Email, and AmoCRM foundations; secure Telegram rollout execution and production smoke remain
 - [x] AI Concierge – chat, tools
 - [x] Settings – profile, language
 

@@ -55,6 +55,7 @@
 > 2026-08-22: HR application boundary role/input precheck, bitta request ULID, provider composition va quota reserve/execute/finally-release'ni typed HTTP mapping bilan birlashtirdi. `eac2a3d` CI `32554187835` green: Deno 102/102 va barcha gate'lar o'tdi; global 30s deadline, live smoke va `501` qolgan.
 > 2026-08-22: HR application execution maximum 30s global deadline va typed `504 TIMEOUT` bilan qotirildi; background provider accounting va quota cleanup deadline'dan keyin ham yakunlanadi. `11ab6af` CI `32554430334` green: Deno 103/103 va barcha gate'lar o'tdi; typed provider-unavailable, live smoke va `501` qolgan.
 > 2026-08-22: Provider/config/accounting failure localized `AI_UNAVAILABLE` va HTTP `503`ga map qilindi; backend schema hamda frontend 4-locale copy sinxron. `f184434` CI `32554684769` green: Deno 105/105 va barcha gate'lar o'tdi; live smoke va `501` qolgan.
+> 2026-08-22: Telegram secret + `setWebhook` uchun secret-safe transactional rollout helper tayyorlandi: exact target preflight, accidental rotation denial, temp env-file, pre-commit rollback, subprocess env isolation, strict Telegram result, redaction va post-commit `getWebhookInfo`/health/401 verification. Final `67381df` CI `32555376998` green: Deno 111/111 va barcha gate'lar o'tdi. Secret/token o'qilmadi yoki o'rnatilmadi; production hali fail-closed `503`, secure local `TELEGRAM_BOT_TOKEN` access qolgan.
 
 ## Hozir qayerdamiz
 
@@ -77,7 +78,7 @@
 | Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 40 migration, `bright-api` v11 ACTIVE, health `200`, authsiz docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` modern key override'larida; legacy anon/service-role API keylari disabled |
 | Type-check | Clean temp frontend installida muvaffaqiyatli |
-| Unit test | Frontend 28/28 fayl, 127/127 test; HR backend application 9 + orchestrator 9 va qolgan qatlamlar bilan 101/101; Telegram bilan Deno 105/105 |
+| Unit test | Frontend 28/28 fayl, 127/127 test; HR backend 101/101, Telegram guard 4/4 va Telegram rollout helper 6/6; targeted Deno 111/111 |
 | Deploy environment guard | Node test 14/14: 10 isolation contracti + 2 Vite `.env` fallback/runtime-precedence + 2 bundled endpoint extraction regressiyasi |
 | Production build | Synthetic non-production project-ref bilan muvaffaqiyatli; CSP tanlangan refdan yaratildi |
 | Security check | 10 ta build/Netlify fayli muvaffaqiyatli |
@@ -87,7 +88,7 @@
 | Delivery platform | Faol platforma faqat Netlify. Repo ichida Vercel config/dependency yo'q; external Vercel project saqlangan, `gitRepositoryConnected=false` tasdiqlandi |
 | Environment isolation | Netlify CLI authoritative read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envlari yo'q; Personal rejada faqat browser-public `VITE_*` qiymatlar `All` scope'da |
 | Staging security advisor | Error `0`; ma'lum `vector` public-schema warningi `1`; server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | Final code commit `f184434` uchun main run `32554684769` 1m08sda success: Deno 105/105 va barcha backend/frontend/build/security gate'lari green |
+| Remote GitHub Actions | Final code commit `67381df` uchun main run `32555376998` 53sda success: Deno 111/111 va barcha backend/frontend/build/security gate'lari green |
 | Netlify preview | Bu slice bevosita `main`ga push qilingani uchun yangi deploy-preview yaratilmagan; Netlify production context ishlagan |
 | Production frontend | Deploy `6a89065505b5600008dd0385` ready, build `6a89065505b5600008dd0383`, commit `f77dd9a`, 29s, plugin success, secret match 0/87,145; `/` va `/dashboard/hr/candidates` `200`, CSP va production-only `index-DipHAHEa.js` bundle green |
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |
@@ -105,7 +106,7 @@
 | Realtime | **Done** | Inbox, Tasks va Notifications subscriptionlari |
 | Task assignment notifications | **Done** | Biriktirish, read va acknowledge oqimi |
 | Admin platforma | **Partial** | Dashboard, companies, contacts, users, audit, KB, risk, health va AI stats mavjud; tenant profile/AI-stats authenticated smoke va Company Dashboard dark-contrast vizual acceptance user sessionida tasdiqlangan |
-| Telegram bot | **Partial / fail-closed operational block** | Production v15 ACTIVE; health `200`, secret yo'qligida POST `503`. Secret set, Telegram `setWebhook` va bot smoke qolgan |
+| Telegram bot | **Partial / fail-closed operational block** | Production v15 ACTIVE; health `200`, secret yo'qligida POST `503`. Secret-safe transactional rollout helper local/CI green; secure local `TELEGRAM_BOT_TOKEN` access, helper execution va bot smoke qolgan |
 | Resend email inbox | **Partial** | Webhook va mapping kodi mavjud; real receiving/delivery smoke-test tasdiqlanmagan |
 | AI Concierge / RAG | **Partial** | Claude router, OpenAI embedding va RAG fundamenti bor; explicit document search/citation va to'liq smoke-test qarzi bor |
 | AI usage/cost tracking | **Partial** | Log wiring va DB tracking bor; polishing request quota'si PostgreSQL atomik reservation/release bilan race-safe qilingan, provider usage output validatsiyasidan oldin hisoblanadi. Migration rollout, tenant billing dashboard va barcha endpointlar uchun yagona enforcement hali qolgan |

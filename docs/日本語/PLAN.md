@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 7.2 · 更新 2026-08-22
+> Version 7.3 · 更新 2026-08-22
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -51,7 +51,7 @@
 
 ## P2 — Operational integrations
 
-- [ ] Production v15 fail-closed `503`後、新しい`TELEGRAM_WEBHOOK_SECRET`を設定し、同じ値でTelegram `setWebhook`を再接続する。
+- [ ] **BLOCKED — secure `TELEGRAM_BOT_TOKEN` access:** Transactional helperを1回実行してproduction secretとTelegram `setWebhook`を接続する。Helperがrollbackとpost-commit verificationを行う。
 - [ ] Resend receiving、signature、tenant mapping、deliveryをE2E検証。
 - [ ] **BLOCKED — paid plan:** Supabase organizationはFree。承認済みPro+ upgrade後にLeaked Password Protectionを有効化。
 - [ ] Netlify preview protectionを選択。

@@ -53,6 +53,7 @@
 > 2026-08-22: The HR application boundary now combines role/input prechecks, one request ULID, provider composition, and quota reserve/execute/finally-release with typed HTTP mapping. `eac2a3d` CI `32554187835` is green: Deno 102/102 and all gates passed; the global 30s deadline, live smoke, and `501` remain.
 > 2026-08-22: HR application execution now enforces a maximum 30s global deadline and typed `504 TIMEOUT`; background provider accounting and quota cleanup still complete after the deadline. `11ab6af` CI `32554430334` is green: Deno 103/103 and all gates passed; typed provider-unavailable, live smoke, and `501` remain.
 > 2026-08-22: Provider/config/accounting failures now map to localized `AI_UNAVAILABLE` and HTTP `503`; backend schema and four-locale frontend copy are synchronized. `f184434` CI `32554684769` is green: Deno 105/105 and all gates passed; live smoke and `501` remain.
+> 2026-08-22: A secret-safe transactional rollout helper is ready for Telegram secret + `setWebhook`: exact-target preflight, accidental-rotation denial, temporary env file, pre-commit rollback, subprocess env isolation, strict Telegram result, redaction, and post-commit `getWebhookInfo`/health/401 verification. Final `67381df` CI `32555376998` is green with Deno 111/111 and all gates. No token/secret was read or set; production remains fail-closed `503` pending secure local `TELEGRAM_BOT_TOKEN` access.
 > 2026-08-22: `36b9553` is on main and GitHub CI `32546561166` completed green in 1m12s; Netlify was skipped because frontend runtime did not change.
 
 ## Current phase
@@ -76,7 +77,7 @@
 | Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 40 migrations, `bright-api` v11 ACTIVE, health `200`, unauthenticated docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge uses modern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overrides; legacy anon/service-role API keys are disabled |
 | Type-check | Passed in a clean temporary frontend install |
-| Unit tests | Frontend 28/28 files, 127/127 tests, including HR Candidate 12/12; HR backend application 9 + orchestrator 9 and all remaining layers = 101/101; targeted backend with Telegram 105/105 |
+| Unit tests | Frontend 28/28 files, 127/127 tests; HR backend 101/101, Telegram guard 4/4, and Telegram rollout helper 6/6; targeted Deno 111/111 |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks, 2 Vite `.env` fallback/runtime-precedence regressions, and 2 bundled-endpoint extraction regressions |
 | Production build/security check | Build passed with a synthetic non-production ref; CSP was generated from that ref; security checked 10 build/Netlify files |
 | Production dependency audit | Raw audit: 0 total vulnerabilities; scoped gate: 0 high/critical with no exceptions |
@@ -85,7 +86,7 @@
 | Delivery platform | Netlify only. The repository has no Vercel config/dependency; the external Vercel project remains, with `gitRepositoryConnected=false` verified |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs are absent; on Personal only browser-public `VITE_*` values use `All` scope |
 | Staging security advisor | Errors `0`; known `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | Final code commit `f184434` main run `32554684769` succeeded in 1m08s: Deno 105/105 and all backend/frontend/build/security gates green |
+| Remote GitHub Actions | Final code commit `67381df` main run `32555376998` succeeded in 53s: Deno 111/111 and all backend/frontend/build/security gates green |
 | Netlify preview | No new deploy preview was created because this slice was pushed directly to `main`; Netlify used production context |
 | Production frontend | Deploy `6a89065505b5600008dd0385` ready, build `6a89065505b5600008dd0383`, commit `f77dd9a`, 29s, plugin success, 0 secret matches across 87,145 files; `/` and `/dashboard/hr/candidates` `200`, CSP and production-only `index-DipHAHEa.js` green |
 | Frontend Supabase key contract | Code and production accept only the modern publishable key; bundle has 1 modern key, 0 JWT-like keys, no legacy env name, and the format guard; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env deleted |
@@ -101,7 +102,7 @@
 | Auth, multi-tenant, RBAC and core web modules | Done | Main product foundation works |
 | Realtime and task notifications | Done | Inbox, Tasks, Notifications, acknowledgement |
 | Admin platform | Partial | Core management/monitoring exists; tenant-profile/AI-stats authenticated smoke tests and Company Dashboard dark-contrast visual acceptance were confirmed in a user session |
-| Telegram | Partial / fail-closed operational block | Production v15 ACTIVE; health `200`, POST `503` while secret is absent. Secret setup, Telegram `setWebhook`, and bot smoke remain |
+| Telegram | Partial / fail-closed operational block | Production v15 ACTIVE; health `200`, POST `503` while the secret is absent. The secret-safe transactional rollout helper is local/CI green; secure local `TELEGRAM_BOT_TOKEN` access, helper execution, and bot smoke remain |
 | Resend inbox | Partial | Code exists; receiving/delivery E2E is unverified |
 | AI Concierge/RAG and cost tracking | Partial | Foundation exists; polishing request quota is race-safe through PostgreSQL atomic reservation/release, and provider usage is accounted before output validation. Migration rollout, citation UX, billing dashboard, unified endpoint enforcement, and full smoke tests remain |
 | AI Document Assistant | Production binary + staged AI polish preview / provider blocked | 15 templates, 4 languages, and real PDF/DOCX/private Storage are live. The polishing frontend is in production and migration plus `bright-api` v11 are in staging; Auth/tenant/document boundaries and cleanup are green, but real-provider smoke returns `503 AI_UNAVAILABLE` because staging lacks `ANTHROPIC_API_KEY`. Production backend/migration rollout is intentionally pending |
