@@ -4,6 +4,17 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-22 — HR deterministik scoring va evidence-linked report qatlamlari yakunlandi
+
+- `ANTHROPIC_API_KEY`ni kutmasdan candidate scoring/reportning provider-independent domain qismi implementatsiya qilindi. Oldingi scorer barcha kategoriyaga `0`, report generator esa bo'sh array va summary qaytarardi.
+- Scorer hujjatlashtirilgan 6 kategoriya rubrikasini 0–100 oralig'ida hisoblaydi, JD bo'lmasa `role_fit=null`, texnologiya talabi aniqlanmasa neytral lexical baseline qo'llaydi. Weighted overall va grade invalid/unbounded qiymatlarni fail-closed clamp qiladi. `stack_mismatch`, `experience_gap`, `title_inflation` faqat complete va taqqoslanadigan GitHub dalilida, konservativ severity hamda UZ/JA/EN izoh bilan chiqadi; partial/failed GitHub flag yaratmaydi.
+- Report generator UZ/JA/ENda 6 tagacha strength/evidence-gap, 1,500 belgilik summary, har non-null kategoriya va behavioral yo'nalish uchun 6–7 ta evidence-linked savol hamda deterministic hiring recommendation beradi. High-severity flag qarorni aynan bir bucket pasaytiradi; private ish taxmin qilinmaydi. Sonnet semantic refinement, provider accounting call-site va route activation hali key bilan birga qoladi; production `501`, DB va frontend o'zgarmadi.
+- `5395da1` scoring commitining GitHub CI run `32547412956`si 1m03sda green. Yakuniy `b222cf9` report commitining CI run `32547588906`si 1m06sda Deno 60/60, backend quality, frontend 127/127, deploy-env 14/14, audit 0 high/critical, 3,701-module build va 10-file security bilan green. Runtime frontend o'zgarmagani uchun Netlify ataylab skip qilindi.
+
+Qolgan ish: `ANTHROPIC_API_KEY` kelgach semantic CV structuring va Sonnet scoring/report refinementini validated structured output bilan ulash, har provider javobini atomic usage RPCda hisoblash, quota lease'ni `finally`da release qilish va full-flow green bo'lgach `501`ni olib tashlash.
+
+Fayllar: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/{candidate-scorer,report-generator}{,.test}.ts`, `index.ts` va 4-tilli `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/HR_CANDIDATE_ANALYSIS`.
+
 ## 2026-08-22 — HR provider usage/cost accounting stagingda atomik qotirildi
 
 - `ANTHROPIC_API_KEY`dan mustaqil navbatdagi HR slice bajarildi. Oldin HR orchestratorida usage/cost uchun faqat TODO bor edi; provider bosqichlari token hisobini takror yozishi yoki `usage_tracking` bilan ajralib ketishi mumkin edi.

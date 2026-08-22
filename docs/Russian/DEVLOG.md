@@ -4,6 +4,15 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — Завершены детерминированный HR scoring и evidence-linked report
+
+- Пока отсутствует `ANTHROPIC_API_KEY`, реализована provider-independent domain-часть candidate scoring/report. Ранее scorer возвращал нули, а report generator — пустые массивы и summary.
+- Scorer применяет rubric по 6 категориям 0–100, возвращает `role_fit=null` без job description, ограничивает invalid/unbounded значения и создаёт консервативные UZ/JA/EN inconsistency flags только при complete сопоставимых GitHub evidence. Partial/failed GitHub не создаёт flags.
+- Report generator возвращает bounded UZ/JA/EN strengths, evidence gaps, summary, 6–7 evidence-linked category/behavioral questions и deterministic hiring recommendation. Private work не предполагается. Semantic Sonnet refinement, provider accounting call-sites и route activation остаются blocked; production сохраняет `501`, DB/frontend runtime не менялись.
+- Scoring commit `5395da1` прошёл GitHub CI `32547412956` за 1m03s. Final report commit `b222cf9` прошёл CI `32547588906` за 1m06s: Deno 60/60, backend quality, frontend 127/127, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files green. Netlify намеренно skipped, потому что frontend runtime не менялся.
+
+Осталось: после получения key подключить semantic CV structuring и Sonnet refinement с validated structured output, учитывать каждый provider response через atomic usage RPC, освобождать quota lease в `finally` и снять `501` только после green full-flow smoke.
+
 ## 2026-08-22 — HR provider usage/cost accounting атомарно усилен в staging
 
 - Service-role-only RPC `record_hr_candidate_ai_usage` записывает только bounded model/complexity/token/cost/cache/latency metadata для semantic CV, scoring и reporting. Tenant+endpoint+request idempotency и daily token counter обновляются в одной transaction; active membership, ULID, numeric/cache bounds и browser EXECUTE denial fail closed. Prompt, CV и output не сохраняются, raw DB error скрыт.

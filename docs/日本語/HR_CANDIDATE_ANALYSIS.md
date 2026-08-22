@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Status: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache、bounded local PDF/DOCX、request/role/plan policy、PostgreSQL minute/day/concurrency lease、bounded multipart、orchestrator failure semanticsはreal/tested。Semantic LLM scoring/report、usage log、frontend results、full HTTP wiringが残り、canonical endpointは`501 NOT_IMPLEMENTED`を返す。現在状態: [STATUS.md](STATUS.md)。
+> **Status: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache、bounded local PDF/DOCX、request/role/plan policy、PostgreSQL leases、bounded multipart、atomic usage accounting、deterministic scoring/evidence report、orchestrator、frontendはreal/tested。Semantic CV/Sonnet refinement、provider accounting call-sites、full HTTP wiringが残り、canonical endpointは`501 NOT_IMPLEMENTED`を返す。現在状態: [STATUS.md](STATUS.md)。
 
 > **AI Business Concierge — `hr_candidate_analysis` モジュール設計パッケージ**
 > バージョン: 1.0 (MVP設計) · 日付: 2026-04-29
@@ -326,6 +326,8 @@ Accept-Language: uz | ja | en   （デフォルト: uz）
 
 ### 6.3 ツール3 — `candidate-scorer.ts`
 
+> 現行実装はprovider-independent rubric、bounded weighted overall/grade、completeかつ比較可能なGitHub evidenceだけに基づくconservative UZ/JA/EN flagsを提供する。Sonnet/Haiku structured refinementはkey-dependentな次層として残る。
+
 ```
 モデル:  Claude Sonnet 4（深層）または Haiku（高速）
 モード:  構造化出力（JSONモード）
@@ -345,6 +347,8 @@ Accept-Language: uz | ja | en   （デフォルト: uz）
 ```
 
 ### 6.4 ツール4 — `report-generator.ts`
+
+> 現行実装はbounded UZ/JA/EN evidence-linked strengths/gaps/summary、全non-null categoryとbehavioral evidenceを覆う6–7問、deterministic recommendationを提供する。Sonnet narrative refinementはkey-dependentな次層として残る。
 
 ```
 モデル:  Claude Sonnet 4

@@ -4,6 +4,15 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-22 — HR deterministic scoringとevidence-linked reportを完了
+
+- `ANTHROPIC_API_KEY`待ちの間に、provider-independentなcandidate scoring/report domainを実装した。従来のscorerは全categoryを0、report generatorは空配列・空summaryを返していた。
+- Scorerは6-category 0–100 rubric、job descriptionなしの`role_fit=null`、invalid/unbounded値のclampを実装。ConservativeなUZ/JA/EN inconsistency flagはcompleteかつ比較可能なGitHub evidenceだけから生成し、partial/failed GitHubでは生成しない。
+- Report generatorはbounded UZ/JA/EN strengths、evidence gaps、summary、6–7件のevidence-linked category/behavioral questions、deterministic hiring recommendationを返す。Private workは推測しない。Semantic Sonnet refinement、provider accounting call-sites、route activationはblockedのままで、productionは`501`、DB/frontend runtimeは未変更。
+- Scoring commit `5395da1`のGitHub CI `32547412956`は1m03sでgreen。Final report commit `b222cf9`のCI `32547588906`は1m06sでDeno 60/60、backend quality、frontend 127/127、deploy-env 14/14、audit high/critical 0、3,701-module build、10-file security green。Frontend runtime未変更のためNetlifyは意図的にskipした。
+
+残作業: key取得後、validated structured output付きsemantic CV structuring/Sonnet refinement、各provider responseのatomic usage RPC計上、`finally`でのquota lease releaseを接続し、green full-flow smoke後のみ`501`を解除する。
+
 ## 2026-08-22 — HR provider usage/cost accountingをstagingでatomic化
 
 - Service-role-only `record_hr_candidate_ai_usage` RPCはsemantic CV、scoring、reportingのbounded model/complexity/token/cost/cache/latency metadataのみ保存する。Tenant+endpoint+request idempotencyとdaily token counterを1 transactionで更新し、active membership、ULID、numeric/cache bounds、browser EXECUTE denialはfail closed。Prompt、CV、outputは保存せずraw DB errorも隠す。

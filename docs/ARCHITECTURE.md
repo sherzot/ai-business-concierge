@@ -3,7 +3,7 @@
 > Loyiha arxitekturasi, design patternlar va unit testing qoidalari
 > Version: 1.3 | Yangilandi: 2026-08-21
 >
-> Bu hujjat joriy arxitektura chegaralari va target refactoring yo'nalishini birga ko'rsatadi. Runtime holati uchun [STATUS.md](STATUS.md) ustun. `hr-candidate` papkasi partial: GitHub, local PDF/DOCX, pure request policy, PostgreSQL quota lease, bounded multipart va orchestrator failure boundary real; semantic LLM/scoring/report/full HTTP wiring production-ready emas.
+> Bu hujjat joriy arxitektura chegaralari va target refactoring yo'nalishini birga ko'rsatadi. Runtime holati uchun [STATUS.md](STATUS.md) ustun. `hr-candidate` papkasi partial: GitHub, local PDF/DOCX, pure request policy, PostgreSQL quota lease, bounded multipart, deterministic scoring/report va orchestrator failure boundary real; semantic LLM refinement/full HTTP wiring production-ready emas.
 
 ---
 
@@ -194,7 +194,7 @@ router.post("/tasks", async (c) => {
 
 ### 3.3 Target pattern: modular service papkasi
 
-`hr-candidate` papkasi kerakli modular strukturani ko'rsatadi. GitHub REST va local PDF/DOCX adapterlari bounded; pure request/role/tariff policy providerdan oldin ishlaydi; service-role-only PostgreSQL RPC quota lease'ni rezervatsiya qiladi va alohida idempotent RPC provider logi bilan token counterni bitta tranzaksiyada yozadi; prompt/CV/output accounting chegarasidan o'tmaydi. Multipart adapter body'ni 5 MiB CV + 64 KiB overhead bilan cheklaydi; orchestrator failure oqimlarini boshqaradi. Semantic CV/scoring/report, accounting call-site va full HTTP route wiringda TODO/stublar bor.
+`hr-candidate` papkasi kerakli modular strukturani ko'rsatadi. GitHub REST va local PDF/DOCX adapterlari bounded; pure request/role/tariff policy providerdan oldin ishlaydi; service-role-only PostgreSQL RPC quota lease'ni rezervatsiya qiladi va alohida idempotent RPC provider logi bilan token counterni bitta tranzaksiyada yozadi; prompt/CV/output accounting chegarasidan o'tmaydi. Multipart adapter body'ni 5 MiB CV + 64 KiB overhead bilan cheklaydi; orchestrator failure oqimlarini boshqaradi. Deterministik domain policy 6 kategoriya scoring, conservative inconsistency, 3-tilli evidence report va interview savollarini beradi. Semantic CV/Sonnet refinement, accounting call-site va full HTTP route wiring hali partial.
 
 ```
 services/{domain}/
@@ -396,4 +396,4 @@ it('overdue: done status bo'lsa false', () => {
 
 *ARCHITECTURE.md — AI Business Concierge v1.0*
 *Sana: 2026-05-05*
-*HR Candidate target modular pattern: bounded adapter/request/quota/multipart/orchestrator boundary real; semantic LLM/scoring/report/full HTTP wiring partial scaffold.*
+*HR Candidate target modular pattern: bounded adapter/request/quota/multipart/orchestrator hamda deterministic scoring/report boundary real; semantic LLM refinement/full HTTP wiring partial scaffold.*

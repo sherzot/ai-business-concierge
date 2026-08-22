@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Статус: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX, request/role/plan policy, PostgreSQL minute/day/concurrency lease, bounded multipart и orchestrator failure semantics real/tested. Остаются semantic LLM scoring/report, usage log, frontend results и full HTTP wiring; canonical endpoint возвращает `501 NOT_IMPLEMENTED`. Текущее состояние: [STATUS.md](STATUS.md).
+> **Статус: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX, request/role/plan policy, PostgreSQL leases, bounded multipart, atomic usage accounting, deterministic scoring/evidence report, orchestrator и frontend real/tested. Остаются semantic CV/Sonnet refinement, provider accounting call-sites и full HTTP wiring; canonical endpoint возвращает `501 NOT_IMPLEMENTED`. Текущее состояние: [STATUS.md](STATUS.md).
 
 > **AI Business Concierge — Пакет проектирования модуля `hr_candidate_analysis`**
 > Версия: 1.0 (MVP дизайн) · Дата: 2026-04-29
@@ -326,6 +326,8 @@ Accept-Language: uz | ja | en   (по умолчанию: uz)
 
 ### 6.3 Инструмент 3 — `candidate-scorer.ts`
 
+> Текущая реализация даёт provider-independent rubric, bounded weighted overall/grade и conservative UZ/JA/EN flags только по complete сопоставимым GitHub evidence. Sonnet/Haiku structured refinement остаётся key-dependent слоем.
+
 ```
 Модель:  Claude Sonnet 4 (глубокий) или Haiku (быстрый)
 Режим:   Структурированный вывод (JSON mode)
@@ -345,6 +347,8 @@ Accept-Language: uz | ja | en   (по умолчанию: uz)
 ```
 
 ### 6.4 Инструмент 4 — `report-generator.ts`
+
+> Текущая реализация даёт bounded UZ/JA/EN evidence-linked strengths/gaps/summary, 6–7 вопросов по всем non-null категориям и behavioral evidence, а также deterministic recommendation. Sonnet narrative refinement остаётся key-dependent слоем.
 
 ```
 Модель:  Claude Sonnet 4

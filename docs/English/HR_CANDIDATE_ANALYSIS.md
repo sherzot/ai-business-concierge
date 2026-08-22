@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Status: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX, request/role/plan policy, PostgreSQL minute/day/concurrency leases, bounded multipart, and orchestrator failure semantics are real/tested. Semantic LLM scoring/reporting, usage logging, frontend results, and full HTTP wiring remain; the canonical endpoint returns `501 NOT_IMPLEMENTED`. Current state: [STATUS.md](STATUS.md).
+> **Status: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX, request/role/plan policy, PostgreSQL leases, bounded multipart, atomic usage accounting, deterministic scoring/evidence reporting, orchestrator, and frontend are real/tested. Semantic CV/Sonnet refinement, provider accounting call-sites, and full HTTP wiring remain; the canonical endpoint returns `501 NOT_IMPLEMENTED`. Current state: [STATUS.md](STATUS.md).
 
 > **AI Business Concierge — `hr_candidate_analysis` Module Design Package**
 > Version: 1.0 (MVP design) · Date: 2026-04-29
@@ -326,6 +326,8 @@ Notes:
 
 ### 6.3 Tool 3 — `candidate-scorer.ts`
 
+> The current implementation provides the provider-independent rubric, bounded weighted overall/grade, and conservative UZ/JA/EN inconsistency flags only from complete comparable GitHub evidence. Sonnet/Haiku structured refinement remains the next key-dependent layer.
+
 ```
 Model:  Claude Sonnet 4 (deep) or Haiku (fast)
 Mode:   Structured output (JSON mode)
@@ -345,6 +347,8 @@ Inconsistency detection:
 ```
 
 ### 6.4 Tool 4 — `report-generator.ts`
+
+> The current implementation provides bounded UZ/JA/EN evidence-linked strengths/gaps/summary, 6–7 questions covering every non-null category plus behavioral evidence, and a deterministic recommendation. Sonnet narrative refinement remains the next key-dependent layer.
 
 ```
 Model:  Claude Sonnet 4

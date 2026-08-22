@@ -4,6 +4,17 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — Deterministic HR scoring and evidence-linked reporting completed
+
+- While `ANTHROPIC_API_KEY` remains unavailable, the provider-independent candidate scoring/report domain was implemented. The scorer previously returned zero for every category and the report generator returned empty arrays and summary.
+- The scorer now applies the six-category 0–100 rubric, returns `role_fit=null` without a job description, clamps invalid/unbounded values, and emits conservative UZ/JA/EN inconsistency flags only from complete comparable GitHub evidence. Partial/failed GitHub data cannot create a flag.
+- The report generator now returns bounded UZ/JA/EN strengths, evidence gaps, a summary, 6–7 evidence-linked category/behavioral interview questions, and a deterministic hiring recommendation. Private work is not inferred. Semantic Sonnet refinement, provider-accounting call-sites, and route activation remain blocked; production stays `501`, with no DB or frontend runtime change.
+- Scoring commit `5395da1` passed GitHub CI `32547412956` in 1m03s. Final report commit `b222cf9` passed CI `32547588906` in 1m06s with Deno 60/60, backend quality, frontend 127/127, deploy-env 14/14, audit 0 high/critical, a 3,701-module build, and 10-file security. Netlify was intentionally skipped because frontend runtime did not change.
+
+Remaining: once the key arrives, wire semantic CV structuring and Sonnet refinement with validated structured output, account for every provider response through the atomic usage RPC, release quota leases in `finally`, and remove `501` only after a green full-flow smoke.
+
+Files: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/{candidate-scorer,report-generator}{,.test}.ts`, `index.ts`, and four-language DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/HR_CANDIDATE_ANALYSIS.
+
 ## 2026-08-22 — HR provider usage/cost accounting hardened atomically in staging
 
 - A service-role-only `record_hr_candidate_ai_usage` RPC now records bounded model/complexity/token/cost/cache/latency metadata for semantic CV, scoring, and reporting. Tenant+endpoint+request idempotency and the daily token counter share one transaction; active membership, ULID, numeric/cache bounds, and browser EXECUTE denial fail closed. Prompt, CV, and output content is never stored, and the TypeScript adapter hides raw DB errors.

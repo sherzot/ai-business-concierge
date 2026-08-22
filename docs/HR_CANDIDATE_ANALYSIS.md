@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Holat: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub adapter/cache, bounded local PDF/DOCX extraction, pure request/role/tariff policy, PostgreSQL minute/day/concurrency lease, bounded multipart va orchestrator failure semantics real/testlangan. Semantic LLM scorer/report, usage log, frontend result va full HTTP wiring qolgan; canonical endpoint `501 NOT_IMPLEMENTED`. Joriy holat: [STATUS.md](STATUS.md).
+> **Holat: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub adapter/cache, bounded local PDF/DOCX extraction, pure request/role/tariff policy, PostgreSQL minute/day/concurrency lease, bounded multipart, atomic usage accounting, deterministic scorer/evidence report, orchestrator va frontend real/testlangan. Semantic CV/Sonnet refinement, provider accounting call-site va full HTTP wiring qolgan; canonical endpoint `501 NOT_IMPLEMENTED`. Joriy holat: [STATUS.md](STATUS.md).
 
 > **AI Business Concierge — `hr_candidate_analysis` modul dizayn paketi**
 > Version: 1.0 (MVP design) · Sana: 2026-04-29 · Til: O'zbekcha / 日本語 / English
@@ -502,6 +502,8 @@ Caveats:
 
 ### 6.3 Tool 3 — `candidate-scorer.ts`
 
+> Joriy implementatsiya provider-independent rubrikani, bounded weighted overall/grade va faqat complete taqqoslanadigan GitHub dalilida conservative UZ/JA/EN inconsistency flaglarini beradi. Sonnet/Haiku structured refinement key bilan keyingi qatlam sifatida qolgan.
+
 ```
 Model:  Claude Sonnet 4 (deep) yoki Haiku (fast)
 Mode:   Structured output (JSON mode)
@@ -552,6 +554,8 @@ Inconsistency detection rules:
 ```
 
 ### 6.4 Tool 4 — `report-generator.ts`
+
+> Joriy implementatsiya UZ/JA/EN evidence-linked strength/gap/summary, har non-null kategoriya va behavioral yo'nalish uchun 6–7 savol hamda deterministic recommendation beradi. Sonnet narrative refinement key bilan keyingi qatlam sifatida qolgan.
 
 ```
 Model:  Claude Sonnet 4

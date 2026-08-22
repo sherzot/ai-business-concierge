@@ -1,6 +1,6 @@
 # AI Business Concierge — активный план
 
-> Версия 6.2 · Обновлено 2026-08-22
+> Версия 6.3 · Обновлено 2026-08-22
 > Здесь только активные и следующие задачи. Старый master plan: [../archive/Russian/PLAN_LEGACY_2026-07-24.md](../archive/Russian/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — безопасное начало сессии
@@ -58,7 +58,7 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** подключить CV semantic structuring и Sonnet scoring/reporting через LLM Router, учитывая каждый provider response через готовый atomic usage/cost RPC.
+- [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** подключить CV semantic structuring и Sonnet structured scoring/report refinement поверх deterministic baseline через LLM Router, учитывая каждый provider response через готовый atomic usage/cost RPC.
 - [ ] После LLM integration подключить quota-lease release и active route, убрать `501` и выполнить full-flow integration/manual acceptance.
 
 ## Последующие фазы
