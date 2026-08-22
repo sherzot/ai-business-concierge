@@ -1,6 +1,6 @@
 # AI Business Concierge — current status
 
-> Last code/platform snapshot verified: **2026-08-21**
+> Last code/platform snapshot verified: **2026-08-22**
 > Documentation normalized: **2026-08-07**
 > The local runtime, production health/auth, and remote GitHub Actions baseline were re-verified on 2026-08-07. The P0 commits were pushed and the new CI run completed fully green.
 > 2026-08-08: the publishable-key commit was pushed and passed CI/Netlify deploy, but the production bundle still uses the legacy fallback. Direct browser Data API access to risk-scanner tables was closed in production.
@@ -39,6 +39,7 @@
 > 2026-08-21: HR Candidate now has a real public GitHub adapter with bounded REST/pagination/response, timeout, repository-tree aggregation, and a ten-minute cache; Deno 10/10 and a live `octocat` smoke are complete. `8496aae` is on main and CI `32487503062` is green. The route remains `501`; Supabase Free keeps Pro+ Leaked Password Protection BLOCKED.
 > 2026-08-21: Secret-free PDF/DOCX parsing is implemented for HR Candidate with 5 MiB/file-magic/PDF 50-page/text bounds, DOCX ZIP-bomb defenses, and EN/UZ/RU/JA date/section signals. `2526d72` is on main and CI `32489478394` is green with Deno 22/22; Haiku semantic structuring and route `501` remain gated by the provider key.
 > 2026-08-21: The HR request boundary/orchestrator is hardened fail-closed with pre-provider validation, tenant role guard, plan policy, failed-CV hard stop, timer cleanup, canonical ULID, and schema exclusivity. `2656e6a` is on main and CI `32491296828` is green with Deno 34/34; persistent quota/LLM/route wiring remain.
+> 2026-08-22: HR tenant quota and multipart boundaries are complete without provider secrets: PostgreSQL minute/day/concurrency leases, database plan mapping, 5 MiB + 64 KiB bounded streaming, and safe disabled-route draining. Staging has 39 migrations and the remote 22-case pgTAP runner succeeded; Deno 47/47 and frontend 117/117 are green. Production DB/Edge is unchanged; local fresh replay is blocked by the Docker socket.
 
 ## Current phase
 
@@ -58,10 +59,10 @@
 | Supabase CLI | Official Homebrew tap `v2.112.0`; verified with a fresh local volume |
 | Backend | Production Supabase Edge Function `bright-api` v76, `ACTIVE`, `verify_jwt=false`; SHA matches staging v10 |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 37/37 migrations, `bright-api` v11 ACTIVE, health `200`, unauthenticated docs/polish `401 TENANT_REQUIRED` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 39 migrations, `bright-api` v11 ACTIVE, health `200`, unauthenticated docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge uses modern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overrides; legacy anon/service-role API keys are disabled |
 | Type-check | Passed in a clean temporary frontend install |
-| Unit tests | Frontend 26/26 files, 117/117 tests; AI polish/router/usage Deno 18/18; HR GitHub 10 + CV 8 + boundary 5 + orchestrator 6 + schema 1 = 30/30; current targeted backend Deno 34/34 with Telegram; prior document binary/lifecycle Deno 7/7 |
+| Unit tests | Frontend 26/26 files, 117/117 tests; AI polish/router/usage Deno 18/18; HR GitHub 10 + CV 8 + boundary 5 + quota 7 + multipart 6 + orchestrator 6 + schema 1 = 43/43; current targeted backend Deno 47/47 with Telegram; prior document binary/lifecycle Deno 7/7 |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks, 2 Vite `.env` fallback/runtime-precedence regressions, and 2 bundled-endpoint extraction regressions |
 | Production build/security check | Build passed with a synthetic non-production ref; CSP was generated from that ref; security checked 10 build/Netlify files |
 | Production dependency audit | Raw audit: 0 total vulnerabilities; scoped gate: 0 high/critical with no exceptions |
@@ -76,8 +77,8 @@
 | Frontend Supabase key contract | Code and production accept only the modern publishable key; bundle has 1 modern key, 0 JWT-like keys, no legacy env name, and the format guard; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env deleted |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup of two tenants/five Auth users, final fixture 0/0; Realtime tables are SELECT-only and require active membership/tenant |
 | Document binary/Storage acceptance | Real PDF/DOCX lifecycle passes 7/7 Deno tests. Production authenticated DOCX/PDF signed downloads are green; direct Storage `400`, cross-tenant export `404`, delete `200`, document/generated/object residue 0/0/0, and final fixture residue 0/0/0/0/0. Smart CDN cached signed-URL deletion invalidation can take up to 60 seconds |
-| Migration history | Canonical local fresh replay 37/37 and full database pgTAP 45/45 are green, including atomic quota 9/9; staging is 37/37 and production is 36/36. The user-owned duplicate migration copy remains unchanged |
-| Local Supabase services | PostgreSQL-only stack is healthy for fresh replay and pgTAP. Full-stack start timed out on analytics/vector/realtime/storage/studio health; remote staging acceptance did not depend on it |
+| Migration history | Previous canonical local fresh replay 37/37 and full database pgTAP 45/45 are green. Staging has 39 migrations; the new HR quota remote 22-case pgTAP runner succeeded, with 2/2 private-table RLS+FORCE and RPC grants read back green. Production remains 36/36 and unchanged. The user-owned duplicate migration copy remains unchanged |
+| Local Supabase services | The Docker socket did not respond in this session, so fresh local 39-migration replay is BLOCKED. New SQL was verified on staging PostgreSQL 17.6 by dry-run/pgTAP; the previous local baseline remains 37/37 and pgTAP 45/45 green |
 
 ## Capability status
 
@@ -90,13 +91,13 @@
 | Resend inbox | Partial | Code exists; receiving/delivery E2E is unverified |
 | AI Concierge/RAG and cost tracking | Partial | Foundation exists; polishing request quota is race-safe through PostgreSQL atomic reservation/release, and provider usage is accounted before output validation. Migration rollout, citation UX, billing dashboard, unified endpoint enforcement, and full smoke tests remain |
 | AI Document Assistant | Production binary + staged AI polish preview / provider blocked | 15 templates, 4 languages, and real PDF/DOCX/private Storage are live. The polishing frontend is in production and migration plus `bright-api` v11 are in staging; Auth/tenant/document boundaries and cleanup are green, but real-provider smoke returns `503 AI_UNAVAILABLE` because staging lacks `ANTHROPIC_API_KEY`. Production backend/migration rollout is intentionally pending |
-| HR Candidate Analysis | Partial / route blocked | GitHub/cache, local PDF/DOCX, pre-provider validation, tenant role guard, plan policy, and orchestrator failure semantics are real/tested; persistent quota reservation, Haiku/Sonnet, usage log, and route wiring remain; production `501` |
+| HR Candidate Analysis | Partial / route blocked | GitHub/cache, local PDF/DOCX, pre-provider validation, tenant role guard, database plan policy, PostgreSQL minute/day/concurrency leases, bounded multipart, and orchestrator failure semantics are real/tested; Haiku/Sonnet, usage log, frontend results, and route wiring remain; production `501` |
 | Billing / Click / Payme and AI Sales Bot | Planned | Phase 3 |
 
 ## Immediate order
 
-1. While `ANTHROPIC_API_KEY` is pending, implement PostgreSQL-backed per-minute/day/concurrency quota reservation and a safe multipart HTTP adapter for HR Candidate; retain `501` until the full flow is ready.
-2. Once the key arrives, set it securely in staging Edge secrets and rerun the authenticated real-provider preview/save smoke to green.
-3. After green staging smoke, deploy production migration `20260821000000` plus `bright-api` and run smoke tests.
+1. While `ANTHROPIC_API_KEY` is pending, complete HR Candidate usage/cost logging and the frontend upload/results flow; retain `501` until the full flow is ready.
+2. Once the key arrives, set it securely in staging Edge secrets, wire semantic CV/scoring/reporting, and make authenticated real-provider smoke green.
+3. After green staging smoke, remove `501` with quota-lease release/wiring; separately smoke the AI Document Assistant production `20260821000000` migration plus `bright-api` rollout.
 
 Detailed tasks: [PLAN.md](PLAN.md). Canonical source: [Uzbek STATUS](../STATUS.md).

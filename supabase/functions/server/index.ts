@@ -46,6 +46,10 @@ import {
   validateDocumentPolishInput,
 } from "./services/document-polisher.ts";
 import { isHrCandidateRoleAllowed } from "./services/hr-candidate/request-boundary.ts";
+import {
+  drainBoundedHrCandidateBody,
+  HrMultipartBodyError,
+} from "./services/hr-candidate/http-adapter.ts";
 
 const app = new Hono();
 const BASE_PATH = "/make-server-6c2837d6";
@@ -3670,12 +3674,24 @@ const registerRoutes = (prefix: string) => {
       );
     }
 
-    // MUHIM: multipart body'ni drain qilish kerak, aks holda Deno
-    // response'ni flush qilolmaydi va function timeout'ga tushadi.
+    // Disabled route ham request body'ni cheksiz bufferlamaydi. To'liq parser
+    // provider/quota wiring bilan birga yoqiladi.
     try {
-      await c.req.arrayBuffer();
-    } catch {
-      // Drain xatosi — davom etamiz
+      await drainBoundedHrCandidateBody(c.req.raw);
+    } catch (error) {
+      if (error instanceof HrMultipartBodyError) {
+        return c.json(
+          {
+            request_id: crypto.randomUUID(),
+            status: "error" as const,
+            duration_ms: 0,
+            locale: "uz" as const,
+            error: error.envelope,
+          },
+          error.status,
+        );
+      }
+      return failure(c, 400, "INVALID_REQUEST", "Request body yaroqsiz.");
     }
 
     // TODO: usage-tracking guardUsage({ resource: 'ai_requests' })

@@ -1,6 +1,6 @@
 # AI Business Concierge — активный план
 
-> Версия 6.1 · Обновлено 2026-08-21
+> Версия 6.2 · Обновлено 2026-08-22
 > Здесь только активные и следующие задачи. Старый master plan: [../archive/Russian/PLAN_LEGACY_2026-07-24.md](../archive/Russian/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — безопасное начало сессии
@@ -58,7 +58,6 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] Добавить PostgreSQL-backed per-minute/day/concurrency quota reservation и safe multipart HTTP adapter; сохранить `501` до готовности full flow.
 - [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** подключить CV semantic structuring и Sonnet structured scoring/reporting через LLM Router.
 - [ ] Подключить usage/cost logging ко всем HR provider calls.
 - [ ] Завершить frontend, убрать `501` stub и после LLM integration выполнить full-flow integration/manual acceptance.

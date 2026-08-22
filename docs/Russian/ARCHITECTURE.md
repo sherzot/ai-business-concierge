@@ -3,7 +3,7 @@
 > Архитектура проекта, паттерны проектирования и правила unit-тестирования
 > Версия: 1.3 | Обновлено: 2026-08-21
 >
-> Текущий runtime-статус находится в [STATUS.md](STATUS.md). `hr-candidate` partial: GitHub, local PDF/DOCX, pure request policy и orchestrator failure boundary real; persistent quota и semantic LLM/scoring/report/HTTP wiring не production-ready.
+> Текущий runtime-статус находится в [STATUS.md](STATUS.md). `hr-candidate` partial: GitHub, local PDF/DOCX, pure request policy, PostgreSQL quota lease, bounded multipart и orchestrator failure boundary real; semantic LLM/scoring/report/full HTTP wiring не production-ready.
 
 ---
 
@@ -136,7 +136,7 @@ supabase/functions/server/
     services/
       llm-router.ts
       knowledge-base.ts
-      hr-candidate/        ← PARTIAL; adapters/request/orchestrator real, quota + semantic LLM stubs
+      hr-candidate/        ← PARTIAL; adapters/request/quota/multipart/orchestrator real, semantic LLM stub
         index.ts
         types.ts
         candidate-scorer.ts
@@ -252,4 +252,4 @@ features/tasks/__tests__/
 ---
 
 *ARCHITECTURE.md — AI Business Concierge v1.0 · 2026-05-05*
-*HR Candidate — target modular pattern: bounded adapter/request/orchestrator boundaries real; persistent quota и semantic LLM/scoring/report/HTTP wiring остаются partial scaffold.*
+*HR Candidate — target modular pattern: bounded adapter/request/quota/multipart/orchestrator boundaries real; semantic LLM/scoring/report/full HTTP wiring остаются partial scaffold.*

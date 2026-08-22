@@ -2,7 +2,7 @@
 
 Данный документ определяет требования к проекту и направления развития. Обращайтесь к этому документу при добавлении новых функций.
 
-> Обновлено 2026-08-21. Текущий snapshot: [STATUS.md](STATUS.md). Статусы: Done, Partial, Skeleton, Planned.
+> Обновлено 2026-08-22. Текущий snapshot: [STATUS.md](STATUS.md). Статусы: Done, Partial, Skeleton, Planned.
 
 ---
 
@@ -41,8 +41,8 @@
 | R-001 | Интеграция реального inbox | Email (Resend) webhook – частично ✅ | Inbox |
 | R-002 | Обновления в реальном времени | Supabase Realtime – inbox, tasks ✅ | Inbox, Tasks |
 | R-015 | Уведомления о назначении задач | Уведомление ответственному при назначении, подтверждение, прозрачность статусов ✅ | Tasks |
-| R-016 | HR Candidate Analysis | Partial; GitHub/cache, bounded PDF/DOCX, request/role policy и orchestrator/schema готовы (HR 30/30). Остаются persistent quota, Haiku/Sonnet, usage log, route wiring и full flow | HR |
-| R-017 | AI rate limiting | Partial; polishing check/increment race-safe через service-role-only PostgreSQL atomic reservation, local pgTAP 9/9 green и migration deployed в staging. Остаются production rollout, unified policy для остальных endpoints и `Retry-After` | Backend |
+| R-016 | HR Candidate Analysis | Partial; GitHub/cache, bounded PDF/DOCX, request/role policy, PostgreSQL minute/day/concurrency lease, bounded multipart и orchestrator/schema готовы (HR 43/43). Остаются Haiku/Sonnet, usage log, frontend results, route wiring и full flow | HR |
+| R-017 | AI rate limiting | Partial; polishing daily reservation и HR tenant minute/day/concurrency lease race-safe в service-role-only PostgreSQL; staging HR pgTAP runner 22 cases success. Остаются production rollout, unified policy для остальных endpoints и `Retry-After` | Backend |
 | R-018 | AI cost tracking | Partial; logging есть, tenant dashboard/enforcement остаётся | Backend |
 | R-019 | Vector Search (RAG) | Partial; vector/embedding основа есть, explicit tool/citations остаются | Docs |
 | R-020 | Admin Dashboard | Partial; core pages есть, billing/advanced agents остаются | Admin |

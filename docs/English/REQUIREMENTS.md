@@ -2,7 +2,7 @@
 
 This document defines project requirements and future directions. Refer to this document when adding new features.
 
-> Updated 2026-08-21. Current operational snapshot: [STATUS.md](STATUS.md). Status terms are Done, Partial, Skeleton, and Planned.
+> Updated 2026-08-22. Current operational snapshot: [STATUS.md](STATUS.md). Status terms are Done, Partial, Skeleton, and Planned.
 
 ---
 
@@ -41,8 +41,8 @@ This document defines project requirements and future directions. Refer to this 
 | R-001 | Real inbox integration | Email (Resend) webhook – partially done ✅ | Inbox |
 | R-002 | Real-time updates | Supabase Realtime – inbox, tasks ✅ | Inbox, Tasks |
 | R-015 | Task assignment notifications | Alert assignee when leader assigns, acknowledgement, status transparency ✅ | Tasks |
-| R-016 | HR Candidate Analysis | Partial; GitHub/cache, bounded PDF/DOCX, request/role policy, and orchestrator/schema are ready (HR 30/30). Persistent quota, Haiku/Sonnet, usage log, route wiring, and full flow remain | HR |
-| R-017 | AI rate limiting | Partial; polishing check/increment is race-safe through a service-role-only PostgreSQL atomic reservation, passed local pgTAP 9/9, and the migration is deployed to staging. Production rollout, unified policy for other endpoints, and `Retry-After` remain | Backend |
+| R-016 | HR Candidate Analysis | Partial; GitHub/cache, bounded PDF/DOCX, request/role policy, PostgreSQL minute/day/concurrency leases, bounded multipart, and orchestrator/schema are ready (HR 43/43). Haiku/Sonnet, usage logging, frontend results, route wiring, and full flow remain | HR |
+| R-017 | AI rate limiting | Partial; polishing daily reservation and HR tenant minute/day/concurrency leases are race-safe in service-role-only PostgreSQL; staging HR's 22-case pgTAP runner succeeded. Production rollout, unified policy for other endpoints, and `Retry-After` remain | Backend |
 | R-018 | AI cost tracking | Partial; logging exists, tenant usage dashboard/enforcement remains | Backend |
 | R-019 | Vector Search (RAG) | Partial; vector/embedding foundation exists, explicit tool/citations remain | Docs |
 | R-020 | Admin Dashboard | Partial; core pages exist, billing/advanced agents remain | Admin |

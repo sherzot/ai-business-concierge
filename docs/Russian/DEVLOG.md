@@ -4,6 +4,15 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — Persistent quota HR и bounded multipart boundary завершены в staging
+
+- Пока ожидается `ANTHROPIC_API_KEY`, завершён следующий secret-free slice HR Candidate. DB-планы `starter/pro/company` теперь отображаются в tariff policy, а tenant-scoped minute/day counters и 45-секундные expiring concurrency leases атомарно принадлежат PostgreSQL через service-role-only reserve/release RPC. Browser EXECUTE и direct-table доступ service role закрыты; для user FK добавлен covering index.
+- Multipart adapter проверяет boundary, duplicate/unknown fields, encoding, MIME, file/text/locale/depth и ограничивает declared/chunked body размером 5 MiB CV + 64 KiB overhead. Disabled canonical route использует bounded drain и сохраняет `501 NOT_IMPLEMENTED` для valid authorized request; provider и production Edge не развёртывались.
+- Deno backend 47/47, format 17 файлов, check 12 файлов и lint PASS. В monolith остаются прежние 21 logging/Hono/risk type errors, новых HR errors нет. В Node 22.23.2 frontend 26/26 файлов и 117/117 tests, type-check, deploy-env 14/14, production audit 0 high/critical, build 3,701 modules и security gate 10 файлов PASS.
+- В staging применены migrations `20260822010759` и `20260822011030`, всего 39. Remote transactional pgTAP runner 22 cases дошёл до `ok 22` и выполнил rollback; read-back подтвердил RLS+FORCE 2/2 private tables, service reserve/release разрешён, browser reserve/release запрещён, direct service SELECT запрещён. Новый advisor finding unindexed FK закрыт; остались только ожидаемые INFO unused-index до появления workload. Production DB/Edge не менялись. Fresh local replay 39 migrations BLOCKED из-за не отвечающего Docker socket; DB-проверка выполнена на staging PostgreSQL 17.6 через dry-run/pgTAP.
+
+Осталось: secret-free usage/cost logging и frontend upload/results; после получения key — real-provider smoke semantic CV/scoring/report, release lease в route `finally`, затем снятие `501`.
+
 ## 2026-08-21 — HR request boundary и orchestrator усилены fail-closed
 
 - Проведён audit provider-independent HR request/orchestrator path. Runtime validation был TODO; fulfilled CV с `parse_status: failed` мог продолжить scoring; success в `Promise.race` оставлял timeout timers; base36 request-ID shim не гарантировал ULID alphabet schema; schema требовала `result` даже для error response.

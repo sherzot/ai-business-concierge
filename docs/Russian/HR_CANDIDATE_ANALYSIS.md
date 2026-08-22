@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Статус: SKELETON / DESIGN.** Frontend/backend scaffold существует, но CV parser, scorer и report generator не production-ready; canonical endpoint возвращает `501 NOT_IMPLEMENTED`. Текущее состояние: [STATUS.md](STATUS.md).
+> **Статус: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX, request/role/plan policy, PostgreSQL minute/day/concurrency lease, bounded multipart и orchestrator failure semantics real/tested. Остаются semantic LLM scoring/report, usage log, frontend results и full HTTP wiring; canonical endpoint возвращает `501 NOT_IMPLEMENTED`. Текущее состояние: [STATUS.md](STATUS.md).
 
 > **AI Business Concierge — Пакет проектирования модуля `hr_candidate_analysis`**
 > Версия: 1.0 (MVP дизайн) · Дата: 2026-04-29

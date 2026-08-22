@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 6.1 · 更新 2026-08-21
+> Version 6.2 · 更新 2026-08-22
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -58,7 +58,6 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] PostgreSQL-backed per-minute/day/concurrency quota reservationとsafe multipart HTTP adapterを追加し、full flow readyまで`501`を維持。
 - [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** LLM Router経由でCV semantic structuringとSonnet structured scoring/reportingを接続。
 - [ ] 全HR provider callsへusage/cost loggingを接続。
 - [ ] Frontendを完了し`501` stubを削除、LLM integration後にfull-flow integration/manual acceptanceを実施。

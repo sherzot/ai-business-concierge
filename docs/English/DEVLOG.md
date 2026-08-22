@@ -4,6 +4,15 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — HR persistent quota and bounded multipart boundary completed in staging
+
+- While `ANTHROPIC_API_KEY` remains pending, the next secret-free HR Candidate slice was completed. Database `starter/pro/company` plans now map to the tariff policy, while PostgreSQL owns tenant-scoped minute/day counters and 45-second expiring concurrency leases through service-role-only reserve/release RPCs. Browser EXECUTE and service-role direct table access are denied; the user FK has a covering index.
+- The multipart adapter validates boundary, field multiplicity/allowlist, encoding, MIME, file/text/locale/depth contracts and caps declared or chunked bodies at a 5 MiB CV plus 64 KiB overhead. The disabled canonical route now drains with the same bound and still returns `501 NOT_IMPLEMENTED` for a valid authorized request; provider and production Edge were not deployed.
+- Backend Deno passed 47/47 plus 17-file format, 12-file check, and lint. The monolith retains the same 21 pre-existing logging/Hono/risk type errors, with none on new HR lines. Under Node 22.23.2, frontend 26/26 files and 117/117 tests, type-check, deploy-env 14/14, production audit 0 high/critical, 3,701-module build, and 10-file security gate passed.
+- Staging applied migrations `20260822010759` and `20260822011030`, reaching 39 migrations. The remote 22-case transactional pgTAP runner reached `ok 22` and rolled back; read-back confirmed 2/2 private tables use RLS+FORCE, service reserve/release is allowed, browser reserve/release is denied, and direct service table SELECT is denied. The new unindexed-FK advisor finding is closed; only expected unused-index INFO remains before workload. Production DB/Edge was unchanged. Fresh local 39-migration replay is BLOCKED because the local Docker socket did not respond; staging PostgreSQL 17.6 dry-run/pgTAP provided database verification.
+
+Remaining: complete secret-free HR usage/cost logging and frontend upload/results; once the key arrives, run real semantic CV/scoring/report smoke, release the quota lease in route `finally`, then remove `501`.
+
 ## 2026-08-21 — HR request boundary and orchestrator hardened fail-closed
 
 - The provider-independent HR request/orchestrator path was audited. Runtime validation was TODO; a fulfilled CV with `parse_status: failed` could continue into scoring; successful `Promise.race` calls left timeout timers alive; the base36 request-ID shim did not guarantee the schema's ULID alphabet; and the schema required `result` even for error responses.

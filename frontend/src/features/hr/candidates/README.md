@@ -1,7 +1,7 @@
 # HR Candidate Analysis — Frontend module
 
 > Sub-module under `features/hr/candidates/`
-> Status: SKELETON (UI scaffolding ready, business logic TODO)
+> Status: PARTIAL (API contract tests plus backend GitHub/CV/request/quota/multipart/orchestrator boundaries are real; UI wiring and provider flow remain)
 > Design doc: [/docs/HR_CANDIDATE_ANALYSIS.md](../../../../../docs/HR_CANDIDATE_ANALYSIS.md)
 
 ## Wiring instructions (App.tsx / navigation)
@@ -81,6 +81,8 @@ which currently returns `501 NOT_IMPLEMENTED`. The backend skeleton is at
 
 - [x] `github-analyzer.ts` — bounded public REST fetch + aggregate + process cache
 - [~] `cv-parser.ts`        — bounded pdfjs / mammoth extraction complete; Haiku structuring blocked on provider key
+- [x] `quota.ts`            — DB plan mapping + service-role-only PostgreSQL minute/day/concurrency lease
+- [x] `http-adapter.ts`     — duplicate-safe multipart parsing + 5 MiB CV / 64 KiB overhead stream bound
 - [ ] `candidate-scorer.ts` — Sonnet structured output
 - [ ] `report-generator.ts` — Sonnet narrative + interview questions
 - [~] `index.ts`            — validation/parallel/timeout/failed-CV gates complete; LLM retry and usage logging remain

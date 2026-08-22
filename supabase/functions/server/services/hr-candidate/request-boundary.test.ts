@@ -133,6 +133,21 @@ Deno.test("HR rate-limit policy resolves known plans and fails closed on unknown
     { concurrent: 5, per_minute: 20, per_day: 100 },
     "business alias",
   );
+  assertEquals(
+    getHrRateLimitPolicy("starter"),
+    { concurrent: 2, per_minute: 5, per_day: 20 },
+    "database starter plan maps to entrepreneur policy",
+  );
+  assertEquals(
+    getHrRateLimitPolicy("Pro"),
+    { concurrent: 5, per_minute: 20, per_day: 100 },
+    "legacy tenant Pro plan maps to business policy",
+  );
+  assertEquals(
+    getHrRateLimitPolicy("Kompaniya"),
+    { concurrent: 10, per_minute: 60, per_day: 500 },
+    "company alias",
+  );
   assertEquals(getHrRateLimitPolicy("unknown"), null, "unknown plan denied");
 
   if (business) business.per_day = 0;

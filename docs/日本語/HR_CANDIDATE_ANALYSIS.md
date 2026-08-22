@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Status: SKELETON / DESIGN.** Frontend/backend scaffoldは存在するが、CV parser、scorer、report generatorはproduction-readyではなく、canonical endpointは`501 NOT_IMPLEMENTED`を返す。現在状態: [STATUS.md](STATUS.md)。
+> **Status: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache、bounded local PDF/DOCX、request/role/plan policy、PostgreSQL minute/day/concurrency lease、bounded multipart、orchestrator failure semanticsはreal/tested。Semantic LLM scoring/report、usage log、frontend results、full HTTP wiringが残り、canonical endpointは`501 NOT_IMPLEMENTED`を返す。現在状態: [STATUS.md](STATUS.md)。
 
 > **AI Business Concierge — `hr_candidate_analysis` モジュール設計パッケージ**
 > バージョン: 1.0 (MVP設計) · 日付: 2026-04-29
@@ -406,6 +406,8 @@ Accept-Language: uz | ja | en   （デフォルト: uz）
 | 起業家 | 2 | 5 | 20 |
 | ビジネス | 5 | 20 | 100 |
 | 企業 | 10 | 60 | 500 |
+
+実装: service-role-only PostgreSQL RPCがtenant state rowをlockし、minute/day counterと45秒concurrency leaseをatomicにreserveする。Private tableはbrowserとdirect service-table accessを拒否し、DBの`free/starter/pro/company` planをこのpolicyへmapする。
 
 ---
 

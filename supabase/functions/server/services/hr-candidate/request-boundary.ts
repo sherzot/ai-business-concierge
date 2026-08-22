@@ -9,12 +9,12 @@
 import { normaliseGithubInput } from "./github-analyzer.ts";
 import type { AnalyzeRequest, ErrorEnvelope } from "./types.ts";
 
-const PDF_MIME = "application/pdf";
-const DOCX_MIME =
+export const HR_PDF_MIME = "application/pdf";
+export const HR_DOCX_MIME =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-const MAX_CV_BYTES = 5 * 1024 * 1024;
-const MAX_FILENAME_CHARS = 180;
-const MAX_JOB_DESCRIPTION_CHARS = 5_000;
+export const HR_MAX_CV_BYTES = 5 * 1024 * 1024;
+export const HR_MAX_FILENAME_CHARS = 180;
+export const HR_MAX_JOB_DESCRIPTION_CHARS = 5_000;
 
 export const HR_CANDIDATE_ALLOWED_ROLES = [
   "hr",
@@ -25,7 +25,11 @@ export const HR_CANDIDATE_ALLOWED_ROLES = [
   "super_admin",
 ] as const;
 
-export type HrCandidatePlan = "free" | "entrepreneur" | "business";
+export type HrCandidatePlan =
+  | "free"
+  | "entrepreneur"
+  | "business"
+  | "company";
 
 export type HrRateLimitPolicy = {
   concurrent: number;
@@ -37,6 +41,7 @@ const RATE_LIMIT_POLICIES: Record<HrCandidatePlan, HrRateLimitPolicy> = {
   free: { concurrent: 1, per_minute: 1, per_day: 2 },
   entrepreneur: { concurrent: 2, per_minute: 5, per_day: 20 },
   business: { concurrent: 5, per_minute: 20, per_day: 100 },
+  company: { concurrent: 10, per_minute: 60, per_day: 500 },
 };
 
 export type AnalyzeRequestValidation =
@@ -58,8 +63,12 @@ export function getHrRateLimitPolicy(plan: unknown): HrRateLimitPolicy | null {
     bepul: "free",
     entrepreneur: "entrepreneur",
     tadbirkor: "entrepreneur",
+    starter: "entrepreneur",
     business: "business",
     biznes: "business",
+    pro: "business",
+    company: "company",
+    kompaniya: "company",
   };
   const canonical = aliases[normalized];
   return canonical ? { ...RATE_LIMIT_POLICIES[canonical] } : null;
@@ -100,7 +109,7 @@ export function validateAnalyzeRequest(
       "cv_file",
     );
   }
-  if (input.cv_file.byteLength > MAX_CV_BYTES) {
+  if (input.cv_file.byteLength > HR_MAX_CV_BYTES) {
     return invalid(
       "CV_TOO_LARGE",
       "CV hajmi 5 MBdan oshmasligi kerak.",
@@ -109,7 +118,7 @@ export function validateAnalyzeRequest(
       "cv_file",
     );
   }
-  if (input.cv_mime !== PDF_MIME && input.cv_mime !== DOCX_MIME) {
+  if (input.cv_mime !== HR_PDF_MIME && input.cv_mime !== HR_DOCX_MIME) {
     return invalid(
       "UNSUPPORTED_FILE_TYPE",
       "Faqat PDF yoki DOCX qabul qilinadi.",
@@ -122,7 +131,7 @@ export function validateAnalyzeRequest(
   if (
     typeof input.cv_filename !== "string" ||
     input.cv_filename.trim().length === 0 ||
-    [...input.cv_filename].length > MAX_FILENAME_CHARS
+    [...input.cv_filename].length > HR_MAX_FILENAME_CHARS
   ) {
     return invalidRequest(
       "CV fayl nomi yaroqsiz.",
@@ -144,7 +153,7 @@ export function validateAnalyzeRequest(
   const normalizedJobDescription = jobDescription?.normalize("NFKC").trim();
   if (
     normalizedJobDescription &&
-    [...normalizedJobDescription].length > MAX_JOB_DESCRIPTION_CHARS
+    [...normalizedJobDescription].length > HR_MAX_JOB_DESCRIPTION_CHARS
   ) {
     return invalidRequest(
       "Lavozim tavsifi 5 000 belgidan oshmasligi kerak.",

@@ -1,6 +1,6 @@
 # AI Business Concierge — текущее состояние
 
-> Последний подтверждённый snapshot кода/platform: **2026-08-21**
+> Последний подтверждённый snapshot кода/platform: **2026-08-22**
 > Документация упорядочена: **2026-08-07**
 > Local runtime, production health/auth и remote GitHub Actions baseline повторно проверены 2026-08-07. P0 commits отправлены, новый CI run завершён полностью green.
 > 2026-08-08: commit publishable key отправлен и прошёл CI/Netlify deploy, но production bundle пока использует legacy fallback. Прямой browser Data API доступ к risk scanner tables закрыт в production.
@@ -39,6 +39,7 @@
 > 2026-08-21: HR Candidate получил real public GitHub adapter с bounded REST/pagination/response, timeout, repository-tree aggregation и 10-minute cache; Deno 10/10 и live `octocat` smoke complete. `8496aae` в main, CI `32487503062` green. Route остаётся `501`; Supabase Free блокирует Pro+ Leaked Password Protection.
 > 2026-08-21: Для HR Candidate реализован secret-free PDF/DOCX parser с лимитами 5 MiB/file magic/PDF 50 pages/text, защитой DOCX ZIP-bomb и EN/UZ/RU/JA date/section signals. `2526d72` в main, CI `32489478394` green с Deno 22/22; Haiku semantic structuring и route `501` остаются gated до provider key.
 > 2026-08-21: HR request boundary/orchestrator усилен fail-closed: pre-provider validation, tenant role guard, plan policy, failed-CV hard stop, timer cleanup, canonical ULID и schema exclusivity. `2656e6a` в main, CI `32491296828` green с Deno 34/34; остаются persistent quota/LLM/route wiring.
+> 2026-08-22: HR tenant quota и multipart boundary завершены без provider secret: PostgreSQL minute/day/concurrency lease, DB plan mapping, bounded streaming 5 MiB + 64 KiB и safe drain disabled route. В staging 39 migrations, remote pgTAP runner 22 cases success; Deno 47/47 и frontend 117/117 green. Production DB/Edge не менялся; local fresh replay blocked из-за Docker socket.
 
 ## Текущая фаза
 
@@ -58,10 +59,10 @@
 | Supabase CLI | Official Homebrew tap `v2.112.0`; подтверждён на fresh local volume |
 | Backend | Production Supabase Edge Function `bright-api` v76, `ACTIVE`, `verify_jwt=false`; SHA совпадает со staging v10 |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 37/37 migrations, `bright-api` v11 ACTIVE, health `200`, unauth docs/polish `401 TENANT_REQUIRED` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 39 migrations, `bright-api` v11 ACTIVE, health `200`, unauth docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge использует modern overrides `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY`; legacy anon/service-role API keys disabled |
 | Type-check | Успешно в clean temporary frontend install |
-| Unit tests | Frontend 26/26 files, 117/117 tests; AI polish/router/usage Deno 18/18; HR GitHub 10 + CV 8 + boundary 5 + orchestrator 6 + schema 1 = 30/30; текущий targeted backend Deno 34/34 с Telegram; прежний document binary/lifecycle Deno 7/7 |
+| Unit tests | Frontend 26/26 files, 117/117 tests; AI polish/router/usage Deno 18/18; HR GitHub 10 + CV 8 + boundary 5 + quota 7 + multipart 6 + orchestrator 6 + schema 1 = 43/43; текущий targeted backend Deno 47/47 с Telegram; прежний document binary/lifecycle Deno 7/7 |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks + 2 Vite `.env` fallback/runtime-precedence + 2 bundled-endpoint extraction regressions |
 | Production build/security check | Build прошёл с synthetic non-production ref; CSP создан из этого ref; проверено 10 build/Netlify файлов |
 | Production dependency audit | Raw audit: всего 0 vulnerabilities; scoped gate без исключений: high/critical 0 |
@@ -76,8 +77,8 @@
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
 | DB/Edge security acceptance | Fresh migration replay 32/32; local pgTAP 21/21; local real Auth-token Edge tests 8/8; staging modern-key remote Edge 8/8, cleanup двух tenants/пяти Auth users и final fixture 0/0; Realtime tables SELECT-only и требуют active membership/tenant |
 | Document binary/Storage acceptance | Real PDF/DOCX lifecycle Deno 7/7. Production authenticated DOCX/PDF signed downloads green; direct Storage `400`, cross-tenant export `404`, delete `200`, residue document/generated/object 0/0/0 и final fixture 0/0/0/0/0. Invalidation cached signed URL в Smart CDN может занять до 60 секунд |
-| Migration history | Canonical local fresh replay 37/37 и full database pgTAP 45/45 green, включая atomic quota 9/9; staging 37/37, production 36/36. User-owned duplicate migration copy не изменена |
-| Local Supabase services | PostgreSQL-only stack healthy для fresh replay и pgTAP. Full-stack start завершился health timeout для analytics/vector/realtime/storage/studio; remote staging acceptance от него не зависел |
+| Migration history | Предыдущий canonical local fresh replay 37/37 и full database pgTAP 45/45 green. В staging 39 migrations; новый HR quota remote pgTAP runner 22 cases success, read-back RLS+FORCE 2/2 private tables и RPC grants green. Production 36/36 и не изменён. User-owned duplicate migration copy не изменена |
+| Local Supabase services | Docker socket не отвечал, поэтому fresh local 39-migration replay BLOCKED. Новый SQL проверен в staging PostgreSQL 17.6 через dry-run/pgTAP; предыдущий local baseline 37/37 и pgTAP 45/45 green |
 
 ## Состояние возможностей
 
@@ -90,13 +91,13 @@
 | Resend inbox | Partial | Код есть; receiving/delivery E2E не подтверждён |
 | AI Concierge/RAG и cost tracking | Partial | Основа есть; polishing request quota race-safe через PostgreSQL atomic reservation/release, provider usage учитывается до output validation. Остаются rollout migration, citation UX, billing dashboard, unified endpoint enforcement и smoke tests |
 | AI Документолог | Production binary + staged AI polish preview / provider blocked | 15 templates, 4 языка и real PDF/DOCX/private Storage работают. Polishing frontend в production, migration и `bright-api` v11 в staging; Auth/tenant/document boundaries и cleanup green, но real-provider smoke возвращает `503 AI_UNAVAILABLE`, потому что в staging нет `ANTHROPIC_API_KEY`. Production backend/migration rollout намеренно ожидает |
-| HR Candidate Analysis | Partial / route blocked | GitHub/cache, local PDF/DOCX, pre-provider validation, tenant role guard, plan policy и orchestrator failure semantics real/tested; остаются persistent quota reservation, Haiku/Sonnet, usage log и route wiring; production `501` |
+| HR Candidate Analysis | Partial / route blocked | GitHub/cache, local PDF/DOCX, pre-provider validation, tenant role guard, DB plan policy, PostgreSQL minute/day/concurrency lease, bounded multipart и orchestrator failure semantics real/tested; остаются Haiku/Sonnet, usage log, frontend results и route wiring; production `501` |
 | Billing / Click / Payme и AI Sales Bot | Planned | Phase 3 |
 
 ## Ближайший порядок
 
-1. Пока ожидается `ANTHROPIC_API_KEY`, реализовать для HR Candidate PostgreSQL-backed per-minute/day/concurrency quota reservation и safe multipart HTTP adapter; сохранить `501` до готовности full flow.
-2. После получения key безопасно установить его в staging Edge secrets и повторить authenticated real-provider preview/save smoke до green.
-3. После green staging smoke deploy production migration `20260821000000` + `bright-api` и выполнить smoke tests.
+1. Пока ожидается `ANTHROPIC_API_KEY`, завершить HR Candidate usage/cost logging и frontend upload/results; сохранить `501` до готовности full flow.
+2. После получения key безопасно установить его в staging Edge secrets, подключить semantic CV/scoring/report и сделать authenticated real-provider smoke green.
+3. После green staging smoke снять `501` с quota-lease release/wiring; отдельно выполнить smoke production rollout AI Документолога migration `20260821000000` + `bright-api`.
 
 Подробности: [PLAN.md](PLAN.md). Основной источник: [узбекский STATUS](../STATUS.md).

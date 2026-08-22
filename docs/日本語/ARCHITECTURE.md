@@ -3,7 +3,7 @@
 > プロジェクトアーキテクチャ、設計パターン、ユニットテストルール
 > バージョン: 1.3 | 更新: 2026-08-21
 >
-> Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate`はpartial。GitHub、local PDF/DOCX、pure request policy、orchestrator failure boundaryはreal。Persistent quotaとsemantic LLM/scoring/report/HTTP wiringはproduction-readyではない。
+> Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate`はpartial。GitHub、local PDF/DOCX、pure request policy、PostgreSQL quota lease、bounded multipart、orchestrator failure boundaryはreal。Semantic LLM/scoring/report/full HTTP wiringはproduction-readyではない。
 
 ---
 
@@ -136,7 +136,7 @@ supabase/functions/server/
     services/
       llm-router.ts
       knowledge-base.ts
-      hr-candidate/        ← PARTIAL; adapters/request/orchestratorはreal、quota + semantic LLM stubsが残る
+      hr-candidate/        ← PARTIAL; adapters/request/quota/multipart/orchestratorはreal、semantic LLM stubが残る
         index.ts
         types.ts
         candidate-scorer.ts
@@ -247,4 +247,4 @@ features/tasks/__tests__/
 ---
 
 *ARCHITECTURE.md — AI Business Concierge v1.0 · 2026-05-05*
-*HR Candidateはtarget modular pattern。Bounded adapter/request/orchestrator boundaryはreal、persistent quotaとsemantic LLM/scoring/report/HTTP wiringはpartial scaffold。*
+*HR Candidateはtarget modular pattern。Bounded adapter/request/quota/multipart/orchestrator boundaryはreal、semantic LLM/scoring/report/full HTTP wiringはpartial scaffold。*

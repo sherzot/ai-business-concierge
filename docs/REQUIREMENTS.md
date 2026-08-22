@@ -1,6 +1,6 @@
 # AI Business Concierge — requirements
 
-> Yangilandi: 2026-08-21
+> Yangilandi: 2026-08-22
 > Holat qiymatlari: **Done** — ishlaydigan implementatsiya bor; **Partial** — bir qismi yoki operatsion verifikatsiya qolgan; **Skeleton** — scaffold bor, business logic ishlamaydi; **Planned** — boshlanmagan.
 
 ## Hozirgi platforma capabilitylari
@@ -29,8 +29,8 @@
 | R-001 | Real email inbox | Partial | Resend receiving, signature, mapping va real delivery smoke-test |
 | R-002 | Supabase Realtime | Done | Regressiya testlari bilan saqlash |
 | R-015 | Task assignment notifications | Done | Regressiya testlari bilan saqlash |
-| R-016 | HR Candidate Analysis | Partial | GitHub/cache, bounded PDF/DOCX, request/role policy va orchestrator/schema tayyor (HR 30/30); persistent quota, Haiku/Sonnet, usage log, route wiring va full-flow qolgan |
-| R-017 | AI rate limiting | Partial | Polishing quota check/incrementi service-role-only PostgreSQL atomik reservation bilan race-safe, local pgTAP 9/9 green va migration stagingga qo'llangan; production rollout, qolgan endpointlar uchun yagona quota siyosati va `Retry-After` qolgan |
+| R-016 | HR Candidate Analysis | Partial | GitHub/cache, bounded PDF/DOCX, request/role policy, PostgreSQL minute/day/concurrency lease, bounded multipart va orchestrator/schema tayyor (HR 43/43); Haiku/Sonnet, usage log, frontend result, route wiring va full-flow qolgan |
+| R-017 | AI rate limiting | Partial | Polishing daily reservation va HR tenant minute/day/concurrency lease service-role-only PostgreSQLda race-safe; staging HR pgTAP 22-case success. Production rollout, qolgan endpointlar uchun yagona quota siyosati va `Retry-After` qolgan |
 | R-018 | AI cost tracking | Partial | Log wiring mavjud; usage API, tenant dashboard va plan enforcement |
 | R-019 | Vector Search (RAG) | Partial | Embedding/match fundamenti bor; explicit docs tool, citation va cache |
 | R-020 | Admin Dashboard | Partial | Billing/MRR/churn va advanced AI agent monitoring |

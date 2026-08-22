@@ -1,6 +1,6 @@
 # AI Business Concierge — joriy holat
 
-> Kod/platforma bo'yicha oxirgi tasdiqlangan snapshot: **2026-08-21**
+> Kod/platforma bo'yicha oxirgi tasdiqlangan snapshot: **2026-08-22**
 > Hujjatlar tartiblangan sana: **2026-08-07**
 > Lokal runtime, production health/auth va remote GitHub Actions baseline'i 2026-08-07 kuni qayta tekshirildi. P0 commitlari push qilindi va yangi CI run to'liq green yakunlandi.
 > 2026-08-08: publishable-key commit push/CI/Netlify deploy qilindi, ammo production bundle hali legacy fallback ishlatmoqda. Risk scanner jadvallarining browser Data API ruxsatlari productionda yopildi.
@@ -40,6 +40,7 @@
 > 2026-08-21: HR Candidate public GitHub analyzer real adapterga o'tdi: bounded REST/pagination/response, timeout, repo-tree aggregation va 10 daqiqalik cache; Deno 10/10 va real `octocat` smoke complete. `8496aae` main va CI `32487503062` green. Route hanuz `501`; Supabase Free sabab Pro+ Leaked Password Protection BLOCKED.
 > 2026-08-21: HR Candidate secretsiz PDF/DOCX parseri implementatsiya qilindi: 5 MiB/file magic/PDF 50-page/text limitlari, DOCX ZIP-bomb himoyasi, EN/UZ/RU/JA sana/section va local signal extraction. `2526d72` main, CI `32489478394` green: Deno 22/22; Haiku semantic structuring va route `501` provider keygacha yopiq.
 > 2026-08-21: HR request boundary/orchestrator fail-closed qotirildi: pre-provider validation, tenant role guard, tariff policy, failed-CV hard stop, timer cleanup, canonical ULID va schema exclusivity. `2656e6a` main, CI `32491296828` green: Deno 34/34; persistent quota/LLM/route wiring qolgan.
+> 2026-08-22: HR tenant quota va multipart boundary secretsiz yakunlandi: PostgreSQL minute/day/concurrency lease, DB plan mapping, 5 MiB + 64 KiB bounded streaming va disabled-route safe drain. Staging 39 migration, remote pgTAP 22-case success; Deno 47/47 va frontend 117/117 green. Production DB/Edge o'zgarmadi; local fresh replay Docker socket sabab blocked.
 
 ## Hozir qayerdamiz
 
@@ -59,10 +60,10 @@
 | Supabase CLI | Homebrew official tap `v2.112.0`; fresh local volume bilan tasdiqlangan |
 | Backend | Production Supabase Edge Function `bright-api` v76, `ACTIVE`, `verify_jwt=false`; SHA staging v10 bilan teng |
 | Health smoke-test | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 37/37 migration, `bright-api` v11 ACTIVE, health `200`, authsiz docs/polish `401 TENANT_REQUIRED` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 39 migration, `bright-api` v11 ACTIVE, health `200`, authsiz docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` modern key override'larida; legacy anon/service-role API keylari disabled |
 | Type-check | Clean temp frontend installida muvaffaqiyatli |
-| Unit test | Frontend 26/26 fayl, 117/117 test; AI polish/router/usage Deno 18/18; HR GitHub 10 + CV 8 + boundary 5 + orchestrator 6 + schema 1 = 30/30; Telegram bilan joriy targeted backend Deno 34/34; oldingi document binary/lifecycle Deno 7/7 |
+| Unit test | Frontend 26/26 fayl, 117/117 test; AI polish/router/usage Deno 18/18; HR GitHub 10 + CV 8 + boundary 5 + quota 7 + multipart 6 + orchestrator 6 + schema 1 = 43/43; Telegram bilan joriy targeted backend Deno 47/47; oldingi document binary/lifecycle Deno 7/7 |
 | Deploy environment guard | Node test 14/14: 10 isolation contracti + 2 Vite `.env` fallback/runtime-precedence + 2 bundled endpoint extraction regressiyasi |
 | Production build | Synthetic non-production project-ref bilan muvaffaqiyatli; CSP tanlangan refdan yaratildi |
 | Security check | 10 ta build/Netlify fayli muvaffaqiyatli |
@@ -78,8 +79,8 @@
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |
 | DB/Edge security acceptance | Fresh migration replay `32/32`; local pgTAP `21/21`; local real Auth tokenli Edge `8/8`; staging modern-key remote Edge `8/8`, cleanup 2 tenant/5 Auth user va yakuniy fixture `0/0`; Realtime jadvallari SELECT-only va active membership/tenant bilan himoyalangan |
 | Document binary/Storage acceptance | Real PDF/DOCX lifecycle Deno 7/7. Production authenticated DOCX/PDF signed download green; direct Storage `400`, cross-tenant export `404`, delete `200`, document/generated/object residue 0/0/0 va final fixture 0/0/0/0/0. Smart CDN cached signed URL deletion invalidatsiyasi 60 soniyagacha tarqalishi mumkin |
-| Migration history | Canonical local fresh replay 37/37 va full database pgTAP 45/45 green, shu jumladan atomik quota 9/9; staging 37/37, production 36/36. User-owned duplicate migration nusxasi o'zgarmagan |
-| Local Supabase services | PostgreSQL-only stack fresh replay va pgTAP uchun healthy. Full stack startda analytics/vector/realtime/storage/studio health timeout berdi; remote staging acceptance bunga bog'lanmadi |
+| Migration history | Oldingi canonical local fresh replay 37/37 va full database pgTAP 45/45 green. Staging 39 migration; yangi HR quota remote pgTAP 22-case success, 2/2 private table RLS+FORCE va RPC grant read-back green. Production 36/36 va o'zgarmagan. User-owned duplicate migration nusxasi o'zgarmagan |
+| Local Supabase services | Bu sessiyada Docker socket javob bermadi, shu sabab fresh local 39-migration replay BLOCKED. Yangi SQL staging PostgreSQL 17.6 dry-run/pgTAPda tekshirildi; oldingi PostgreSQL-only baseline 37/37 va pgTAP 45/45 green |
 
 ## Mahsulot va integratsiyalar holati
 
@@ -95,7 +96,7 @@
 | AI Concierge / RAG | **Partial** | Claude router, OpenAI embedding va RAG fundamenti bor; explicit document search/citation va to'liq smoke-test qarzi bor |
 | AI usage/cost tracking | **Partial** | Log wiring va DB tracking bor; polishing request quota'si PostgreSQL atomik reservation/release bilan race-safe qilingan, provider usage output validatsiyasidan oldin hisoblanadi. Migration rollout, tenant billing dashboard va barcha endpointlar uchun yagona enforcement hali qolgan |
 | AI Hujjatchi | **Production binary + staged AI polish preview / provider blocked** | 15 shablon, 4 til va real PDF/DOCX/private Storage productionda. Polishing frontend productionga, migration va `bright-api` v11 stagingga chiqdi; Auth/tenant/document va cleanup green, ammo stagingda `ANTHROPIC_API_KEY` yo'qligi sabab real-provider smoke `503 AI_UNAVAILABLE`. Production backend/migration rollout ataylab kutilmoqda |
-| HR Candidate Analysis | **Partial / route blocked** | GitHub/cache, local PDF/DOCX, pre-provider validation, tenant role guard, tariff policy va orchestrator failure semantics real/testlangan; persistent quota reservation, Haiku/Sonnet, usage log va route wiring qolgan, production `501` |
+| HR Candidate Analysis | **Partial / route blocked** | GitHub/cache, local PDF/DOCX, pre-provider validation, tenant role guard, DB plan policy, PostgreSQL minute/day/concurrency lease, bounded multipart va orchestrator failure semantics real/testlangan; Haiku/Sonnet, usage log, frontend natija va route wiring qolgan, production `501` |
 | Billing / Click / Payme | **Planned** | Phase 3 |
 | AI Sotuvchi | **Planned** | Phase 3 |
 
@@ -110,9 +111,9 @@
 
 ## Eng yaqin bajariladigan ishlar
 
-1. `ANTHROPIC_API_KEY` kutilganda HR Candidate uchun PostgreSQL-backed per-minute/day/concurrency quota reservation va safe multipart HTTP adapterini implementatsiya qilish; `501`ni full-flow tayyor bo'lguncha saqlash.
-2. Key kelgach uni staging Edge secrets'ga xavfsiz o'rnatish va authenticated real-provider preview/save smoke-testni qayta green qilish.
-3. Green staging smoke'dan keyin production `20260821000000` migration + `bright-api` rollout va smoke-testni bajarish.
+1. `ANTHROPIC_API_KEY` kutilganda HR Candidate usage/cost log va frontend upload/result oqimini yakunlash; `501`ni full-flow tayyor bo'lguncha saqlash.
+2. Key kelgach uni staging Edge secrets'ga xavfsiz o'rnatish, semantic CV/scoring/reportni ulash va authenticated real-provider smoke-testni green qilish.
+3. Green staging smoke'dan keyin quota lease release/wiring bilan `501`ni olib tashlash; AI Hujjatchi production `20260821000000` migration + `bright-api` rolloutini alohida smoke-test qilish.
 
 Batafsil tartib: [PLAN.md](PLAN.md).
 

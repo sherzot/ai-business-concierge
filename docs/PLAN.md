@@ -1,7 +1,7 @@
 # AI Business Concierge — faol reja
 
-> Version: 6.1
-> Yangilandi: 2026-08-21
+> Version: 6.2
+> Yangilandi: 2026-08-22
 > Bu faylda faqat faol va navbatdagi ishlar turadi. 2026-07-24 gacha bo'lgan katta tarixiy reja [archive/PLAN_LEGACY_2026-07-24.md](archive/PLAN_LEGACY_2026-07-24.md)ga ko'chirilgan.
 
 ## Ishlash qoidasi
@@ -67,7 +67,6 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] PostgreSQL-backed per-minute/day/concurrency quota reservation va safe multipart HTTP adapterini qo'shish; `501`ni full-flowgacha saqlash.
 - [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** CV semantic structuring, Sonnet structured scoring va report generatorni LLM Router orqali ulash.
 - [ ] Usage/cost logni barcha HR provider chaqiruvlariga ulash.
 - [ ] Frontend upload/result oqimini yakunlash va `501` stubni olib tashlash.

@@ -4,6 +4,15 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-22 — HR persistent quotaとbounded multipart boundaryをstagingで完了
+
+- `ANTHROPIC_API_KEY`待ちの間に、次のsecret-free HR Candidate sliceを完了した。DB planの`starter/pro/company`をtariff policyへmapし、tenant-scoped minute/day counterと45秒でexpireするconcurrency leaseをservice-role-only reserve/release RPCでPostgreSQLがatomicに所有する。Browser EXECUTEとservice roleのdirect-table accessは拒否し、user FK covering indexも追加した。
+- Multipart adapterはboundary、duplicate/unknown field、encoding、MIME、file/text/locale/depth contractを検証し、declared/chunked bodyの両方を5 MiB CV + 64 KiB overheadで制限する。Disabled canonical routeもbounded drainを使い、valid authorized requestでは`501 NOT_IMPLEMENTED`を維持する。Provider/production Edge deployは行っていない。
+- Backend Deno 47/47、17-file format、12-file check、lintがPASS。Monolithには既存のlogging/Hono/risk type error 21件が残るが、新しいHR行のerrorは0。Node 22.23.2でfrontend 26/26 files・117/117 tests、type-check、deploy-env 14/14、production audit high/critical 0、3,701-module build、10-file security gateがPASS。
+- Stagingへmigration `20260822010759`と`20260822011030`を適用し、合計39。Remote transactional pgTAP 22-case runnerは`ok 22`まで到達してrollbackし、read-backでprivate table 2/2のRLS+FORCE、service reserve/release許可、browser reserve/release拒否、service direct SELECT拒否を確認した。新規unindexed-FK advisor findingは解消し、workload前の想定内unused-index INFOのみ残る。Production DB/Edgeは未変更。Local Docker socketが応答しないためfresh local 39-migration replayはBLOCKEDで、staging PostgreSQL 17.6 dry-run/pgTAPでDB検証した。
+
+残作業: secret-freeのHR usage/cost loggingとfrontend upload/results。Key受領後にsemantic CV/scoring/reportのreal-provider smoke、route `finally`でlease release、その後`501`を解除する。
+
 ## 2026-08-21 — HR request boundaryとorchestratorをfail-closed強化
 
 - Provider-independent HR request/orchestrator pathをauditした。Runtime validationはTODOで、fulfilled CVの`parse_status: failed`がscoringへ進み得た。`Promise.race` success後もtimeout timerが残り、base36 request-ID shimはschemaのULID alphabetを保証せず、schemaはerror responseにも`result`を必須としていた。
