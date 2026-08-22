@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — Усилен global 30-second deadline HR analysis
+
+- Application execution получил maximum 30,000 ms global response deadline. Если quota/analyzer execution превышает его, public result возвращает typed `TIMEOUT` и HTTP `504`; configurable test timeout fail-safe clamp 1–30,000 ms. Backend отдаёт deterministic envelope раньше frontend 40-second transport timeout.
+- Deadline не бросает already-started provider promise: completed work продолжает accounting и quota `finally-release` в background. Поэтому fast `504` не создаёт untracked AI cost или early lease release; individual stage timeouts и DB 45-second expiry остаются cleanup backstops.
+- Application 8/8, HR backend 99/99 и targeted Deno с Telegram 103/103 PASS; format/check/lint green. `11ab6af` отправлен в `main`; GitHub CI `32554430334` green за 1m15s: Deno 103/103, backend quality, frontend 28/28 files и 127/127 tests, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files. Netlify skipped; staging/production runtime, live provider и `501` без изменений.
+
+Осталось: map provider/config/accounting failure из generic `INTERNAL` в typed `AI_UNAVAILABLE`/`503` и синхронизировать frontend locale copy; после key выполнить staging live smoke; затем активировать route.
+
+Файлы: `supabase/functions/server/services/hr-candidate/application{,.test}.ts` и синхронная четырёхъязычная документация.
+
 ## 2026-08-22 — Завершён key-independent HR application execution boundary
 
 - Новый `application.ts` объединяет canonical tenant/user/role context, pre-provider request validation, request-scoped provider composition, persistent quota reserve/execute/finally-release и analyzer в одном application boundary. Один ULID используется в public result, provider cache и atomic usage accounting; role/input denial выполняется до composition/quota, missing provider config fail-closed без расходования quota.

@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-22 — HR global 30 soniyalik analysis deadline qotirildi
+
+- Application executionga maximum 30,000 ms global response deadline qo'shildi. Quota/analyzer oqimi deadline'dan oshsa public result typed `TIMEOUT` va HTTP `504` bo'ladi; configurable test timeout ham 1–30,000 ms oralig'ida fail-safe clamp qilinadi. Bu frontend 40s transport timeoutidan oldin deterministic backend envelope qaytaradi.
+- Deadline boshlangan provider promise'ni tashlab yubormaydi: completed response background'da accountingdan o'tadi va quota lifecycle `finally-release`ni bajaradi. Shu bilan tez `504` berish untracked AI cost yoki early lease release yaratmaydi; individual stage timeoutlari va DB 45s expiry qolgan cleanup backstoplaridir.
+- Application 8/8, HR backend 99/99 va Telegram bilan Deno 103/103 PASS; format/check/lint green. `11ab6af` `main`ga push qilindi; GitHub CI `32554430334` 1m15sda Deno 103/103, backend quality, frontend 28/28 fayl va 127/127 test, deploy-env 14/14, audit 0 high/critical, 3,701-module build va 10-file security bilan green. Netlify skip; staging/production runtime, live provider va `501` o'zgarmadi.
+
+Qolgan ish: provider/config/accounting failure'ni umumiy `INTERNAL`dan typed `AI_UNAVAILABLE`/`503`ga ajratish va frontend locale copy bilan sinxronlash; key kelgach staging live smoke; keyin route activation.
+
+Fayllar: `supabase/functions/server/services/hr-candidate/application{,.test}.ts` va 4-tilli loyiha hujjatlari.
+
 ## 2026-08-22 — HR application execution boundary keydan mustaqil yakunlandi
 
 - Yangi `application.ts` canonical tenant/user/role context, pre-provider request validation, request-scoped provider composition, persistent quota reserve/execute/finally-release va analyzer'ni bitta application boundaryda yig'di. Bitta ULID public result, provider cache va atomic usage accountingda aynan bir xil ishlatiladi; role/input denial composition va quota'dan oldin, missing provider config esa quota counterini sarflamasdan fail-closed bo'ladi.

@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — HR global 30-second analysis deadline hardened
+
+- Application execution now has a maximum 30,000 ms global response deadline. If quota/analyzer execution exceeds it, the public result is typed `TIMEOUT` with HTTP `504`; configurable test timeouts are fail-safe clamped to 1–30,000 ms. The backend therefore returns a deterministic envelope before the frontend's 40-second transport timeout.
+- The deadline does not abandon an already-started provider promise: completed work continues through accounting and quota `finally-release` in the background. A fast `504` therefore creates neither untracked AI cost nor early lease release; individual stage timeouts and the DB 45-second expiry remain cleanup backstops.
+- Application 8/8, HR backend 99/99, and targeted Deno with Telegram 103/103 passed; format/check/lint are green. `11ab6af` was pushed to `main`; GitHub CI `32554430334` passed in 1m15s with Deno 103/103, backend quality, frontend 28/28 files and 127/127 tests, deploy-env 14/14, audit 0 high/critical, a 3,701-module build, and 10-file security. Netlify was skipped; staging/production runtime, live provider, and `501` were unchanged.
+
+Remaining: map provider/config/accounting failures from generic `INTERNAL` to typed `AI_UNAVAILABLE`/`503` and synchronize frontend locale copy; perform staging live smoke after the key arrives; then activate the route.
+
+Files: `supabase/functions/server/services/hr-candidate/application{,.test}.ts` and synchronized four-language project documentation.
+
 ## 2026-08-22 — Key-independent HR application execution boundary completed
 
 - New `application.ts` combines canonical tenant/user/role context, pre-provider request validation, request-scoped provider composition, persistent quota reserve/execute/finally-release, and the analyzer behind one application boundary. One ULID is shared by the public result, provider cache, and atomic usage accounting; role/input denial precedes composition/quota, and missing provider configuration fails closed without consuming quota.

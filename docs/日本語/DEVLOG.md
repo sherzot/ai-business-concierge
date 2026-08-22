@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-22 — HR global 30-second analysis deadlineを強化
+
+- Application executionへmaximum 30,000 ms global response deadlineを追加。Quota/analyzer executionが超過するとpublic resultはtyped `TIMEOUT`・HTTP `504`となり、configurable test timeoutも1–30,000 msへfail-safe clamp。Frontend 40-second transport timeoutより前にdeterministic backend envelopeを返す。
+- Deadlineはalready-started provider promiseを放棄しない。Completed workはbackgroundでaccountingとquota `finally-release`を継続。Fast `504`でもuntracked AI costやearly lease releaseを作らず、individual stage timeoutとDB 45-second expiryがcleanup backstopとなる。
+- Application 8/8、HR backend 99/99、Telegram込みtargeted Deno 103/103 PASS。Format/check/lint green。`11ab6af`を`main`へpushし、GitHub CI `32554430334`は1m15sでgreen: Deno 103/103、backend quality、frontend 28/28 files・127/127 tests、deploy-env 14/14、audit high/critical 0、3,701-module build、10-file security。Netlifyはskip、staging/production runtime、live provider、`501`は未変更。
+
+残作業: Provider/config/accounting failureをgeneric `INTERNAL`からtyped `AI_UNAVAILABLE`/`503`へmapしfrontend locale copyを同期。Key到着後にstaging live smoke、その後route activation。
+
+Files: `supabase/functions/server/services/hr-candidate/application{,.test}.ts`、4言語同期project documentation。
+
 ## 2026-08-22 — Key-independent HR application execution boundaryを完了
 
 - 新規`application.ts`はcanonical tenant/user/role context、pre-provider request validation、request-scoped provider composition、persistent quota reserve/execute/finally-release、analyzerを1つのapplication boundaryへ統合する。1つのULIDをpublic result、provider cache、atomic usage accountingで共有。Role/input denialはcomposition/quotaより前、missing provider configはquotaを消費せずfail-closed。

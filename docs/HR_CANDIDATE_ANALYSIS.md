@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Holat: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX va sanitized raw CV in-memory seam, request/role/plan, PostgreSQL quota/finally-release, bounded multipart, atomic usage, minimized prompt, injectable Haiku/Sonnet provider-stage va strict output/account-before-validation, tenant/request-scoped server composition, deterministic merge/scorer/report, provider-stage orchestrator, application execution va frontend real/testlangan. Global deadline, live smoke va full HTTP wiring qolgan; canonical endpoint `501 NOT_IMPLEMENTED`. Joriy holat: [STATUS.md](STATUS.md).
+> **Holat: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX va sanitized raw CV in-memory seam, request/role/plan, PostgreSQL quota/finally-release, bounded multipart, atomic usage, minimized prompt, injectable Haiku/Sonnet provider-stage va strict output/account-before-validation, tenant/request-scoped server composition, deterministic merge/scorer/report, provider-stage orchestrator, 30s-deadline application execution va frontend real/testlangan. Typed provider-unavailable, live smoke va full HTTP wiring qolgan; canonical endpoint `501 NOT_IMPLEMENTED`. Joriy holat: [STATUS.md](STATUS.md).
 
 > **AI Business Concierge — `hr_candidate_analysis` modul dizayn paketi**
 > Version: 1.0 (MVP design) · Sana: 2026-04-29 · Til: O'zbekcha / 日本語 / English
@@ -502,7 +502,7 @@ Caveats:
 
 ### 6.3 Tool 3 — `candidate-scorer.ts`
 
-> Joriy implementatsiya provider-independent rubrikani, bounded weighted overall/grade va faqat complete taqqoslanadigan GitHub dalilida conservative UZ/JA/EN inconsistency flaglarini beradi. Injectable Sonnet/Haiku stage model/budget/cache policy, private sanitized CV seam, minimized prompt, account-before-validation va strict validatorni birlashtiradi; tenant/request server composition key va atomic accounting closure'ni inject qiladi; application boundary quota lifecycle va typed HTTP mappingni boshqaradi; deterministic finalize overall/grade va local flaglarni saqlaydi. Global deadline va live smoke qolgan.
+> Joriy implementatsiya provider-independent rubrikani, bounded weighted overall/grade va faqat complete taqqoslanadigan GitHub dalilida conservative UZ/JA/EN inconsistency flaglarini beradi. Injectable Sonnet/Haiku stage model/budget/cache policy, private sanitized CV seam, minimized prompt, account-before-validation va strict validatorni birlashtiradi; tenant/request server composition key va atomic accounting closure'ni inject qiladi; application boundary quota lifecycle, typed HTTP mapping va 30s deadline'ni boshqaradi; deterministic finalize overall/grade va local flaglarni saqlaydi. Typed provider-unavailable va live smoke qolgan.
 
 ```
 Model:  Claude Sonnet 4 (deep) yoki Haiku (fast)

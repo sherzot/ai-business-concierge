@@ -51,6 +51,7 @@
 > 2026-08-22: 16k-bounded sanitized raw-CV in-memory seamとinjectable provider-stage orchestrationを完了。Private textはresult/log/persistenceへ入らずfailed parseでは返さない。`116c833` CI `32553502762` green: Deno 92/92と全gateが通過。Server composition、live smoke、`501`が残る。
 > 2026-08-22: HR server composition factoryがserver-only keyとcanonical tenant/user/request contextをtenant+request+stage cacheおよびatomic accountingへ結合。Invalid configはprovider前にfail-closed。`2e4db5c` CI `32553827974` green: Deno 95/95と全gateが通過。Application execution/live smoke、`501`が残る。
 > 2026-08-22: HR application boundaryがrole/input precheck、1つのrequest ULID、provider composition、quota reserve/execute/finally-releaseをtyped HTTP mappingで統合。`eac2a3d` CI `32554187835` green: Deno 102/102と全gateが通過。Global 30s deadline、live smoke、`501`が残る。
+> 2026-08-22: HR application executionへmaximum 30s global deadlineとtyped `504 TIMEOUT`をenforce。Background provider accountingとquota cleanupはdeadline後も完了する。`11ab6af` CI `32554430334` green: Deno 103/103と全gateが通過。Typed provider-unavailable、live smoke、`501`が残る。
 > 2026-08-22: `36b9553`はmain、GitHub CI `32546561166`は1m12sでgreen。Frontend runtime未変更のためNetlifyはskip。
 
 ## 現在のPhase
@@ -74,7 +75,7 @@
 | Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。40 migrations、`bright-api` v11 ACTIVE、health `200`、unauth docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list。Email confirmation ON、8-digit/1-minute OTP、TOTP ON。Auth settings HTTP `200`、autoconfirm false。Edgeはmodern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overridesを使用しlegacy anon/service-role API keysはdisabled |
 | Type-check | Clean temporary frontend installで成功 |
-| Unit tests | Frontend 28/28 files・127/127 tests、HR frontend 12/12。HR backend GitHub 10 + CV 10 + boundary 5 + quota/lifecycle 12 + multipart 6 + accounting 4 + provider contract 8 + prompt contract 6 + provider stages 8 + provider composition 3 + application 7 + scorer 4 + report 6 + orchestrator 8 + schema 1 = 98/98、Telegram込み102/102 |
+| Unit tests | Frontend 28/28 files・127/127 tests、HR frontend 12/12。HR backend GitHub 10 + CV 10 + boundary 5 + quota/lifecycle 12 + multipart 6 + accounting 4 + provider contract 8 + prompt contract 6 + provider stages 8 + provider composition 3 + application 8 + scorer 4 + report 6 + orchestrator 8 + schema 1 = 99/99、Telegram込み103/103 |
 | Deployment environment guard | Node tests 14/14: isolation contract 10件 + Vite `.env` fallback/runtime-precedence 2件 + bundled-endpoint extraction regressions 2件 |
 | Production build/security check | Synthetic non-production refでbuild pass。CSPはそのrefから生成、10 build/Netlify filesを検査 |
 | Production dependency audit | Raw audit: vulnerability合計0件; scoped gateはexceptionなしでhigh/critical 0件 |
@@ -83,7 +84,7 @@
 | Delivery platform | Netlifyのみ。RepositoryにVercel config/dependencyなし。External Vercel projectは保持し、`gitRepositoryConnected=false`を確認 |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase、`deploy-preview`/`branch-deploy`/`dev` -> staging。Optional URL envなし。Personalではbrowser-public `VITE_*`のみ`All` scopeを使用 |
 | Staging security advisor | Error `0`、既知`vector` public-schema warning `1`、server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | Final code commit `eac2a3d`のmain run `32554187835`は1m14sでsuccess。Deno 102/102とbackend quality、frontend 28/28 files・127/127 tests、deploy-env 14/14、audit high/critical 0、3,701-module build、10-file security green |
+| Remote GitHub Actions | Final code commit `11ab6af`のmain run `32554430334`は1m15sでsuccess。Deno 103/103とbackend quality、frontend 28/28 files・127/127 tests、deploy-env 14/14、audit high/critical 0、3,701-module build、10-file security green |
 | Netlify preview | Sliceを直接`main`へpushしたため新規deploy previewはなく、Netlify production contextが実行された |
 | Production frontend | Deploy `6a89065505b5600008dd0385` ready、build `6a89065505b5600008dd0383`、commit `f77dd9a`、29s、plugin success、87,145 filesでsecret match 0。`/`と`/dashboard/hr/candidates`は`200`、CSP・production-only `index-DipHAHEa.js` green |
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |
@@ -103,7 +104,7 @@
 | Resend inbox | Partial | Codeあり、receiving/delivery E2E未確認 |
 | AI Concierge/RAGとcost tracking | Partial | 基盤あり。Polishing request quotaはPostgreSQL atomic reservation/releaseでrace-safe、provider usageはoutput validation前に計上する。Migration rollout、citation UX、billing dashboard、unified endpoint enforcement、smoke testsが残る |
 | AI文書作成 | Production binary + staged AI polish preview / provider blocked | 15 templates、4言語、実PDF/DOCX/private Storageは稼働中。Polishing frontendはproduction、migrationと`bright-api` v11はstagingへdeploy済み。Auth/tenant/document boundariesとcleanupはgreenだが、stagingに`ANTHROPIC_API_KEY`がなくreal-provider smokeは`503 AI_UNAVAILABLE`。Production backend/migration rolloutは意図的に保留 |
-| HR Candidate Analysis | Partial / provider blocked | Bounded adapters、local PDF/DOCXとsanitized raw-CV in-memory seam、request/role、PostgreSQL quota/finally-release、multipart、atomic usage/cost persistence、minimized prompt、injectable Haiku/Sonnet stages、strict output/account-before-validation、server composition、deterministic merge/scorer/report、provider-stage orchestrator、application execution、frontend boundaryはtested。Global deadline/live smoke、active routeが残りproductionは`501` |
+| HR Candidate Analysis | Partial / provider blocked | Bounded adapters、local PDF/DOCXとsanitized raw-CV in-memory seam、request/role、PostgreSQL quota/finally-release、multipart、atomic usage/cost persistence、minimized prompt、injectable Haiku/Sonnet stages、strict output/account-before-validation、server composition、deterministic merge/scorer/report、provider-stage orchestrator、30s-deadline application execution、frontend boundaryはtested。Typed provider-unavailable/live smoke、active routeが残りproductionは`501` |
 | Billing / Click / Payme と AI Sales Bot | Planned | Phase 3 |
 
 ## 直近の順序

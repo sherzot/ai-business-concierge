@@ -51,6 +51,7 @@
 > 2026-08-22: Завершены 16k-bounded sanitized raw-CV in-memory seam и injectable provider-stage orchestration; private text не попадает в result/log/persistence и отсутствует при failed parse. `116c833` CI `32553502762` green: Deno 92/92 и все gates прошли; server composition, live smoke и `501` остаются.
 > 2026-08-22: HR server composition factory связывает server-only key и canonical tenant/user/request context с tenant+request+stage cache и atomic accounting; invalid config fail-closed до provider. `2e4db5c` CI `32553827974` green: Deno 95/95 и все gates прошли; application execution/live smoke и `501` остаются.
 > 2026-08-22: HR application boundary объединяет role/input precheck, один request ULID, provider composition и quota reserve/execute/finally-release с typed HTTP mapping. `eac2a3d` CI `32554187835` green: Deno 102/102 и все gates прошли; global 30s deadline, live smoke и `501` остаются.
+> 2026-08-22: HR application execution теперь enforce maximum 30s global deadline и typed `504 TIMEOUT`; background provider accounting и quota cleanup завершаются после deadline. `11ab6af` CI `32554430334` green: Deno 103/103 и все gates прошли; typed provider-unavailable, live smoke и `501` остаются.
 > 2026-08-22: `36b9553` в main, GitHub CI `32546561166` green за 1m12s; Netlify skipped, поскольку frontend runtime не менялся.
 
 ## Текущая фаза
@@ -74,7 +75,7 @@
 | Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 40 migrations, `bright-api` v11 ACTIVE, health `200`, unauth docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge использует modern overrides `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY`; legacy anon/service-role API keys disabled |
 | Type-check | Успешно в clean temporary frontend install |
-| Unit tests | Frontend 28/28 files, 127/127 tests, HR Candidate frontend 12/12; HR backend GitHub 10 + CV 10 + boundary 5 + quota/lifecycle 12 + multipart 6 + accounting 4 + provider contract 8 + prompt contract 6 + provider stages 8 + provider composition 3 + application 7 + scorer 4 + report 6 + orchestrator 8 + schema 1 = 98/98; targeted с Telegram 102/102 |
+| Unit tests | Frontend 28/28 files, 127/127 tests, HR Candidate frontend 12/12; HR backend GitHub 10 + CV 10 + boundary 5 + quota/lifecycle 12 + multipart 6 + accounting 4 + provider contract 8 + prompt contract 6 + provider stages 8 + provider composition 3 + application 8 + scorer 4 + report 6 + orchestrator 8 + schema 1 = 99/99; targeted с Telegram 103/103 |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks + 2 Vite `.env` fallback/runtime-precedence + 2 bundled-endpoint extraction regressions |
 | Production build/security check | Build прошёл с synthetic non-production ref; CSP создан из этого ref; проверено 10 build/Netlify файлов |
 | Production dependency audit | Raw audit: всего 0 vulnerabilities; scoped gate без исключений: high/critical 0 |
@@ -83,7 +84,7 @@
 | Delivery platform | Только Netlify. В repository нет Vercel config/dependency; внешний Vercel project сохранён, `gitRepositoryConnected=false` подтверждён |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs отсутствуют; на Personal только browser-public `VITE_*` используют `All` scope |
 | Staging security advisor | Errors `0`; известный `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | Final code commit `eac2a3d` main run `32554187835` success за 1m14s: Deno 102/102 и backend quality, frontend 28/28 files и 127/127 tests, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files green |
+| Remote GitHub Actions | Final code commit `11ab6af` main run `32554430334` success за 1m15s: Deno 103/103 и backend quality, frontend 28/28 files и 127/127 tests, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files green |
 | Netlify preview | Новый deploy preview не создан, потому что slice pushed напрямую в `main`; Netlify использовал production context |
 | Production frontend | Deploy `6a89065505b5600008dd0385` ready, build `6a89065505b5600008dd0383`, commit `f77dd9a`, 29s, plugin success, 0 secret matches в 87,145 files; `/` и `/dashboard/hr/candidates` `200`, CSP и production-only `index-DipHAHEa.js` green |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
@@ -103,7 +104,7 @@
 | Resend inbox | Partial | Код есть; receiving/delivery E2E не подтверждён |
 | AI Concierge/RAG и cost tracking | Partial | Основа есть; polishing request quota race-safe через PostgreSQL atomic reservation/release, provider usage учитывается до output validation. Остаются rollout migration, citation UX, billing dashboard, unified endpoint enforcement и smoke tests |
 | AI Документолог | Production binary + staged AI polish preview / provider blocked | 15 templates, 4 языка и real PDF/DOCX/private Storage работают. Polishing frontend в production, migration и `bright-api` v11 в staging; Auth/tenant/document boundaries и cleanup green, но real-provider smoke возвращает `503 AI_UNAVAILABLE`, потому что в staging нет `ANTHROPIC_API_KEY`. Production backend/migration rollout намеренно ожидает |
-| HR Candidate Analysis | Partial / provider blocked | Bounded adapters, local PDF/DOCX и sanitized raw-CV in-memory seam, request/role, PostgreSQL quota/finally-release, multipart, atomic usage/cost persistence, minimized prompts, injectable Haiku/Sonnet stages, strict output/account-before-validation, server composition, deterministic merge/scorer/report, provider-stage orchestrator, application execution и frontend boundary tested; остаются global deadline/live smoke и active route; production `501` |
+| HR Candidate Analysis | Partial / provider blocked | Bounded adapters, local PDF/DOCX и sanitized raw-CV in-memory seam, request/role, PostgreSQL quota/finally-release, multipart, atomic usage/cost persistence, minimized prompts, injectable Haiku/Sonnet stages, strict output/account-before-validation, server composition, deterministic merge/scorer/report, provider-stage orchestrator, 30s-deadline application execution и frontend boundary tested; остаются typed provider-unavailable/live smoke и active route; production `501` |
 | Billing / Click / Payme и AI Sales Bot | Planned | Phase 3 |
 
 ## Ближайший порядок

@@ -3,7 +3,7 @@
 > Архитектура проекта, паттерны проектирования и правила unit-тестирования
 > Версия: 1.3 | Обновлено: 2026-08-21
 >
-> Текущий runtime-статус находится в [STATUS.md](STATUS.md). `hr-candidate` partial: bounded adapters, local PDF/DOCX и private sanitized-text in-memory seam, request policy, PostgreSQL quota/finally-release, multipart, tenant/request-scoped server provider/accounting composition, injectable provider-stage orchestration, application execution и deterministic merge/scoring/report real. Global deadline, live smoke и full HTTP wiring не production-ready.
+> Текущий runtime-статус находится в [STATUS.md](STATUS.md). `hr-candidate` partial: bounded adapters, local PDF/DOCX и private sanitized-text in-memory seam, request policy, PostgreSQL quota/finally-release, multipart, tenant/request-scoped server provider/accounting composition, injectable provider-stage orchestration, 30s-deadline application execution и deterministic merge/scoring/report real. Typed provider-unavailable, live smoke и full HTTP wiring не production-ready.
 
 ---
 
@@ -252,4 +252,4 @@ features/tasks/__tests__/
 ---
 
 *ARCHITECTURE.md — AI Business Concierge v1.0 · 2026-05-05*
-*HR Candidate — target modular pattern: bounded adapter/request/quota-lifecycle/multipart/orchestrator/application, private in-memory CV seam, minimized prompt/injectable provider-stage/strict output, server key/accounting composition и deterministic merge boundaries real; global deadline/full HTTP wiring остаётся partial scaffold.*
+*HR Candidate — target modular pattern: bounded adapter/request/quota-lifecycle/multipart/orchestrator/30s-deadline application, private in-memory CV seam, minimized prompt/injectable provider-stage/strict output, server key/accounting composition и deterministic merge boundaries real; typed provider-unavailable/full HTTP wiring остаётся partial scaffold.*

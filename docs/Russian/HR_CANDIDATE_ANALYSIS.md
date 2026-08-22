@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Статус: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX и sanitized raw-CV in-memory seam, request/role/plan policy, PostgreSQL quota/finally-release, bounded multipart, atomic usage accounting, minimized prompts, injectable Haiku/Sonnet provider stages со strict output/account-before-validation, tenant/request-scoped server composition, deterministic merge/scoring/report, provider-stage orchestrator, application execution и frontend real/tested. Остаются global deadline, live smoke и full HTTP wiring; canonical endpoint возвращает `501 NOT_IMPLEMENTED`. Текущее состояние: [STATUS.md](STATUS.md).
+> **Статус: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX и sanitized raw-CV in-memory seam, request/role/plan policy, PostgreSQL quota/finally-release, bounded multipart, atomic usage accounting, minimized prompts, injectable Haiku/Sonnet provider stages со strict output/account-before-validation, tenant/request-scoped server composition, deterministic merge/scoring/report, provider-stage orchestrator, 30s-deadline application execution и frontend real/tested. Остаются typed provider-unavailable, live smoke и full HTTP wiring; canonical endpoint возвращает `501 NOT_IMPLEMENTED`. Текущее состояние: [STATUS.md](STATUS.md).
 
 > **AI Business Concierge — Пакет проектирования модуля `hr_candidate_analysis`**
 > Версия: 1.0 (MVP дизайн) · Дата: 2026-04-29

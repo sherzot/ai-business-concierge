@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Status: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache、bounded local PDF/DOCXとsanitized raw-CV in-memory seam、request/role/plan policy、PostgreSQL quota/finally-release、bounded multipart、atomic usage accounting、minimized prompt、strict output/account-before-validation付きinjectable Haiku/Sonnet provider stages、tenant/request-scoped server composition、deterministic merge/scoring/report、provider-stage orchestrator、application execution、frontendはreal/tested。Global deadline、live smoke、full HTTP wiringが残り、canonical endpointは`501 NOT_IMPLEMENTED`を返す。現在状態: [STATUS.md](STATUS.md)。
+> **Status: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache、bounded local PDF/DOCXとsanitized raw-CV in-memory seam、request/role/plan policy、PostgreSQL quota/finally-release、bounded multipart、atomic usage accounting、minimized prompt、strict output/account-before-validation付きinjectable Haiku/Sonnet provider stages、tenant/request-scoped server composition、deterministic merge/scoring/report、provider-stage orchestrator、30s-deadline application execution、frontendはreal/tested。Typed provider-unavailable、live smoke、full HTTP wiringが残り、canonical endpointは`501 NOT_IMPLEMENTED`を返す。現在状態: [STATUS.md](STATUS.md)。
 
 > **AI Business Concierge — `hr_candidate_analysis` モジュール設計パッケージ**
 > バージョン: 1.0 (MVP設計) · 日付: 2026-04-29
