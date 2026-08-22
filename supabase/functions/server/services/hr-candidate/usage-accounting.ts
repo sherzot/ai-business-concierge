@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.49.8";
 import type { LLMResponse } from "../llm-router.ts";
 
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const ULID_PATTERN = /^[0-9A-HJKMNP-TV-Z]{26}$/;
+
 export type HrProviderStage =
   | "cv_semantic"
   | "candidate_scoring"
@@ -24,6 +28,14 @@ export type HrUsageReceipt = Pick<
   | "latencyMs"
   | "cached"
 >;
+
+export function isValidHrUsageContext(
+  context: HrUsageContext,
+): boolean {
+  return UUID_PATTERN.test(context.tenantId) &&
+    UUID_PATTERN.test(context.userId) &&
+    ULID_PATTERN.test(context.requestId);
+}
 
 /**
  * Persists one already-completed Claude call and its token counter atomically.
@@ -78,10 +90,7 @@ function isSafeUsage(
     (response.inputTokens === 0 && response.outputTokens === 0 &&
       response.costUsd === 0);
 
-  return context.tenantId.trim().length > 0 &&
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-      .test(context.userId) &&
-    /^[0-9A-HJKMNP-TV-Z]{26}$/.test(context.requestId) &&
+  return isValidHrUsageContext(context) &&
     response.model.trim().length > 0 && response.model.length <= 160 &&
     tokensAreSafe && metricsAreSafe && cacheIsConsistent;
 }

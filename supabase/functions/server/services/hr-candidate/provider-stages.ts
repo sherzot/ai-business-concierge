@@ -46,7 +46,7 @@ import type {
   HrUsageRecordResult,
 } from "./usage-accounting.ts";
 
-type InvokeClaude = (
+export type HrProviderInvoke = (
   apiKey: string,
   request: LLMRequest,
 ) => Promise<LLMResponse>;
@@ -81,7 +81,7 @@ export function createHrProviderStages(config: {
     stage: HrProviderStage,
     receipt: HrUsageReceipt,
   ) => Promise<HrUsageRecordResult>;
-  invoke?: InvokeClaude;
+  invoke?: HrProviderInvoke;
 }): HrProviderStages {
   const apiKey = requiredSecret(config.apiKey);
   const cacheScope = requiredScope(config.cacheScope);
@@ -207,7 +207,7 @@ function request(input: LLMRequest): LLMRequest {
   return input;
 }
 
-const defaultInvoke: InvokeClaude = async (apiKey, llmRequest) => {
+const defaultInvoke: HrProviderInvoke = async (apiKey, llmRequest) => {
   const { callClaude } = await import("../llm-router.ts");
   return await callClaude(apiKey, llmRequest);
 };

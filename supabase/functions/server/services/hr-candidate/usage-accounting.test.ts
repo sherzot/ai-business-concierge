@@ -9,7 +9,7 @@ function assert(condition: unknown, message: string): asserts condition {
 }
 
 const CONTEXT = {
-  tenantId: "tenant-1",
+  tenantId: "22222222-2222-4222-8222-222222222222",
   userId: "11111111-1111-4111-8111-111111111111",
   requestId: "01K36X8M3M0123456789ABCDEF",
 };
