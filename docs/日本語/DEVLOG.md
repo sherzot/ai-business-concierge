@@ -4,6 +4,17 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-22 — HR provider-output contractとreport schema edge caseを強化
+
+- `ANTHROPIC_API_KEY`なしで、将来のlive provider callを囲むsafety boundaryを準備した。`provider-contract.ts`はCV semantic、scoring refinement、report narrativeをexact JSONまたはexact `json` fenceとしてのみ受け入れ、exact keys、bounded Unicode strings/arrays/numbers/dates、role-fit policy、interview category coverageをfail-closed検証する。Raw outputやprivate CV valueはpublic error/logへ出さない。
+- Completed provider receiptはoutput parsing/validationの**前**にatomic usage adapterへ渡す。Invalid outputも計上し、accounting unavailable/throw時はuntracked AI outputを返さない。Response前のprovider failureではreceiptを作らない。Real Haiku/Sonnet invocation用boundaryはreadyだが、keyなしのlive callは行わずrouteは`501`のまま。
+- 全category/repository scoreが70未満でもdeterministic reportはschemaを満たす。Highest-available signalをstrong evidenceとは呼ばないfactual fallbackとして返し、question/expected-signal boundをschemaと同じ400 charactersへ揃えた。
+- Deno 2.1.14でprovider contract 8/8、report 6/6、Telegram込みtargeted backend 69/69 PASS。変更fileはformat/check/lint PASS。Local Node 22 frontend typecheckはfailureなしのfilesystem sleep後にcancelした。Main commit `a904632`とraw outputをaccounting type boundaryから除外したfollow-up `550ca8b`を`main`へpushし、final authoritative GitHub CI `32552046675`は1m15sでgreen: Deno 69/69、backend quality、frontend 28/28 files・127/127 tests、deploy-env 14/14、audit high/critical 0、3,701-module build、10-file security。Staging/production DB、Edge、Netlify、runtimeは未変更。Netlifyは`[skip netlify]`で意図的にskip。
+
+残作業: key受領後、real CV/scoring/report LLM Router callをaccount-before-validation contractへ接続し、quota leaseを`finally`でrelease、full-flow smoke成功後にのみ`501`を削除する。
+
+Files: `.github/workflows/ci.yml`、`supabase/functions/server/services/hr-candidate/provider-contract{,.test}.ts`、`report-generator{,.test}.ts`、4言語同期documentation。
+
 ## 2026-08-22 — HR deterministic scoringとevidence-linked reportを完了
 
 - `ANTHROPIC_API_KEY`待ちの間に、provider-independentなcandidate scoring/report domainを実装した。従来のscorerは全categoryを0、report generatorは空配列・空summaryを返していた。

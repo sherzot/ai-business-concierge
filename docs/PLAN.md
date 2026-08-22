@@ -1,6 +1,6 @@
 # AI Business Concierge — faol reja
 
-> Version: 6.3
+> Version: 6.4
 > Yangilandi: 2026-08-22
 > Bu faylda faqat faol va navbatdagi ishlar turadi. 2026-07-24 gacha bo'lgan katta tarixiy reja [archive/PLAN_LEGACY_2026-07-24.md](archive/PLAN_LEGACY_2026-07-24.md)ga ko'chirilgan.
 
@@ -67,7 +67,7 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** CV semantic structuring va deterministik baseline ustidagi Sonnet structured scoring/report refinementini LLM Router orqali ulash; har provider javobini tayyor atomic usage/cost RPCda hisoblash.
+- [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** LLM Routerdagi real CV semantic structuring va Sonnet scoring/report refinement chaqiruvlarini tayyor strict-output hamda account-before-validation contractiga ulash.
 - [ ] LLM integrationdan keyin quota lease release, active route wiring, `501` removal, full-flow integration va manual acceptance testlarini o'tkazish.
 
 ## Keyingi phase'lar

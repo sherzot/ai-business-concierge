@@ -4,6 +4,17 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — HR provider-output contract and report schema edge case hardened
+
+- A key-independent safety boundary now surrounds future live provider calls. `provider-contract.ts` accepts CV semantic, scoring-refinement, and report-narrative responses only as exact JSON or an exact `json` fence, then fail-closed validates exact keys, bounded Unicode strings/arrays/numbers/dates, role-fit policy, and interview-category coverage. Raw model output and private CV values are never placed in public errors or logs.
+- Every completed provider receipt is sent to the atomic usage adapter **before** output parsing/validation. Invalid output is still billed; unavailable/throwing accounting blocks untracked AI output. A provider failure before a response creates no receipt. This is the prepared boundary for real Haiku/Sonnet invocation; no live call ran without the key and the route remains `501`.
+- The deterministic report now satisfies the schema when every category/repository score is below 70: it emits a factual highest-available-signal fallback without calling it strong evidence. Interview question and expected-signal limits now match the schema at 400 characters.
+- Deno 2.1.14 passed the new provider contract 8/8, report 6/6, and the full targeted backend with Telegram 69/69; changed files passed format/check/lint. Local Node 22 frontend typecheck was cancelled after the filesystem stayed asleep without a failure. Main commit `a904632` and raw-output accounting type-boundary follow-up `550ca8b` were pushed to `main`; final authoritative GitHub CI `32552046675` passed in 1m15s with Deno 69/69, backend quality, frontend 28/28 files and 127/127 tests, deploy-env 14/14, audit 0 high/critical, a 3,701-module build, and 10-file security. Staging/production DB, Edge, Netlify, and runtime were unchanged; Netlify was intentionally skipped by `[skip netlify]`.
+
+Remaining: once the key arrives, connect the real CV/scoring/report LLM Router calls to this account-before-validation contract, release the quota lease in `finally`, pass full-flow smoke, and only then remove `501`.
+
+Files: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/provider-contract{,.test}.ts`, `report-generator{,.test}.ts`, and synchronized four-language project documentation.
+
 ## 2026-08-22 — Deterministic HR scoring and evidence-linked reporting completed
 
 - While `ANTHROPIC_API_KEY` remains unavailable, the provider-independent candidate scoring/report domain was implemented. The scorer previously returned zero for every category and the report generator returned empty arrays and summary.

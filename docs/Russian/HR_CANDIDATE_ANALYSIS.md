@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Статус: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX, request/role/plan policy, PostgreSQL leases, bounded multipart, atomic usage accounting, deterministic scoring/evidence report, orchestrator и frontend real/tested. Остаются semantic CV/Sonnet refinement, provider accounting call-sites и full HTTP wiring; canonical endpoint возвращает `501 NOT_IMPLEMENTED`. Текущее состояние: [STATUS.md](STATUS.md).
+> **Статус: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX, request/role/plan policy, PostgreSQL leases, bounded multipart, atomic usage accounting, strict provider-output/account-before-validation, deterministic scoring/evidence report, orchestrator и frontend real/tested. Остаются real semantic CV/Sonnet invocation и full HTTP wiring; canonical endpoint возвращает `501 NOT_IMPLEMENTED`. Текущее состояние: [STATUS.md](STATUS.md).
 
 > **AI Business Concierge — Пакет проектирования модуля `hr_candidate_analysis`**
 > Версия: 1.0 (MVP дизайн) · Дата: 2026-04-29
@@ -326,7 +326,7 @@ Accept-Language: uz | ja | en   (по умолчанию: uz)
 
 ### 6.3 Инструмент 3 — `candidate-scorer.ts`
 
-> Текущая реализация даёт provider-independent rubric, bounded weighted overall/grade и conservative UZ/JA/EN flags только по complete сопоставимым GitHub evidence. Sonnet/Haiku structured refinement остаётся key-dependent слоем.
+> Текущая реализация даёт provider-independent rubric, bounded weighted overall/grade и conservative UZ/JA/EN flags только по complete сопоставимым GitHub evidence. Для Sonnet/Haiku refinement готовы exact JSON/key/value validators и fail-closed wrapper, учитывающий completed receipt до output parsing; live invocation остаётся key-dependent слоем.
 
 ```
 Модель:  Claude Sonnet 4 (глубокий) или Haiku (быстрый)

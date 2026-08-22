@@ -4,6 +4,17 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-22 — HR provider output kontrakti va report schema edge-case'i qotirildi
+
+- `ANTHROPIC_API_KEY`ni kutmasdan real provider chaqiruvining atrofidagi xavfsizlik chegarasi tayyorlandi. Yangi `provider-contract.ts` CV semantic, scoring refinement va report narrative javoblarini faqat exact JSON yoki exact `json` fence sifatida qabul qiladi; root/nested exact-key, Unicode/string/array/numeric/date, role-fit va interview-category coverage limitlarini fail-closed tekshiradi. Raw output yoki private CV qiymati xato envelope/logga chiqarilmaydi.
+- Yakunlangan provider receipt'i output parsing/validatsiyasidan **oldin** atomic usage adapteriga beriladi. Invalid provider output ham token/cost sifatida hisoblanadi; accounting unavailable/throw bo'lsa untracked AI output qaytarilmaydi. Providerning o'zi javob bermasa usage receipt yaratilmaydi. Bu contract real Haiku/Sonnet invocation ulanadigan tayyor boundary; key bo'lmagani uchun live provider call bajarilmadi va route `501`ligicha qoldi.
+- Deterministik reportdagi schema nomuvofiqligi yopildi: barcha kategoriya/repo ballari 70dan past bo'lganda `strengths: []` endi chiqmaydi. Eng yuqori mavjud signal “strong evidence” deb talqin qilinmasdan factual fallback sifatida beriladi; interview question/expected-signal boundlari schema bilan 400 belgiga tenglashtirildi.
+- Deno 2.1.14da yangi provider contract 8/8, report 6/6 va Telegram bilan to'liq targeted backend 69/69 PASS; o'zgargan fayllar format/check/lintdan o'tdi. Frontend Node 22 typecheck lokal filesystem I/O uyqusida qolib, failure bermasdan bekor qilindi. Asosiy `a904632` va raw-output accounting type chegarasini yopgan follow-up `550ca8b` `main`ga push qilindi; final authoritative GitHub CI `32552046675` 1m15sda Deno 69/69, backend quality, frontend 28/28 fayl va 127/127 test, deploy-env 14/14, audit 0 high/critical, 3,701-module build va 10-file security bilan green. Production/staging DB, Edge va Netlify o'zgarmadi; Netlify `[skip netlify]` bilan ataylab skip qilindi.
+
+Qolgan ish: key kelgach LLM Routerdagi real CV/scoring/report chaqiruvlarini shu account-before-validation contractiga ulash. Undan keyin quota lease'ni `finally`da release qilish, active route/full-flow smoke'ni green qilish va `501`ni olib tashlash.
+
+Fayllar: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/provider-contract{,.test}.ts`, `report-generator{,.test}.ts` va 4-tilli `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/HR_CANDIDATE_ANALYSIS`.
+
 ## 2026-08-22 — HR deterministik scoring va evidence-linked report qatlamlari yakunlandi
 
 - `ANTHROPIC_API_KEY`ni kutmasdan candidate scoring/reportning provider-independent domain qismi implementatsiya qilindi. Oldingi scorer barcha kategoriyaga `0`, report generator esa bo'sh array va summary qaytarardi.

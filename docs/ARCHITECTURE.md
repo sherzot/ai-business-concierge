@@ -194,7 +194,7 @@ router.post("/tasks", async (c) => {
 
 ### 3.3 Target pattern: modular service papkasi
 
-`hr-candidate` papkasi kerakli modular strukturani ko'rsatadi. GitHub REST va local PDF/DOCX adapterlari bounded; pure request/role/tariff policy providerdan oldin ishlaydi; service-role-only PostgreSQL RPC quota lease'ni rezervatsiya qiladi va alohida idempotent RPC provider logi bilan token counterni bitta tranzaksiyada yozadi; prompt/CV/output accounting chegarasidan o'tmaydi. Multipart adapter body'ni 5 MiB CV + 64 KiB overhead bilan cheklaydi; orchestrator failure oqimlarini boshqaradi. Deterministik domain policy 6 kategoriya scoring, conservative inconsistency, 3-tilli evidence report va interview savollarini beradi. Semantic CV/Sonnet refinement, accounting call-site va full HTTP route wiring hali partial.
+`hr-candidate` papkasi kerakli modular strukturani ko'rsatadi. GitHub REST va local PDF/DOCX adapterlari bounded; pure request/role/tariff policy providerdan oldin ishlaydi; service-role-only PostgreSQL RPC quota lease'ni rezervatsiya qiladi va alohida idempotent RPC provider logi bilan token counterni bitta tranzaksiyada yozadi; prompt/CV/output accounting chegarasidan o'tmaydi. Completed provider receipt output parsingdan oldin hisoblanadi; accounting unavailable bo'lsa output fail-closed bloklanadi. Exact JSON, exact-key, bounded value va category-coverage validatorlari untrusted semantic/scoring/report outputni domain objectga o'tkazadi. Multipart adapter body'ni 5 MiB CV + 64 KiB overhead bilan cheklaydi; orchestrator failure oqimlarini boshqaradi. Deterministik domain policy 6 kategoriya scoring, conservative inconsistency, 3-tilli evidence report va interview savollarini beradi. Real semantic CV/Sonnet invocation va full HTTP route wiring hali partial.
 
 ```
 services/{domain}/
@@ -396,4 +396,4 @@ it('overdue: done status bo'lsa false', () => {
 
 *ARCHITECTURE.md — AI Business Concierge v1.0*
 *Sana: 2026-05-05*
-*HR Candidate target modular pattern: bounded adapter/request/quota/multipart/orchestrator hamda deterministic scoring/report boundary real; semantic LLM refinement/full HTTP wiring partial scaffold.*
+*HR Candidate target modular pattern: bounded adapter/request/quota/multipart/orchestrator, strict provider contract hamda deterministic scoring/report boundary real; semantic LLM invocation/full HTTP wiring partial scaffold.*

@@ -4,6 +4,17 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — Усилен HR provider-output contract и исправлен edge case report schema
+
+- Без `ANTHROPIC_API_KEY` подготовлена safety boundary вокруг будущих live provider calls. `provider-contract.ts` принимает CV semantic, scoring refinement и report narrative только как exact JSON либо exact `json` fence и fail-closed проверяет exact keys, bounded Unicode strings/arrays/numbers/dates, role-fit policy и coverage категорий interview. Raw output и private CV values не попадают в public errors/logs.
+- Каждый completed provider receipt передаётся atomic usage adapter **до** parsing/validation output. Invalid output всё равно учитывается; unavailable/throw accounting блокирует untracked AI output. Provider failure до response не создаёт receipt. Это готовая boundary для real Haiku/Sonnet invocation; без key live call не выполнялся, route остаётся `501`.
+- Deterministic report теперь соблюдает schema при всех category/repository scores ниже 70: factual highest-available signal не называется strong evidence. Bounds question/expected-signal синхронизированы со schema на 400 characters.
+- Deno 2.1.14: provider contract 8/8, report 6/6, полный targeted backend с Telegram 69/69 PASS; changed files прошли format/check/lint. Local Node 22 frontend typecheck отменён после filesystem sleep без failure. Main commit `a904632` и follow-up type boundary `550ca8b`, исключающий raw output из accounting, отправлены в `main`; final authoritative GitHub CI `32552046675` green за 1m15s: Deno 69/69, backend quality, frontend 28/28 files и 127/127 tests, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files. Staging/production DB, Edge, Netlify и runtime не менялись; Netlify намеренно skipped через `[skip netlify]`.
+
+Осталось: после получения key подключить real CV/scoring/report LLM Router calls к account-before-validation contract, release quota lease в `finally`, выполнить full-flow smoke и только затем убрать `501`.
+
+Файлы: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/provider-contract{,.test}.ts`, `report-generator{,.test}.ts` и синхронная документация на четырёх языках.
+
 ## 2026-08-22 — Завершены детерминированный HR scoring и evidence-linked report
 
 - Пока отсутствует `ANTHROPIC_API_KEY`, реализована provider-independent domain-часть candidate scoring/report. Ранее scorer возвращал нули, а report generator — пустые массивы и summary.

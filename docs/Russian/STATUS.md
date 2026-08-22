@@ -44,6 +44,7 @@
 > 2026-08-22: `f77dd9a` в main, GitHub CI `32545770532` green, Netlify production deploy `6a89065505b5600008dd0385` ready. `/` и `/dashboard/hr/candidates` возвращают `200`; CSP и production-only bundle green. Provider route остаётся `501`.
 > 2026-08-22: HR provider usage/cost accounting atomic/idempotent; staging 40 migrations, remote transactional acceptance и Deno 51/51 green. Prompt/CV/output не сохраняются; production и `501` без изменений.
 > 2026-08-22: Завершены deterministic six-category HR scoring и UZ/JA/EN evidence-linked report fallback. Scoring `5395da1` CI `32547412956` и final `b222cf9` CI `32547588906` green: Deno 60/60 и все quality/frontend/security gates прошли. Semantic provider refinement, accounting call-sites и production `501` без изменений.
+> 2026-08-22: Готовы strict HR provider JSON/bounds и fail-closed account-before-validation boundary; raw output исключён из accounting type boundary, low-evidence report schema edge case исправлен. Final `550ca8b` CI `32552046675` green: Deno 69/69 и все quality/frontend/security gates прошли; live provider/route, staging/production runtime и `501` не изменились.
 > 2026-08-22: `36b9553` в main, GitHub CI `32546561166` green за 1m12s; Netlify skipped, поскольку frontend runtime не менялся.
 
 ## Текущая фаза
@@ -67,7 +68,7 @@
 | Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/month`, `ACTIVE_HEALTHY`; 40 migrations, `bright-api` v11 ACTIVE, health `200`, unauth docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge использует modern overrides `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY`; legacy anon/service-role API keys disabled |
 | Type-check | Успешно в clean temporary frontend install |
-| Unit tests | Frontend 28/28 files, 127/127 tests, HR Candidate frontend 12/12; HR backend GitHub 10 + CV 8 + boundary 5 + quota 7 + multipart 6 + accounting 4 + scorer 4 + report 5 + orchestrator 6 + schema 1 = 56/56; targeted с Telegram 60/60 |
+| Unit tests | Frontend 28/28 files, 127/127 tests, HR Candidate frontend 12/12; HR backend GitHub 10 + CV 8 + boundary 5 + quota 7 + multipart 6 + accounting 4 + provider contract 8 + scorer 4 + report 6 + orchestrator 6 + schema 1 = 65/65; targeted с Telegram 69/69 |
 | Deployment environment guard | 14/14 Node tests: 10 isolation-contract checks + 2 Vite `.env` fallback/runtime-precedence + 2 bundled-endpoint extraction regressions |
 | Production build/security check | Build прошёл с synthetic non-production ref; CSP создан из этого ref; проверено 10 build/Netlify файлов |
 | Production dependency audit | Raw audit: всего 0 vulnerabilities; scoped gate без исключений: high/critical 0 |
@@ -76,7 +77,7 @@
 | Delivery platform | Только Netlify. В repository нет Vercel config/dependency; внешний Vercel project сохранён, `gitRepositoryConnected=false` подтверждён |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs отсутствуют; на Personal только browser-public `VITE_*` используют `All` scope |
 | Staging security advisor | Errors `0`; известный `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | Final main run `32547588906` для `b222cf9` success за 1m06s: Deno 60/60 и backend quality, frontend 28/28 files и 127/127 tests, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files green |
+| Remote GitHub Actions | Final code commit `550ca8b` main run `32552046675` success за 1m15s: Deno 69/69 и backend quality, frontend 28/28 files и 127/127 tests, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files green |
 | Netlify preview | Новый deploy preview не создан, потому что slice pushed напрямую в `main`; Netlify использовал production context |
 | Production frontend | Deploy `6a89065505b5600008dd0385` ready, build `6a89065505b5600008dd0383`, commit `f77dd9a`, 29s, plugin success, 0 secret matches в 87,145 files; `/` и `/dashboard/hr/candidates` `200`, CSP и production-only `index-DipHAHEa.js` green |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
@@ -96,7 +97,7 @@
 | Resend inbox | Partial | Код есть; receiving/delivery E2E не подтверждён |
 | AI Concierge/RAG и cost tracking | Partial | Основа есть; polishing request quota race-safe через PostgreSQL atomic reservation/release, provider usage учитывается до output validation. Остаются rollout migration, citation UX, billing dashboard, unified endpoint enforcement и smoke tests |
 | AI Документолог | Production binary + staged AI polish preview / provider blocked | 15 templates, 4 языка и real PDF/DOCX/private Storage работают. Polishing frontend в production, migration и `bright-api` v11 в staging; Auth/tenant/document boundaries и cleanup green, но real-provider smoke возвращает `503 AI_UNAVAILABLE`, потому что в staging нет `ANTHROPIC_API_KEY`. Production backend/migration rollout намеренно ожидает |
-| HR Candidate Analysis | Partial / provider blocked | Bounded adapters, request/role, PostgreSQL quota, multipart, atomic usage/cost persistence, deterministic scorer, three-locale evidence report, orchestrator и frontend boundary tested; остаются semantic Haiku/Sonnet refinement, provider accounting call-sites, active route и full flow; production `501` |
+| HR Candidate Analysis | Partial / provider blocked | Bounded adapters, request/role, PostgreSQL quota, multipart, atomic usage/cost persistence, strict provider output/account-before-validation, deterministic scorer, three-locale evidence report, orchestrator и frontend boundary tested; остаются real Haiku/Sonnet invocation, active route и full flow; production `501` |
 | Billing / Click / Payme и AI Sales Bot | Planned | Phase 3 |
 
 ## Ближайший порядок
