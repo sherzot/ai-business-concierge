@@ -42,6 +42,7 @@ jobs:
         working-directory: .
         run: |
           deno test \
+            scripts/telegram-webhook-rollout.test.ts \
             supabase/functions/telegram-bot/webhook-security.test.ts \
             supabase/functions/server/services/hr-candidate/github-analyzer.test.ts \
             supabase/functions/server/services/hr-candidate/cv-parser.test.ts \
@@ -63,6 +64,8 @@ jobs:
         working-directory: .
         run: |
           deno fmt --check \
+            scripts/telegram-webhook-rollout.ts \
+            scripts/telegram-webhook-rollout.test.ts \
             supabase/functions/telegram-bot/index.ts \
             supabase/functions/telegram-bot/webhook-security.ts \
             supabase/functions/telegram-bot/webhook-security.test.ts \
@@ -97,6 +100,8 @@ jobs:
             supabase/functions/server/services/hr-candidate/schema.test.ts \
             supabase/functions/server/routes/hr-candidate.ts
           deno check \
+            scripts/telegram-webhook-rollout.ts \
+            scripts/telegram-webhook-rollout.test.ts \
             supabase/functions/telegram-bot/index.ts \
             supabase/functions/server/services/hr-candidate/github-analyzer.test.ts \
             supabase/functions/server/services/hr-candidate/cv-parser.test.ts \
@@ -114,6 +119,8 @@ jobs:
             supabase/functions/server/services/hr-candidate/index.test.ts \
             supabase/functions/server/services/hr-candidate/schema.test.ts
           deno lint \
+            scripts/telegram-webhook-rollout.ts \
+            scripts/telegram-webhook-rollout.test.ts \
             supabase/functions/server/services/hr-candidate/cv-parser.ts \
             supabase/functions/server/services/hr-candidate/cv-parser.test.ts \
             supabase/functions/server/services/hr-candidate/request-boundary.ts \
