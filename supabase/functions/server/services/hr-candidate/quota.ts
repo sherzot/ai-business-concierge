@@ -33,6 +33,18 @@ export type HrQuotaReservationResult =
     policy?: HrRateLimitPolicy;
   };
 
+type HrQuotaReservation = Extract<HrQuotaReservationResult, { ok: true }>;
+type HrQuotaDenial = Extract<HrQuotaReservationResult, { ok: false }>;
+
+export type HrQuotaExecutionResult<T> =
+  | { ok: true; value: T; reservation: HrQuotaReservation }
+  | HrQuotaDenial;
+
+type HrQuotaLifecycleDependencies = {
+  reserve: typeof reserveHrCandidateQuota;
+  release: typeof releaseHrCandidateQuota;
+};
+
 type PlanResolution =
   | { ok: true; policy: HrRateLimitPolicy }
   | { ok: false };
@@ -206,6 +218,48 @@ export async function releaseHrCandidateQuota(
   } catch (error) {
     console.error("hr-candidate quota: lease release failed", error);
     return false;
+  }
+}
+
+/**
+ * Owns the complete concurrency-lease lifecycle around one analysis attempt.
+ * Minute/day counters remain consumed after an accepted reservation, while the
+ * concurrency lease is always released after success or failure. Cleanup must
+ * never replace the original operation result/error; a failed release is safe
+ * because the PostgreSQL lease has a bounded expiry.
+ */
+export async function executeWithHrCandidateQuota<T>(
+  supabase: SupabaseClient,
+  tenantId: string,
+  userId: string,
+  execute: (reservation: HrQuotaReservation) => Promise<T>,
+  overrides: Partial<HrQuotaLifecycleDependencies> = {},
+): Promise<HrQuotaExecutionResult<T>> {
+  const dependencies: HrQuotaLifecycleDependencies = {
+    reserve: reserveHrCandidateQuota,
+    release: releaseHrCandidateQuota,
+    ...overrides,
+  };
+  const reservation = await dependencies.reserve(supabase, tenantId, userId);
+  if (!reservation.ok) return reservation;
+
+  try {
+    return {
+      ok: true,
+      value: await execute(reservation),
+      reservation,
+    };
+  } finally {
+    try {
+      await dependencies.release(
+        supabase,
+        tenantId,
+        userId,
+        reservation.leaseId,
+      );
+    } catch {
+      console.error("hr-candidate quota: lease release failed");
+    }
   }
 }
 

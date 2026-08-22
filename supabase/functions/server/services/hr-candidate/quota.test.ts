@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.49.8";
 import {
+  executeWithHrCandidateQuota,
   releaseHrCandidateQuota,
   reserveHrCandidateQuota,
   resolveHrCandidateQuotaPolicy,
@@ -214,4 +215,173 @@ Deno.test("HR quota releases the exact tenant/user lease", async () => {
       p_lease_id: LEASE_ID,
     },
   }, "release RPC contract");
+});
+
+Deno.test("HR quota lifecycle skips analysis and release when reservation is denied", async () => {
+  const events: string[] = [];
+  const result = await executeWithHrCandidateQuota(
+    client({}),
+    "tenant-1",
+    USER_ID,
+    () => {
+      events.push("execute");
+      return Promise.resolve("not reached");
+    },
+    {
+      reserve: () => {
+        events.push("reserve");
+        return Promise.resolve({
+          ok: false,
+          reason: "minute",
+          retryAfterSeconds: 12,
+        });
+      },
+      release: () => {
+        events.push("release");
+        return Promise.resolve(true);
+      },
+    },
+  );
+
+  assertEquals(events, ["reserve"], "denied lifecycle order");
+  assertEquals(result, {
+    ok: false,
+    reason: "minute",
+    retryAfterSeconds: 12,
+  }, "denial preserved");
+});
+
+Deno.test("HR quota lifecycle releases the exact lease after success", async () => {
+  const events: string[] = [];
+  const releaseArgs: string[] = [];
+  const result = await executeWithHrCandidateQuota(
+    client({}),
+    "tenant-1",
+    USER_ID,
+    (reservation) => {
+      events.push(`execute:${reservation.leaseId}`);
+      return Promise.resolve("analysis-result");
+    },
+    {
+      reserve: () => {
+        events.push("reserve");
+        return Promise.resolve({
+          ok: true,
+          leaseId: LEASE_ID,
+          minuteRemaining: 4,
+          dayRemaining: 19,
+          policy: { concurrent: 2, per_minute: 5, per_day: 20 },
+        });
+      },
+      release: (_supabase, tenantId, userId, leaseId) => {
+        events.push("release");
+        releaseArgs.push(tenantId, userId, leaseId);
+        return Promise.resolve(true);
+      },
+    },
+  );
+
+  assert(result.ok, "successful lifecycle");
+  assertEquals(result.value, "analysis-result", "analysis value");
+  assertEquals(
+    events,
+    ["reserve", `execute:${LEASE_ID}`, "release"],
+    "success lifecycle order",
+  );
+  assertEquals(
+    releaseArgs,
+    ["tenant-1", USER_ID, LEASE_ID],
+    "release identity",
+  );
+});
+
+Deno.test("HR quota lifecycle releases after analysis rejection and preserves the error", async () => {
+  const operationError = new Error("analysis timeout");
+  let releaseCalls = 0;
+  let caught: unknown;
+  try {
+    await executeWithHrCandidateQuota(
+      client({}),
+      "tenant-1",
+      USER_ID,
+      () => Promise.reject(operationError),
+      {
+        reserve: () =>
+          Promise.resolve({
+            ok: true,
+            leaseId: LEASE_ID,
+            minuteRemaining: 4,
+            dayRemaining: 19,
+            policy: { concurrent: 2, per_minute: 5, per_day: 20 },
+          }),
+        release: () => {
+          releaseCalls += 1;
+          return Promise.resolve(true);
+        },
+      },
+    );
+  } catch (error) {
+    caught = error;
+  }
+
+  assertEquals(releaseCalls, 1, "one release after rejection");
+  assert(caught === operationError, "original analysis error preserved");
+});
+
+Deno.test("HR quota lifecycle does not replace success when cleanup is unavailable", async () => {
+  const result = await executeWithHrCandidateQuota(
+    client({}),
+    "tenant-1",
+    USER_ID,
+    () => Promise.resolve(42),
+    {
+      reserve: () =>
+        Promise.resolve({
+          ok: true,
+          leaseId: LEASE_ID,
+          minuteRemaining: 4,
+          dayRemaining: 19,
+          policy: { concurrent: 2, per_minute: 5, per_day: 20 },
+        }),
+      release: () => Promise.resolve(false),
+    },
+  );
+
+  assert(result.ok, "cleanup false must not mask success");
+  assertEquals(result.value, 42, "successful result retained");
+});
+
+Deno.test("HR quota lifecycle does not replace the analysis error when cleanup throws", async () => {
+  const originalError = console.error;
+  console.error = () => {};
+  const operationError = new Error("provider failed");
+  let caught: unknown;
+  try {
+    await executeWithHrCandidateQuota(
+      client({}),
+      "tenant-1",
+      USER_ID,
+      () => Promise.reject(operationError),
+      {
+        reserve: () =>
+          Promise.resolve({
+            ok: true,
+            leaseId: LEASE_ID,
+            minuteRemaining: 4,
+            dayRemaining: 19,
+            policy: { concurrent: 2, per_minute: 5, per_day: 20 },
+          }),
+        release: () => Promise.reject(new Error("database unavailable")),
+      },
+    );
+  } catch (error) {
+    caught = error;
+  } finally {
+    console.error = originalError;
+  }
+
+  assert(
+    caught === operationError,
+    "cleanup error cannot mask operation error",
+  );
 });
