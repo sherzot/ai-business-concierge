@@ -1,6 +1,6 @@
 # AI Business Concierge — faol reja
 
-> Version: 6.9
+> Version: 7.0
 > Yangilandi: 2026-08-22
 > Bu faylda faqat faol va navbatdagi ishlar turadi. 2026-07-24 gacha bo'lgan katta tarixiy reja [archive/PLAN_LEGACY_2026-07-24.md](archive/PLAN_LEGACY_2026-07-24.md)ga ko'chirilgan.
 
@@ -67,7 +67,7 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] Canonical tenant/user context, quota reserve/finally-release, provider composition va analyzer'ni bitta key-independent application execution boundaryda yig'ish; denial/config/provider failure mapping regressiyalarini yozish, route'ni disabled saqlash.
+- [ ] Orchestrator/application ustida documented 30 soniyalik global deadline'ni enforce qilish; sequential CV/scoring/report stage budgetlari va timeout mapping regressiyalarini yozish, route'ni disabled saqlash.
 - [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** staging secretni o'rnatish va authenticated real-provider live smoke qilish.
 - [ ] LLM integrationdan keyin tayyor quota lifecycle boundary bilan active route wiring, `501` removal, full-flow integration va manual acceptance testlarini o'tkazish.
 

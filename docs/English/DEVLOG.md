@@ -4,6 +4,16 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — Key-independent HR application execution boundary completed
+
+- New `application.ts` combines canonical tenant/user/role context, pre-provider request validation, request-scoped provider composition, persistent quota reserve/execute/finally-release, and the analyzer behind one application boundary. One ULID is shared by the public result, provider cache, and atomic usage accounting; role/input denial precedes composition/quota, and missing provider configuration fails closed without consuming quota.
+- Application output separates HTTP status from typed `CandidateAnalysisResult`: role `403`, invalid input `400`, minute/day/concurrency denial `429`, quota infrastructure `503`, GitHub `502`, and timeout `504`; raw DB/provider details never enter the public envelope. Existing quota cleanup remains guaranteed after an accepted execution whether the analyzer succeeds or returns an error. The canonical HTTP route is intentionally not wired and remains `501`.
+- Application 7/7, HR backend 98/98, and targeted Deno with Telegram 102/102 passed; format/check/lint are green. `eac2a3d` was pushed to `main`; GitHub CI `32554187835` passed in 1m14s with Deno 102/102, backend quality, frontend 28/28 files and 127/127 tests, deploy-env 14/14, audit 0 high/critical, a 3,701-module build, and 10-file security. Netlify was skipped; staging/production DB/Edge and the live provider were unchanged.
+
+Remaining: enforce the documented 30-second global analysis deadline over sequential provider-stage budgets; perform staging live smoke after the key arrives; then explicitly activate the route/full flow and remove `501`.
+
+Files: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/application{,.test}.ts`, and synchronized four-language project documentation.
+
 ## 2026-08-22 — HR server provider composition and accounting binding completed
 
 - New `provider-composition.ts` binds a server-only key, service-role client, and canonical tenant/user/request context to injectable provider stages. Cache scope is isolated by tenant+request+stage; completed-response metadata is passed to the existing atomic `record_hr_candidate_ai_usage` RPC closure before strict output parsing. CV text and the API key never enter accounting arguments.

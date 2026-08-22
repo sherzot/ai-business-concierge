@@ -3,7 +3,7 @@
 > Loyiha arxitekturasi, design patternlar va unit testing qoidalari
 > Version: 1.3 | Yangilandi: 2026-08-21
 >
-> Bu hujjat joriy arxitektura chegaralari va target refactoring yo'nalishini birga ko'rsatadi. Runtime holati uchun [STATUS.md](STATUS.md) ustun. `hr-candidate` papkasi partial: GitHub, local PDF/DOCX va private sanitized-text in-memory seam, pure request policy, PostgreSQL quota lease, bounded multipart, tenant/request-scoped server provider/accounting composition, injectable provider-stage orchestration hamda deterministic merge/scoring/report real; application execution, live smoke va full HTTP wiring production-ready emas.
+> Bu hujjat joriy arxitektura chegaralari va target refactoring yo'nalishini birga ko'rsatadi. Runtime holati uchun [STATUS.md](STATUS.md) ustun. `hr-candidate` papkasi partial: GitHub, local PDF/DOCX va private sanitized-text in-memory seam, pure request policy, PostgreSQL quota lease, bounded multipart, tenant/request-scoped server provider/accounting composition, injectable provider-stage orchestration, application execution hamda deterministic merge/scoring/report real; global deadline, live smoke va full HTTP wiring production-ready emas.
 
 ---
 
@@ -396,4 +396,4 @@ it('overdue: done status bo'lsa false', () => {
 
 *ARCHITECTURE.md — AI Business Concierge v1.0*
 *Sana: 2026-05-05*
-*HR Candidate target modular pattern: bounded adapter/request/quota-lifecycle/multipart/orchestrator, private in-memory CV seam, minimized prompt/injectable provider-stage/strict output, server key/accounting composition hamda deterministic merge boundary real; application execution/full HTTP wiring partial scaffold.*
+*HR Candidate target modular pattern: bounded adapter/request/quota-lifecycle/multipart/orchestrator/application, private in-memory CV seam, minimized prompt/injectable provider-stage/strict output, server key/accounting composition hamda deterministic merge boundary real; global deadline/full HTTP wiring partial scaffold.*

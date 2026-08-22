@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-22 — HR application execution boundary keydan mustaqil yakunlandi
+
+- Yangi `application.ts` canonical tenant/user/role context, pre-provider request validation, request-scoped provider composition, persistent quota reserve/execute/finally-release va analyzer'ni bitta application boundaryda yig'di. Bitta ULID public result, provider cache va atomic usage accountingda aynan bir xil ishlatiladi; role/input denial composition va quota'dan oldin, missing provider config esa quota counterini sarflamasdan fail-closed bo'ladi.
+- Application natijasi HTTP status va typed `CandidateAnalysisResult`ni ajratadi: role `403`, invalid input `400`, minute/day/concurrency denial `429`, quota infrastructure `503`, GitHub `502`, timeout `504`; raw DB/provider detail public envelope'ga chiqmaydi. Accepted execution success yoki analyzer error qaytarsa ham mavjud quota lifecycle cleanup'i saqlanadi. Canonical HTTP route ataylab ulanmagan va `501` qolgan.
+- Application 7/7, HR backend 98/98 va Telegram bilan Deno 102/102 PASS; format/check/lint green. `eac2a3d` `main`ga push qilindi; GitHub CI `32554187835` 1m14sda Deno 102/102, backend quality, frontend 28/28 fayl va 127/127 test, deploy-env 14/14, audit 0 high/critical, 3,701-module build va 10-file security bilan green. Netlify skip; staging/production DB/Edge va live provider o'zgarmadi.
+
+Qolgan ish: documented 30 soniyalik global analysis deadline'ni sequential provider stage budgetlari ustidan enforce qilish; key kelgach staging live smoke; keyin explicit route activation/full-flow va `501` removal.
+
+Fayllar: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/application{,.test}.ts` va 4-tilli loyiha hujjatlari.
+
 ## 2026-08-22 — HR server provider composition va accounting binding yakunlandi
 
 - Yangi `provider-composition.ts` server-only key, service-role client va canonical tenant/user/request contextini injectable provider stagesga bog'laydi. Cache scope tenant+request+stage bo'yicha ajratiladi; completed response metadata'si strict output parse'dan oldin mavjud atomic `record_hr_candidate_ai_usage` RPC closure'iga beriladi. CV matni va API key accounting argumentlariga kirmaydi.

@@ -4,6 +4,16 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — Завершён key-independent HR application execution boundary
+
+- Новый `application.ts` объединяет canonical tenant/user/role context, pre-provider request validation, request-scoped provider composition, persistent quota reserve/execute/finally-release и analyzer в одном application boundary. Один ULID используется в public result, provider cache и atomic usage accounting; role/input denial выполняется до composition/quota, missing provider config fail-closed без расходования quota.
+- Application output разделяет HTTP status и typed `CandidateAnalysisResult`: role `403`, invalid input `400`, minute/day/concurrency denial `429`, quota infrastructure `503`, GitHub `502`, timeout `504`; raw DB/provider details не попадают в public envelope. Existing quota cleanup гарантирован после accepted execution при success и analyzer error. Canonical HTTP route намеренно не подключён и остаётся `501`.
+- Application 7/7, HR backend 98/98 и targeted Deno с Telegram 102/102 PASS; format/check/lint green. `eac2a3d` отправлен в `main`; GitHub CI `32554187835` green за 1m14s: Deno 102/102, backend quality, frontend 28/28 files и 127/127 tests, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files. Netlify skipped; staging/production DB/Edge и live provider без изменений.
+
+Осталось: enforce documented 30-second global analysis deadline поверх sequential provider-stage budgets; после key выполнить staging live smoke; затем explicit route/full-flow activation и удалить `501`.
+
+Файлы: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/application{,.test}.ts` и синхронная четырёхъязычная документация.
+
 ## 2026-08-22 — Завершены HR server provider composition и accounting binding
 
 - Новый `provider-composition.ts` связывает server-only key, service-role client и canonical tenant/user/request context с injectable provider stages. Cache scope изолирован по tenant+request+stage; metadata completed response передаётся в существующий atomic RPC `record_hr_candidate_ai_usage` до strict output parsing. CV text и API key не входят в accounting arguments.

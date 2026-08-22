@@ -4,6 +4,16 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-22 — Key-independent HR application execution boundaryを完了
+
+- 新規`application.ts`はcanonical tenant/user/role context、pre-provider request validation、request-scoped provider composition、persistent quota reserve/execute/finally-release、analyzerを1つのapplication boundaryへ統合する。1つのULIDをpublic result、provider cache、atomic usage accountingで共有。Role/input denialはcomposition/quotaより前、missing provider configはquotaを消費せずfail-closed。
+- Application outputはHTTP statusとtyped `CandidateAnalysisResult`を分離。Role `403`、invalid input `400`、minute/day/concurrency denial `429`、quota infrastructure `503`、GitHub `502`、timeout `504`。Raw DB/provider detailsはpublic envelopeへ出ない。Accepted execution後はanalyzer success/errorのどちらでも既存quota cleanupを保証。Canonical HTTP routeは意図的に未接続で`501`のまま。
+- Application 7/7、HR backend 98/98、Telegram込みtargeted Deno 102/102 PASS。Format/check/lint green。`eac2a3d`を`main`へpushし、GitHub CI `32554187835`は1m14sでgreen: Deno 102/102、backend quality、frontend 28/28 files・127/127 tests、deploy-env 14/14、audit high/critical 0、3,701-module build、10-file security。Netlifyはskip、staging/production DB/Edge、live providerは未変更。
+
+残作業: Sequential provider-stage budgetsにdocumented 30-second global analysis deadlineをenforce。Key到着後にstaging live smoke、その後explicit route/full-flow activationと`501`削除。
+
+Files: `.github/workflows/ci.yml`、`supabase/functions/server/services/hr-candidate/application{,.test}.ts`、4言語同期project documentation。
+
 ## 2026-08-22 — HR server provider compositionとaccounting bindingを完了
 
 - 新規`provider-composition.ts`はserver-only key、service-role client、canonical tenant/user/request contextをinjectable provider stagesへ結合する。Cache scopeはtenant+request+stageで分離し、completed response metadataをstrict output parsing前に既存atomic `record_hr_candidate_ai_usage` RPC closureへ渡す。CV textとAPI keyはaccounting argumentsへ入らない。

@@ -1,6 +1,6 @@
 # AI Business Concierge — активный план
 
-> Версия 6.9 · Обновлено 2026-08-22
+> Версия 7.0 · Обновлено 2026-08-22
 > Здесь только активные и следующие задачи. Старый master plan: [../archive/Russian/PLAN_LEGACY_2026-07-24.md](../archive/Russian/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — безопасное начало сессии
@@ -58,7 +58,7 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] Объединить canonical tenant/user context, quota reserve/finally-release, provider composition и analyzer в одном key-independent application execution boundary; покрыть denial/config/provider failure mapping, сохраняя route disabled.
+- [ ] Enforce documented 30-second global deadline поверх orchestrator/application execution; покрыть sequential CV/scoring/report stage budgets и timeout mapping, сохраняя route disabled.
 - [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** установить staging secret и выполнить authenticated real-provider live smoke.
 - [ ] После LLM integration подключить active route через готовую quota lifecycle boundary, убрать `501` и выполнить full-flow integration/manual acceptance.
 

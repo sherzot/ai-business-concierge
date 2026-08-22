@@ -1,6 +1,6 @@
 # AI Business Concierge — Active Plan
 
-> Version 6.9 · 更新 2026-08-22
+> Version 7.0 · 更新 2026-08-22
 > Active/next taskのみを置く。旧master plan: [../archive/日本語/PLAN_LEGACY_2026-07-24.md](../archive/日本語/PLAN_LEGACY_2026-07-24.md)。
 
 ## P0 — 安全なsession開始
@@ -58,7 +58,7 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] Canonical tenant/user context、quota reserve/finally-release、provider composition、analyzerを1つのkey-independent application execution boundaryへ統合。Routeはdisabledのままdenial/config/provider failure mappingをtestする。
+- [ ] Orchestrator/application execution全体へdocumented 30-second global deadlineをenforceし、sequential CV/scoring/report stage budgetsとtimeout mappingをtestする。Routeはdisabledのまま。
 - [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** Staging secretを設定しauthenticated real-provider live smokeを行う。
 - [ ] LLM integration後、準備済みquota lifecycle boundary経由でactive routeを接続し、`501`を削除してfull-flow integration/manual acceptanceを実施。
 
