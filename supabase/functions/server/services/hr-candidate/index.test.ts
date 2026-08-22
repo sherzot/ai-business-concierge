@@ -7,6 +7,7 @@ import type {
 } from "./types.ts";
 import type { ScorerOutput } from "./candidate-scorer.ts";
 import type { ReportOutput } from "./report-generator.ts";
+import type { HrProviderStages } from "./provider-stages.ts";
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
@@ -89,11 +90,15 @@ function dependencies(
     requestId: () => REQUEST_ID,
     now: () => (now += 25),
     fetchGithubSignals: (_input: string) => Promise.resolve(GITHUB),
-    parseCv: (
+    parseCvForAnalysis: (
       _file: Uint8Array,
       _mime: string,
       _filename: string,
-    ) => Promise.resolve(CV),
+    ) =>
+      Promise.resolve({
+        signals: CV,
+        semanticText: "Sanitized candidate CV evidence for semantic analysis.",
+      }),
     scoreCandidate: (
       _signals: RawSignals,
       _jobDescription: string | undefined,
@@ -158,12 +163,14 @@ Deno.test("orchestrator degrades on GitHub failure and continues with CV", async
 Deno.test("orchestrator hard-fails a fulfilled CV result with failed parse status", async () => {
   let scoringCalls = 0;
   const analyze = createCandidateAnalyzer(dependencies({
-    parseCv: () =>
+    parseCvForAnalysis: () =>
       Promise.resolve({
-        ...CV,
-        extracted_text_chars: 0,
-        parse_status: "failed" as const,
-        error_reason: "INVALID_PDF_SIGNATURE",
+        signals: {
+          ...CV,
+          extracted_text_chars: 0,
+          parse_status: "failed" as const,
+          error_reason: "INVALID_PDF_SIGNATURE",
+        },
       }),
     scoreCandidate: () => {
       scoringCalls += 1;
@@ -185,9 +192,9 @@ Deno.test("orchestrator rejects invalid input before all provider work", async (
       calls += 1;
       return Promise.resolve(GITHUB);
     },
-    parseCv: () => {
+    parseCvForAnalysis: () => {
       calls += 1;
-      return Promise.resolve(CV);
+      return Promise.resolve({ signals: CV, semanticText: "private" });
     },
   }));
 
@@ -200,6 +207,118 @@ Deno.test("orchestrator rejects invalid input before all provider work", async (
     "validation code",
   );
   assertEquals(calls, 0, "no provider calls");
+});
+
+Deno.test("orchestrator passes sanitized CV text only through injected provider stages", async () => {
+  const calls: string[] = [];
+  const semanticText = "PRIVATE_SEMANTIC_CV_TEXT";
+  let scoringCvStatus = "";
+  let reportScore = 0;
+  const providerStages: HrProviderStages = {
+    structureCv: (text, locale) => {
+      calls.push(`structure:${locale}`);
+      assertEquals(text, semanticText, "in-memory semantic input");
+      return Promise.resolve({
+        roles: [{
+          title: "Backend Engineer",
+          company: "Example",
+          start: "2022-01",
+          end: null,
+        }],
+        tech_skills: ["PostgreSQL"],
+      });
+    },
+    refineScoring: (signals, _jobDescription, locale, depth) => {
+      calls.push(`score:${locale}:${depth}`);
+      scoringCvStatus = signals.cv.parse_status;
+      return Promise.resolve({
+        category_scores: {
+          tech_depth: 90,
+          project_quality: 82,
+          activity: 74,
+          communication_docs: 80,
+          cv_github_consistency: 88,
+          role_fit: 86,
+        },
+        inconsistency_flags: [],
+      });
+    },
+    refineReport: (_signals, scores, _jobDescription, locale) => {
+      calls.push(`report:${locale}`);
+      reportScore = scores.overall_score;
+      return Promise.resolve({
+        strengths: ["Strong evidence across the supplied sources."],
+        weaknesses: ["Validate system ownership during the interview."],
+        summary:
+          "The bounded evidence supports a structured technical interview.",
+        interview_questions: REPORT.interview_questions,
+      });
+    },
+  };
+  const analyze = createCandidateAnalyzer(dependencies({
+    parseCvForAnalysis: () => Promise.resolve({ signals: CV, semanticText }),
+    providerStages,
+    scoreCandidate: (signals) => {
+      calls.push("baseline-score");
+      assertEquals(signals.cv.parse_status, "complete", "semantic CV merged");
+      return Promise.resolve(SCORES);
+    },
+    generateReport: (_signals, scores) => {
+      calls.push("baseline-report");
+      assert(scores.overall_score !== SCORES.overall_score, "refined score");
+      return Promise.resolve(REPORT);
+    },
+  }));
+
+  const result = await analyze(request());
+
+  assertEquals(result.status, "ok", "provider-refined status");
+  assertEquals(calls, [
+    "structure:en",
+    "baseline-score",
+    "score:en:deep",
+    "baseline-report",
+    "report:en",
+  ], "provider stage order");
+  assertEquals(scoringCvStatus, "complete", "refinement receives merged CV");
+  assertEquals(reportScore, result.result?.overall_score, "report score");
+  assertEquals(
+    result.result?.raw_signals.cv.tech_skills,
+    ["PostgreSQL"],
+    "semantic CV signal merged",
+  );
+  assert(
+    !JSON.stringify(result).includes(semanticText),
+    "private semantic input never enters the result envelope",
+  );
+});
+
+Deno.test("orchestrator fails closed when provider stages lack semantic CV input", async () => {
+  let providerCalls = 0;
+  const providerStages: HrProviderStages = {
+    structureCv: () => {
+      providerCalls += 1;
+      return Promise.resolve({});
+    },
+    refineScoring: () => {
+      providerCalls += 1;
+      return Promise.reject(new Error("unexpected"));
+    },
+    refineReport: () => {
+      providerCalls += 1;
+      return Promise.reject(new Error("unexpected"));
+    },
+  };
+  const analyze = createCandidateAnalyzer(dependencies({
+    parseCvForAnalysis: () => Promise.resolve({ signals: CV }),
+    providerStages,
+  }));
+
+  const result = await analyze(request());
+
+  assertEquals(result.status, "error", "safe error status");
+  assertEquals(result.error?.code, "INTERNAL", "safe public code");
+  assertEquals(providerCalls, 0, "provider not called without semantic input");
 });
 
 Deno.test("orchestrator maps timeout-shaped failures to the public timeout envelope", async () => {

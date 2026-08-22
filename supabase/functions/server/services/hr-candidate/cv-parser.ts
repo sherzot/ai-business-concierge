@@ -1,10 +1,9 @@
 /**
  * CV Parser (Tool 2)
  *
- * Extracts bounded, local-only signals from PDF and DOCX uploads. Raw CV text
- * is neither persisted nor logged here. Anthropic-assisted semantic structuring
- * remains a separate rollout gate and is intentionally not called by this
- * module while its provider credential is unavailable.
+ * Extracts bounded, local-only signals from PDF and DOCX uploads. Sanitized CV
+ * text can be returned through an explicit in-memory analysis seam, but is
+ * never embedded in CvSignals, persisted, or logged by this module.
  */
 
 import type { CvSignals } from "./types.ts";
@@ -183,11 +182,24 @@ const DATE_RANGE_RE = new RegExp(
   "giu",
 );
 
+export type CvAnalysisInput = Readonly<{
+  signals: CvSignals;
+  semanticText?: string;
+}>;
+
 export async function parseCv(
   file: Uint8Array,
   mime: string,
   filename: string,
 ): Promise<CvSignals> {
+  return (await parseCvForAnalysis(file, mime, filename)).signals;
+}
+
+export async function parseCvForAnalysis(
+  file: Uint8Array,
+  mime: string,
+  filename: string,
+): Promise<CvAnalysisInput> {
   if (mime !== PDF_MIME && mime !== DOCX_MIME) {
     throw new Error("UNSUPPORTED_FILE_TYPE");
   }
@@ -203,17 +215,21 @@ export async function parseCv(
       ? await extractPdfText(file)
       : await extractDocxText(file);
   } catch (error) {
-    return failedResult(safeFilename, format, safeErrorReason(error));
+    return {
+      signals: failedResult(safeFilename, format, safeErrorReason(error)),
+    };
   }
 
   const normalised = normalizeExtractedText(rawText);
   if (normalised.length < 200) {
-    return failedResult(
-      safeFilename,
-      format,
-      "INSUFFICIENT_TEXT (possibly scanned PDF; OCR is not supported)",
-      normalised.length,
-    );
+    return {
+      signals: failedResult(
+        safeFilename,
+        format,
+        "INSUFFICIENT_TEXT (possibly scanned PDF; OCR is not supported)",
+        normalised.length,
+      ),
+    };
   }
 
   const safeText = sanitizeCvText(normalised);
@@ -224,16 +240,19 @@ export async function parseCv(
   const experienceYears = totalExperienceYears(dateRanges);
 
   return {
-    filename: safeFilename,
-    format,
-    extracted_text_chars: safeText.length,
-    experience_years_total: experienceYears ?? undefined,
-    tech_skills: techSkills.length > 0 ? techSkills : undefined,
-    languages: languages.length > 0 ? languages : undefined,
-    // Local extraction is useful but semantic roles/education still require
-    // the separately gated structured-output step.
-    parse_status: "partial",
-    error_reason: "SEMANTIC_STRUCTURING_PENDING",
+    signals: {
+      filename: safeFilename,
+      format,
+      extracted_text_chars: safeText.length,
+      experience_years_total: experienceYears ?? undefined,
+      tech_skills: techSkills.length > 0 ? techSkills : undefined,
+      languages: languages.length > 0 ? languages : undefined,
+      // Local extraction is useful but semantic roles/education still require
+      // the separately injected structured-output step.
+      parse_status: "partial",
+      error_reason: "SEMANTIC_STRUCTURING_PENDING",
+    },
+    semanticText: safeText,
   };
 }
 

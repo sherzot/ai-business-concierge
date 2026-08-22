@@ -3,16 +3,17 @@
  *
  * Status: PARTIAL. Provider-independent orchestration is implemented and
  * tested; deterministic scoring and evidence-linked reporting are implemented.
- * Semantic refinement and provider usage call-site wiring remain. Atomic
- * usage persistence is implemented separately.
+ * Injectable provider stages can refine all three phases while sanitized CV
+ * text remains in-memory and outside the public result envelope.
  *
  * Responsibilities:
  *   1. Validate and normalize input before provider calls
  *   2. Run github_analyzer + cv_parser in parallel (Promise.allSettled, hard timeouts)
  *   3. Hard-fail if CV parse failed (no scoring possible without CV)
- *   4. Run candidate_scorer (12s timeout; retry remains gated with LLM work)
- *   5. Run report_generator (14s timeout)
- *   6. Assemble CandidateAnalysisResult (provider receipts wire in with LLMs)
+ *   4. Optionally structure the CV through an injected provider stage
+ *   5. Run deterministic scoring and optional provider refinement
+ *   6. Run deterministic report generation and optional provider refinement
+ *   7. Assemble CandidateAnalysisResult without private semantic text
  *
  * SLA: total ≤ 25 s p50, hard timeout 30 s.
  * No persistence (MVP) — only in-memory.
@@ -27,16 +28,23 @@ import type {
 } from "./types.ts";
 import type { ScorerOutput } from "./candidate-scorer.ts";
 import type { ReportOutput } from "./report-generator.ts";
+import type { HrProviderStages } from "./provider-stages.ts";
 
 import { fetchGithubSignals } from "./github-analyzer.ts";
-import { parseCv } from "./cv-parser.ts";
+import { parseCvForAnalysis } from "./cv-parser.ts";
 import { scoreCandidate } from "./candidate-scorer.ts";
 import { generateReport } from "./report-generator.ts";
+import {
+  finalizeReportNarrative,
+  finalizeScoringRefinement,
+  mergeCvSemanticOutput,
+} from "./provider-stages.ts";
 import { validateAnalyzeRequest } from "./request-boundary.ts";
 
 type CandidateAnalyzerDependencies = {
   fetchGithubSignals: typeof fetchGithubSignals;
-  parseCv: typeof parseCv;
+  parseCvForAnalysis: typeof parseCvForAnalysis;
+  providerStages?: HrProviderStages;
   scoreCandidate: (
     signals: RawSignals,
     jobDescription: string | undefined,
@@ -62,7 +70,7 @@ export function createCandidateAnalyzer(
 ): (input: unknown) => Promise<CandidateAnalysisResult> {
   const dependencies: CandidateAnalyzerDependencies = {
     fetchGithubSignals,
-    parseCv,
+    parseCvForAnalysis,
     scoreCandidate,
     generateReport,
     now: Date.now,
@@ -96,7 +104,7 @@ export function createCandidateAnalyzer(
           "GITHUB_UNAVAILABLE",
         ),
         withTimeout(
-          dependencies.parseCv(
+          dependencies.parseCvForAnalysis(
             parsed.cv_file,
             parsed.cv_mime,
             parsed.cv_filename,
@@ -109,7 +117,7 @@ export function createCandidateAnalyzer(
       // CV is required — bail if it failed
       if (
         cvResult.status === "rejected" ||
-        cvResult.value.parse_status === "failed"
+        cvResult.value.signals.parse_status === "failed"
       ) {
         return errorResult(requestId, startedAt, parsed.locale, {
           code: "CV_PARSE_FAILED",
@@ -123,19 +131,35 @@ export function createCandidateAnalyzer(
         }, dependencies.now);
       }
 
+      let cvSignals = cvResult.value.signals;
+      if (dependencies.providerStages) {
+        if (!cvResult.value.semanticText) {
+          throw new Error("CV_SEMANTIC_INPUT_UNAVAILABLE");
+        }
+        const semantic = await withTimeout(
+          dependencies.providerStages.structureCv(
+            cvResult.value.semanticText,
+            parsed.locale,
+          ),
+          10_000,
+          "INTERNAL",
+        );
+        cvSignals = mergeCvSemanticOutput(cvSignals, semantic);
+      }
+
       const signals: RawSignals = {
         github: githubResult.status === "fulfilled" ? githubResult.value : {
           fetch_status: "failed",
           error_reason: safeProviderFailureReason(githubResult.reason),
         },
-        cv: cvResult.value,
+        cv: cvSignals,
       };
 
       // -----------------------------------------------------------------------
       // Phase 2 — Scoring (Sonnet/Haiku based on analysis_depth)
       // -----------------------------------------------------------------------
       // TODO: retry with exponential backoff (3 attempts, base 500ms)
-      const scores = await withTimeout(
+      const baselineScores = await withTimeout(
         dependencies.scoreCandidate(
           signals,
           parsed.job_description,
@@ -145,11 +169,26 @@ export function createCandidateAnalyzer(
         12_000,
         "INTERNAL",
       );
+      const scores = dependencies.providerStages
+        ? finalizeScoringRefinement(
+          baselineScores,
+          await withTimeout(
+            dependencies.providerStages.refineScoring(
+              signals,
+              parsed.job_description,
+              parsed.locale,
+              parsed.analysis_depth,
+            ),
+            12_000,
+            "INTERNAL",
+          ),
+        )
+        : baselineScores;
 
       // -----------------------------------------------------------------------
       // Phase 3 — Report generation (always Sonnet, locale-aware)
       // -----------------------------------------------------------------------
-      const report = await withTimeout(
+      const baselineReport = await withTimeout(
         dependencies.generateReport(
           signals,
           scores,
@@ -159,6 +198,22 @@ export function createCandidateAnalyzer(
         14_000,
         "INTERNAL",
       );
+      const report = dependencies.providerStages
+        ? finalizeReportNarrative(
+          scores,
+          await withTimeout(
+            dependencies.providerStages.refineReport(
+              signals,
+              scores,
+              parsed.job_description,
+              parsed.locale,
+            ),
+            14_000,
+            "INTERNAL",
+          ),
+          parsed.locale,
+        )
+        : baselineReport;
 
       // -----------------------------------------------------------------------
       // Phase 4 — Assemble payload
@@ -173,9 +228,6 @@ export function createCandidateAnalyzer(
         ? "degraded"
         : "ok";
       const duration = Math.max(0, dependencies.now() - startedAt);
-
-      // Provider implementations must call recordHrProviderUsage immediately
-      // after every completed LLM response, before output validation.
 
       return {
         request_id: requestId,
