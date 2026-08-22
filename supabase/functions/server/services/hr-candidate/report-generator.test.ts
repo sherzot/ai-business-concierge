@@ -183,3 +183,41 @@ Deno.test("incomplete GitHub data is described as an evidence gap, not invented 
   );
   assert(result.summary.includes("failed"), "source status retained");
 });
+
+Deno.test("low evidence still satisfies the report schema without inventing a strength", async () => {
+  const lowScores: ScorerOutput = {
+    overall_score: 20,
+    grade: "F",
+    category_scores: {
+      tech_depth: 20,
+      project_quality: 15,
+      activity: 10,
+      communication_docs: 25,
+      cv_github_consistency: 5,
+      role_fit: null,
+    },
+    inconsistency_flags: [],
+  };
+  const result = await generateReport(
+    {
+      ...SIGNALS,
+      github: { fetch_status: "complete", pinned_repos: [] },
+    },
+    lowScores,
+    undefined,
+    "en",
+  );
+
+  assertEquals(result.strengths.length, 1, "schema-required strength count");
+  assert(
+    result.strengths[0].includes("highest available evidence signal") &&
+      result.strengths[0].includes("not presented as strong evidence"),
+    "factual low-evidence fallback",
+  );
+  assert(
+    result.interview_questions.every((item) =>
+      item.question.length <= 400 && item.expected_signal.length <= 400
+    ),
+    "question schema bounds",
+  );
+});

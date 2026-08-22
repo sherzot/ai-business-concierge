@@ -119,9 +119,10 @@ function buildStrengths(
   scores: ScorerOutput,
   locale: Locale,
 ): string[] {
-  const strengths = categoryEntries(scores)
+  const rankedCategories = categoryEntries(scores)
+    .sort((left, right) => right[1] - left[1]);
+  const strengths = rankedCategories
     .filter(([, value]) => value >= 70)
-    .sort((left, right) => right[1] - left[1])
     .slice(0, 3)
     .map(([category, value]) =>
       localizedCategoryEvidence(locale, "strength", category, value)
@@ -134,6 +135,15 @@ function buildStrengths(
     )[0];
   if (bestRepo && score(bestRepo.quality_score) >= 70) {
     strengths.push(repoEvidence(locale, bestRepo.name, bestRepo.quality_score));
+  }
+  if (strengths.length === 0 && rankedCategories[0]) {
+    strengths.push(
+      highestAvailableEvidence(
+        locale,
+        rankedCategories[0][0],
+        rankedCategories[0][1],
+      ),
+    );
   }
   return unique(strengths).slice(0, 6);
 }
@@ -365,8 +375,8 @@ function question(
   const [prompt, expectedSignal] = templates[locale][kind];
   return {
     category,
-    question: boundedText(prompt, 500),
-    expected_signal: boundedText(expectedSignal, 500),
+    question: boundedText(prompt, 400),
+    expected_signal: boundedText(expectedSignal, 400),
     linked_evidence: boundedText(linkedEvidence, 200),
   };
 }
@@ -416,6 +426,22 @@ function repoEvidence(
     uz: `${name} public repositorysi ${quality}/100 sifat signalini ko'rsatdi.`,
     ja: `公開リポジトリ ${name} の品質シグナルは ${quality}/100 です。`,
     en: `Public repository ${name} produced a ${quality}/100 quality signal.`,
+  });
+}
+
+function highestAvailableEvidence(
+  locale: Locale,
+  category: CategoryKey,
+  value: number,
+): string {
+  const label = CATEGORY_LABELS[locale][category];
+  return localized(locale, {
+    uz:
+      `Eng yuqori mavjud dalil signali — ${label}: ${value}/100; bu kuchli dalil sifatida talqin qilinmaydi.`,
+    ja:
+      `利用可能な根拠で最も高いシグナルは${label}の ${value}/100 です。強い根拠とは解釈しません。`,
+    en:
+      `The highest available evidence signal is ${label}: ${value}/100; it is not presented as strong evidence.`,
   });
 }
 
