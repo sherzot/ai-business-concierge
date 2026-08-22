@@ -27,6 +27,8 @@ import {
   validateAnalyzeRequest,
 } from "./request-boundary.ts";
 
+const DEFAULT_ANALYSIS_TIMEOUT_MS = 30_000;
+
 type HttpStatus = 200 | 400 | 403 | 404 | 429 | 500 | 502 | 503 | 504;
 
 export type HrCandidateApplicationResult = {
@@ -58,6 +60,7 @@ export type ExecuteAnalysisQuota = (
 export type HrCandidateApplicationDependencies = {
   requestId: () => string;
   now: () => number;
+  analysisTimeoutMs: number;
   composeStages: typeof composeHrProviderStages;
   createAnalyzer: typeof createCandidateAnalyzer;
   executeQuota: ExecuteAnalysisQuota;
@@ -70,6 +73,7 @@ export async function executeHrCandidateAnalysis(
   const dependencies: HrCandidateApplicationDependencies = {
     requestId: createUlid,
     now: Date.now,
+    analysisTimeoutMs: DEFAULT_ANALYSIS_TIMEOUT_MS,
     composeStages: composeHrProviderStages,
     createAnalyzer: createCandidateAnalyzer,
     executeQuota: (supabase, tenantId, userId, execute) =>
@@ -142,13 +146,26 @@ export async function executeHrCandidateAnalysis(
 
   let execution: HrQuotaExecutionResult<CandidateAnalysisResult>;
   try {
-    execution = await dependencies.executeQuota(
-      input.supabase,
-      input.tenantId,
-      input.userId,
-      () => analyze(validation.value),
+    execution = await withApplicationDeadline(
+      dependencies.executeQuota(
+        input.supabase,
+        input.tenantId,
+        input.userId,
+        () => analyze(validation.value),
+      ),
+      dependencies.analysisTimeoutMs,
     );
-  } catch {
+  } catch (error) {
+    if (error instanceof HrApplicationDeadlineError) {
+      return errorApplicationResult(
+        504,
+        requestId,
+        startedAt,
+        validation.value.locale,
+        timeoutEnvelope(),
+        dependencies.now,
+      );
+    }
     return errorApplicationResult(
       503,
       requestId,
@@ -181,6 +198,38 @@ export async function executeHrCandidateAnalysis(
       dayRemaining: execution.reservation.dayRemaining,
     },
   };
+}
+
+class HrApplicationDeadlineError extends Error {
+  constructor() {
+    super("HR_ANALYSIS_DEADLINE_EXCEEDED");
+    this.name = "HrApplicationDeadlineError";
+  }
+}
+
+async function withApplicationDeadline<T>(
+  operation: Promise<T>,
+  timeoutMs: number,
+): Promise<T> {
+  const boundedTimeout = Number.isFinite(timeoutMs)
+    ? Math.max(1, Math.min(Math.trunc(timeoutMs), 30_000))
+    : DEFAULT_ANALYSIS_TIMEOUT_MS;
+  return await new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new HrApplicationDeadlineError()),
+      boundedTimeout,
+    );
+    operation.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
 }
 
 function errorApplicationResult(
@@ -248,6 +297,15 @@ function errorEnvelope(
     default:
       return errorEnvelope("INTERNAL", "internal");
   }
+}
+
+function timeoutEnvelope(): ErrorEnvelope {
+  return {
+    code: "TIMEOUT",
+    message_uz: "Tahlil 30 soniyalik limitdan oshdi. Qayta urinib ko'ring.",
+    message_ja: "分析が30秒の上限を超えました。もう一度お試しください。",
+    message_en: "The analysis exceeded the 30-second limit. Please try again.",
+  };
 }
 
 function httpStatusForAnalysis(result: CandidateAnalysisResult): HttpStatus {

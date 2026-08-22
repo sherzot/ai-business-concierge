@@ -85,6 +85,7 @@ function baseDependencies(
   return {
     requestId: () => REQUEST_ID,
     now: () => (now += 10),
+    analysisTimeoutMs: 30_000,
     composeStages: () => {
       calls.push("compose");
       return {} as never;
@@ -264,4 +265,27 @@ Deno.test("HR application maps analyzer timeout while preserving quota cleanup",
   assertEquals(result.httpStatus, 504, "timeout HTTP status");
   assertEquals(result.body.locale, "ja", "analysis locale");
   assertEquals(calls.at(-1), "release", "lease cleanup completed");
+});
+
+Deno.test("HR application enforces a global deadline and lets quota cleanup finish", async () => {
+  const calls: string[] = [];
+  let finishAnalysis: ((value: CandidateAnalysisResult) => void) | undefined;
+  const dependencies = baseDependencies(calls);
+  dependencies.analysisTimeoutMs = 5;
+  dependencies.createAnalyzer = () => () =>
+    new Promise<CandidateAnalysisResult>((resolve) => {
+      calls.push("analyze-pending");
+      finishAnalysis = resolve;
+    });
+
+  const result = await executeHrCandidateAnalysis(INPUT, dependencies);
+
+  assertEquals(result.httpStatus, 504, "global deadline status");
+  assertEquals(result.body.error?.code, "TIMEOUT", "global timeout code");
+  assert(!calls.includes("release"), "active operation not released early");
+  assert(finishAnalysis !== undefined, "analysis resolver captured");
+
+  finishAnalysis(SUCCESS);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assertEquals(calls.at(-1), "release", "background cleanup completed");
 });
