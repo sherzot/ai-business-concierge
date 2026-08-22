@@ -8,6 +8,7 @@ import type {
 import type { ScorerOutput } from "./candidate-scorer.ts";
 import type { ReportOutput } from "./report-generator.ts";
 import type { HrProviderStages } from "./provider-stages.ts";
+import { HrProviderContractError } from "./provider-contract.ts";
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
@@ -319,6 +320,30 @@ Deno.test("orchestrator fails closed when provider stages lack semantic CV input
   assertEquals(result.status, "error", "safe error status");
   assertEquals(result.error?.code, "INTERNAL", "safe public code");
   assertEquals(providerCalls, 0, "provider not called without semantic input");
+});
+
+Deno.test("orchestrator maps provider contract failure to AI unavailable", async () => {
+  const providerStages: HrProviderStages = {
+    structureCv: () =>
+      Promise.reject(
+        new HrProviderContractError(
+          "USAGE_ACCOUNTING_UNAVAILABLE",
+          "cv_semantic",
+        ),
+      ),
+    refineScoring: () => Promise.reject(new Error("unexpected")),
+    refineReport: () => Promise.reject(new Error("unexpected")),
+  };
+  const analyze = createCandidateAnalyzer(dependencies({ providerStages }));
+
+  const result = await analyze(request());
+
+  assertEquals(result.status, "error", "provider error status");
+  assertEquals(result.error?.code, "AI_UNAVAILABLE", "typed provider code");
+  assert(
+    !JSON.stringify(result).includes("USAGE_ACCOUNTING_UNAVAILABLE"),
+    "internal provider detail hidden",
+  );
 });
 
 Deno.test("orchestrator maps timeout-shaped failures to the public timeout envelope", async () => {

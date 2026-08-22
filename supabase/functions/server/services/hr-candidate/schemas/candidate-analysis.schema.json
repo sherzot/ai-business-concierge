@@ -340,6 +340,7 @@
             "FORBIDDEN_ROLE",
             "RATE_LIMITED",
             "RATE_LIMIT_UNAVAILABLE",
+            "AI_UNAVAILABLE",
             "NOT_IMPLEMENTED",
             "TIMEOUT",
             "INTERNAL"

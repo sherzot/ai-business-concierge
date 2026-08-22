@@ -509,6 +509,7 @@ export const translations: Record<Locale, Dictionary> = {
     "hr.candidates.errors.REQUEST_FAILED": "So'rov bajarilmadi. Birozdan keyin qayta urinib ko'ring.",
     "hr.candidates.errors.INVALID_RESPONSE": "Server yaroqsiz javob qaytardi. Birozdan keyin qayta urinib ko'ring.",
     "hr.candidates.errors.INTERNAL": "Ichki xato yuz berdi. Birozdan keyin qayta urinib ko'ring.",
+    "hr.candidates.errors.AI_UNAVAILABLE": "AI tahlil vaqtincha ishlamayapti. Birozdan keyin qayta urinib ko'ring.",
 
     "dashboard.role.greeting": "Salom, {name}!",
     "dashboard.role.quickActions": "Tezkor harakatlar",
@@ -1111,6 +1112,7 @@ export const translations: Record<Locale, Dictionary> = {
     "hr.candidates.errors.REQUEST_FAILED": "Не удалось выполнить запрос. Повторите попытку позже.",
     "hr.candidates.errors.INVALID_RESPONSE": "Сервер вернул некорректный ответ. Повторите попытку позже.",
     "hr.candidates.errors.INTERNAL": "Произошла внутренняя ошибка. Повторите попытку позже.",
+    "hr.candidates.errors.AI_UNAVAILABLE": "AI-анализ временно недоступен. Повторите попытку позже.",
 
     "dashboard.role.greeting": "Здравствуйте, {name}!",
     "dashboard.role.quickActions": "Быстрые действия",
@@ -1713,6 +1715,7 @@ export const translations: Record<Locale, Dictionary> = {
     "hr.candidates.errors.REQUEST_FAILED": "The request could not be completed. Please retry later.",
     "hr.candidates.errors.INVALID_RESPONSE": "The server returned an invalid response. Please retry later.",
     "hr.candidates.errors.INTERNAL": "An internal error occurred. Please retry later.",
+    "hr.candidates.errors.AI_UNAVAILABLE": "AI analysis is temporarily unavailable. Please retry later.",
 
     "dashboard.role.greeting": "Hello, {name}!",
     "dashboard.role.quickActions": "Quick actions",
@@ -2315,6 +2318,7 @@ export const translations: Record<Locale, Dictionary> = {
     "hr.candidates.errors.REQUEST_FAILED": "リクエストを完了できませんでした。しばらくしてから再試行してください。",
     "hr.candidates.errors.INVALID_RESPONSE": "サーバーから無効な応答が返されました。しばらくしてから再試行してください。",
     "hr.candidates.errors.INTERNAL": "内部エラーが発生しました。しばらくしてから再試行してください。",
+    "hr.candidates.errors.AI_UNAVAILABLE": "AI分析は一時的に利用できません。しばらくしてから再試行してください。",
 
     "dashboard.role.greeting": "こんにちは、{name}さん！",
     "dashboard.role.quickActions": "クイックアクション",

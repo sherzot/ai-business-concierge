@@ -25,6 +25,7 @@ export type ErrorCode =
   | "FORBIDDEN_ROLE"
   | "RATE_LIMITED"
   | "RATE_LIMIT_UNAVAILABLE"
+  | "AI_UNAVAILABLE"
   | "NOT_IMPLEMENTED"
   | "TIMEOUT"
   | "INTERNAL";
@@ -34,9 +35,11 @@ export type ErrorCode =
 // ---------------------------------------------------------------------------
 
 export type AnalyzeRequest = {
-  github_input: string;          // username or full GitHub URL
-  cv_file: Uint8Array;           // raw bytes
-  cv_mime: "application/pdf" | "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  github_input: string; // username or full GitHub URL
+  cv_file: Uint8Array; // raw bytes
+  cv_mime:
+    | "application/pdf"
+    | "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
   cv_filename: string;
   job_description?: string;
   locale: Locale;
@@ -57,7 +60,7 @@ export type CandidateAnalysisResult = {
 };
 
 export type CandidateAnalysisPayload = {
-  overall_score: number;       // 0–100
+  overall_score: number; // 0–100
   grade: "A+" | "A" | "B+" | "B" | "C+" | "C" | "D" | "F";
   category_scores: CategoryScores;
   strengths: string[];
@@ -75,17 +78,30 @@ export type CategoryScores = {
   activity: number;
   communication_docs: number;
   cv_github_consistency: number;
-  role_fit: number | null;     // null when no job_description provided
+  role_fit: number | null; // null when no job_description provided
 };
 
 export type InconsistencyFlag = {
-  type: "stack_mismatch" | "experience_gap" | "title_inflation" | "education_unverified" | "timeline_conflict" | "other";
+  type:
+    | "stack_mismatch"
+    | "experience_gap"
+    | "title_inflation"
+    | "education_unverified"
+    | "timeline_conflict"
+    | "other";
   severity: "low" | "medium" | "high";
   explanation: string;
 };
 
 export type InterviewQuestion = {
-  category: "tech_depth" | "project_quality" | "activity" | "communication_docs" | "consistency" | "role_fit" | "behavioral";
+  category:
+    | "tech_depth"
+    | "project_quality"
+    | "activity"
+    | "communication_docs"
+    | "consistency"
+    | "role_fit"
+    | "behavioral";
   question: string;
   expected_signal: string;
   linked_evidence?: string;
@@ -93,7 +109,7 @@ export type InterviewQuestion = {
 
 export type HiringRecommendation = {
   decision: "strong_hire" | "interview" | "borderline" | "do_not_proceed";
-  confidence: number;          // 0–1
+  confidence: number; // 0–1
   rationale: string;
 };
 
@@ -141,7 +157,7 @@ export type PinnedRepo = {
   has_ci: boolean;
   last_commit_at: string | null;
   is_fork: boolean;
-  quality_score: number;       // 0–100
+  quality_score: number; // 0–100
   description?: string | null;
 };
 
@@ -161,8 +177,8 @@ export type CvSignals = {
 export type CvRole = {
   title: string;
   company: string;
-  start: string;               // YYYY-MM
-  end?: string | null;         // YYYY-MM | null = current
+  start: string; // YYYY-MM
+  end?: string | null; // YYYY-MM | null = current
   duration_months?: number;
 };
 

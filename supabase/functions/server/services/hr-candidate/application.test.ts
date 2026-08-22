@@ -182,7 +182,7 @@ Deno.test("HR application rejects unavailable provider configuration before quot
   const result = await executeHrCandidateAnalysis(INPUT, dependencies);
 
   assertEquals(result.httpStatus, 503, "configuration HTTP status");
-  assertEquals(result.body.error?.code, "INTERNAL", "safe public code");
+  assertEquals(result.body.error?.code, "AI_UNAVAILABLE", "safe public code");
   assertEquals(calls, ["compose"], "quota not consumed");
 });
 
@@ -264,6 +264,30 @@ Deno.test("HR application maps analyzer timeout while preserving quota cleanup",
 
   assertEquals(result.httpStatus, 504, "timeout HTTP status");
   assertEquals(result.body.locale, "ja", "analysis locale");
+  assertEquals(calls.at(-1), "release", "lease cleanup completed");
+});
+
+Deno.test("HR application maps analyzer provider failure to 503", async () => {
+  const calls: string[] = [];
+  const unavailable: CandidateAnalysisResult = {
+    request_id: REQUEST_ID,
+    status: "error",
+    duration_ms: 100,
+    locale: "en",
+    error: {
+      code: "AI_UNAVAILABLE",
+      message_uz: "AI tahlil vaqtincha ishlamayapti.",
+      message_ja: "AI分析は一時的に利用できません。",
+      message_en: "AI analysis is temporarily unavailable.",
+    },
+  };
+  const result = await executeHrCandidateAnalysis(
+    INPUT,
+    baseDependencies(calls, unavailable),
+  );
+
+  assertEquals(result.httpStatus, 503, "provider HTTP status");
+  assertEquals(result.body.error?.code, "AI_UNAVAILABLE", "provider code");
   assertEquals(calls.at(-1), "release", "lease cleanup completed");
 });
 

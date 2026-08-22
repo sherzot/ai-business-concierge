@@ -29,6 +29,8 @@ import type {
 import type { ScorerOutput } from "./candidate-scorer.ts";
 import type { ReportOutput } from "./report-generator.ts";
 import type { HrProviderStages } from "./provider-stages.ts";
+import { HrProviderContractError } from "./provider-contract.ts";
+import { HrProviderConfigurationError } from "./provider-stages.ts";
 
 import { fetchGithubSignals } from "./github-analyzer.ts";
 import { parseCvForAnalysis } from "./cv-parser.ts";
@@ -304,6 +306,17 @@ function errorResult(
 }
 
 function normalizeError(err: unknown): ErrorEnvelope {
+  if (
+    err instanceof HrProviderContractError ||
+    err instanceof HrProviderConfigurationError
+  ) {
+    return {
+      code: "AI_UNAVAILABLE",
+      message_uz: "AI tahlil vaqtincha ishlamayapti.",
+      message_ja: "AI分析は一時的に利用できません。",
+      message_en: "AI analysis is temporarily unavailable.",
+    };
+  }
   const message = err instanceof Error ? err.message : String(err);
   if (message.startsWith("TIMEOUT:")) {
     return {

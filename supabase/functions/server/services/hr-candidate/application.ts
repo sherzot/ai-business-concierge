@@ -137,7 +137,7 @@ export async function executeHrCandidateAnalysis(
       startedAt,
       validation.value.locale,
       errorEnvelope(
-        "INTERNAL",
+        configurationUnavailable ? "AI_UNAVAILABLE" : "INTERNAL",
         configurationUnavailable ? "provider_unavailable" : "internal",
       ),
       dependencies.now,
@@ -326,6 +326,7 @@ function httpStatusForAnalysis(result: CandidateAnalysisResult): HttpStatus {
     case "GITHUB_UNAVAILABLE":
       return 502;
     case "RATE_LIMIT_UNAVAILABLE":
+    case "AI_UNAVAILABLE":
       return 503;
     case "TIMEOUT":
       return 504;
