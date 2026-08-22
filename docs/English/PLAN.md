@@ -1,6 +1,6 @@
 # AI Business Concierge — active plan
 
-> Version 6.6 · Updated 2026-08-22
+> Version 6.7 · Updated 2026-08-22
 > Only active and next work belongs here. The previous master plan is archived at [../archive/English/PLAN_LEGACY_2026-07-24.md](../archive/English/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — safe session start
@@ -58,7 +58,7 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** connect and live-smoke real CV semantic structuring and Sonnet scoring/report LLM Router calls through the prepared minimized/injection-resistant prompt -> account-before-validation -> strict-output pipeline.
+- [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** pass sanitized raw CV input through the in-memory orchestrator seam into the prepared provider-stage pipeline, wire the server composition root with key/accounting closures, and perform a real staging live smoke.
 - [ ] After LLM integration, wire the active route through the prepared quota lifecycle boundary, remove `501`, and run full-flow integration/manual acceptance.
 
 ## Later phases

@@ -3,7 +3,7 @@
 > Архитектура проекта, паттерны проектирования и правила unit-тестирования
 > Версия: 1.3 | Обновлено: 2026-08-21
 >
-> Текущий runtime-статус находится в [STATUS.md](STATUS.md). `hr-candidate` partial: bounded adapters, request policy, PostgreSQL quota/finally-release, minimized escaped-data prompts, atomic/idempotent metadata-only usage accounting, strict provider output/account-before-validation, multipart, deterministic scoring/report, orchestrator и frontend boundaries real; live semantic LLM invocation и full HTTP wiring не production-ready.
+> Текущий runtime-статус находится в [STATUS.md](STATUS.md). `hr-candidate` partial: bounded adapters, request policy, PostgreSQL quota/finally-release, multipart, minimized prompts, injectable provider-stage boundary с model/budget/cache selection, metadata accounting до exact output validation и deterministic merge/scoring/report real. Configuration принадлежит composition root; raw CV in-memory seam, key wiring, live smoke и full route остаются partial.
 
 ---
 
@@ -252,4 +252,4 @@ features/tasks/__tests__/
 ---
 
 *ARCHITECTURE.md — AI Business Concierge v1.0 · 2026-05-05*
-*HR Candidate — target modular pattern: bounded adapter/request/quota-lifecycle/multipart/orchestrator, minimized prompt/strict provider contracts и deterministic scoring/report boundaries real; semantic LLM invocation/full HTTP wiring остаётся partial scaffold.*
+*HR Candidate — target modular pattern: bounded adapter/request/quota-lifecycle/multipart/orchestrator, minimized prompt/injectable provider-stage/strict output и deterministic merge boundaries real; key composition/full HTTP wiring остаётся partial scaffold.*

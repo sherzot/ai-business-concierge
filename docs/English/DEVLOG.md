@@ -4,6 +4,17 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — Mocked HR provider-stage pipeline completed end to end
+
+- New `provider-stages.ts` composes CV semantics, scoring refinement, and report narrative as prompt -> LLM Router -> metadata-only accounting -> strict validation behind one injectable boundary. The module reads neither secrets nor a DB client; the composition root supplies the server-only key, tenant cache scope, and accounting closure. The default router is dynamically loaded only for a real invocation.
+- Model and budget policy is fixed: CV uses `simple/Haiku`, scoring uses `fast=simple/Haiku` or `deep=analysis/Sonnet`, and report uses `document/Sonnet`, with 1,200/1,800/2,400 max output tokens and 10/12/14-second timeouts. Cache scopes are isolated by tenant and stage; a missing key or scope fails safely before reaching the provider.
+- Merge policy preserves local evidence: canonical local skills/languages precede provider variants, while semantic roles/education complete the parse. Overall/grade are deterministically recomputed from refined categories, conservative local flags remain, and the hiring recommendation stays deterministic rather than provider-controlled.
+- Provider stages passed 8/8, HR backend 84/84, and targeted Deno with Telegram 88/88. `deadcdc` was pushed to `main`; GitHub CI `32553032864` passed in 1m18s with Deno 88/88, backend quality, frontend 28/28 files and 127/127 tests, deploy-env 14/14, audit 0 high/critical, a 3,701-module build, and 10-file security. Netlify was skipped; live provider, staging/production DB/Edge, and `501` were unchanged.
+
+Remaining: pass sanitized raw CV semantic input through an in-memory orchestrator seam, wire the provider stages at the server composition root with key/accounting closures, and perform a real staging smoke. The route remains `501` without the key.
+
+Files: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/provider-stages{,.test}.ts`, and synchronized four-language `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/HR_CANDIDATE_ANALYSIS` documentation.
+
 ## 2026-08-22 — HR provider prompts hardened against injection and bias
 
 - The three prompt skeleton/TODOs are now production contracts. CV semantic, scoring, and report system prompts specify exact JSON/key/enum/string/array/date/category bounds aligned with runtime validators, forbid guessing missing/private work, and exclude protected traits from scoring/reporting.

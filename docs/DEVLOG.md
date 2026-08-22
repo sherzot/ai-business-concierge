@@ -4,6 +4,17 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-22 — HR provider-stage pipeline mock bilan end-to-end tayyorlandi
+
+- Yangi `provider-stages.ts` CV semantic, scoring refinement va report narrative uchun prompt -> LLM Router -> metadata-only accounting -> strict validation oqimini bitta injectable boundaryga yig'di. Module secret yoki DB clientni o'zi o'qimaydi; composition root server-only key, tenant cache scope va accounting closure'ni beradi. Default router faqat real invocation paytida dynamic yuklanadi.
+- Model/budget policy qotirildi: CV `simple/Haiku`, scoring `fast=simple/Haiku` yoki `deep=analysis/Sonnet`, report `document/Sonnet`; tegishli max output 1,200/1,800/2,400 token va 10/12/14 soniya timeout. Cache scope tenant+stage bo'yicha ajratiladi; missing key/scope providerga yetmasdan safe config error beradi.
+- Merge policy local evidence'ni saqlaydi: canonical local skill/language provider variantidan oldin turadi, semantic role/education parse'ni complete qiladi; refined categorylardan overall/grade deterministik qayta hisoblanadi, local conservative flags yo'qolmaydi; hiring recommendation providerga berilmaydi va deterministic qoladi.
+- Provider-stage 8/8, HR backend 84/84 va Telegram bilan Deno 88/88 PASS. `deadcdc` `main`ga push qilindi; GitHub CI `32553032864` 1m18sda Deno 88/88, backend quality, frontend 28/28 fayl va 127/127 test, deploy-env 14/14, audit 0 high/critical, 3,701-module build va 10-file security bilan green. Netlify skip; live provider, staging/production DB/Edge va `501` o'zgarmadi.
+
+Qolgan ish: raw sanitized CV semantic inputini orchestrator contextida in-memory uzatish, server composition rootda key/accounting closure bilan stage pipeline'ni ulash va real staging smoke. Key yo'qligida route `501` saqlanadi.
+
+Fayllar: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/provider-stages{,.test}.ts` va 4-tilli `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/HR_CANDIDATE_ANALYSIS`.
+
 ## 2026-08-22 — HR provider prompt contractlari injection/biasga qarshi qotirildi
 
 - `prompts.ts`dagi uchta skeleton/TODO production contractga almashtirildi. CV semantic, scoring va report system promptlari exact JSON/key/enum/string/array/date/category limitlarini runtime validatorlar bilan teng belgilaydi; missing evidence taxmin qilinmaydi, private work va protected traitlar scoring/reportga ta'sir qilmaydi.

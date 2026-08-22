@@ -4,6 +4,17 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — Mocked HR provider-stage pipeline завершён end-to-end
+
+- Новый `provider-stages.ts` объединяет CV semantic, scoring refinement и report narrative в prompt -> LLM Router -> metadata-only accounting -> strict validation через один injectable boundary. Модуль не читает secret или DB client; composition root передаёт server-only key, tenant cache scope и accounting closure. Default router загружается динамически только при real invocation.
+- Model/budget policy зафиксирован: CV использует `simple/Haiku`, scoring — `fast=simple/Haiku` или `deep=analysis/Sonnet`, report — `document/Sonnet`; max output 1,200/1,800/2,400 tokens и timeout 10/12/14 секунд. Cache scope изолирован по tenant и stage; отсутствующий key/scope даёт safe config error до provider.
+- Merge policy сохраняет local evidence: canonical local skills/languages идут перед provider variants, semantic roles/education дополняют parse. Overall/grade детерминированно пересчитываются из refined categories, conservative local flags сохраняются, hiring recommendation остаётся deterministic и не управляется provider.
+- Provider stages 8/8, HR backend 84/84 и targeted Deno с Telegram 88/88 PASS. `deadcdc` отправлен в `main`; GitHub CI `32553032864` green за 1m18s: Deno 88/88, backend quality, frontend 28/28 files и 127/127 tests, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files. Netlify skipped; live provider, staging/production DB/Edge и `501` без изменений.
+
+Осталось: передать sanitized raw CV semantic input через in-memory orchestrator seam, подключить provider stages в server composition root с key/accounting closures и выполнить real staging smoke. Без key route остаётся `501`.
+
+Файлы: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/provider-stages{,.test}.ts` и синхронная четырёхъязычная документация `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/HR_CANDIDATE_ANALYSIS`.
+
 ## 2026-08-22 — HR provider prompt contracts усилены против injection и bias
 
 - Три prompt skeleton/TODO заменены production contracts. System prompts для CV semantic, scoring и report задают exact JSON/key/enum/string/array/date/category bounds, совпадающие с runtime validators, запрещают угадывать missing/private work и использовать protected traits.

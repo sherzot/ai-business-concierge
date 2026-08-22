@@ -4,6 +4,17 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-22 — Mock HR provider-stage pipelineをend-to-endで完了
+
+- 新規`provider-stages.ts`はCV semantic、scoring refinement、report narrativeをprompt -> LLM Router -> metadata-only accounting -> strict validationとして1つのinjectable boundaryに統合。Module自身はsecret/DB clientを読まず、composition rootがserver-only key、tenant cache scope、accounting closureを注入する。Default routerはreal invocation時だけdynamic loadする。
+- Model/budget policyを固定。CVは`simple/Haiku`、scoringは`fast=simple/Haiku`または`deep=analysis/Sonnet`、reportは`document/Sonnet`を使い、max outputは1,200/1,800/2,400 tokens、timeoutは10/12/14秒。Cache scopeはtenant+stageで分離し、key/scope不足はprovider到達前にsafe config errorとなる。
+- Merge policyはlocal evidenceを保持する。Canonical local skills/languagesをprovider variantsより優先し、semantic roles/educationでparseを補完。Refined categoriesからoverall/gradeをdeterministicに再計算し、conservative local flagsを保持、hiring recommendationもprovider-controlledにせずdeterministicのまま。
+- Provider stages 8/8、HR backend 84/84、Telegram込みtargeted Deno 88/88 PASS。`deadcdc`を`main`へpushし、GitHub CI `32553032864`は1m18sでgreen: Deno 88/88、backend quality、frontend 28/28 files・127/127 tests、deploy-env 14/14、audit high/critical 0、3,701-module build、10-file security。Netlifyはskip、live provider、staging/production DB/Edge、`501`は未変更。
+
+残作業: sanitized raw CV semantic inputをin-memory orchestrator seamで渡し、server composition rootでkey/accounting closureをprovider stagesへ接続し、real staging smokeを行う。Keyなしではrouteは`501`を維持する。
+
+Files: `.github/workflows/ci.yml`、`supabase/functions/server/services/hr-candidate/provider-stages{,.test}.ts`、4言語同期`DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/HR_CANDIDATE_ANALYSIS` documentation。
+
 ## 2026-08-22 — HR provider prompt contractをinjection/bias対策で強化
 
 - 3つのprompt skeleton/TODOをproduction contractへ置換。CV semantic、scoring、report system promptはruntime validatorと一致するexact JSON/key/enum/string/array/date/category boundsを定義し、missing/private workの推測とprotected traitの利用を禁止。
