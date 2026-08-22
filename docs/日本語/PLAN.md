@@ -60,7 +60,7 @@
 
 - [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** LLM Router経由でCV semantic structuringとSonnet structured scoring/reportingを接続。
 - [ ] 全HR provider callsへusage/cost loggingを接続。
-- [ ] Frontendを完了し`501` stubを削除、LLM integration後にfull-flow integration/manual acceptanceを実施。
+- [ ] LLM integration後にquota-lease releaseとactive routeを接続し、`501`を削除してfull-flow integration/manual acceptanceを実施。
 
 ## Later phases
 

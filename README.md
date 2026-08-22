@@ -268,7 +268,7 @@ ai-business-concierge/
 │       │   ├── auth/
 │       │   ├── docs/
 │       │   ├── hr/
-│       │   │   └── candidates/  # HR Candidate Analysis (skeleton)
+│       │   │   └── candidates/  # HR Candidate Analysis frontend boundary
 │       │   ├── inbox/
 │       │   ├── integrations/
 │       │   ├── notifications/
@@ -307,7 +307,7 @@ ai-business-concierge/
 |---|---|
 | **auth** | Login, role, tenant context, `AuthContext`, `ProtectedLayout` |
 | **docs** | Document list, search, detail view, indexing |
-| **hr** | HR cases, surveys; `hr/candidates/` — Candidate analysis (skeleton) |
+| **hr** | HR cases, surveys; `hr/candidates/` — Candidate upload/state/result boundary (`501` until provider wiring) |
 | **inbox** | Unified inbox, filters, real-time updates |
 | **integrations** | Telegram, Email, AmoCRM settings |
 | **notifications** | Task assignment notifications, dropdown |

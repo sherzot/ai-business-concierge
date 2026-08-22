@@ -4,6 +4,17 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-22 — HR Candidate frontend upload/state/result boundaryを完了
+
+- `ANTHROPIC_API_KEY`待ちの間に、secret-free frontend sliceを完了した。従来のUI skeletonにはclient input bounds、stale request cancellation、安全なtransport error、runtime success-envelope validation、accessibleなpending/error/empty stateがなかった。
+- `/hr/candidates`はsubmit前にPDF/DOCX 5 MiB、filename 180文字、job description 5,000 Unicode文字を検証し、GitHub/job値をnormalizeする。Drag/drop、file summary/remove、locale/depth radio group、disabled stateも実装した。APIはnetwork前にtenant/sessionを検証し、browser multipart boundaryを維持、40秒timeoutとcaller cancellationを適用する。Raw backend textを出さずHTTP/network failureをtyped codeへmapし、不完全なsuccess payloadを拒否する。Hookは前requestをabortし、stale/unmount updateを防ぎ、tenant変更時にresetする。
+- Results workspaceはresponsive cardless editorial layout、accessible live status/error/empty state、既存score/summary/questions/GitHub componentを使う。Four-locale copyをshared runtime i18n sourceで同期した。Canonical backend routeは意図的に`501 NOT_IMPLEMENTED`のままで、provider、production DB、Edgeは未変更。
+- 検証はtargeted API/form/hook 12/12、full frontend 28/28 files・127/127 tests、TypeScript、deploy-env 14/14、production dependency audit high/critical 0、Node 22.18.0で3,701-module build、10-file security gateがPASS。Authenticated in-app browserで1440×1000 desktopと390×844 mobile dark layout、light-theme toggle、required validation、horizontal overflow 0を確認した。Browser file chooser automationは2回timeoutしたため、real file selectionはunit drop/upload testsでcoverした。Synthetic staging fixtureのfinal read-backはAuth/identity/membership/tenant `0/0/0/0`、temporary PDFとbrowser tabは削除済み。
+
+残作業: provider keyに依存しないHR usage/cost loggingを完了する。`ANTHROPIC_API_KEY`入手後、semantic CV、Sonnet scoring/reporting、quota release、authenticated full-flow smokeをgreenにしてから`501`を削除する。
+
+対象: `frontend/src/app/i18n.ts`、`frontend/src/features/hr/{__tests__,candidates}`、`frontend/src/features/hr/candidates/README.md`、repository `README.md`、4言語`DEVLOG/STATUS/PLAN/REQUIREMENTS`。
+
 ## 2026-08-22 — HR persistent quotaとbounded multipart boundaryをstagingで完了
 
 - `ANTHROPIC_API_KEY`待ちの間に、次のsecret-free HR Candidate sliceを完了した。DB planの`starter/pro/company`をtariff policyへmapし、tenant-scoped minute/day counterと45秒でexpireするconcurrency leaseをservice-role-only reserve/release RPCでPostgreSQLがatomicに所有する。Browser EXECUTEとservice roleのdirect-table accessは拒否し、user FK covering indexも追加した。

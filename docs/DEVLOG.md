@@ -4,6 +4,17 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-22 — HR Candidate frontend upload/state/result boundary yakunlandi
+
+- `ANTHROPIC_API_KEY` kutilayotganda secretsiz frontend slice yakunlandi. Oldingi UI skeletonida client input limitlari, stale request cancellationi, safe transport xatolari, runtime success-envelope tekshiruvi va accessible pending/error/empty holatlari yetishmasdi.
+- `/hr/candidates` endi PDF/DOCX 5 MiB, filename 180 va job description 5,000 Unicode-belgi limitlarini submitdan oldin tekshiradi; GitHub/job qiymatlarini normalize qiladi; drag/drop, file summary/remove, locale/depth radio group va disabled state beradi. API tenant/sessionni networkdan oldin tekshiradi, browser multipart boundarysini saqlaydi, 40 soniya timeout/caller cancellation qo'llaydi, HTTP/network xatolarini raw backend matnisiz typed kodlarga map qiladi va to'liq bo'lmagan success payloadni UIga o'tkazmaydi. Hook oldingi requestni abort qiladi, stale response va unmount update'ini bloklaydi, tenant almashganda state'ni reset qiladi.
+- Natija workspace'i desktop va mobilda cardless editorial layout, accessible live status/error, empty state hamda mavjud score/summary/questions/GitHub komponentlarini ko'rsatadi. To'rt locale copy shared runtime i18n manbasida sinxronlandi. Backend canonical route ataylab `501 NOT_IMPLEMENTED` bo'lib qoldi; provider, production DB va Edge o'zgarmadi.
+- Verifikatsiya: targeted API/form/hook 12/12; full frontend 28/28 fayl va 127/127 test, TypeScript, deploy-env 14/14, production dependency audit high/critical 0, Node 22.18.0 bilan 3,701-module build va 10-file security gate PASS. In-app browserda authenticated desktop 1440×1000 va mobile 390×844 dark, light-theme toggle, required validation va responsive layout tekshirildi; horizontal overflow 0. Browser file chooser automationi ikki urinishda timeout bo'ldi, shu sabab real file selection unit drop/upload testlari bilan qoplandi. Synthetic staging fixture read-back yakunda Auth/identity/membership/tenant `0/0/0/0`; vaqtinchalik PDF va browser tablari tozalandi.
+
+Qolgan ish: provider kelishidan mustaqil HR usage/cost loggingni yakunlash. `ANTHROPIC_API_KEY` kelgach semantic CV, Sonnet scoring/report, quota release va authenticated full-flow smoke'ni green qilib, keyin `501`ni olib tashlash.
+
+Fayllar: `frontend/src/app/i18n.ts`, `frontend/src/features/hr/{__tests__,candidates}`, `frontend/src/features/hr/candidates/README.md`, repository `README.md`, 4-tilli `DEVLOG/STATUS/PLAN/REQUIREMENTS`.
+
 ## 2026-08-22 — HR persistent quota va bounded multipart boundary stagingda yakunlandi
 
 - `ANTHROPIC_API_KEY`ni kutayotgan paytda HR Candidate'ning secretsiz navbatdagi P2 slice'i bajarildi. Oldin tarif policy faqat xotirada edi, `starter/pro/company` DB planlari to'liq map qilinmasdi, concurrency lease yo'q edi va disabled `501` route body'ni `arrayBuffer()` bilan cheksiz bufferlardi.

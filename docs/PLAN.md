@@ -69,8 +69,7 @@
 
 - [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** CV semantic structuring, Sonnet structured scoring va report generatorni LLM Router orqali ulash.
 - [ ] Usage/cost logni barcha HR provider chaqiruvlariga ulash.
-- [ ] Frontend upload/result oqimini yakunlash va `501` stubni olib tashlash.
-- [ ] LLM integrationdan keyin full-flow integration va manual acceptance testlarini o'tkazish.
+- [ ] LLM integrationdan keyin quota lease release, active route wiring, `501` removal, full-flow integration va manual acceptance testlarini o'tkazish.
 
 ## Keyingi phase'lar
 

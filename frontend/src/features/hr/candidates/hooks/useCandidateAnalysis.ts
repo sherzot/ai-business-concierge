@@ -1,9 +1,6 @@
 /**
  * useCandidateAnalysis — plain React hook (loyihada React Query yo'q).
  *
- * Status: SKELETON.
- * Owner: frontend agent.
- *
  * Auth: candidatesApi.analyzeCandidate() ichida supabase.auth.getSession() chaqiriladi.
  *       Tenant ID'ni hook ichida AuthContext orqali olamiz.
  *
@@ -12,8 +9,8 @@
  *   mutate({ githubInput, cvFile, jobDescription, locale, analysisDepth });
  */
 
-import { useCallback, useState } from "react";
-import { analyzeCandidate } from "../api/candidatesApi";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { analyzeCandidate, CandidateRequestError } from "../api/candidatesApi";
 import { useAuthContext } from "../../../auth/context/AuthContext";
 import type { AnalyzeFormInput, CandidateAnalysisResult } from "../types";
 
@@ -28,25 +25,61 @@ const INITIAL: State = { data: null, error: null, isPending: false };
 export function useCandidateAnalysis() {
   const [state, setState] = useState<State>(INITIAL);
   const { currentTenant } = useAuthContext();
+  const controllerRef = useRef<AbortController | null>(null);
+  const requestSequence = useRef(0);
 
-  const mutate = useCallback(async (input: AnalyzeFormInput) => {
-    setState({ data: null, error: null, isPending: true });
+  const mutate = useCallback(
+    async (input: AnalyzeFormInput) => {
+      controllerRef.current?.abort();
+      const controller = new AbortController();
+      controllerRef.current = controller;
+      const sequence = ++requestSequence.current;
+      setState({ data: null, error: null, isPending: true });
 
-    try {
-      const result = await analyzeCandidate(input, currentTenant?.id);
-      setState({ data: result, error: null, isPending: false });
-      return result;
-    } catch (err) {
-      // Rethrow QILMAYMIZ — caller "fire and forget" ishlatadi.
-      // Xato state.error ga yoziladi, UI banner ko'rsatadi.
-      const error = err instanceof Error ? err : new Error(String(err));
-      console.error("[useCandidateAnalysis] mutation error", error);
-      setState({ data: null, error, isPending: false });
-      return null;
-    }
-  }, [currentTenant?.id]);
+      try {
+        const result = await analyzeCandidate(input, currentTenant?.id, {
+          signal: controller.signal,
+        });
+        if (sequence === requestSequence.current) {
+          setState({ data: result, error: null, isPending: false });
+        }
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        if (
+          sequence === requestSequence.current &&
+          !(
+            error instanceof CandidateRequestError && error.code === "CANCELLED"
+          )
+        ) {
+          setState({ data: null, error, isPending: false });
+        }
+        return null;
+      } finally {
+        if (sequence === requestSequence.current) controllerRef.current = null;
+      }
+    },
+    [currentTenant?.id],
+  );
 
-  const reset = useCallback(() => setState(INITIAL), []);
+  const reset = useCallback(() => {
+    requestSequence.current += 1;
+    controllerRef.current?.abort();
+    controllerRef.current = null;
+    setState(INITIAL);
+  }, []);
+
+  useEffect(
+    () => () => {
+      requestSequence.current += 1;
+      controllerRef.current?.abort();
+    },
+    [],
+  );
+
+  useEffect(() => {
+    reset();
+  }, [currentTenant?.id, reset]);
 
   return {
     mutate,

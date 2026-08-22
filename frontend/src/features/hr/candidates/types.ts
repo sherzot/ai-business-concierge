@@ -6,8 +6,7 @@
  *
  * Implementation note:
  *   Keep this file in sync via `npx json-schema-to-typescript` or hand-edit.
- *   For MVP skeleton these are hand-written and MUST match the backend
- *   `types.ts` shape one-to-one.
+ *   These types MUST match the backend `types.ts` shape one-to-one.
  */
 
 export type Locale = "uz" | "ja" | "en";
@@ -54,13 +53,26 @@ export type CategoryScores = {
 export type CategoryKey = keyof CategoryScores;
 
 export type InconsistencyFlag = {
-  type: "stack_mismatch" | "experience_gap" | "title_inflation" | "education_unverified" | "timeline_conflict" | "other";
+  type:
+    | "stack_mismatch"
+    | "experience_gap"
+    | "title_inflation"
+    | "education_unverified"
+    | "timeline_conflict"
+    | "other";
   severity: "low" | "medium" | "high";
   explanation: string;
 };
 
 export type InterviewQuestion = {
-  category: "tech_depth" | "project_quality" | "activity" | "communication_docs" | "consistency" | "role_fit" | "behavioral";
+  category:
+    | "tech_depth"
+    | "project_quality"
+    | "activity"
+    | "communication_docs"
+    | "consistency"
+    | "role_fit"
+    | "behavioral";
   question: string;
   expected_signal: string;
   linked_evidence?: string;
@@ -106,7 +118,12 @@ export type CvSignals = {
   filename: string;
   format: "pdf" | "docx";
   experience_years_total?: number;
-  roles?: { title: string; company: string; start: string; end?: string | null }[];
+  roles?: {
+    title: string;
+    company: string;
+    start: string;
+    end?: string | null;
+  }[];
   tech_skills?: string[];
   parse_status: "complete" | "partial" | "failed";
 };
@@ -117,7 +134,7 @@ export type CvSignals = {
 
 export type AnalyzeFormInput = {
   githubInput: string;
-  cvFile: File | null;
+  cvFile: File;
   jobDescription: string;
   locale: Locale;
   analysisDepth: AnalysisDepth;

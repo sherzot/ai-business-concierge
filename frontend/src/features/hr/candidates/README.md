@@ -1,48 +1,12 @@
 # HR Candidate Analysis — Frontend module
 
 > Sub-module under `features/hr/candidates/`
-> Status: PARTIAL (API contract tests plus backend GitHub/CV/request/quota/multipart/orchestrator boundaries are real; UI wiring and provider flow remain)
+> Status: PARTIAL (production-ready upload/state/result boundary is wired; backend provider flow intentionally remains `501 NOT_IMPLEMENTED`)
 > Design doc: [/docs/HR_CANDIDATE_ANALYSIS.md](../../../../../docs/HR_CANDIDATE_ANALYSIS.md)
 
-## Wiring instructions (App.tsx / navigation)
-
-To make this module reachable, do these 3 small edits:
-
-### 1. Add the route
-
-In whichever file owns the in-app routes (currently inside `App.tsx` per
-`ProtectedLayout` → `<App />`), add:
-
-```tsx
-import { CandidateAnalysisPage } from "./features/hr/candidates/pages/CandidateAnalysisPage";
-
-// Inside your <Routes /> or switch:
-<Route path="/hr/candidates" element={<CandidateAnalysisPage />} />
-```
-
-### 2. Add the sidebar / nav entry
-
-```tsx
-{
-  path: "/hr/candidates",
-  label: t("nav.hr_candidates"),    // "Nomzod tahlili" / "候補者分析" / "Candidate analysis"
-  icon: UserSearch,                 // lucide-react
-  requiredRoles: ["HR", "MANAGER", "TENANT_ADMIN", "SUPER_ADMIN"],
-}
-```
-
-### 3. Register i18n bundle
-
-If the project uses a single shared `i18n.ts` instead of per-feature
-imports, merge the three locale files:
-
-```ts
-import hrCandidatesUz from "./features/hr/candidates/i18n/uz.json";
-import hrCandidatesJa from "./features/hr/candidates/i18n/ja.json";
-import hrCandidatesEn from "./features/hr/candidates/i18n/en.json";
-
-// Add under each locale tree at "hr.candidates"
-```
+The protected `/hr/candidates` route, role-aware sidebar entry, and four-locale
+copy are registered in the application shell. The shared `app/i18n.ts` tree is
+the runtime source of truth; the feature JSON files are reference copies only.
 
 ## Files in this module
 
@@ -58,7 +22,7 @@ candidates/
 │   ├── InconsistencyAlert.tsx      CV ↔ GitHub mismatch flags
 │   └── GithubProfileBlock.tsx      Raw GitHub stats
 ├── hooks/
-│   └── useCandidateAnalysis.ts     React Query mutation
+│   └── useCandidateAnalysis.ts     Abortable plain React request state
 ├── pages/
 │   └── CandidateAnalysisPage.tsx   /hr/candidates page
 ├── i18n/
@@ -76,7 +40,7 @@ This module is wired to:
 POST /v1/hr/candidates/analyze
 ```
 
-which currently returns `501 NOT_IMPLEMENTED`. The backend skeleton is at
+which currently returns `501 NOT_IMPLEMENTED`. The backend service boundary is at
 `supabase/functions/server/services/hr-candidate/`. Implementation gates:
 
 - [x] `github-analyzer.ts` — bounded public REST fetch + aggregate + process cache
@@ -87,5 +51,8 @@ which currently returns `501 NOT_IMPLEMENTED`. The backend skeleton is at
 - [ ] `report-generator.ts` — Sonnet narrative + interview questions
 - [~] `index.ts`            — validation/parallel/timeout/failed-CV gates complete; LLM retry and usage logging remain
 
-Once those land, flip the route handler in `index.ts` from the 501 stub to
-call `analyzeCandidate(req)`.
+The frontend validates bounded PDF/DOCX input, normalizes fields, sends an
+authenticated tenant-scoped multipart request, rejects malformed success
+payloads, cancels stale requests, and renders typed pending/error/result states.
+Once provider wiring and usage logging land, flip the route handler from the
+501 stub to `analyzeCandidate(req)` and run authenticated full-flow acceptance.

@@ -60,7 +60,7 @@
 
 - [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** wire CV semantic structuring plus Sonnet structured scoring/reporting through the LLM Router.
 - [ ] Wire usage/cost logging across all HR provider calls.
-- [ ] Complete frontend results, remove the `501` stub, and run full-flow integration/manual acceptance after LLM integration.
+- [ ] After LLM integration, wire quota-lease release and the active route, remove `501`, and run full-flow integration/manual acceptance.
 
 ## Later phases
 

@@ -4,6 +4,17 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — Завершён frontend boundary upload/state/result для HR Candidate
+
+- Пока ожидается `ANTHROPIC_API_KEY`, завершён secret-free frontend slice. В прежнем UI skeleton отсутствовали client input bounds, отмена stale request, безопасные transport errors, runtime-валидация success envelope и accessible pending/error/empty states.
+- `/hr/candidates` до submit проверяет PDF/DOCX до 5 MiB, filename до 180 символов и job description до 5 000 Unicode-символов; нормализует GitHub/job, поддерживает drag/drop, summary/remove файла, locale/depth radio groups и disabled states. API проверяет tenant/session до network, сохраняет browser multipart boundary, применяет timeout 40 секунд и caller cancellation, отображает HTTP/network failures в typed codes без raw backend текста и отклоняет неполный success payload. Hook отменяет предыдущий request, блокирует stale/unmounted updates и сбрасывается при смене tenant.
+- Results workspace получил responsive cardless editorial layout, accessible live status/error/empty states и существующие score/summary/questions/GitHub components. Four-locale copy синхронизирован в общем runtime i18n. Canonical backend route намеренно остаётся `501 NOT_IMPLEMENTED`; provider, production DB и Edge не менялись.
+- Проверки: targeted API/form/hook 12/12; full frontend 28/28 файлов и 127/127 tests; TypeScript; deploy-env 14/14; production dependency audit high/critical 0; Node 22.18.0 build 3 701 modules; security gate 10 файлов — PASS. Authenticated in-app browser acceptance охватил desktop 1440×1000 и mobile 390×844 в dark, light-theme toggle, required validation и horizontal overflow 0. Автоматизация browser file chooser дважды завершилась timeout, поэтому real file selection покрыт unit drop/upload tests. Финальный read-back synthetic staging fixture: Auth/identity/membership/tenant `0/0/0/0`; temporary PDF и browser tabs удалены.
+
+Осталось: независимо от provider key завершить usage/cost logging HR provider calls. После появления `ANTHROPIC_API_KEY` сделать green semantic CV, Sonnet scoring/reporting, quota release и authenticated full-flow smoke, затем убрать `501`.
+
+Файлы: `frontend/src/app/i18n.ts`, `frontend/src/features/hr/{__tests__,candidates}`, `frontend/src/features/hr/candidates/README.md`, repository `README.md`, четыре языка `DEVLOG/STATUS/PLAN/REQUIREMENTS`.
+
 ## 2026-08-22 — Persistent quota HR и bounded multipart boundary завершены в staging
 
 - Пока ожидается `ANTHROPIC_API_KEY`, завершён следующий secret-free slice HR Candidate. DB-планы `starter/pro/company` теперь отображаются в tariff policy, а tenant-scoped minute/day counters и 45-секундные expiring concurrency leases атомарно принадлежат PostgreSQL через service-role-only reserve/release RPC. Browser EXECUTE и direct-table доступ service role закрыты; для user FK добавлен covering index.
