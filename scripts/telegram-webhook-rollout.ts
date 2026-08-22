@@ -21,7 +21,7 @@ interface TelegramApiResponse<T> {
   description?: string;
 }
 
-interface TelegramWebhookInfo {
+export interface TelegramWebhookInfo {
   url: string;
   pending_update_count: number;
   last_error_date?: number;
@@ -130,6 +130,34 @@ export function parseTelegramResponse<T>(
   return response;
 }
 
+export function requireTelegramTrue(
+  response: TelegramApiResponse<boolean>,
+  operation: string,
+): void {
+  if (response.result !== true) {
+    throw new Error(`Telegram ${operation} success result=true qaytarmadi`);
+  }
+}
+
+export function validateWebhookInfo(value: unknown): TelegramWebhookInfo {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Telegram getWebhookInfo result object emas");
+  }
+  const info = value as Partial<TelegramWebhookInfo>;
+  if (
+    typeof info.url !== "string" ||
+    !Number.isInteger(info.pending_update_count) ||
+    (info.pending_update_count ?? -1) < 0 ||
+    (info.last_error_date !== undefined &&
+      !Number.isInteger(info.last_error_date)) ||
+    (info.last_error_message !== undefined &&
+      typeof info.last_error_message !== "string")
+  ) {
+    throw new Error("Telegram getWebhookInfo result contractga mos emas");
+  }
+  return info as TelegramWebhookInfo;
+}
+
 export function redactSensitiveValues(
   message: string,
   values: string[],
@@ -147,6 +175,10 @@ async function runCommand(
 ): Promise<CommandResult> {
   const output = await new Deno.Command(command, {
     args,
+    env: {
+      TELEGRAM_BOT_TOKEN: "",
+      TELEGRAM_WEBHOOK_SECRET: "",
+    },
     stdout: "piped",
     stderr: "piped",
   }).output();
@@ -252,7 +284,8 @@ async function verifyWebhook(
     config.botToken,
     "getWebhookInfo",
   );
-  if (!infoResponse.result || infoResponse.result.url !== config.webhookUrl) {
+  const info = validateWebhookInfo(infoResponse.result);
+  if (info.url !== config.webhookUrl) {
     throw new Error(
       "Telegram getWebhookInfo kutilgan webhook URLni tasdiqlamadi",
     );
@@ -280,9 +313,9 @@ async function verifyWebhook(
   }
 
   console.log(
-    `Telegram webhook verified: URL exact, health 200, invalid POST 401, pending updates ${infoResponse.result.pending_update_count}`,
+    `Telegram webhook verified: URL exact, health 200, invalid POST 401, pending updates ${info.pending_update_count}`,
   );
-  if (infoResponse.result.last_error_date) {
+  if (info.last_error_date) {
     console.warn(
       "Telegram webhook info oldingi delivery xatosini ko'rsatmoqda; BotFather/API orqali tekshiring",
     );
@@ -306,14 +339,19 @@ export async function rolloutTelegramWebhook(
       "Supabase TELEGRAM_WEBHOOK_SECRET o'rnatildi (qiymat yashirildi)",
     );
 
-    await fetchTelegram<boolean>(config.botToken, "setWebhook", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        url: config.webhookUrl,
-        secret_token: config.webhookSecret,
-      }),
-    });
+    const setWebhookResponse = await fetchTelegram<boolean>(
+      config.botToken,
+      "setWebhook",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: config.webhookUrl,
+          secret_token: config.webhookSecret,
+        }),
+      },
+    );
+    requireTelegramTrue(setWebhookResponse, "setWebhook");
     telegramCommitted = true;
     console.log("Telegram setWebhook muvaffaqiyatli bajarildi");
 

@@ -4,7 +4,9 @@ import {
   parseSupabaseSecretNames,
   parseTelegramResponse,
   redactSensitiveValues,
+  requireTelegramTrue,
   validateRolloutConfig,
+  validateWebhookInfo,
 } from "./telegram-webhook-rollout.ts";
 
 const validConfig = {
@@ -75,9 +77,16 @@ Deno.test("Supabase secret ro'yxati faqat nomlarga parse qilinadi", () => {
 });
 
 Deno.test("Telegram API failure description bilan typed error beradi", () => {
-  assertEquals(
-    parseTelegramResponse<boolean>({ ok: true, result: true }, "setWebhook"),
+  const success = parseTelegramResponse<boolean>(
     { ok: true, result: true },
+    "setWebhook",
+  );
+  assertEquals(success, { ok: true, result: true });
+  requireTelegramTrue(success, "setWebhook");
+  assertThrows(
+    () => requireTelegramTrue({ ok: true, result: false }, "setWebhook"),
+    Error,
+    "result=true",
   );
   assertThrows(
     () =>
@@ -87,6 +96,22 @@ Deno.test("Telegram API failure description bilan typed error beradi", () => {
       ),
     Error,
     "Bad Request",
+  );
+  assertEquals(
+    validateWebhookInfo({
+      url: validConfig.webhookUrl,
+      pending_update_count: 0,
+    }),
+    { url: validConfig.webhookUrl, pending_update_count: 0 },
+  );
+  assertThrows(
+    () =>
+      validateWebhookInfo({
+        url: validConfig.webhookUrl,
+        pending_update_count: -1,
+      }),
+    Error,
+    "contractga mos emas",
   );
 });
 
