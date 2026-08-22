@@ -4,6 +4,17 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-22 — HR provider prompt contractをinjection/bias対策で強化
+
+- 3つのprompt skeleton/TODOをproduction contractへ置換。CV semantic、scoring、report system promptはruntime validatorと一致するexact JSON/key/enum/string/array/date/category boundsを定義し、missing/private workの推測とprotected traitの利用を禁止。
+- User-controlled CV/JD/signalsをsystem instructionへinterpolateしない。NFKC/bounds後にescaped JSON data blockへ格納し、CV 16k chars、JD 5k、serialized provider data 96 KiBでfail-closed。Embedded delimiter/instructionはdataのまま。
+- Evidence projectionを最小化し、username、profile URL、CV filename、company/institution名、repo URL/description、follower/followingを除外。Technical repo/role/date/skill/status signalを保持し、JD/role-fit presenceはexplicit flag。
+- Prompt contract 6/6、HR backend 76/76、Telegram込みtargeted Deno 80/80 PASS。`d07577f`を`main`へpushし、GitHub CI `32552683005`は1m11sでgreen: Deno 80/80、backend quality、frontend 28/28 files・127/127 tests、deploy-env 14/14、audit high/critical 0、3,701-module build、10-file security。Netlifyはskip、live provider、staging/production DB/Edge、`501`は未変更。
+
+残作業: key受領後にreal Haiku/Sonnet callを準備済みprompt -> account-before-validation -> strict-output pipelineへ接続し、authenticated staging full flow成功後にcanonical routeを有効化。
+
+Files: `.github/workflows/ci.yml`、`supabase/functions/server/services/hr-candidate/prompts{,.test}.ts`、4言語同期documentation。
+
 ## 2026-08-22 — Provider keyなしでHR quota-lease lifecycleを完了
 
 - Persistent quota reserve/release adapterを`executeWithHrCandidateQuota` lifecycle boundaryで統合。Denial時はanalysis/releaseを開始せず、accepted lease後はsuccess、provider rejection、timeout-shaped failureの全てでreleaseを`finally`からexactly once呼ぶ。

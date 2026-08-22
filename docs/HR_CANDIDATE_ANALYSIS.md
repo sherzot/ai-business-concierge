@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Holat: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub adapter/cache, bounded local PDF/DOCX extraction, pure request/role/tariff policy, PostgreSQL minute/day/concurrency lease va finally-release lifecycle, bounded multipart, atomic usage accounting, strict provider output/account-before-validation contracti, deterministic scorer/evidence report, orchestrator va frontend real/testlangan. Real semantic CV/Sonnet invocation va full HTTP wiring qolgan; canonical endpoint `501 NOT_IMPLEMENTED`. Joriy holat: [STATUS.md](STATUS.md).
+> **Holat: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub adapter/cache, bounded local PDF/DOCX extraction, pure request/role/tariff policy, PostgreSQL minute/day/concurrency lease/finally-release, bounded multipart, atomic usage accounting, minimized injection-resistant prompt va strict provider output/account-before-validation contractlari, deterministic scorer/evidence report, orchestrator va frontend real/testlangan. Real semantic CV/Sonnet invocation va full HTTP wiring qolgan; canonical endpoint `501 NOT_IMPLEMENTED`. Joriy holat: [STATUS.md](STATUS.md).
 
 > **AI Business Concierge — `hr_candidate_analysis` modul dizayn paketi**
 > Version: 1.0 (MVP design) · Sana: 2026-04-29 · Til: O'zbekcha / 日本語 / English
@@ -502,7 +502,7 @@ Caveats:
 
 ### 6.3 Tool 3 — `candidate-scorer.ts`
 
-> Joriy implementatsiya provider-independent rubrikani, bounded weighted overall/grade va faqat complete taqqoslanadigan GitHub dalilida conservative UZ/JA/EN inconsistency flaglarini beradi. Sonnet/Haiku structured refinement uchun exact JSON/exact-key/bounded-value validator va completed receipt'ni output parsingdan oldin hisoblaydigan fail-closed wrapper tayyor; real invocation key bilan keyingi qatlam sifatida qolgan.
+> Joriy implementatsiya provider-independent rubrikani, bounded weighted overall/grade va faqat complete taqqoslanadigan GitHub dalilida conservative UZ/JA/EN inconsistency flaglarini beradi. Sonnet/Haiku structured refinement uchun identity/prestige/free-textni minimallashtiradigan escaped untrusted-data prompt, exact JSON/exact-key/bounded-value validator va completed receipt'ni output parsingdan oldin hisoblaydigan fail-closed wrapper tayyor; real invocation key bilan keyingi qatlam sifatida qolgan.
 
 ```
 Model:  Claude Sonnet 4 (deep) yoki Haiku (fast)

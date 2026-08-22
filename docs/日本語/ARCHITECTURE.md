@@ -3,7 +3,7 @@
 > プロジェクトアーキテクチャ、設計パターン、ユニットテストルール
 > バージョン: 1.3 | 更新: 2026-08-21
 >
-> Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate`はpartial。Bounded adapters、request policy、PostgreSQL quota lease・finally-release lifecycle、atomic/idempotent metadata-only usage accounting、strict provider output/account-before-validation、multipart、deterministic scoring/report、orchestrator、frontend boundariesはreal。Live semantic LLM invocationとfull HTTP wiringはproduction-readyではない。
+> Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate`はpartial。Bounded adapters、request policy、PostgreSQL quota/finally-release、minimized escaped-data prompt、atomic/idempotent metadata-only usage accounting、strict provider output/account-before-validation、multipart、deterministic scoring/report、orchestrator、frontend boundariesはreal。Live semantic LLM invocationとfull HTTP wiringはproduction-readyではない。
 
 ---
 
@@ -247,4 +247,4 @@ features/tasks/__tests__/
 ---
 
 *ARCHITECTURE.md — AI Business Concierge v1.0 · 2026-05-05*
-*HR Candidateはtarget modular pattern。Bounded adapter/request/quota-lifecycle/multipart/orchestrator、strict provider contract、deterministic scoring/report boundaryはreal、semantic LLM invocation/full HTTP wiringはpartial scaffold。*
+*HR Candidateはtarget modular pattern。Bounded adapter/request/quota-lifecycle/multipart/orchestrator、minimized prompt/strict provider contract、deterministic scoring/report boundaryはreal、semantic LLM invocation/full HTTP wiringはpartial scaffold。*

@@ -4,6 +4,17 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-22 — HR provider prompt contractlari injection/biasga qarshi qotirildi
+
+- `prompts.ts`dagi uchta skeleton/TODO production contractga almashtirildi. CV semantic, scoring va report system promptlari exact JSON/key/enum/string/array/date/category limitlarini runtime validatorlar bilan teng belgilaydi; missing evidence taxmin qilinmaydi, private work va protected traitlar scoring/reportga ta'sir qilmaydi.
+- User-controlled CV/JD/signal qiymatlari system instructionga interpolatsiya qilinmaydi. Ular NFKC+boundsdan o'tib, `<`/`>`/`&` va Unicode separatorlari escaped JSON data blockka yoziladi; CV 16k, JD 5k va serialized provider data 96 KiB bilan fail-closed. Embedded delimiter/instruction data sifatida qoladi.
+- Scoring/report evidence projectioni minimallashtirildi: username, profile URL, CV filename, company/institution nomi, repo URL/description va follower/following providerga uzatilmaydi; technical repo/role/date/skill/status signallari saqlanadi. Role-fit/JD presence explicit flag bilan yuboriladi.
+- Yangi prompt contract 6/6, HR backend 76/76 va Telegram bilan Deno 80/80 PASS. `d07577f` `main`ga push qilindi; GitHub CI `32552683005` 1m11sda Deno 80/80, backend quality, frontend 28/28 fayl va 127/127 test, deploy-env 14/14, audit 0 high/critical, 3,701-module build va 10-file security bilan green. Netlify ataylab skip qilindi; live provider, staging/production DB/Edge va `501` o'zgarmadi.
+
+Qolgan ish: key kelgach real Haiku/Sonnet calllarni tayyor prompt -> account-before-validation -> strict output pipeline'iga ulash va authenticated staging full-flowdan keyin canonical route'ni yoqish.
+
+Fayllar: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/prompts{,.test}.ts` va 4-tilli `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE/HR_CANDIDATE_ANALYSIS`.
+
 ## 2026-08-22 — HR quota lease lifecycle keydan mustaqil yakunlandi
 
 - Persistent quota reserve/release adapterlari endi bitta `executeWithHrCandidateQuota` lifecycle boundary orqali bog'landi. Reservation denialda analysis va release umuman boshlanmaydi; lease olingach success, provider rejection yoki timeout-shaped xatoda release aynan bir marta `finally`da chaqiriladi.

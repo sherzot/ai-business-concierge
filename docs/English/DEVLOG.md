@@ -4,6 +4,17 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — HR provider prompts hardened against injection and bias
+
+- The three prompt skeleton/TODOs are now production contracts. CV semantic, scoring, and report system prompts specify exact JSON/key/enum/string/array/date/category bounds aligned with runtime validators, forbid guessing missing/private work, and exclude protected traits from scoring/reporting.
+- User-controlled CV/JD/signal values are not interpolated into system instructions. After NFKC/bounds, they enter escaped JSON data blocks; CV is capped at 16k chars, JD at 5k, and serialized provider data at 96 KiB. Embedded delimiters/instructions remain data.
+- Scoring/report evidence is minimized: username, profile URL, CV filename, company/institution names, repo URL/description, and follower/following are excluded while technical repo/role/date/skill/status evidence remains. JD and role-fit presence are explicit flags.
+- Prompt contract 6/6, HR backend 76/76, and targeted Deno with Telegram 80/80 passed. `d07577f` was pushed to `main`; GitHub CI `32552683005` passed in 1m11s with Deno 80/80, backend quality, frontend 28/28 files and 127/127 tests, deploy-env 14/14, audit 0 high/critical, a 3,701-module build, and 10-file security. Netlify was skipped; live provider, staging/production DB/Edge, and `501` were unchanged.
+
+Remaining: after the key arrives, connect real Haiku/Sonnet calls to the prepared prompt -> account-before-validation -> strict-output pipeline, then enable the canonical route after authenticated staging full flow succeeds.
+
+Files: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/prompts{,.test}.ts`, and synchronized four-language project documentation.
+
 ## 2026-08-22 — HR quota-lease lifecycle completed without the provider key
 
 - The persistent quota reserve/release adapters are now joined by one `executeWithHrCandidateQuota` lifecycle boundary. A denial starts neither analysis nor release; after an accepted lease, success, provider rejection, and timeout-shaped failures all call release exactly once in `finally`.

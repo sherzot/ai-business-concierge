@@ -48,6 +48,7 @@
 > 2026-08-22: HR deterministik 6-kategoriya scorer va UZ/JA/EN evidence-linked report fallbacki yakunlandi. `5395da1` CI `32547412956` va final `b222cf9` CI `32547588906` green: Deno 60/60 hamda barcha quality/frontend/security gate'lari o'tdi. Semantic provider refinement, accounting call-site va production `501` o'zgarmadi.
 > 2026-08-22: HR provider output exact JSON/bounds contracti va account-before-validation fail-closed boundary tayyorlandi; raw output accounting type chegarasidan chiqarildi va past-dalilli report schema edge-case'i yopildi. Final `550ca8b` CI `32552046675` green: Deno 69/69 va barcha quality/frontend/security gate'lari o'tdi; live provider/route, staging/production runtime va `501` o'zgarmadi.
 > 2026-08-22: HR quota reserve/execute/finally-release lifecycle boundary yakunlandi; denial, success, provider error va cleanup error oqimlari testlandi. `8b11515` CI `32552288887` green: Deno 74/74 va barcha gate'lar o'tdi; active route va production `501` o'zgarmadi.
+> 2026-08-22: HR trusted-system/untrusted-data prompt contractlari exact output, injection escaping, bias/privacy guard va minimized evidence projection bilan qotirildi. `d07577f` CI `32552683005` green: Deno 80/80 va barcha gate'lar o'tdi; live provider va production `501` o'zgarmadi.
 
 ## Hozir qayerdamiz
 
@@ -70,7 +71,7 @@
 | Staging Supabase | `piqsyfwrjtormrlenjix`, `ap-southeast-1`, `$0/oy`, `ACTIVE_HEALTHY`; 40 migration, `bright-api` v11 ACTIVE, health `200`, authsiz docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list; email confirmation ON, 8-digit/1-minute OTP, TOTP ON; Auth settings HTTP `200`, autoconfirm false. Edge `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` modern key override'larida; legacy anon/service-role API keylari disabled |
 | Type-check | Clean temp frontend installida muvaffaqiyatli |
-| Unit test | Frontend 28/28 fayl, 127/127 test, jumladan HR Candidate API/form/hook 12/12; AI polish/router/usage Deno 18/18; HR GitHub 10 + CV 8 + boundary 5 + quota/lifecycle 12 + multipart 6 + accounting 4 + provider contract 8 + scorer 4 + report 6 + orchestrator 6 + schema 1 = 70/70; Telegram bilan joriy targeted backend Deno 74/74; oldingi document binary/lifecycle Deno 7/7 |
+| Unit test | Frontend 28/28 fayl, 127/127 test, jumladan HR Candidate API/form/hook 12/12; AI polish/router/usage Deno 18/18; HR GitHub 10 + CV 8 + boundary 5 + quota/lifecycle 12 + multipart 6 + accounting 4 + provider contract 8 + prompt contract 6 + scorer 4 + report 6 + orchestrator 6 + schema 1 = 76/76; Telegram bilan joriy targeted backend Deno 80/80; oldingi document binary/lifecycle Deno 7/7 |
 | Deploy environment guard | Node test 14/14: 10 isolation contracti + 2 Vite `.env` fallback/runtime-precedence + 2 bundled endpoint extraction regressiyasi |
 | Production build | Synthetic non-production project-ref bilan muvaffaqiyatli; CSP tanlangan refdan yaratildi |
 | Security check | 10 ta build/Netlify fayli muvaffaqiyatli |
@@ -80,7 +81,7 @@
 | Delivery platform | Faol platforma faqat Netlify. Repo ichida Vercel config/dependency yo'q; external Vercel project saqlangan, `gitRepositoryConnected=false` tasdiqlandi |
 | Environment isolation | Netlify CLI authoritative read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envlari yo'q; Personal rejada faqat browser-public `VITE_*` qiymatlar `All` scope'da |
 | Staging security advisor | Error `0`; ma'lum `vector` public-schema warningi `1`; server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | Final code commit `8b11515` uchun main run `32552288887` 58sda success: Deno 74/74 va backend quality, frontend 28/28 fayl 127/127, deploy-env 14/14, audit 0 high/critical, 3,701-module build va 10-file security green |
+| Remote GitHub Actions | Final code commit `d07577f` uchun main run `32552683005` 1m11sda success: Deno 80/80 va backend quality, frontend 28/28 fayl 127/127, deploy-env 14/14, audit 0 high/critical, 3,701-module build va 10-file security green |
 | Netlify preview | Bu slice bevosita `main`ga push qilingani uchun yangi deploy-preview yaratilmagan; Netlify production context ishlagan |
 | Production frontend | Deploy `6a89065505b5600008dd0385` ready, build `6a89065505b5600008dd0383`, commit `f77dd9a`, 29s, plugin success, secret match 0/87,145; `/` va `/dashboard/hr/candidates` `200`, CSP va production-only `index-DipHAHEa.js` bundle green |
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |
@@ -103,7 +104,7 @@
 | AI Concierge / RAG | **Partial** | Claude router, OpenAI embedding va RAG fundamenti bor; explicit document search/citation va to'liq smoke-test qarzi bor |
 | AI usage/cost tracking | **Partial** | Log wiring va DB tracking bor; polishing request quota'si PostgreSQL atomik reservation/release bilan race-safe qilingan, provider usage output validatsiyasidan oldin hisoblanadi. Migration rollout, tenant billing dashboard va barcha endpointlar uchun yagona enforcement hali qolgan |
 | AI Hujjatchi | **Production binary + staged AI polish preview / provider blocked** | 15 shablon, 4 til va real PDF/DOCX/private Storage productionda. Polishing frontend productionga, migration va `bright-api` v11 stagingga chiqdi; Auth/tenant/document va cleanup green, ammo stagingda `ANTHROPIC_API_KEY` yo'qligi sabab real-provider smoke `503 AI_UNAVAILABLE`. Production backend/migration rollout ataylab kutilmoqda |
-| HR Candidate Analysis | **Partial / provider blocked** | GitHub/cache, local PDF/DOCX, request/role, PostgreSQL quota va finally-release lifecycle, bounded multipart, atomic usage/cost, strict provider output/account-before-validation contracti, deterministik scorer, 3-tilli evidence report, orchestrator va frontend boundary real/testlangan; real Haiku/Sonnet invocation, active route va full-flow qolgan, production `501` |
+| HR Candidate Analysis | **Partial / provider blocked** | GitHub/cache, local PDF/DOCX, request/role, PostgreSQL quota/finally-release, bounded multipart, atomic usage/cost, injection-resistant minimized prompt va strict output/account-before-validation contractlari, deterministik scorer, 3-tilli evidence report, orchestrator va frontend boundary real/testlangan; real Haiku/Sonnet invocation, active route va full-flow qolgan, production `501` |
 | Billing / Click / Payme | **Planned** | Phase 3 |
 | AI Sotuvchi | **Planned** | Phase 3 |
 

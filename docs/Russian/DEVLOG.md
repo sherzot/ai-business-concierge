@@ -4,6 +4,17 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — HR provider prompt contracts усилены против injection и bias
+
+- Три prompt skeleton/TODO заменены production contracts. System prompts для CV semantic, scoring и report задают exact JSON/key/enum/string/array/date/category bounds, совпадающие с runtime validators, запрещают угадывать missing/private work и использовать protected traits.
+- User-controlled CV/JD/signals не интерполируются в system instructions. После NFKC/bounds они помещаются в escaped JSON data blocks; CV ограничен 16k chars, JD 5k, serialized provider data 96 KiB. Embedded delimiters/instructions остаются data.
+- Evidence projection минимизирован: исключены username, profile URL, CV filename, company/institution names, repo URL/description, follower/following; сохранены technical repo/role/date/skill/status signals. JD/role-fit presence передаются explicit flags.
+- Prompt contract 6/6, HR backend 76/76, targeted Deno с Telegram 80/80 PASS. `d07577f` отправлен в `main`; GitHub CI `32552683005` green за 1m11s: Deno 80/80, backend quality, frontend 28/28 files и 127/127 tests, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files. Netlify skipped; live provider, staging/production DB/Edge и `501` без изменений.
+
+Осталось: после получения key подключить real Haiku/Sonnet calls к готовому prompt -> account-before-validation -> strict-output pipeline и включить canonical route после authenticated staging full flow.
+
+Файлы: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/prompts{,.test}.ts` и синхронная документация на четырёх языках.
+
 ## 2026-08-22 — HR quota-lease lifecycle завершён без provider key
 
 - Persistent quota reserve/release adapters объединены boundary `executeWithHrCandidateQuota`. При denial analysis/release не начинаются; после accepted lease success, provider rejection и timeout-shaped failure вызывают release ровно один раз в `finally`.
