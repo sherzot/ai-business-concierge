@@ -8,6 +8,7 @@
 
 - Service-role-only `record_hr_candidate_ai_usage` RPCはsemantic CV、scoring、reportingのbounded model/complexity/token/cost/cache/latency metadataのみ保存する。Tenant+endpoint+request idempotencyとdaily token counterを1 transactionで更新し、active membership、ULID、numeric/cache bounds、browser EXECUTE denialはfail closed。Prompt、CV、outputは保存せずraw DB errorも隠す。
 - Accounting Deno 4/4、targeted backend 51/51 green。Stagingはmigration `20260822022702`で40。Transactional acceptanceはduplicate suppression、2 logs、240/90 tokens、$0.002070、exactly-once 330 tokens、request counter 0、grantsを検証し、rollback residue user/tenant 0/0。新規security advisor errorは0。Productionと`501`は未変更。
+- `36b9553`をmainへpushし、GitHub CI `32546561166`は1m12sでgreen。Deno 51/51とquality、frontend 127/127、deploy-env 14/14、audit high/critical 0、3,701-module build、10-file securityを通過。Frontend runtime未変更のためNetlifyは意図的にskip。
 
 残作業: key取得後、各provider responseをoutput validation前にaccountingへ接続し、quota lease releaseとfull-flow smoke後に`501`を削除する。
 

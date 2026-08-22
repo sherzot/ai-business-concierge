@@ -43,6 +43,7 @@
 > 2026-08-22: Frontend boundary upload/state/result HR Candidate доведён до production-grade: bounded client validation, tenant/session-first multipart, timeout/cancellation, защита stale response, runtime result validation и accessible responsive UX. Frontend 28/28 файлов, 127/127 tests и все build/security gates green; desktop/mobile browser acceptance без horizontal overflow. Backend route намеренно остаётся `501`.
 > 2026-08-22: `f77dd9a` в main, GitHub CI `32545770532` green, Netlify production deploy `6a89065505b5600008dd0385` ready. `/` и `/dashboard/hr/candidates` возвращают `200`; CSP и production-only bundle green. Provider route остаётся `501`.
 > 2026-08-22: HR provider usage/cost accounting atomic/idempotent; staging 40 migrations, remote transactional acceptance и Deno 51/51 green. Prompt/CV/output не сохраняются; production и `501` без изменений.
+> 2026-08-22: `36b9553` в main, GitHub CI `32546561166` green за 1m12s; Netlify skipped, поскольку frontend runtime не менялся.
 
 ## Текущая фаза
 
@@ -74,7 +75,7 @@
 | Delivery platform | Только Netlify. В repository нет Vercel config/dependency; внешний Vercel project сохранён, `gitRepositoryConnected=false` подтверждён |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs отсутствуют; на Personal только browser-public `VITE_*` используют `All` scope |
 | Staging security advisor | Errors `0`; известный `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | Main run `32545770532` для commit `f77dd9a` success за 57s: Deno quality, frontend 28/28 files и 127/127 tests, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files green |
+| Remote GitHub Actions | Main run `32546561166` для commit `36b9553` success за 1m12s: Deno 51/51 и quality, frontend 127/127, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files green |
 | Netlify preview | Новый deploy preview не создан, потому что slice pushed напрямую в `main`; Netlify использовал production context |
 | Production frontend | Deploy `6a89065505b5600008dd0385` ready, build `6a89065505b5600008dd0383`, commit `f77dd9a`, 29s, plugin success, 0 secret matches в 87,145 files; `/` и `/dashboard/hr/candidates` `200`, CSP и production-only `index-DipHAHEa.js` green |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |

@@ -43,6 +43,7 @@
 > 2026-08-22: The HR Candidate frontend upload/state/result boundary is production-grade: bounded client validation, tenant/session-first multipart, timeout/cancellation, stale-response protection, runtime result validation, and accessible responsive UX. Frontend 28/28 files, 127/127 tests, and every build/security gate are green; desktop/mobile browser acceptance has zero horizontal overflow. The backend route intentionally remains `501`.
 > 2026-08-22: `f77dd9a` is on main, GitHub CI `32545770532` is green, and Netlify production deploy `6a89065505b5600008dd0385` is ready. `/` and `/dashboard/hr/candidates` return `200`; CSP and the production-only bundle are green. The provider route remains `501`.
 > 2026-08-22: HR provider usage/cost accounting is atomic and idempotent; staging has 40 migrations, remote transactional acceptance and Deno 51/51 are green. Prompt/CV/output data is not stored; production and `501` are unchanged.
+> 2026-08-22: `36b9553` is on main and GitHub CI `32546561166` completed green in 1m12s; Netlify was skipped because frontend runtime did not change.
 
 ## Current phase
 
@@ -74,7 +75,7 @@
 | Delivery platform | Netlify only. The repository has no Vercel config/dependency; the external Vercel project remains, with `gitRepositoryConnected=false` verified |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs are absent; on Personal only browser-public `VITE_*` values use `All` scope |
 | Staging security advisor | Errors `0`; known `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | Main run `32545770532` for commit `f77dd9a` succeeded in 57s: Deno quality, frontend 28/28 files and 127/127 tests, deploy-env 14/14, audit 0 high/critical, 3,701-module build, and 10-file security green |
+| Remote GitHub Actions | Main run `32546561166` for commit `36b9553` succeeded in 1m12s: Deno 51/51 plus quality, frontend 127/127, deploy-env 14/14, audit 0 high/critical, 3,701-module build, and 10-file security green |
 | Netlify preview | No new deploy preview was created because this slice was pushed directly to `main`; Netlify used production context |
 | Production frontend | Deploy `6a89065505b5600008dd0385` ready, build `6a89065505b5600008dd0383`, commit `f77dd9a`, 29s, plugin success, 0 secret matches across 87,145 files; `/` and `/dashboard/hr/candidates` `200`, CSP and production-only `index-DipHAHEa.js` green |
 | Frontend Supabase key contract | Code and production accept only the modern publishable key; bundle has 1 modern key, 0 JWT-like keys, no legacy env name, and the format guard; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env deleted |

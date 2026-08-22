@@ -44,6 +44,7 @@
 > 2026-08-22: HR Candidate frontend upload/state/result boundary production darajasiga keltirildi: bounded client validation, tenant/session-first multipart, timeout/cancellation, stale-response himoyasi, runtime result validation va accessible responsive UX. Frontend 28/28 fayl, 127/127 test va barcha build/security gate'lari green; desktop/mobile browser acceptance'da horizontal overflow 0. Backend route ataylab `501`.
 > 2026-08-22: `f77dd9a` main, GitHub CI `32545770532` green va Netlify production deploy `6a89065505b5600008dd0385` ready. `/` hamda `/dashboard/hr/candidates` `200`, CSP va production-only bundle green; provider route `501` bo'lib qoldi.
 > 2026-08-22: HR provider usage/cost accounting atomik va idempotent qilindi; staging 40 migration, remote transactional acceptance va Deno 51/51 green. Prompt/CV/output yozilmaydi; production va `501` o'zgarmadi.
+> 2026-08-22: `36b9553` main va GitHub CI `32546561166` 1m12sda green; runtime frontend o'zgarmagani uchun Netlify skip qilindi.
 
 ## Hozir qayerdamiz
 
@@ -76,7 +77,7 @@
 | Delivery platform | Faol platforma faqat Netlify. Repo ichida Vercel config/dependency yo'q; external Vercel project saqlangan, `gitRepositoryConnected=false` tasdiqlandi |
 | Environment isolation | Netlify CLI authoritative read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envlari yo'q; Personal rejada faqat browser-public `VITE_*` qiymatlar `All` scope'da |
 | Staging security advisor | Error `0`; ma'lum `vector` public-schema warningi `1`; server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | Commit `f77dd9a` uchun main run `32545770532` 57sda success: Deno quality, frontend 28/28 fayl va 127/127 test, deploy-env 14/14, audit 0 high/critical, 3,701-module build va 10-file security green |
+| Remote GitHub Actions | Commit `36b9553` uchun main run `32546561166` 1m12sda success: Deno 51/51 va quality, frontend 127/127, deploy-env 14/14, audit 0 high/critical, 3,701-module build va 10-file security green |
 | Netlify preview | Bu slice bevosita `main`ga push qilingani uchun yangi deploy-preview yaratilmagan; Netlify production context ishlagan |
 | Production frontend | Deploy `6a89065505b5600008dd0385` ready, build `6a89065505b5600008dd0383`, commit `f77dd9a`, 29s, plugin success, secret match 0/87,145; `/` va `/dashboard/hr/candidates` `200`, CSP va production-only `index-DipHAHEa.js` bundle green |
 | Frontend Supabase key contract | Kod va production faqat modern publishable keyni qabul qiladi; bundle modern key 1, JWT-like key 0, legacy env nomi yo'q, format guard bor; Auth settings `200`, Realtime `OPEN`; Netlify legacy frontend env o'chirilgan |

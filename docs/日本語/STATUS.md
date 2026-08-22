@@ -43,6 +43,7 @@
 > 2026-08-22: HR Candidate frontend upload/state/result boundaryをproduction-grade化した。Bounded client validation、tenant/session-first multipart、timeout/cancellation、stale-response protection、runtime result validation、accessible responsive UXを実装。Frontend 28/28 files・127/127 testsと全build/security gateがgreen、desktop/mobile browser acceptanceのhorizontal overflowは0。Backend routeは意図的に`501`のまま。
 > 2026-08-22: `f77dd9a`はmain、GitHub CI `32545770532`はgreen、Netlify production deploy `6a89065505b5600008dd0385`はready。`/`と`/dashboard/hr/candidates`は`200`、CSPとproduction-only bundleはgreen。Provider routeは`501`のまま。
 > 2026-08-22: HR provider usage/cost accountingはatomic/idempotent。Stagingは40 migrations、remote transactional acceptanceとDeno 51/51 green。Prompt/CV/outputは保存せず、productionと`501`は未変更。
+> 2026-08-22: `36b9553`はmain、GitHub CI `32546561166`は1m12sでgreen。Frontend runtime未変更のためNetlifyはskip。
 
 ## 現在のPhase
 
@@ -74,7 +75,7 @@
 | Delivery platform | Netlifyのみ。RepositoryにVercel config/dependencyなし。External Vercel projectは保持し、`gitRepositoryConnected=false`を確認 |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase、`deploy-preview`/`branch-deploy`/`dev` -> staging。Optional URL envなし。Personalではbrowser-public `VITE_*`のみ`All` scopeを使用 |
 | Staging security advisor | Error `0`、既知`vector` public-schema warning `1`、server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | Commit `f77dd9a`のmain run `32545770532`は57sでsuccess。Deno quality、frontend 28/28 files・127/127 tests、deploy-env 14/14、audit 0 high/critical、3,701-module build、10-file security green |
+| Remote GitHub Actions | Commit `36b9553`のmain run `32546561166`は1m12sでsuccess。Deno 51/51とquality、frontend 127/127、deploy-env 14/14、audit high/critical 0、3,701-module build、10-file security green |
 | Netlify preview | Sliceを直接`main`へpushしたため新規deploy previewはなく、Netlify production contextが実行された |
 | Production frontend | Deploy `6a89065505b5600008dd0385` ready、build `6a89065505b5600008dd0383`、commit `f77dd9a`、29s、plugin success、87,145 filesでsecret match 0。`/`と`/dashboard/hr/candidates`は`200`、CSP・production-only `index-DipHAHEa.js` green |
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |

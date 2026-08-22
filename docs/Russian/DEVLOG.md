@@ -8,6 +8,7 @@
 
 - Service-role-only RPC `record_hr_candidate_ai_usage` записывает только bounded model/complexity/token/cost/cache/latency metadata для semantic CV, scoring и reporting. Tenant+endpoint+request idempotency и daily token counter обновляются в одной transaction; active membership, ULID, numeric/cache bounds и browser EXECUTE denial fail closed. Prompt, CV и output не сохраняются, raw DB error скрыт.
 - Accounting Deno 4/4 и targeted backend 51/51 green. Staging migration `20260822022702`, итого 40. Transactional acceptance проверил duplicate suppression, 2 logs, 240/90 tokens, $0.002070, exactly-once 330 tokens, request counter 0 и grants; rollback residue user/tenant 0/0. Новых security advisor errors нет. Production и `501` не менялись.
+- `36b9553` отправлен в main; GitHub CI `32546561166` green за 1m12s: Deno 51/51 и quality, frontend 127/127, deploy-env 14/14, audit 0 high/critical, build 3 701 modules и security 10 files. Netlify намеренно skipped, frontend runtime не менялся.
 
 Осталось: после получения key подключить каждый provider response к accounting до output validation, release quota lease и убрать `501` только после full-flow smoke.
 

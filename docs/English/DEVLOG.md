@@ -8,6 +8,7 @@ Project development history, completed work, encountered errors, and their solut
 
 - A service-role-only `record_hr_candidate_ai_usage` RPC now records bounded model/complexity/token/cost/cache/latency metadata for semantic CV, scoring, and reporting. Tenant+endpoint+request idempotency and the daily token counter share one transaction; active membership, ULID, numeric/cache bounds, and browser EXECUTE denial fail closed. Prompt, CV, and output content is never stored, and the TypeScript adapter hides raw DB errors.
 - Accounting Deno 4/4 and targeted backend 51/51 passed. Staging applied `20260822022702`, reaching 40 migrations. Transactional acceptance verified first/duplicate/second-stage, two logs, 240/90 tokens, $0.002070, exactly-once 330-token aggregation, request counter 0, and grants; rollback residue was user/tenant 0/0. No new security-advisor errors appeared. Production and `501` were unchanged.
+- `36b9553` was pushed to main; GitHub CI `32546561166` completed green in 1m12s with Deno 51/51 and quality, frontend 127/127, deploy-env 14/14, audit 0 high/critical, a 3,701-module build, and 10-file security. Netlify was intentionally skipped because frontend runtime did not change.
 
 Remaining: wire each real provider response through this boundary before output validation, then release quota leases and remove `501` only after full-flow smoke.
 
