@@ -2,9 +2,9 @@
  * HR Candidate Analysis — Orchestrator
  *
  * Status: PARTIAL. Provider-independent orchestration is implemented and
- * tested; deterministic scoring is implemented. Semantic refinement/report
- * generation and provider usage call-site wiring remain. Atomic usage
- * persistence is implemented separately.
+ * tested; deterministic scoring and evidence-linked reporting are implemented.
+ * Semantic refinement and provider usage call-site wiring remain. Atomic
+ * usage persistence is implemented separately.
  *
  * Responsibilities:
  *   1. Validate and normalize input before provider calls

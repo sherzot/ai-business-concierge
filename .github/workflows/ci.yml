@@ -50,6 +50,7 @@ jobs:
             supabase/functions/server/services/hr-candidate/http-adapter.test.ts \
             supabase/functions/server/services/hr-candidate/usage-accounting.test.ts \
             supabase/functions/server/services/hr-candidate/candidate-scorer.test.ts \
+            supabase/functions/server/services/hr-candidate/report-generator.test.ts \
             supabase/functions/server/services/hr-candidate/index.test.ts \
             supabase/functions/server/services/hr-candidate/schema.test.ts
 
@@ -74,6 +75,8 @@ jobs:
             supabase/functions/server/services/hr-candidate/usage-accounting.test.ts \
             supabase/functions/server/services/hr-candidate/candidate-scorer.ts \
             supabase/functions/server/services/hr-candidate/candidate-scorer.test.ts \
+            supabase/functions/server/services/hr-candidate/report-generator.ts \
+            supabase/functions/server/services/hr-candidate/report-generator.test.ts \
             supabase/functions/server/services/hr-candidate/index.ts \
             supabase/functions/server/services/hr-candidate/index.test.ts \
             supabase/functions/server/services/hr-candidate/schema.test.ts \
@@ -87,6 +90,7 @@ jobs:
             supabase/functions/server/services/hr-candidate/http-adapter.test.ts \
             supabase/functions/server/services/hr-candidate/usage-accounting.test.ts \
             supabase/functions/server/services/hr-candidate/candidate-scorer.test.ts \
+            supabase/functions/server/services/hr-candidate/report-generator.test.ts \
             supabase/functions/server/services/hr-candidate/index.test.ts \
             supabase/functions/server/services/hr-candidate/schema.test.ts
           deno lint \
@@ -102,6 +106,8 @@ jobs:
             supabase/functions/server/services/hr-candidate/usage-accounting.test.ts \
             supabase/functions/server/services/hr-candidate/candidate-scorer.ts \
             supabase/functions/server/services/hr-candidate/candidate-scorer.test.ts \
+            supabase/functions/server/services/hr-candidate/report-generator.ts \
+            supabase/functions/server/services/hr-candidate/report-generator.test.ts \
             supabase/functions/server/services/hr-candidate/index.ts \
             supabase/functions/server/services/hr-candidate/index.test.ts \
             supabase/functions/server/services/hr-candidate/schema.test.ts \
