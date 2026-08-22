@@ -71,7 +71,7 @@
 | Delivery platform | Netlifyのみ。RepositoryにVercel config/dependencyなし。External Vercel projectは保持し、`gitRepositoryConnected=false`を確認 |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase、`deploy-preview`/`branch-deploy`/`dev` -> staging。Optional URL envなし。Personalではbrowser-public `VITE_*`のみ`All` scopeを使用 |
 | Staging security advisor | Error `0`、既知`vector` public-schema warning `1`、server-only RLS/no-policy info `11` |
-| Remote GitHub Actions | Commit `2656e6a`のmain run `32491296828`は1m9sでsuccess。Deno 34/34、frontend 117/117、deploy-env 14/14、audit 0 high/critical、3,701-module build、10-file security green |
+| Remote GitHub Actions | Commit `398e46e`のmain run `32543760806`は1m15sでsuccess。Deno 47/47とquality checks、frontend 117/117、deploy-env 14/14、audit 0 high/critical、3,701-module build、10-file security green |
 | Netlify preview | Sliceを直接`main`へpushしたため新規deploy previewはなく、Netlify production contextが実行された |
 | Production frontend | Deploy `6a88056075359300089b9fa5` ready、build `6a88056075359300089b9fa3`、commit `4b51fec`、34s、plugin success、87,170 filesでsecret match 0。`/`と`/dashboard/docs`は`200`、CSP・production-only bundle green |
 | Frontend Supabase key contract | Code/productionはmodern publishable keyのみ許可。Bundleはmodern key 1、JWT-like key 0、legacy env nameなし、format guardあり。Auth settings `200`、Realtime `OPEN`。Netlify legacy frontend env削除済み |

@@ -10,6 +10,7 @@
 - Multipart adapterはboundary、duplicate/unknown field、encoding、MIME、file/text/locale/depth contractを検証し、declared/chunked bodyの両方を5 MiB CV + 64 KiB overheadで制限する。Disabled canonical routeもbounded drainを使い、valid authorized requestでは`501 NOT_IMPLEMENTED`を維持する。Provider/production Edge deployは行っていない。
 - Backend Deno 47/47、17-file format、12-file check、lintがPASS。Monolithには既存のlogging/Hono/risk type error 21件が残るが、新しいHR行のerrorは0。Node 22.23.2でfrontend 26/26 files・117/117 tests、type-check、deploy-env 14/14、production audit high/critical 0、3,701-module build、10-file security gateがPASS。
 - Stagingへmigration `20260822010759`と`20260822011030`を適用し、合計39。Remote transactional pgTAP 22-case runnerは`ok 22`まで到達してrollbackし、read-backでprivate table 2/2のRLS+FORCE、service reserve/release許可、browser reserve/release拒否、service direct SELECT拒否を確認した。新規unindexed-FK advisor findingは解消し、workload前の想定内unused-index INFOのみ残る。Production DB/Edgeは未変更。Local Docker socketが応答しないためfresh local 39-migration replayはBLOCKEDで、staging PostgreSQL 17.6 dry-run/pgTAPでDB検証した。
+- `398e46e`を`main`へpush。GitHub CI `32543760806`は1m15sでgreen: Deno 47/47、format/check/lint、frontend 26/26 files・117/117 tests、deploy-env 14/14、audit 0 high/critical、3,701-module build、10-file security gate PASS。Runtime frontendは変更していないためNetlifyは意図的にskipした。
 
 残作業: secret-freeのHR usage/cost loggingとfrontend upload/results。Key受領後にsemantic CV/scoring/reportのreal-provider smoke、route `finally`でlease release、その後`501`を解除する。
 

@@ -71,7 +71,7 @@
 | Delivery platform | Только Netlify. В repository нет Vercel config/dependency; внешний Vercel project сохранён, `gitRepositoryConnected=false` подтверждён |
 | Environment isolation | Authoritative Netlify CLI read-back 4/4: `production` -> production Supabase; `deploy-preview`/`branch-deploy`/`dev` -> staging. Optional URL envs отсутствуют; на Personal только browser-public `VITE_*` используют `All` scope |
 | Staging security advisor | Errors `0`; известный `vector` public-schema warning `1`; server-only RLS/no-policy infos `11` |
-| Remote GitHub Actions | Main run `32491296828` для commit `2656e6a` success за 1m9s: Deno 34/34, frontend 117/117, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files green |
+| Remote GitHub Actions | Main run `32543760806` для commit `398e46e` success за 1m15s: Deno 47/47 и quality checks, frontend 117/117, deploy-env 14/14, audit 0 high/critical, build 3,701 modules и security 10 files green |
 | Netlify preview | Новый deploy preview не создан, потому что slice pushed напрямую в `main`; Netlify использовал production context |
 | Production frontend | Deploy `6a88056075359300089b9fa5` ready, build `6a88056075359300089b9fa3`, commit `4b51fec`, 34s, plugin success, 0 secret matches в 87,170 files; `/` и `/dashboard/docs` `200`, CSP и production-only bundle green |
 | Frontend Supabase key contract | Code и production принимают только modern publishable key; bundle: modern key 1, JWT-like keys 0, legacy env name отсутствует, format guard есть; Auth settings `200`, Realtime `OPEN`; legacy frontend env Netlify удалён |
