@@ -4,6 +4,13 @@ Project development history, completed work, encountered errors, and their solut
 
 > **Translations (kept in sync):** [Uzbek (primary)](../DEVLOG.md) · [Russian](../Russian/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — HR provider usage/cost accounting hardened atomically in staging
+
+- A service-role-only `record_hr_candidate_ai_usage` RPC now records bounded model/complexity/token/cost/cache/latency metadata for semantic CV, scoring, and reporting. Tenant+endpoint+request idempotency and the daily token counter share one transaction; active membership, ULID, numeric/cache bounds, and browser EXECUTE denial fail closed. Prompt, CV, and output content is never stored, and the TypeScript adapter hides raw DB errors.
+- Accounting Deno 4/4 and targeted backend 51/51 passed. Staging applied `20260822022702`, reaching 40 migrations. Transactional acceptance verified first/duplicate/second-stage, two logs, 240/90 tokens, $0.002070, exactly-once 330-token aggregation, request counter 0, and grants; rollback residue was user/tenant 0/0. No new security-advisor errors appeared. Production and `501` were unchanged.
+
+Remaining: wire each real provider response through this boundary before output validation, then release quota leases and remove `501` only after full-flow smoke.
+
 ## 2026-08-22 — HR Candidate frontend upload/state/result boundary completed
 
 - While `ANTHROPIC_API_KEY` remains pending, the secret-free frontend slice was completed. The former UI skeleton lacked client-side input bounds, stale-request cancellation, safe transport errors, runtime success-envelope validation, and accessible pending/error/empty states.

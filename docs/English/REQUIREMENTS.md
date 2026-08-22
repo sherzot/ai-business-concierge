@@ -41,7 +41,7 @@ This document defines project requirements and future directions. Refer to this 
 | R-001 | Real inbox integration | Email (Resend) webhook – partially done ✅ | Inbox |
 | R-002 | Real-time updates | Supabase Realtime – inbox, tasks ✅ | Inbox, Tasks |
 | R-015 | Task assignment notifications | Alert assignee when leader assigns, acknowledgement, status transparency ✅ | Tasks |
-| R-016 | HR Candidate Analysis | Partial; GitHub/cache, bounded PDF/DOCX, request/role policy, PostgreSQL minute/day/concurrency leases, bounded multipart, orchestrator/schema, and the frontend upload/state/result boundary are ready (backend HR 43/43; frontend candidate 12/12). Haiku/Sonnet, usage logging, active route wiring, and full flow remain | HR |
+| R-016 | HR Candidate Analysis | Partial; bounded adapters, request/role, PostgreSQL quota, multipart, atomic/idempotent usage-cost persistence, orchestrator/schema, and frontend boundary are ready (backend HR 47/47; frontend 12/12). Haiku/Sonnet, provider accounting call-sites, active route, and full flow remain | HR |
 | R-017 | AI rate limiting | Partial; polishing daily reservation and HR tenant minute/day/concurrency leases are race-safe in service-role-only PostgreSQL; staging HR's 22-case pgTAP runner succeeded. Production rollout, unified policy for other endpoints, and `Retry-After` remain | Backend |
 | R-018 | AI cost tracking | Partial; logging exists, tenant usage dashboard/enforcement remains | Backend |
 | R-019 | Vector Search (RAG) | Partial; vector/embedding foundation exists, explicit tool/citations remain | Docs |

@@ -3,7 +3,7 @@
 > プロジェクトアーキテクチャ、設計パターン、ユニットテストルール
 > バージョン: 1.3 | 更新: 2026-08-21
 >
-> Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate`はpartial。GitHub、local PDF/DOCX、pure request policy、PostgreSQL quota lease、bounded multipart、orchestrator failure boundaryはreal。Semantic LLM/scoring/report/full HTTP wiringはproduction-readyではない。
+> Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate`はpartial。Bounded adapters、request policy、PostgreSQL quota lease、atomic/idempotent metadata-only usage accounting、multipart、orchestrator、frontend boundariesはreal。Semantic LLM/scoring/report call-sitesとfull HTTP wiringはproduction-readyではない。
 
 ---
 

@@ -194,7 +194,7 @@ router.post("/tasks", async (c) => {
 
 ### 3.3 Target pattern: modular service papkasi
 
-`hr-candidate` papkasi kerakli modular strukturani ko'rsatadi. GitHub REST va local PDF/DOCX adapterlari bounded; pure request/role/tariff policy providerdan oldin ishlaydi; service-role-only PostgreSQL RPC tenant minute/day counter va expiring concurrency lease'ni atomik rezervatsiya qiladi; multipart adapter declared/chunked body'ni 5 MiB CV + 64 KiB overhead bilan cheklaydi; dependency-injected orchestrator invalid/failed/timeout/degraded oqimlarini boshqaradi. Semantic CV structuring, scoring, report, usage log va full HTTP route wiringda TODO/stublar bor. Butun papkani production implementatsiya deb ko'chirmang. Ishlaydigan servis chegaralari uchun `llm-router.ts`, `knowledge-base.ts` va `document-generator.ts`; murakkab feature papka shakli uchun quyidagi target pattern ishlatiladi:
+`hr-candidate` papkasi kerakli modular strukturani ko'rsatadi. GitHub REST va local PDF/DOCX adapterlari bounded; pure request/role/tariff policy providerdan oldin ishlaydi; service-role-only PostgreSQL RPC quota lease'ni rezervatsiya qiladi va alohida idempotent RPC provider logi bilan token counterni bitta tranzaksiyada yozadi; prompt/CV/output accounting chegarasidan o'tmaydi. Multipart adapter body'ni 5 MiB CV + 64 KiB overhead bilan cheklaydi; orchestrator failure oqimlarini boshqaradi. Semantic CV/scoring/report, accounting call-site va full HTTP route wiringda TODO/stublar bor.
 
 ```
 services/{domain}/

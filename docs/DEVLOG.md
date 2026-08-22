@@ -4,6 +4,16 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-22 — HR provider usage/cost accounting stagingda atomik qotirildi
+
+- `ANTHROPIC_API_KEY`dan mustaqil navbatdagi HR slice bajarildi. Oldin HR orchestratorida usage/cost uchun faqat TODO bor edi; provider bosqichlari token hisobini takror yozishi yoki `usage_tracking` bilan ajralib ketishi mumkin edi.
+- `record_hr_candidate_ai_usage` service-role-only PostgreSQL RPCsi `cv_semantic`, `candidate_scoring` va `report_generation` bosqichlari uchun model/complexity/token/cost/cache/latency metadata'sini yozadi. `(tenant, endpoint, request)` unique boundary retryni idempotent qiladi; yangi log va daily token counter bitta tranzaksiyada yangilanadi. Active tenant membership, canonical ULID va qat'iy numeric/cache limitlari fail-closed; prompt, CV va model output yozilmaydi. TypeScript adapter raw DB xatosini logga chiqarmaydi.
+- Lokal Deno accounting 4/4 va Telegram bilan targeted backend 51/51, format/check/lint PASS. Staging migration `20260822022702` bilan 40 taga yetdi; transactional remote acceptance first/duplicate/second-stage, 2 log, 240/90 token, $0.002070, exactly-once 330 token, request counter 0 va service/anon/auth grantlarini tekshirdi. Barcha assertionlar green, rollbackdan keyin synthetic user/tenant qoldig'i 0/0. Security advisor yangi error qaytarmadi; oldingi `vector` warningi va server-only RLS INFOlar saqlandi. Production DB/Edge va `501` route o'zgarmadi.
+
+Qolgan ish: key kelgach har bir real LLM javobini output validatsiyasidan oldin shu accounting boundaryga ulash, quota lease'ni `finally`da release qilish va full-flow smoke'dan keyin `501`ni olib tashlash.
+
+Fayllar: `.github/workflows/ci.yml`, `supabase/functions/server/services/hr-candidate/usage-accounting{,.test}.ts`, `supabase/migrations/20260822022702_hr_candidate_usage_accounting.sql`, HR README/index comment va 4-tilli `DEVLOG/STATUS/PLAN/REQUIREMENTS/ARCHITECTURE`.
+
 ## 2026-08-22 — HR Candidate frontend upload/state/result boundary yakunlandi
 
 - `ANTHROPIC_API_KEY` kutilayotganda secretsiz frontend slice yakunlandi. Oldingi UI skeletonida client input limitlari, stale request cancellationi, safe transport xatolari, runtime success-envelope tekshiruvi va accessible pending/error/empty holatlari yetishmasdi.

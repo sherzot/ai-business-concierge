@@ -49,10 +49,12 @@ which currently returns `501 NOT_IMPLEMENTED`. The backend service boundary is a
 - [x] `http-adapter.ts`     — duplicate-safe multipart parsing + 5 MiB CV / 64 KiB overhead stream bound
 - [ ] `candidate-scorer.ts` — Sonnet structured output
 - [ ] `report-generator.ts` — Sonnet narrative + interview questions
-- [~] `index.ts`            — validation/parallel/timeout/failed-CV gates complete; LLM retry and usage logging remain
+- [~] `index.ts`            — validation/parallel/timeout/failed-CV gates complete; LLM retry and usage call-site wiring remain
+- [x] `usage-accounting.ts` — idempotent service-role-only provider token/cost persistence
 
 The frontend validates bounded PDF/DOCX input, normalizes fields, sends an
 authenticated tenant-scoped multipart request, rejects malformed success
 payloads, cancels stale requests, and renders typed pending/error/result states.
-Once provider wiring and usage logging land, flip the route handler from the
+Once provider wiring records every call through the prepared accounting RPC,
+flip the route handler from the
 501 stub to `analyzeCandidate(req)` and run authenticated full-flow acceptance.

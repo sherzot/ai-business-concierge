@@ -3,7 +3,7 @@
 > Архитектура проекта, паттерны проектирования и правила unit-тестирования
 > Версия: 1.3 | Обновлено: 2026-08-21
 >
-> Текущий runtime-статус находится в [STATUS.md](STATUS.md). `hr-candidate` partial: GitHub, local PDF/DOCX, pure request policy, PostgreSQL quota lease, bounded multipart и orchestrator failure boundary real; semantic LLM/scoring/report/full HTTP wiring не production-ready.
+> Текущий runtime-статус находится в [STATUS.md](STATUS.md). `hr-candidate` partial: bounded adapters, request policy, PostgreSQL quota lease, atomic/idempotent metadata-only usage accounting, multipart, orchestrator и frontend boundaries real; semantic LLM/scoring/report call-sites и full HTTP wiring не production-ready.
 
 ---
 

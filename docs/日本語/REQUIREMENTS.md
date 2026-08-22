@@ -41,7 +41,7 @@
 | R-001 | リアル受信ボックス統合 | Email（Resend）webhook – 部分実装済み ✅ | Inbox |
 | R-002 | リアルタイム更新 | Supabase Realtime – inbox、tasks ✅ | Inbox、Tasks |
 | R-015 | タスク割り当て通知 | リーダーが割り当てた際の担当者への通知、確認、ステータスの透明性 ✅ | Tasks |
-| R-016 | HR Candidate Analysis | Partial。GitHub/cache、bounded PDF/DOCX、request/role policy、PostgreSQL minute/day/concurrency lease、bounded multipart、orchestrator/schema、frontend upload/state/result boundaryはready（backend HR 43/43、frontend candidate 12/12）。Haiku/Sonnet、usage log、active route wiring、full flowが残る | HR |
+| R-016 | HR Candidate Analysis | Partial。Bounded adapters、request/role、PostgreSQL quota、multipart、atomic/idempotent usage-cost persistence、orchestrator/schema、frontend boundaryはready（backend HR 47/47、frontend 12/12）。Haiku/Sonnet、provider accounting call-sites、active route、full flowが残る | HR |
 | R-017 | AI rate limiting | Partial。Polishing daily reservationとHR tenant minute/day/concurrency leaseはservice-role-only PostgreSQLでrace-safe。Staging HR pgTAP 22-case runner success。Production rollout、他endpointのunified policy、`Retry-After`が残る | Backend |
 | R-018 | AI cost tracking | Partial; loggingあり、tenant dashboard/enforcementが残る | Backend |
 | R-019 | Vector Search (RAG) | Partial; vector/embedding基盤あり、explicit tool/citationsが残る | Docs |

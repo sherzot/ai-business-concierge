@@ -2,7 +2,8 @@
  * HR Candidate Analysis — Orchestrator
  *
  * Status: PARTIAL. Provider-independent orchestration is implemented and
- * tested; semantic scoring/report generation and usage accounting remain.
+ * tested; semantic scoring/report generation and provider usage call-site
+ * wiring remain. Atomic usage persistence is implemented separately.
  *
  * Responsibilities:
  *   1. Validate and normalize input before provider calls
@@ -10,7 +11,7 @@
  *   3. Hard-fail if CV parse failed (no scoring possible without CV)
  *   4. Run candidate_scorer (12s timeout; retry remains gated with LLM work)
  *   5. Run report_generator (14s timeout)
- *   6. Assemble CandidateAnalysisResult (usage log remains pending)
+ *   6. Assemble CandidateAnalysisResult (provider receipts wire in with LLMs)
  *
  * SLA: total ≤ 25 s p50, hard timeout 30 s.
  * No persistence (MVP) — only in-memory.
@@ -172,8 +173,8 @@ export function createCandidateAnalyzer(
         : "ok";
       const duration = Math.max(0, dependencies.now() - startedAt);
 
-      // TODO: log to ai_messages table (request_id, tokens, cost_usd, duration)
-      //       — see CLAUDE.md "Cost tracking" rule
+      // Provider implementations must call recordHrProviderUsage immediately
+      // after every completed LLM response, before output validation.
 
       return {
         request_id: requestId,

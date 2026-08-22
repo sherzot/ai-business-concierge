@@ -48,6 +48,7 @@ jobs:
             supabase/functions/server/services/hr-candidate/request-boundary.test.ts \
             supabase/functions/server/services/hr-candidate/quota.test.ts \
             supabase/functions/server/services/hr-candidate/http-adapter.test.ts \
+            supabase/functions/server/services/hr-candidate/usage-accounting.test.ts \
             supabase/functions/server/services/hr-candidate/index.test.ts \
             supabase/functions/server/services/hr-candidate/schema.test.ts
 
@@ -68,6 +69,8 @@ jobs:
             supabase/functions/server/services/hr-candidate/quota.test.ts \
             supabase/functions/server/services/hr-candidate/http-adapter.ts \
             supabase/functions/server/services/hr-candidate/http-adapter.test.ts \
+            supabase/functions/server/services/hr-candidate/usage-accounting.ts \
+            supabase/functions/server/services/hr-candidate/usage-accounting.test.ts \
             supabase/functions/server/services/hr-candidate/index.ts \
             supabase/functions/server/services/hr-candidate/index.test.ts \
             supabase/functions/server/services/hr-candidate/schema.test.ts \
@@ -79,6 +82,7 @@ jobs:
             supabase/functions/server/services/hr-candidate/request-boundary.test.ts \
             supabase/functions/server/services/hr-candidate/quota.test.ts \
             supabase/functions/server/services/hr-candidate/http-adapter.test.ts \
+            supabase/functions/server/services/hr-candidate/usage-accounting.test.ts \
             supabase/functions/server/services/hr-candidate/index.test.ts \
             supabase/functions/server/services/hr-candidate/schema.test.ts
           deno lint \
@@ -90,6 +94,8 @@ jobs:
             supabase/functions/server/services/hr-candidate/quota.test.ts \
             supabase/functions/server/services/hr-candidate/http-adapter.ts \
             supabase/functions/server/services/hr-candidate/http-adapter.test.ts \
+            supabase/functions/server/services/hr-candidate/usage-accounting.ts \
+            supabase/functions/server/services/hr-candidate/usage-accounting.test.ts \
             supabase/functions/server/services/hr-candidate/index.ts \
             supabase/functions/server/services/hr-candidate/index.test.ts \
             supabase/functions/server/services/hr-candidate/schema.test.ts \

@@ -58,8 +58,7 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** LLM Router経由でCV semantic structuringとSonnet structured scoring/reportingを接続。
-- [ ] 全HR provider callsへusage/cost loggingを接続。
+- [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** LLM Router経由でCV semantic structuringとSonnet scoring/reportingを接続し、各provider responseを準備済みatomic usage/cost RPCで計上。
 - [ ] LLM integration後にquota-lease releaseとactive routeを接続し、`501`を削除してfull-flow integration/manual acceptanceを実施。
 
 ## Later phases

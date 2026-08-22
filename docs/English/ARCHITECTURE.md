@@ -3,7 +3,7 @@
 > Project architecture, design patterns, and unit testing rules
 > Version: 1.3 | Updated: 2026-08-21
 >
-> Current runtime status is in [STATUS.md](STATUS.md). `hr-candidate` is partial: GitHub, local PDF/DOCX, pure request policy, PostgreSQL quota leases, bounded multipart, and orchestrator failure boundaries are real; semantic LLM/scoring/report/full HTTP wiring is not production-ready.
+> Current runtime status is in [STATUS.md](STATUS.md). `hr-candidate` is partial: bounded adapters, request policy, PostgreSQL quota leases, atomic/idempotent metadata-only usage accounting, multipart, orchestrator, and frontend boundaries are real; semantic LLM/scoring/report call-sites and full HTTP wiring are not production-ready.
 
 ---
 

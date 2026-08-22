@@ -67,8 +67,7 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** CV semantic structuring, Sonnet structured scoring va report generatorni LLM Router orqali ulash.
-- [ ] Usage/cost logni barcha HR provider chaqiruvlariga ulash.
+- [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** CV semantic structuring, Sonnet structured scoring/reportni LLM Router orqali ulash va har provider javobini tayyor atomic usage/cost RPCda hisoblash.
 - [ ] LLM integrationdan keyin quota lease release, active route wiring, `501` removal, full-flow integration va manual acceptance testlarini o'tkazish.
 
 ## Keyingi phase'lar

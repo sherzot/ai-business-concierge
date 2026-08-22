@@ -4,6 +4,13 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-22 — HR provider usage/cost accountingをstagingでatomic化
+
+- Service-role-only `record_hr_candidate_ai_usage` RPCはsemantic CV、scoring、reportingのbounded model/complexity/token/cost/cache/latency metadataのみ保存する。Tenant+endpoint+request idempotencyとdaily token counterを1 transactionで更新し、active membership、ULID、numeric/cache bounds、browser EXECUTE denialはfail closed。Prompt、CV、outputは保存せずraw DB errorも隠す。
+- Accounting Deno 4/4、targeted backend 51/51 green。Stagingはmigration `20260822022702`で40。Transactional acceptanceはduplicate suppression、2 logs、240/90 tokens、$0.002070、exactly-once 330 tokens、request counter 0、grantsを検証し、rollback residue user/tenant 0/0。新規security advisor errorは0。Productionと`501`は未変更。
+
+残作業: key取得後、各provider responseをoutput validation前にaccountingへ接続し、quota lease releaseとfull-flow smoke後に`501`を削除する。
+
 ## 2026-08-22 — HR Candidate frontend upload/state/result boundaryを完了
 
 - `ANTHROPIC_API_KEY`待ちの間に、secret-free frontend sliceを完了した。従来のUI skeletonにはclient input bounds、stale request cancellation、安全なtransport error、runtime success-envelope validation、accessibleなpending/error/empty stateがなかった。

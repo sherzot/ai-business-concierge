@@ -42,6 +42,7 @@
 > 2026-08-22: Provider secret不要のHR tenant quotaとmultipart boundaryを完了。PostgreSQL minute/day/concurrency lease、DB plan mapping、5 MiB + 64 KiB bounded streaming、disabled route safe drainを実装。Stagingは39 migrations、remote pgTAP 22-case runner success。Deno 47/47、frontend 117/117 green。Production DB/Edgeは未変更、local fresh replayはDocker socketによりblocked。
 > 2026-08-22: HR Candidate frontend upload/state/result boundaryをproduction-grade化した。Bounded client validation、tenant/session-first multipart、timeout/cancellation、stale-response protection、runtime result validation、accessible responsive UXを実装。Frontend 28/28 files・127/127 testsと全build/security gateがgreen、desktop/mobile browser acceptanceのhorizontal overflowは0。Backend routeは意図的に`501`のまま。
 > 2026-08-22: `f77dd9a`はmain、GitHub CI `32545770532`はgreen、Netlify production deploy `6a89065505b5600008dd0385`はready。`/`と`/dashboard/hr/candidates`は`200`、CSPとproduction-only bundleはgreen。Provider routeは`501`のまま。
+> 2026-08-22: HR provider usage/cost accountingはatomic/idempotent。Stagingは40 migrations、remote transactional acceptanceとDeno 51/51 green。Prompt/CV/outputは保存せず、productionと`501`は未変更。
 
 ## 現在のPhase
 
@@ -61,10 +62,10 @@
 | Supabase CLI | Official Homebrew tap `v2.112.0`; fresh local volumeで確認済み |
 | Backend | Production Supabase Edge Function `bright-api` v76、`ACTIVE`、`verify_jwt=false`。SHAはstaging v10と一致 |
 | Health | `200` |
-| Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。39 migrations、`bright-api` v11 ACTIVE、health `200`、unauth docs/polish `401 TENANT_REQUIRED` |
+| Staging Supabase | `piqsyfwrjtormrlenjix`、`ap-southeast-1`、`$0/month`、`ACTIVE_HEALTHY`。40 migrations、`bright-api` v11 ACTIVE、health `200`、unauth docs/polish `401 TENANT_REQUIRED` |
 | Staging Auth/API keys | Netlify preview wildcard + local Vite redirect allow-list。Email confirmation ON、8-digit/1-minute OTP、TOTP ON。Auth settings HTTP `200`、autoconfirm false。Edgeはmodern `SB_ANON_KEY`/`SB_SERVICE_ROLE_KEY` overridesを使用しlegacy anon/service-role API keysはdisabled |
 | Type-check | Clean temporary frontend installで成功 |
-| Unit tests | Frontend 28/28 files・127/127 tests（HR Candidate API/form/hook 12/12を含む）。AI polish/router/usage Deno 18/18、HR GitHub 10 + CV 8 + boundary 5 + quota 7 + multipart 6 + orchestrator 6 + schema 1 = 43/43、Telegram込みcurrent targeted backend Deno 47/47、従来document binary/lifecycle Deno 7/7 |
+| Unit tests | Frontend 28/28 files・127/127 tests、HR frontend 12/12。HR backend GitHub 10 + CV 8 + boundary 5 + quota 7 + multipart 6 + accounting 4 + orchestrator 6 + schema 1 = 47/47、Telegram込み51/51 |
 | Deployment environment guard | Node tests 14/14: isolation contract 10件 + Vite `.env` fallback/runtime-precedence 2件 + bundled-endpoint extraction regressions 2件 |
 | Production build/security check | Synthetic non-production refでbuild pass。CSPはそのrefから生成、10 build/Netlify filesを検査 |
 | Production dependency audit | Raw audit: vulnerability合計0件; scoped gateはexceptionなしでhigh/critical 0件 |
@@ -93,12 +94,12 @@
 | Resend inbox | Partial | Codeあり、receiving/delivery E2E未確認 |
 | AI Concierge/RAGとcost tracking | Partial | 基盤あり。Polishing request quotaはPostgreSQL atomic reservation/releaseでrace-safe、provider usageはoutput validation前に計上する。Migration rollout、citation UX、billing dashboard、unified endpoint enforcement、smoke testsが残る |
 | AI文書作成 | Production binary + staged AI polish preview / provider blocked | 15 templates、4言語、実PDF/DOCX/private Storageは稼働中。Polishing frontendはproduction、migrationと`bright-api` v11はstagingへdeploy済み。Auth/tenant/document boundariesとcleanupはgreenだが、stagingに`ANTHROPIC_API_KEY`がなくreal-provider smokeは`503 AI_UNAVAILABLE`。Production backend/migration rolloutは意図的に保留 |
-| HR Candidate Analysis | Partial / provider blocked | GitHub/cache、local PDF/DOCX、pre-provider validation、tenant role guard、DB plan policy、PostgreSQL quota lease、bounded multipart、orchestrator failure semantics、frontend upload/state/result boundaryはreal/tested。Haiku/Sonnet、usage log、active route wiring、full flowが残りproductionは`501` |
+| HR Candidate Analysis | Partial / provider blocked | Bounded adapters、request/role、PostgreSQL quota、multipart、atomic usage/cost persistence、orchestrator、frontend boundaryはtested。Haiku/Sonnet、provider accounting call-sites、active route、full flowが残りproductionは`501` |
 | Billing / Click / Payme と AI Sales Bot | Planned | Phase 3 |
 
 ## 直近の順序
 
-1. `ANTHROPIC_API_KEY`待ちの間に、全provider callのHR Candidate usage/cost loggingを完了し、full flow readyまで`501`を維持する。
+1. `ANTHROPIC_API_KEY`取得後、semantic/scoring/report providersを接続し、各responseをoutput validation前に準備済みRPCで計上する。Full flow readyまで`501`を維持。
 2. Key到着後、staging Edge secretsへ安全に設定し、semantic CV/scoring/reportを接続してauthenticated real-provider smokeをgreenにする。
 3. Green staging smoke後、quota-lease release/wiring込みで`501`を解除する。AI文書作成のproduction migration `20260821000000` + `bright-api` rolloutは別途smokeする。
 
