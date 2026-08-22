@@ -3,7 +3,7 @@
 > プロジェクトアーキテクチャ、設計パターン、ユニットテストルール
 > バージョン: 1.3 | 更新: 2026-08-21
 >
-> Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate`はpartial。Bounded adapters、local PDF/DOCXとprivate sanitized-text in-memory seam、request policy、PostgreSQL quota/finally-release、multipart、tenant/request-scoped server provider/accounting composition、injectable provider-stage orchestration、30s-deadline application execution、deterministic merge/scoring/reportはreal。Typed provider-unavailable、live smoke、full HTTP wiringはproduction-readyではない。
+> Current runtime statusは[STATUS.md](STATUS.md)。`hr-candidate`はpartial。Bounded adapters、local PDF/DOCXとprivate sanitized-text in-memory seam、request policy、PostgreSQL quota/finally-release、multipart、tenant/request-scoped server provider/accounting composition、injectable provider-stage orchestration、30s-deadline application execution、typed `AI_UNAVAILABLE`、deterministic merge/scoring/reportはreal。Live smokeとfull HTTP wiringはproduction-readyではない。
 
 ---
 
@@ -247,4 +247,4 @@ features/tasks/__tests__/
 ---
 
 *ARCHITECTURE.md — AI Business Concierge v1.0 · 2026-05-05*
-*HR Candidateはtarget modular pattern。Bounded adapter/request/quota-lifecycle/multipart/orchestrator/30s-deadline application、private in-memory CV seam、minimized prompt/injectable provider-stage/strict output、server key/accounting composition、deterministic merge boundaryはreal、typed provider-unavailable/full HTTP wiringはpartial scaffold。*
+*HR Candidateはtarget modular pattern。Bounded adapter/request/quota-lifecycle/multipart/orchestrator/30s-deadline application、private in-memory CV seam、minimized prompt/injectable provider-stage/strict output、server key/accounting composition、typed `AI_UNAVAILABLE`、deterministic merge boundaryはreal、live smoke/full HTTP wiringはpartial scaffold。*

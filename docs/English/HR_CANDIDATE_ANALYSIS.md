@@ -1,6 +1,6 @@
 # HR_CANDIDATE_ANALYSIS.md
 
-> **Status: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX plus a sanitized raw-CV in-memory seam, request/role/plan policy, PostgreSQL quota/finally-release, bounded multipart, atomic usage accounting, minimized prompts, injectable Haiku/Sonnet provider stages with strict output/account-before-validation, tenant/request-scoped server composition, deterministic merge/scoring/reporting, provider-stage orchestrator, 30s-deadline application execution, and frontend are real/tested. Typed provider-unavailable, live smoke, and full HTTP wiring remain; the canonical endpoint returns `501 NOT_IMPLEMENTED`. Current state: [STATUS.md](STATUS.md).
+> **Status: PARTIAL IMPLEMENTATION / DESIGN.** Public GitHub/cache, bounded local PDF/DOCX plus a sanitized raw-CV in-memory seam, request/role/plan policy, PostgreSQL quota/finally-release, bounded multipart, atomic usage accounting, minimized prompts, injectable Haiku/Sonnet provider stages with strict output/account-before-validation, tenant/request-scoped server composition, deterministic merge/scoring/reporting, provider-stage orchestrator, 30s-deadline application execution, typed `AI_UNAVAILABLE`, and frontend are real/tested. Live smoke and full HTTP wiring remain; the canonical endpoint returns `501 NOT_IMPLEMENTED`. Current state: [STATUS.md](STATUS.md).
 
 > **AI Business Concierge — `hr_candidate_analysis` Module Design Package**
 > Version: 1.0 (MVP design) · Date: 2026-04-29

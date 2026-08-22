@@ -4,6 +4,13 @@
 
 > **Переводы (синхронизируются):** [Узбекский (основной)](../DEVLOG.md) · [English](../English/DEVLOG.md) · [日本語](../日本語/DEVLOG.md)
 
+## 2026-08-22 — HR provider failure закрыт typed `AI_UNAVAILABLE`
+
+- Provider contract/accounting/config failure теперь normalize в localized `AI_UNAVAILABLE` без raw details; application map в HTTP `503`, quota cleanup сохраняется. Backend type/schema и frontend UZ/RU/EN/JA copy синхронны.
+- Orchestrator 9/9, application 9/9, HR backend 101/101 и Deno с Telegram 105/105 PASS; frontend typecheck green. `f184434` в main; GitHub CI `32554684769` green за 1m08s со всеми backend/frontend/build/security gates. Runtime, live provider и `501` не менялись.
+
+Осталось: authenticated staging live smoke после key, затем explicit route activation/full flow и удаление `501`.
+
 ## 2026-08-22 — Усилен global 30-second deadline HR analysis
 
 - Application execution получил maximum 30,000 ms global response deadline. Если quota/analyzer execution превышает его, public result возвращает typed `TIMEOUT` и HTTP `504`; configurable test timeout fail-safe clamp 1–30,000 ms. Backend отдаёт deterministic envelope раньше frontend 40-second transport timeout.

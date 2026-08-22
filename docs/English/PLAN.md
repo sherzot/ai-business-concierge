@@ -1,6 +1,6 @@
 # AI Business Concierge — active plan
 
-> Version 7.1 · Updated 2026-08-22
+> Version 7.2 · Updated 2026-08-22
 > Only active and next work belongs here. The previous master plan is archived at [../archive/English/PLAN_LEGACY_2026-07-24.md](../archive/English/PLAN_LEGACY_2026-07-24.md).
 
 ## P0 — safe session start
@@ -58,7 +58,6 @@
 
 ## P2 — HR Candidate Analysis
 
-- [ ] Map provider/config/accounting failures to typed `AI_UNAVAILABLE` + HTTP `503`; synchronize backend schema/orchestrator/application regressions and frontend UZ/JA/EN/RU copy while keeping the route disabled.
 - [ ] **BLOCKED — `ANTHROPIC_API_KEY`:** set the staging secret and perform an authenticated real-provider live smoke.
 - [ ] After LLM integration, wire the active route through the prepared quota lifecycle boundary, remove `501`, and run full-flow integration/manual acceptance.
 

@@ -4,6 +4,13 @@
 
 > **翻訳（同期更新）：** [ウズベク語（メイン）](../DEVLOG.md) · [English](../English/DEVLOG.md) · [Russian](../Russian/DEVLOG.md)
 
+## 2026-08-22 — HR provider failureをtyped `AI_UNAVAILABLE`でclose
+
+- Provider contract/accounting/config failureをraw detailなしのlocalized `AI_UNAVAILABLE`へnormalizeし、applicationはHTTP `503`へmap、quota cleanupを保持。Backend type/schemaとfrontend UZ/RU/EN/JA copyを同期。
+- Orchestrator 9/9、application 9/9、HR backend 101/101、Telegram込みDeno 105/105 PASS。Frontend typecheck green。`f184434`はmain、GitHub CI `32554684769`は1m08sで全backend/frontend/build/security gates green。Runtime、live provider、`501`は未変更。
+
+残作業: Key到着後のauthenticated staging live smoke、その後explicit route activation/full flowと`501`削除。
+
 ## 2026-08-22 — HR global 30-second analysis deadlineを強化
 
 - Application executionへmaximum 30,000 ms global response deadlineを追加。Quota/analyzer executionが超過するとpublic resultはtyped `TIMEOUT`・HTTP `504`となり、configurable test timeoutも1–30,000 msへfail-safe clamp。Frontend 40-second transport timeoutより前にdeterministic backend envelopeを返す。

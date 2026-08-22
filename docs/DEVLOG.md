@@ -4,6 +4,15 @@ Loyiha rivojlanishi, qilingan ishlar, duch kelgan xatolar va ularning yechimlari
 
 > **Tarjimalar (sinxron yangilanadi):** [English](English/DEVLOG.md) · [Russian](Russian/DEVLOG.md) · [日本語](日本語/DEVLOG.md)
 
+## 2026-08-22 — HR provider failure typed `AI_UNAVAILABLE` bilan yopildi
+
+- Provider contract/accounting/config failure endi raw detailni yashirgan localized `AI_UNAVAILABLE` envelope'iga normalize qilinadi; application uni HTTP `503`ga map qiladi va accepted quota lease cleanup'i saqlanadi. Backend type/schema hamda frontend UZ/RU/EN/JA fallback copy bir contractga keldi.
+- Orchestrator 9/9, application 9/9, HR backend 101/101 va Telegram bilan Deno 105/105 PASS; frontend typecheck green. `f184434` main; GitHub CI `32554684769` 1m08sda Deno 105/105, frontend 28/28 fayl/127/127 test va barcha quality/build/security gate'lari bilan green. Netlify skip; runtime, live provider va `501` o'zgarmadi.
+
+Qolgan ish: `ANTHROPIC_API_KEY` kelgach authenticated staging live smoke, keyin explicit route activation/full-flow va `501` removal.
+
+Fayllar: frontend `i18n.ts`, HR `types/schema/index/application` va testlari, 4-tilli loyiha hujjatlari.
+
 ## 2026-08-22 — HR global 30 soniyalik analysis deadline qotirildi
 
 - Application executionga maximum 30,000 ms global response deadline qo'shildi. Quota/analyzer oqimi deadline'dan oshsa public result typed `TIMEOUT` va HTTP `504` bo'ladi; configurable test timeout ham 1–30,000 ms oralig'ida fail-safe clamp qilinadi. Bu frontend 40s transport timeoutidan oldin deterministic backend envelope qaytaradi.
